@@ -5,9 +5,10 @@ An engine for rhythm game players, and by rhythm game players.
   
 ![](https://github.com/user-attachments/assets/f2c34329-c02c-4638-ab58-517a01c33567)
 
-
 Never2x is meant to keep up with most osu!mania/Etterna charts, as Vs. Camellia demanded these heavily with how their charts are built.  
 It offers a smooth and intuitive gameplay loop while keeping sync in check, all while trying to bring something new to the FNF space.
+
+As for modding capabilities, it's very similar to how Psych Engine works. The source code was completely written and rethought from scratch, and is meant to offer both hard and soft modding (much like Psych); however hard modding is its main priority.
 
 It's (currently) available on Windows, MacOS (through Wine), and Linux. Mobile support is not planned, and most likely will never be.
 </div>
