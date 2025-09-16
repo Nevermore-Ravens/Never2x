@@ -28,6 +28,9 @@ Note colours will change colour depending on where they're placed in the chart.
 ## Reworked Sustain Inputs
 Like in Etterna, they're now based on a coyote-timer based system; instead of missing immediately upon releasing the sustain.
 
+## Multi-file Support
+The project supports more than the FNF legacy format. It also supports StepMania Shark (.ssc), osu!mania (.osu) and StepMania (.sm), offering easy playtesting without requiring having to convert the chart yourself.
+
 # <div align="center">Credits</div>
 ## [Rudyrue](https://github.com/Rudyrue)
 Lead developer on Never2x, and lead programmer on Vs. Camellia 3.0
