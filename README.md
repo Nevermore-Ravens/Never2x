@@ -10,6 +10,8 @@ It offers a smooth and intuitive gameplay loop while keeping sync in check, all 
 
 As for modding capabilities, it's very similar to how Psych Engine works. The source code was completely written and rethought from scratch, and is meant to offer both hard and soft modding (much like Psych); however hard modding is its main priority.
 
+https://github.com/user-attachments/assets/79adf453-1c0c-4fdb-b706-f796007e1dbf
+
 It's (currently) available on Windows, MacOS (through Wine), and Linux.<br>Mobile support is not planned, and most likely will never be.
 </div>
 
