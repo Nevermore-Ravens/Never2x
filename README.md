@@ -20,7 +20,7 @@ It's (currently) available on Windows, MacOS (through Wine), and Linux. Mobile s
 Do keep in mind:
 
 Even though this system is fairly similar to something like NotITG, it's not its main focus; meaning it might be more limiting than what you're looking for.  
-If this project doesn't fit for you, I suggest looking at other engines like [Troll Engine](https://github.com/riconuts/FNF-Troll-Engine).
+If this project doesn't fit for you, I suggest looking at other engines like [Troll Engine](https://github.com/riconuts/FNF-Troll-Engine) or [What in the Funkin'?!](https://github.com/Hazardous2468/What-In-The-Funkin).
 
 ## Note Quantization
 Note colours will change colour depending on where they're placed in the chart.
