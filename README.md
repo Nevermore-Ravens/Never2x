@@ -39,7 +39,8 @@ Like in Etterna, they're now based on a coyote-timer based system; instead of mi
 The project supports more than the FNF legacy format. It also supports StepMania Shark (.ssc), osu!mania (.osu) and StepMania (.sm), offering easy playtesting without requiring having to convert the chart yourself.
 
 # <div align="center">Credits</div>
-## [Rudyrue](https://github.com/Rudyrue)
+## [Rudyrue](https://github.com/Rudyrue) <img width="75" height="75" alt="rudyrue" src="https://github.com/user-attachments/assets/58a2b957-26a3-45b3-9160-e536c797d37b" />
+
 Lead developer on Never2x, and lead programmer on Vs. Camellia 3.0
 
 ## [SrtHero278](https://github.com/SrtHero278)
@@ -48,5 +49,6 @@ Made the modcharting system and sustain rendering/functionality
 ## [Nebula the Zorua](https://github.com/nebulazorua)
 Additional programming help, modchart system fixes
 
-## Vs. Camellia Team
+## Vs. Camellia Team <img width="75" height="64" alt="camellia" src="https://github.com/user-attachments/assets/17273361-5f01-4dac-ac84-6e1376c138c7" />
+
 For sticking through with this project since the beginning
