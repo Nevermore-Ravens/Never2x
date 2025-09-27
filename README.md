@@ -52,6 +52,9 @@ Additional programming help, modchart system fixes
 ## [BlearChipmunk](https://github.com/BlearChipmunk)
 Optimizations and overall performance/memory improvements
 
+## TheConcealedCow
+Designed the logo
+
 ## Vs. Camellia Team <img width="75" height="64" alt="camellia" src="https://github.com/user-attachments/assets/17273361-5f01-4dac-ac84-6e1376c138c7" />
 
 For sticking through with this project since the beginning
