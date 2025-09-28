@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+
+	<!-- application stuff -->
+	<app title="Friday Night Funkin': Never2x" file="Funkin'" main="Main" version="1.0.0" company="Rudyrue" />
+
+	<window width="1280" height="720" fps="120" background="#000000" hardware="true" vsync="false" />
+	<window orientation="landscape" fullscreen="false" resizable="true"/>
+	<window antialiasing="0" allow-high-dpi="true"/>
+
+	<!-- defines -->
+	<!--<define name="IS_TESTBUILD" />-->
+
+	<!-- THIS ALSO AFFECTS MODCHARTS AS WELL KEEP THAT IN MIND -->
+	<define name="SCRIPTS_ALLOWED"/>
+	<define name="ADDONS_ALLOWED"/>
+	<define name="VIDEOS_ALLOWED" if="cpp"/>
+	<define name="DISCORD_ALLOWED"/>
+	<define name="AWARDS_ALLOWED"/>
+	<define name="WATERMARKS_ALLOWED"/>
+
+	<!-- makes errors show exactly what the issue is instead of being vague -->
+	<haxedef name="message.reporting" value="pretty" />
+
+	<!-- codebase -->
+	<source path="src" />
+	<assets path="assets" type="template"/>
+	<assets path="addons" type="template" if="ADDONS_ALLOWED"/>
+
+	<!-- libraries -->
+	<haxelib name="lime" version="8.1.2" />
+	<haxelib name="openfl" version="9.3.3" />
+	<haxelib name="flixel" version="5.5.0" />
+	<haxelib name="flixel-addons" version="3.0.2"/>
+	<haxelib name="hxdiscord_rpc" version="1.2.4" if="DISCORD_ALLOWED"/>
+	<haxelib name="hxjson5"/>
+	<haxelib name="moonchart"/>
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
+	<haxelib name="flixel-animate"/>
+
+	<haxelib name="hscript-iris" if="SCRIPTS_ALLOWED"/>
+	<haxelib name="hscript" if="debug" /> <!-- for debugging -->
+
+	<!-- miscellaneous -->
+	<set name="BUILD_DIR" value="export/debug" if="debug" />
+	<set name="BUILD_DIR" value="export/release" unless="debug" />
+	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+
+	<define name="FLX_NO_TOUCH" />
+	<!--<define name="FLX_NO_GAMEPAD"/>-->
+	<define name="FLX_NO_DEBUG" unless="debug" />
+
+	<define name="HXCPP_GC_BIG_BLOCKS"/>
+
+	<haxedef name="HXCPP_CHECK_POINTER" />
+	<haxedef name="HXCPP_STACK_LINE" />
+	<haxedef name="HXCPP_STACK_TRACE" />
+
+	<define name="IRIS_DEBUG"/>
+	<define name="hscriptPos"/>
+
+	<define name="no-deprecation-warnings" />
+	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
+
+	<!-- Fix compiling issues -->
+    <setenv name="HAXEPATH" value="./"/>
+	
+	<assets path="alsoft.txt" rename="alsoft.ini" type="text" if="windows"/>
+	<assets path="alsoft.txt" rename="alsoft.conf" type="text" unless="windows"/>
+
+	<icon path="icons/icon16.png" size='16' />
+	<icon path="icons/icon32.png" size='32' />
+	<icon path="icons/icon64.png" size='64' />
+	<icon path="icons/iconOG.png" />
+
+	<haxeflag name="--macro" value="allowPackage('flash')" />
+</project>

@@ -1,0 +1,10 @@
+{
+	songName: 'PEANUT BUTTER JELLY TIME 2020',
+	hasVocals: false,
+	timingPoints: [
+		{
+			time: 0,
+			bpm: 160
+		}
+	]
+}

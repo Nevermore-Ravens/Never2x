@@ -1,0 +1,134 @@
+key,English,Español,Português,日本語
+,,,,
+addons_what_title,WHAT ARE ADD-ONS?,,O QUE SÃO ADD-ONS?,アドオンは何ですか？
+addons_what_desc,Add-ons are additional side-content that acts as a supplement to the main mod. You can freely enable and disable mods to your liking!,,Add-ons são um tipo de conteúdo adicional que servem para suplementar o mod principal. Você pode ligar e desligar Add-ons como quiser!,アドオンは元モッドの副内容です。お好みを自由に有効化および無効化できます！
+license_warning,denotes a pack that contains licensed songs. We recommend not playing these packs if you're streaming.,,significa que um add-on contém músicas licensiadas. Sugerimos que não jogue esses packs se você estiver ao-vivo.,が著作権のある音楽を含まれますことを示します。配信してるなら、このアドオンを使わないことをお勧めします
+,,,,
+Directors,Directors,,Diretores,役員
+Musicians,Musicians,,Músicos,音楽家
+Programmers,Programmers,,Programadores,プログラマー
+Charters,Charters,,Charters,チャート作者
+Artists,Artists,,Artistas,画家
+Special Thanks,Special Thanks,,Agradecimentos Especiais,特別感謝
+,,,,
+Settings,Settings,Configuración,Configurações,設定
+Keybinds,Keybinds,controles,Controles,コントロール
+key_opt_desc,When selected{0} hit {1} to change the indicated key.,,Quando selecionado{0} aperte {1} para mudar o controle indicado.,
+sel_key_desc,Input any key to set the bind.\nTo cancel{0} press ESCAPE. To delete{0} press DELETE.,,Pressione qualquer tecla para definir o controle.\nPara cancelar{0} aperte ESCAPE. Para apagar{0} aperte DELETE,
+left_note,Left Note,Nota Izquierda,Esquerda (Jogo),左ノート
+left_note_desc,For hitting left notes.,Para golpear notas a la izquierda.,Para acertar notas à esquerda.,
+down_note,Down Note,Nota Abajo,Abaixo (Jogo),下ノート
+down_note_desc,For hitting down notes.,Para golpear notas hacia abajo.,Para acertar notas abaixo.,
+up_note,Up Note,Nota Arriba,Acima (Jogo),上ノート
+up_note_desc,For hitting up notes.,Para golpear notas hacia arriba.,Para acertar notas acima.,
+right_note,Right Note,Nota Derecha,Direita (Jogo),右ノート
+right_note_desc,For hitting right notes.,Para golpear notas a la derecha.,Para acertar notas à direita.,
+pause,Pause,Pausa,Pause,ポーズ
+pause_desc,For pausing the game mid-song.,Para pausar el juego en medio de una canción.,Para pausar o jogo no meio de uma música.,
+reset,Reset,Reiniciar,Reiniciar,やり直す
+reset_desc,For forfeiting the song mid-way if allowed.,Para rendirse en la canción a mitad de camino si es permitido.,Para reiniciar no meio de uma música caso permitido.,
+ui_left,UI Left,UI Izquierda,Esquerda (Menu),UI左
+ui_left_desc,For moving left in the menu.,Para moverte a la izquierda en el menú.,Para mover-se para a esquerda no menu,
+ui_up,UI Up,UI Arriba,Acima (Menu),UI右
+ui_up_desc,For moving up in the menu.,Para moverte hacia arriba en el menú.,Para mover-se para cima no menu,
+ui_down,UI Down,UI Abajo,Abaixo (Menu),UI下
+ui_down_desc,For moving down in the menu.,Para moverte hacia abajo en el menú.,Para mover-se para baixo no menu,
+ui_right,UI Right,UI Derecha,Direita (Menu),UI上
+ui_right_desc,For moving right in the menu.,Para moverte a la derecha en el menú.,Para mover-se para a direita no menu,
+accept,Accept,Aceptar,Confirmar,同意する
+accept_desc,For confirming actions in the menu.,Para confirmar acciones en el menú.,Para confirmar ações no menu.,
+back,Back,Atrás,Voltar,戻る
+back_desc,For exiting or canceling actions in the menu.,Para salir o cancelar acciones en el menú.,Para cancelar ações no menu.,
+mute,Mute/Unmute,Silenciar/Activar sonido,Silenciar/Habilitar Volume,ミュート
+mute_desc,For muting or unmuting the game.,Para silenciar o activar el sonido del juego.,Para silenciar ou habilitar o volume do jogo.,
+volume_up,Volume Up,Subir Volumen,Aumentar Volume,ボリューム上
+volume_up_desc,For increasing the volume.,Para aumentar el volumen.,Para aumentar o volume.,
+volume_down,Volume Down,Bajar Volumen,Diminuir Volume,ボリューム下
+volume_down_desc,For decreasing the volume.,Para disminuir el volumen.,Para diminuir o volume.,
+,,,,
+Gameplay,Gameplay,Jugabilidad,Jogabiliade,ゲームプレイ
+scroll_dir,Scroll Direction,Dirección de desplazamiento,Direção do jogo,スクロールの方向
+scroll_dir_desc,Which way the notes will move.,Dirección de las notas. (arriba/abajo),Direção das notas (Para cima/Para baixo),音符の動きの方
+scroll_speed,Scroll Speed,Velocidad de desplazamiento,Velocidade do jogo,スクロールの速度
+scroll_speed_desc,How fast the notes will move.,Cambia la rapidez de las notas en general.,Altera o quão rápido as notas aparecerão.,音符の動き速度
+center_notes,Centered Notes,Notas Centradas,Coluna Centralizada,画面中心音符
+center_notes_desc,If your field should be in the middle of the game instead of the side.,Si tu campo debe estar en medio del juego en vez de un costado.,プレイフィールドが側面ではなく中央を占めるべきの場合
+opp_notes,Opponent Notes,Notas del Oponente,Coluna do oponente,敵音符
+opp_notes_desc,If your opponent's field should be visible.,Si las notas de tu oponente deben ser visibles.,敵音符が見えるべきの場合
+quant_col,Quant Coloring,Coloración cuantitativa,Colorização quantitativa,タイミング基づき色付け
+quant_col_desc,The colorization method for the notes.,El método de colorización de las notas,Altera a forma que as notas serão coloridas.,音符色化の方
+ghost_t,Ghost Tapping,Toque Fantasma,Ghost Tapping,ゴーストタップ
+ghost_t_desc,Whether or not you avoid a penalty for pressing a key without hitting notes.,Si evitas o no una penalización por presionar una tecla si no hay notas,Se você deve sofrer uma penalidade por pressionar uma tecla sem acerta uma nota.,音符無しにボタンが当たる時に罰するべきの場合
+metronome,Metronome,Metrónomo,Metrónomo,メトロノーム
+metronome_desc,Whether or not a sound should be played every beat.,Si se debe o no reproducir un sonido en cada tiempo,Se o jogo deve reproduzir um som a cada batida,
+can_reset,Can Reset,Puedes Resetear,Permitido Reiniciar,やり直せる
+can_reset_desc,If you're allowed to die and restart by pressing your reset bind.,"Si puedes o no resetear presionando tu tecla de reseteo","Se é possível reiniciar ou não apertando a tecla respectiva","リセットボタンを押す時に死んで繰り返せる場合"
+note_offset,Note Offset,Desfase de Notas,Offset das Notas,ノートオフセット
+note_offset_desc,How offset the notes are from the chart. \n\n(Higher = Later),,Aplica um offset para o chart. \n\n(Número maior = Mais tarde),音符が譜面からどれだけずれてます（より高い＝より後）
+assist_claps,Assist Claps,Assist Claps,Assist Claps,当たり音
+assist_claps_desc,Plays a hitsound for when you should hit a note.,,Toca um som quando você deve apertar uma nota.,音符を押す時に音が鳴らす場合
+acc_type,Accuracy Type,Tipo de Precisión,Tipo de Precisão,精度タイプ
+acc_type_desc,How your accuracy should be calculated.,Como se debe calcular tu precisión.,Como o jogo calculará sua precisão,
+hit_error_bar,Hit Error Bar,Barras de error de golpe,Barra de precisão,当たり誤差棒
+hit_error_bar_desc,If the game will show a bar containing how off your recent hits were.,Si el juego mostrará una barra que contiene que tan lejos estuviste de golpear la nota perfectamente.,Se o jogo mostrará uma barra que indica o quão perto você esteve de acertar a nota perfeitamente.,タイミングを表示する棒を視認できる場合
+modcharts,Modcharts,Modcharts,Modcharts,
+modcharts_desc,Whether or not the game can move the notes around crazily in specific songs.,Si el juego puede mover las notas en canciones específicas.,Se o jogo pode mexer as notas de uma forma especial em músicas específicas.,
+,,,,
+Graphics,Graphics,Gráficos,Gráficos,グラフィック
+framerate,FrameRate,Fotogramas por segundo,Taxa de Quadros,フレームレート
+framerate_desc,The maximum frame rate the game will run at.,La cantidad máxima de fotogramas por segundo que el juego correrá.,A taxa de quadros máxima que o jogo poderá rodar.,ゲームが動作する最大フレームレート
+hold_grain,Hold Grain,,,
+antialiasing,Antialiasing,,Antialiasing,アンチエリアス
+reduced_quality,Reduced Quality,,Qualidade Reduzida,質減少
+shaders,Shaders,,Shaders,シェーダー
+gpu_cache,GPU Cache,,Cachê da GPU,GPUキャッシュ
+fullscreen,Fullscreen,,Tela Cheia,全画面
+reflections,Reflections,,Reflexões,反射
+close_animation,Close Animation,,Animação ao fechar,閉じるでアニメーション
+,,,,
+,,,,
+,,,,
+,,,,
+Visuals,Visuals,,Visuais,ビジュアル
+language,Language,Lenguaje,Idioma,言語
+language_desc,Change the language of the game.,Cambia el lenguaje del juego.,Muda o idioma do jogo.,ゲーム言語を変わります
+flashing_lights,Flashing Lights,,Modo de Fotossensibilidade,明滅光
+note_skin,Note Skin,,Skin das Notas,音符外観
+splash_skin,Splash Skin,,Skin das Explosões,飛散外観
+can_unglow,Unglow On Anim Finish,,Remover Brilho no fim da Animação,アニメーション終了に光止まる
+game_alpha,Game Visibility,,Visibilidade do Jogo,ゲーム視認性
+cam_zooms,Camera Zooms,,Zooms da Cãmera,カメラ拡大縮小
+cam_movement,Notes Move Camera,,Notas Movimentam a Câmera,音符追尾カメラ
+hide_hud,Hide HUD,,Esconder a HUD,HUD隠す
+judge_alpha,Judgement Alpha,,Opacidade dos Julgamentos,判定透明度
+combo_alpha,Combo Alpha,,Opacidade do Combo,連続透明度
+Judgement Bar,Judgement Bar,,Barra de Julgamento,判定数バー
+fps_counter,Fps Counter,,Contador de FPS,FPS表示
+,,,,
+mode translations,,,,
+STORY MODE,STORY MODE,,MODO HISTÓRIA,ストーリーモード
+FREEPLAY,FREEPLAY,FREEPLAY,FREEPLAY,フリープレイ
+OPTIONS,OPÇÕES,,OPÇÕES,設定
+EXTRAS,EXTRAS,,EXTRAS,エキストラ
+CREDITS,CREDITS,,CRÉDITOS,クレジット
+,,,,
+formatted translations,,,,
+score,Score: {0} | Accuracy: {1}%,Puntuación: {0} | Precisión: {1}%,Pontuação: {0} | Precisão: {1}%,スコア: {0} | 精度: {1}%
+score_no_acc,Score: {0},Puntuación: {0},Pontuação: {0},スコア: {0}
+marv,Marvelous,Maravilloso,Maravilhoso,かんぺき
+sick,Sick,Perfecto,Perfeito,えぐい
+good,Good,Bueno,Bom,いい
+bad,Bad,Malo,Ruim,わるい
+shit,Shit,Malo,Ruim,くそ
+miss,Miss,Fallo,Erro,ミス
+early,early,,cedo,早い
+late,late,,tarde,遅い
+new_best,NEW BEST!!!,,NOVO RECORDE!!!,
+,,,,
+misc translations,,,,
+up,Up,Arriba,Acima,上へ
+down,Down,Abajo,Abaixo,下へ
+simple,Simple,Simple,Simples,簡単
+complex,Complex,Complejo,Complexo,複雑
+on,On,,Ligado,オン
+off,Off,,Desligado,オフ

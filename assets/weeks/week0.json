@@ -1,0 +1,22 @@
+{
+  	songs: [
+    	{
+      		id: 'peanut butter jelly 2020',
+      		color: 0xFF00267a,
+			icon: 'gf'
+    	},
+		{
+      		id: 'darnell bf',
+      		color: 0xFF00267a,
+			icon: 'gf'
+    	},
+		{
+      		id: 'chkdsk',
+      		color: 0xFF00267a,
+			icon: 'gf'
+    	}
+  	],
+
+  	name: 'Tutorial',
+  	hideStory: true
+}
