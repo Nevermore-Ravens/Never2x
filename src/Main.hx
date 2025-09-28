@@ -96,6 +96,7 @@ class InitState extends flixel.FlxState {
 			FlxAudioHandler.music._audioBackend.updateVolume();
 
 			for (al in FlxAudioHandler.audioList){
+				if (!al.exists) continue;
 				@:privateAccess
 				al._audioBackend.updateVolume();
 			}
