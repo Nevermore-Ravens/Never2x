@@ -59,4 +59,4 @@ Designed the logo
 
 For sticking through with this project since the beginning
 
-# <div align="center">*A.I. (such as ChatGPT, Gemini, Github Copilot, DeepSeek) has not been used and/or assisted in the making of this project.*</div>
+# <div align="center">A.I. (such as ChatGPT, Gemini, Github Copilot, DeepSeek) has not been used and/or assisted in the making of this project.</div>
