@@ -15,6 +15,8 @@ https://github.com/user-attachments/assets/79adf453-1c0c-4fdb-b706-f796007e1dbf
 It's (currently) available on Windows, MacOS (through Wine), and Linux.<br>Mobile support is not planned, and most likely will never be.
 
 To start compiling, refer to [COMPILING.md](COMPILING.md).
+
+**A.I. (such as ChatGPT, Gemini, Github Copilot, DeepSeek) has not been used and/or assisted in the making of this project.**
 </div>
 
 # <div align="center">Features</div>
