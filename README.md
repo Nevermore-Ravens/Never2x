@@ -16,7 +16,6 @@ It's (currently) available on Windows, MacOS (through Wine), and Linux.<br>Mobil
 
 To start compiling, refer to [COMPILING.md](COMPILING.md).
 
-**A.I. (such as ChatGPT, Gemini, Github Copilot, DeepSeek) has not been used and/or assisted in the making of this project.**
 </div>
 
 # <div align="center">Features</div>
@@ -55,6 +54,8 @@ Optimizations and overall performance/memory improvements
 
 ## TheConcealedCow
 Designed the logo
+
+# <div align="center">*A.I. (such as ChatGPT, Gemini, Github Copilot, DeepSeek) has not been used and/or assisted in the making of this project.*</div>
 
 ## Vs. Camellia Team
 
