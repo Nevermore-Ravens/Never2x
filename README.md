@@ -55,8 +55,8 @@ Optimizations and overall performance/memory improvements
 ## TheConcealedCow
 Designed the logo
 
-# <div align="center">*A.I. (such as ChatGPT, Gemini, Github Copilot, DeepSeek) has not been used and/or assisted in the making of this project.*</div>
-
 ## Vs. Camellia Team
 
 For sticking through with this project since the beginning
+
+# <div align="center">*A.I. (such as ChatGPT, Gemini, Github Copilot, DeepSeek) has not been used and/or assisted in the making of this project.*</div>
