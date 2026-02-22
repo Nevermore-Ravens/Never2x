@@ -1,5 +1,6 @@
 package funkin.backend;
 
+import openfl.geom.ColorTransform;
 import haxe.ds.Vector;
 
 class Util
@@ -83,6 +84,55 @@ class Util
 		return result / amount;
 	}
 
+	public static function clipByCoords(obj:FlxSprite, ?left:Float, ?right:Float, ?top:Float, ?bottom:Float) {
+		var leftClip:Float = 0;
+		var widClip:Float = obj.graphic.width;
+		if (left != null || right != null) {
+			final leftCoord:Float = obj.x - (obj.origin.x * obj.scale.x) + obj.origin.x;
+			final rightCoord:Float = leftCoord + obj.graphic.width * obj.scale.x;
+
+			if (left != null) {
+				final lClipResult:Float = Math.max(left - leftCoord, 0) / obj.scale.x;
+				leftClip = lClipResult;
+				widClip -= lClipResult;
+				obj.offset.x = -lClipResult * obj.scale.x;
+			}
+
+			if (right != null)
+				widClip -= Math.max(rightCoord - right, 0) / obj.scale.x;
+		}
+
+		var topClip:Float = 0;
+		var heiClip:Float = obj.graphic.height;
+		if (top != null || bottom != null) {
+			final topCoord:Float = obj.y - (obj.origin.y * obj.scale.y) + obj.origin.y;
+			final bottomCoord:Float = topCoord + obj.graphic.height * obj.scale.y;
+
+			if (top != null) {
+				final tClipResult:Float = Math.max(top - topCoord, 0) / obj.scale.y;
+				topClip = tClipResult;
+				heiClip -= tClipResult;
+				obj.offset.y = -tClipResult * obj.scale.y;
+			}
+
+			if (bottom != null)
+				heiClip -= Math.max(bottomCoord - bottom, 0) / obj.scale.y;
+		}
+
+		obj.clipGraphic(leftClip, topClip, widClip, heiClip);
+		obj.visible = obj.frameWidth > 0 && obj.frameHeight > 0;
+	}
+
+	// FlxColor.interpolate can't get to the finish well
+	public static function lerpColorTransform(transform:ColorTransform, color:FlxColor, ratio:Float, ?alpha:Float) {
+		transform.redMultiplier = FlxMath.lerp(transform.redMultiplier, color.redFloat, ratio);
+		transform.greenMultiplier = FlxMath.lerp(transform.greenMultiplier, color.greenFloat, ratio);
+		transform.blueMultiplier = FlxMath.lerp(transform.blueMultiplier, color.blueFloat, ratio);
+
+		if (alpha != null)
+			transform.alphaMultiplier = FlxMath.lerp(transform.alphaMultiplier, alpha, ratio);
+	}
+
 	public static function colorFromString(color:String):FlxColor
 	{
 		var hideChars = ~/[\t\n\r]/;
@@ -137,6 +187,23 @@ class Util
 
 	public static function cancelAllTweens() {
 		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null) twn.cancel());
+	}
+
+	public static function easeFromString(str:String) {
+		str = str.toLowerCase();
+
+		// work smarter not harder
+		if (str.endsWith("inout"))
+			str = str.substring(0, str.length - 5) + "InOut";
+		else if (str.endsWith("out"))
+			str = str.substring(0, str.length - 3) + "Out";
+		else if (str.endsWith("in"))
+			str = str.substring(0, str.length - 2) + "In";
+
+		if (str.contains("step")) // sorta hardcoded but luckily step's the only multi word ease
+			str = str.replace("step", "Step");
+
+		return Reflect.field(flixel.tweens.FlxEase, str) ?? FlxEase.linear;
 	}
 
 	/**

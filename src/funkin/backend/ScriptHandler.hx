@@ -176,10 +176,8 @@ class Script extends Iris {
 		//set('FlxSprite', FlxSprite);
 
 		//okay, shaders are coming in
-		set('FileShader', funkin.shaders.FileShader);
+		//set('FileShader', funkin.shaders.FileShader);
 		set('ShaderFilter', openfl.filters.ShaderFilter);
-		//setting this shader for test purposes
-		set('RadialBlur', funkin.shaders.RadialBlur);
 	}
 
 	static function getModchartManager() {

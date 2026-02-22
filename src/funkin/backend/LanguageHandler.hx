@@ -60,6 +60,7 @@ class LanguageHandler {
 							escIdx = row[j].indexOf("\\", lastEsc);
 						}
 						rowTxt += row[j].substring(lastEsc, row[j].length);
+						rowTxt = rowTxt.replace("{C}", ","); // cuz you cant really do these in a COMMA seperated file
 
 						rowTranslations.set(headers[j], rowTxt);
 					}

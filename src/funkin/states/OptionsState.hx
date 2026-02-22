@@ -1,13 +1,13 @@
 package funkin.states;
 
 import haxe.io.Path;
-import funkin.shaders.TileLine;
-import funkin.objects.ui.Border;
-import funkin.objects.ui.SwirlBG;
 import funkin.objects.NoteSplash;
 import funkin.objects.FunkinSprite;
-import funkin.objects.ui.CategoryList;
+import funkin.backend.Settings.SaveVariables;
 import flixel.input.keyboard.FlxKey;
+import flixel.input.gamepad.FlxGamepad;
+import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.input.gamepad.FlxGamepad.FlxGamepadModel;
 
 class OptionsState extends FunkinState {
 	public static var self:OptionsState;
@@ -153,7 +153,7 @@ class OptionsState extends FunkinState {
 				var opt = new Option('language', 'language_desc', "language", ListOption(LanguageHandler.getLanguages()));
 				opt.onChange = function(v) {
 					LanguageHandler.setLanguage(v);
-					for (i => cata in self.listGrp.texts.members)
+					for (i => cata in self.listGrp.members)
 						cata.text = _t(self.categoryList[i]).toUpperCase();
 
 					if (self.selCategory >= 0) {
@@ -189,10 +189,7 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("Antialiasing", "<NO-LANG>If textures will have a linear transition between pixels instead of instant.", "antialiasing", BoolOption);
 				opt.onChange = function(v) {
-					for (i => obj in self.border.members)
-						obj.antialiasing = v;
-
-					for (i => cata in self.listGrp.texts.members)
+					for (i => cata in self.listGrp.members)
 						cata.antialiasing = v;
 
 					for (i => txt in self.optTxt.members)
@@ -211,8 +208,8 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("reduced_quality", "<NO-LANG>If the game can cut out a few things for less work.", "reducedQuality", BoolOption);
 				opt.onChange = function(v) {
-				self.lineBG.shader = v ? null : self.lineShader;
-						}
+					//self.lineBG.shader = v ? null : self.lineShader;
+				}
 				opt;
 			},
 			{
@@ -274,33 +271,32 @@ class OptionsState extends FunkinState {
 
 	public static var inPlayState:Bool = false;
 	var selCategory:Int = -1;
+	var curCategory:Int = 0;
 	var curSelected:Int = 0;
+
+	// variables to create a mouse deadzone
+	final MOUSE_DEADZONE = 5; // technically 10, but goes in both directions.
+	var lastMouseX:Float = 0;
+	var lastMouseY:Float = 0;
+	public var mouseMoved:Bool = false;
 
 	// 0 - None, 1 - Left, 2 - Right, 3 - Mouse Left, 4 - Mouse Right
 	var curHolding:Int = 0;
 	var holdWait:Float = 0.5;
 
 	var waitingForKey:Bool = false;
+	var controllerMode:Bool = false;
 
-	var curOptList(get, never):Array<Option>;
-	function get_curOptList() {
-		return optionsList[categoryList[selCategory]];
-	}
+	// applied on openCategory, basically optionsList[categoryList[selCategory]] with some filtering
+	var curOptList:Array<Option> = [];
 
-	var bg:SwirlBG;
-	var lineBG:FunkinSprite;
-	var lineShader:TileLine;
-	var border:Border;
-
-	var listGrp:CategoryList;
+	var listBG:FunkinSprite;
+	var listGrp:FlxTypedGroup<FlxText>;
 
 	var curOptScroll:Float = 0;
 	var optScrollInc:Float = 0;
 	var selOptScale:Float = 0;
 	var optBG:FunkinSprite;
-	var optSel:FunkinSprite;
-	var optArrLeft:FunkinSprite;
-	var optArrRight:FunkinSprite;
 	var optTxt:FlxTypedGroup<FlxText>;
 	var optValTxt:FlxTypedGroup<FlxText>;
 
@@ -312,83 +308,73 @@ class OptionsState extends FunkinState {
 		super.create();
 		self = this;
 
-		add(bg = new SwirlBG(0xFF79CCFC, 0xFF003D7A));
+		var bg:FunkinSprite = new FunkinSprite().loadGraphic(Paths.image('menus/magentaBG'));
+		bg.scale.scale(1.175);
+		bg.updateHitbox();
+		bg.screenCenter();
+		add(bg);
 
-		lineBG = new FunkinSprite();
-		lineBG.makeGraphic(FlxG.width, FlxG.height, 0x70000000);
-		lineShader = new TileLine();
-		lineShader.color1.value = [0, 0, 0, 0.375];
-		lineShader.color2.value = [0, 0, 0, 0.5];
-		lineShader.density.value = [200.0];
-		lineShader.time.value = [SwirlBG.time / 64];
-		lineBG.shader = (!Settings.data.reducedQuality) ? lineShader : null;
-		add(lineBG);
+		add(listBG = new FunkinSprite(10, 10).makeGraphic(1, 1, 0x70000000));
+		listBG.setGraphicSize(300, 700);
+		listBG.updateHitbox();
 
-		var optionsTile = new flixel.addons.display.FlxBackdrop(Paths.image('menus/Options/bigText'), Y);
-		optionsTile.x = FlxG.width - optionsTile.width;
-		optionsTile.velocity.y = 25;
-		add(optionsTile);
+		add(listGrp = new FlxTypedGroup<FlxText>());
+		var y = listBG.y + 15;
+		for (i => cate in categoryList) {
+			var txt = new FlxText(listBG.x + 15, y, listBG.width - 30, _t(cate));
+			txt.setFormat(Paths.font("vcr.ttf"), 24, i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF);
+			txt.antialiasing = Settings.data.antialiasing;
+			listGrp.add(txt);
+			y += 30;
+		}
 
-		add(listGrp = new CategoryList(20, 120, categoryList));
-		listGrp.open = openCategory;
-		listGrp.onRetarget = (i) -> {bg.speed = 5;};
+		// add(listGrp = new CategoryList(20, 120, categoryList));
+		// listGrp.open = openCategory;
+		// listGrp.onRetarget = (i) -> {bg.speed = 5;};
 
-		add(optBG = new FunkinSprite(listGrp.x + listGrp.width + 25, listGrp.y).makeGraphic(1, 440, 0x70000000));
-		optBG.scale.set(795, 0);
+		add(optBG = new FunkinSprite(listBG.x + listBG.width + 10, listBG.y).makeGraphic(1, 700, 0x70000000));
+		optBG.scale.set(500, 0);
 		optBG.updateHitbox();
 		optBG.offset.set();
 		optBG.origin.set();
 
-		add(optSel = new FunkinSprite(optBG.x - 4, optBG.y).makeGraphic(1, 1, 0xFFFFFFFF));
-		optSel.scale.set(optBG.width + 8, 55);
-		optSel.updateHitbox();
-		optSel.scale.y = 0;
-
-		add(optArrLeft = new FunkinSprite(optSel.x, optSel.y, Paths.image("menus/Options/arrow")));
-		optArrLeft.scale.y = 0;
-
-		add(optArrRight = new FunkinSprite(optSel.x + optSel.width, optSel.y, Paths.image("menus/Options/arrow")));
-		optArrRight.flipX = true;
-		optArrRight.scale.y = 0;
-		optArrRight.x -= optArrRight.width;
-
 		add(optValTxt = new FlxTypedGroup<FlxText>());
 		add(optTxt = new FlxTypedGroup<FlxText>());
 
-		add(descBG = new FunkinSprite(optBG.x, FlxG.height - 20 - 120).makeGraphic(1, 1, 0x70000000));
-		descBG.scale.set(optBG.scale.x, 120);
+		add(descBG = new FunkinSprite(optBG.x + optBG.width + 10, 0).makeGraphic(1, 1, 0x70000000));
+		descBG.scale.set(FlxG.width - descBG.x - 10, 120);
 		descBG.updateHitbox();
 		descBG.scale.y = 0;
 		descBG.offset.set();
 		descBG.origin.set();
 
-		add(descTxt = new FlxText(descBG.x + 15, descBG.y + 25, descBG.width - 30, ""));
-		descTxt.setFormat(Paths.font("Rockford-NTLG Extralight.ttf"), 20, 0xFFFFFFFF, LEFT);
-
-		add(border = new Border(true, "CONFIGURE YOUR SETTINGS • ", "Options"));
-		Border.transitionTween(true, true, border);
+		add(descTxt = new FlxText(descBG.x + 10, descBG.y + 10, descBG.width - 20, ""));
+		descTxt.setFormat(Paths.font("vcr.ttf"), 20, 0xFFFFFFFF, LEFT);
 	}
 
 	override function update(delta:Float) {
 		super.update(delta);
 
-		if (!Settings.data.reducedQuality)
-			lineShader.time.value[0] = SwirlBG.time / 64;
-		bg.speed = FlxMath.lerp(bg.speed, 1.0, delta * 15.0);
+        mouseMoved = false;
+		if (Math.abs(FlxG.mouse.screenX - lastMouseX) >= MOUSE_DEADZONE || Math.abs(FlxG.mouse.screenY - lastMouseY) >= MOUSE_DEADZONE) {
+			lastMouseX = FlxG.mouse.screenX;
+			lastMouseY = FlxG.mouse.screenY;
+			mouseMoved = true;
+		}
 
-		if (waitingForKey && !listGrp.enterHit) {
+		if (waitingForKey) {
 			final opt = curOptList[curSelected];
 			final keys:Array<FlxKey> = cast opt.value;
 			if (FlxG.keys.justPressed.ESCAPE) {
 				waitingForKey = false;
-				FlxG.sound.play(Paths.audio("menu_cancel", 'sfx'));
+				FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
 				optValTxt.members[curSelected].text = opt.formatText(true);
 				descTxt.text = getDesc(curOptList[curSelected]);
 				return;
 			} else if (opt.curKey < keys.length && FlxG.keys.justPressed.DELETE) {
 				waitingForKey = false;
-				FlxG.sound.play(Paths.audio("menu_cancel", 'sfx'));
+				FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 				
 				keys.splice(opt.curKey, 1);
 				opt.value = keys;
@@ -398,116 +384,89 @@ class OptionsState extends FunkinState {
 				return;
 			}
 
-			var key = FlxG.keys.firstJustPressed();
-			if (key != -1) {
-				waitingForKey = false;
-				if (opt.curKey == keys.length)
-					keys.push(key);
-				else
-					keys[opt.curKey] = key;
-				opt.value = keys;
+			if(controllerMode) {
+			    var button = FlxG.gamepads.lastActive?.firstJustPressedID() ?? -1;
+				if (button != -1) {
+				    final buttons:Array<FlxGamepadInputID> = cast opt.value;
+					waitingForKey = false;
 
-				FlxG.sound.play(Paths.audio("popup_select", 'sfx'));
-				optValTxt.members[curSelected].text = opt.formatText(true);
-				descTxt.text = getDesc(curOptList[curSelected]);
-			}
-		} else if (selCategory > -2 && !listGrp.enterHit) {
-			if (selCategory >= 0) 
-				optInputs(delta);
-			else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
-				descTxt.text = "";
-				selCategory = -2;
-				listGrp.useMouse = listGrp.useInputs = false;
-				listGrp.targetScale = 0;
-				FlxG.sound.play(Paths.audio("menu_cancel", 'sfx'));
+					if (opt.curKey == buttons.length)
+    					buttons.push(button);
+    				else
+   					    buttons[opt.curKey] = button;
 
-				Border.transitionTween(true, false, border, 0.25, 0.25, function() {
-					if (inPlayState) FlxG.switchState(new PlayState());
-					else FlxG.switchState(new MainMenuState());
-				});
+                    opt.value = buttons;
+
+    				optValTxt.members[curSelected].text = opt.formatText(true);
+    				descTxt.text = getDesc(curOptList[curSelected]);
+				}
+			} else {
+    			var key = FlxG.keys.firstJustPressed();
+    			if (key != -1) {
+                    final keys:Array<FlxKey> = cast opt.value;
+    				waitingForKey = false;
+
+    				if (opt.curKey == keys.length)
+    					keys.push(key);
+    				else
+    					keys[opt.curKey] = key;
+
+    				opt.value = keys;
+
+    				optValTxt.members[curSelected].text = opt.formatText(true);
+    				descTxt.text = getDesc(curOptList[curSelected]);
+    			}
 			}
+		} else if (selCategory > -2) {
+			if (FlxG.mouse.screenX >= listBG.x && FlxG.mouse.screenX <= listBG.x + listBG.width) {
+				for (i in 0...listGrp.length) {
+					var top = listBG.y + 15 + 30 * i;
+	
+					if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30) {
+						retargetCate(mouseMoved ? i : curCategory);
+	
+						if (FlxG.mouse.justPressed)
+							openCategory(i);
+						break;
+					}
+				}
+			}
+
+			(selCategory >= 0 ? optInputs : cateInputs)(delta);
 		}
 
 
 		optBG.scale.y = FlxMath.lerp(optBG.scale.y, (selCategory < 0 ? 0 : 1), delta * 15);
-		descBG.scale.y = descBG.height * optBG.scale.y;
-		@:privateAccess descTxt.regenGraphic();
-		if (descBG.scale.y > 26) {
-			descTxt.clipGraphic(0, 0, descTxt.graphic.width, Math.min(descBG.scale.y - 25, descTxt.graphic.height));
-			descTxt.visible = true;
-		} else
-			descTxt.visible = false;
 
 		curOptScroll = FlxMath.lerp(curOptScroll, optScrollInc * curSelected, delta * 15);
-		final optMargin = (optBG.y + optBG.frameHeight * optBG.scale.y);
-		var curOptY = optBG.y + 25 - curOptScroll;
-		for (i in 0...optTxt.members.length) {
-			final txt = optTxt.members[i];
-			final val = optValTxt.members[i];
-			@:privateAccess {
-				txt.regenGraphic();
-				val.regenGraphic();
-			}
+		/*final topMargin = optBG.y;
+		final botMargin = (optBG.y + optBG.frameHeight * optBG.scale.y);
+		Util.reposNClipTexts(optTxt, curSelected, topMargin, botMargin, (optBG.y + 25 - curOptScroll), delta, function(idx:Int, y:Float, scale:Float) {
+			// similar code to the static func just for val.
+			final txt = optTxt.members[idx];
+			final val = optValTxt.members[idx];
+			@:privateAccess val.regenGraphic();
 
-			txt.origin.x = 0;
 			val.origin.x = val.frameWidth;
-			txt.scale.x = txt.scale.y = FlxMath.lerp(txt.scale.x, (i == curSelected ? 1.0 : 0.85), delta * 15);
 			val.scale.copyFrom(txt.scale);
-			final scale = ((txt.scale.y - 0.85) / 0.15);
 
-			curOptY += 10 * scale;
-			txt.y = curOptY;
 			val.x = optBG.x + optBG.width - 20 - val.width;
-			val.y = txt.y + (txt.height - val.height) * 0.5 + ((i == curSelected) ? 3 * scale : 0);
-			curOptY += 35 + 10 * scale;
+			val.y = txt.y + (txt.height - val.height) * 0.5 + ((idx == curSelected) ? 3 * scale : 0);
 
-			// clip it to the list.
-			final top = txt.y + (txt.graphic.height - txt.graphic.height * txt.scale.y) * 0.5;
-			final bot = (top + txt.graphic.height * txt.scale.y);
-			if (bot > optBG.y + 5 && top < optMargin - 5) {
-				final topClip = Math.max(optBG.y - top, 0);
-				txt.clipGraphic(0, topClip / txt.scale.y, txt.graphic.width, txt.graphic.height - (Math.max(bot - optMargin, 0) + topClip) / txt.scale.y);
-				txt.offset.y = -topClip;
-				txt.visible = true;
-			} else
-				txt.visible = false;
-
-			final valTop = val.y + (val.graphic.height - val.graphic.height * val.scale.y) * 0.5;
-			final valBot = (valTop + val.graphic.height * val.scale.y);
-			final valTopMargin = (i == curSelected) ? Math.max(optSel.y + (optSel.height - optSel.scale.y) * 0.5, optBG.y) : optBG.y;
-			final valBotMargin = (i == curSelected) ? Math.min(optSel.y + (optSel.height + optSel.scale.y) * 0.5, optMargin) : optMargin;
-			final valTopClip = Math.max(valTopMargin - valTop, 0);
-			if (valBot > valTopMargin + 5 && valTop < valBotMargin - 5) {
-				final leftClip = Math.max(optSel.x - val.x, 0) / val.scale.x;
-				val.clipGraphic(leftClip, valTopClip / val.scale.y, val.graphic.width - leftClip, val.graphic.height - (Math.max(valBot - valBotMargin, 0) + valTopClip) / val.scale.y);
-				val.offset.x = -leftClip;
-				val.offset.y = -valTopClip;
-				val.visible = true;
-			} else
-				val.visible = false;
-		}
+			final tMargin = (idx == curSelected) ? Math.max(optSel.y + (optSel.height - optSel.scale.y) * 0.5, topMargin) : topMargin;
+			final bMargin = (idx == curSelected) ? Math.min(optSel.y + (optSel.height + optSel.scale.y) * 0.5, botMargin) : botMargin;
+			Util.clipByCoords(val, optSel.x, null, tMargin, bMargin);
+		});*/
 
 		selOptScale = Math.min(Math.max(selOptScale + delta * (selCategory < 0 ? -8 : 4), 0.0), 1.0);
-		final easedScale = FlxEase.backOut(selOptScale);
-		optSel.scale.y = optSel.height * easedScale;
-		optArrLeft.scale.y = optArrRight.scale.y = easedScale;
-		
-		if (selCategory < 0) return;
-		
-		// descBG.scale.y = FlxMath.lerp(lastDescHeight, descTxt.height + 50, FlxEase.backOut(selOptScale));
-		optSel.y = optTxt.members[curSelected].y + (optTxt.members[curSelected].height - optSel.height) * 0.5;
-		optArrLeft.y = optArrRight.y = optSel.y;
+		descBG.scale.y = FlxMath.lerp(lastDescHeight, descTxt.height + 50, FlxEase.backOut(selOptScale));
+		Util.clipByCoords(descTxt, null, null, null, descBG.y + descBG.scale.y);
 	}
 
-	function openCategory(cata:Int) {
-		if (cata == selCategory) {
-			FlxG.sound.play(Paths.audio("menu_toggle", 'sfx'));
-			return;
-		}
+	function openCategory(cate:Int) {
+		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 
-		listGrp.useInputs = false;
-		listGrp.selected = cata;
-		selCategory = cata;
+		selCategory = cate;
 
 		while (optTxt.length > 0) {
 			final txt = optTxt.members[0];
@@ -518,87 +477,98 @@ class OptionsState extends FunkinState {
 			val.destroy();
 		}
 
+		curOptList.resize(0);
+		final settingFields = Type.getInstanceFields(SaveVariables);
+		for (opt in optionsList[categoryList[selCategory]]) {
+			opt.controllerMode = controllerMode;
+			if (opt.isValid(settingFields))
+				curOptList.push(opt);
+		}
+
 		curSelected = 0;
-		var y = optBG.y + 25;
+		var y = optBG.y + 15;
 		for (i => opt in curOptList) {
-			var txt = new FlxText(optBG.x + 20, y, optBG.width - 40, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase());
-			var val = new FlxText(txt.x, txt.y, 0, opt.formatText(i == curSelected));
-
-			if (i == curSelected) {
-				txt.y += 10;
-				val.y += 10;
-				txt.setFormat(Paths.font("Rockford-NTLG Medium.ttf"), 30, 0xFF101010, LEFT);
-				val.setFormat(Paths.font("Rockford-NTLG Medium.ttf"), 80, 0xFFC7C7C7, RIGHT);
-				//y += 55;
-			} else {
-				txt.setFormat(Paths.font("Rockford-NTLG Light.ttf"), 30, 0xFFFFFFFF, LEFT);
-				txt.updateHitbox();
-				//txt.scale.x = 0.85;
-				txt.origin.x = 0;
-
-				val.setFormat(Paths.font("Rockford-NTLG Light.ttf"), 30, 0xFFFFFFFF, RIGHT);
-				val.updateHitbox();
-				// val.scale.x = 0.85;
-				val.origin.x = val.frameWidth;
-				//y += 35;
-			}
-			txt.scale.set();
-			val.scale.set();
+			var txt = new FlxText(optBG.x + 15, y, optBG.width - 30, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase());
+			var val = new FlxText(txt.x, txt.y, optBG.width - 30, opt.formatText(i == curSelected));
+			txt.setFormat(Paths.font("vcr.ttf"), 24, (i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF), LEFT);
+			val.setFormat(Paths.font("vcr.ttf"), 24, (i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF), RIGHT);
 			txt.antialiasing = Settings.data.antialiasing;
 			val.antialiasing = Settings.data.antialiasing;
 			optTxt.add(txt);
 			optValTxt.add(val);
+			y += 30;
 		}
 		optScrollInc = Math.max(curOptList.length * 35 + 60 - optBG.frameHeight, 0) / curOptList.length;
 
-		lastDescHeight = descBG.scale.y;
 		descTxt.text = getDesc(curOptList[curSelected]);
+		descBG.y = Math.min(optTxt.members[curSelected].y, FlxG.height - 10 - descTxt.height + 20);
+		descTxt.y = descBG.y + 10;
+		lastDescHeight = descBG.scale.y;
+	}
 
-		FlxG.sound.play(Paths.audio("popup_appear", 'sfx')); // combo sounds baybee
-		FlxG.sound.play(Paths.audio("menu_toggle", 'sfx'));
+	function retargetCate(target:Int) {
+		if (target == curCategory) return;
+
+		listGrp.members[curCategory].color = 0xFF90A0A0;
+
+		curCategory = target;
+
+		listGrp.members[curCategory].color = -1;
+
+		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+	}
+
+	function cateInputs(delta:Float) {
+		final downJustPressed = Controls.justPressed("ui_down");
+		if (downJustPressed || Controls.justPressed("ui_up"))
+			retargetCate(FlxMath.wrap(curCategory + (downJustPressed ? 1 : -1), 0, categoryList.length - 1));
+
+		if (Controls.justPressed('accept')) {
+			openCategory(curCategory);
+		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
+			descTxt.text = "";
+			selCategory = -2;
+			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
+
+			//Border.transitionTween(true, false, border, 0.25, 0.25, function() {
+				if (inPlayState) FlxG.switchState(new PlayState());
+				else FlxG.switchState(new MainMenuState());
+			//});
+		}
 	}
 
 	function getDesc(opt:Option) {
-		return (opt.desc.startsWith("<NO-LANG>") ? opt.desc.substring(9, opt.desc.length) : _t(opt.desc)) + (opt.type == KeyOption ? "\n\n" + _formatT("key_opt_desc", [",", _t("accept").toUpperCase()]) : "");
+		return (opt.desc.startsWith("<NO-LANG>") ? opt.desc.substring(9, opt.desc.length) : _formatT(opt.desc, [_t("accept").toUpperCase()])) + (opt.type == KeyOption ? "\n\n" + _formatT("key_opt_desc", [_t("accept").toUpperCase()]) : "");
 	}
 
 	function retargetOpt(target:Int) {
 		if (target == curSelected) return;
 
-		optTxt.members[curSelected].color = 0xFFFFFFFF;
-		optTxt.members[curSelected].font = Paths.font("Rockford-NTLG Light.ttf");
+		optTxt.members[curSelected].color = 0xFF90A0A0;
+		optValTxt.members[curSelected].color = 0xFF90A0A0;
 		optValTxt.members[curSelected].text = curOptList[curSelected].formatText(false);
-		optValTxt.members[curSelected].size = 30;
-		optValTxt.members[curSelected].color = 0xFFFFFFFF;
-		optValTxt.members[curSelected].font = Paths.font("Rockford-NTLG Light.ttf");	
 
 		curSelected = target;
-		optSel.scale.y = 0;
 		selOptScale = 0;
 
-		optTxt.members[curSelected].color = 0xFF101010;
-		optTxt.members[curSelected].font = Paths.font("Rockford-NTLG Medium.ttf");	
+		optTxt.members[curSelected].color = -1;
+		optValTxt.members[curSelected].color = -1;
 		optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
-		optValTxt.members[curSelected].size = 80;
-		optValTxt.members[curSelected].color = 0xFFC7C7C7;
-		optValTxt.members[curSelected].font = Paths.font("Rockford-NTLG Medium.ttf");
 
-		lastDescHeight = descBG.scale.y;
 		descTxt.text = getDesc(curOptList[curSelected]);
+		descBG.y = Math.min(optTxt.members[curSelected].y, FlxG.height - 10 - descTxt.height + 20);
+		descTxt.y = descBG.y + 10;
+		lastDescHeight = descBG.scale.y;
 
-		bg.speed = 5;
-		FlxG.sound.play(Paths.audio("menu_move", 'sfx'));
+		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 	}
 
 	function optInputs(delta:Float) {
-		if (FlxG.mouse.screenX >= optSel.x && FlxG.mouse.screenX <= optSel.x + optSel.width) {
+		if (FlxG.mouse.screenX >= optBG.x && FlxG.mouse.screenX <= optBG.x + optBG.width) {
 			for (i in 0...optTxt.length) {
-				var txt = optTxt.members[i];
-				var height = 35 + 20 * ((txt.scale.y - 0.85) / 0.15);
-				
-				var top = txt.y + (txt.height - height) * 0.5;
-				if (FlxG.mouse.screenY >= top && FlxG.mouse.screenY <= top + height) {
-					retargetOpt(listGrp.mouseMoved ? i : curSelected);
+				var top = listBG.y + 15 + 30 * i;
+				if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30 && curOptList[i].type != Unselectable) {
+					retargetOpt(mouseMoved ? i : curSelected);
 					if (FlxG.mouse.justPressed) {
 						if (curOptList[curSelected].type == ButtonOption) {
 							curOptList[curSelected].change(false);
@@ -609,10 +579,9 @@ class OptionsState extends FunkinState {
 						} else if (curOptList[curSelected].type == KeyOption) {
 							waitingForKey = true;
 							descTxt.text = _formatT("sel_key_desc", [","]);
-							FlxG.sound.play(Paths.audio("popup_appear", 'sfx'));
 							optValTxt.members[curSelected].text = "Setting...";
-						} else if (Math.abs(FlxG.mouse.screenX - (optSel.x + optSel.width * 0.5)) >= optSel.width * 0.5 - 25) {
-							final isLeft = FlxG.mouse.screenX <= optSel.x + 25;
+						} else if (Math.abs(FlxG.mouse.screenX - (optBG.x + optBG.width * 0.5)) >= optBG.width * 0.5 - 25) {
+							final isLeft = FlxG.mouse.screenX <= optBG.x + 25;
 							curHolding = isLeft ? 3 : 4;
 							holdWait = 0.5;
 
@@ -629,8 +598,16 @@ class OptionsState extends FunkinState {
 		final downJustPressed:Bool = Controls.justPressed('ui_down');
 		final leftJustPressed:Bool = Controls.justPressed('ui_left');
 
-		if (downJustPressed || Controls.justPressed('ui_up'))
-			retargetOpt(FlxMath.wrap(curSelected + (downJustPressed ? 1 : -1), 0, curOptList.length - 1));
+		if (downJustPressed || Controls.justPressed('ui_up')) {
+			final firstNew = FlxMath.wrap(curSelected + (downJustPressed ? 1 : -1), 0, curOptList.length - 1);
+			var newOpt = firstNew;
+			while (curOptList[newOpt].type == Unselectable) {
+				newOpt = FlxMath.wrap(newOpt + (downJustPressed ? 1 : -1), 0, curOptList.length - 1);
+				if (newOpt == firstNew)
+					break; // safety
+			}
+			retargetOpt(newOpt);
+		}
 
 		final curOption = curOptList[curSelected];
 		if ((leftJustPressed || Controls.justPressed('ui_right'))) {
@@ -665,15 +642,13 @@ class OptionsState extends FunkinState {
 			} else if (curOption.type == KeyOption) {
 				waitingForKey = true;
 				descTxt.text = _formatT("sel_key_desc", [","]);
-				FlxG.sound.play(Paths.audio("popup_appear", 'sfx'));
 				optValTxt.members[curSelected].text = "Setting...";
 			} else if (curOption.type == ButtonOption) curOption.change(false);
 		}
 
 		if (Controls.justPressed("back") || FlxG.mouse.justPressedRight) {
 			selCategory = -1;
-			listGrp.useInputs = true;
-			FlxG.sound.play(Paths.audio("menu_cancel", 'sfx'));
+			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 		}
 	}
 
@@ -689,15 +664,16 @@ enum OptionType {
 	IntOption(min:Int, max:Int, ?inc:Int, ?wrap:Bool);
 	FloatOption(min:Float, max:Float, ?inc:Float, ?wrap:Bool);
 	BoolOption;
-	ListOption(options:Array<String>);
+	ListOption(options:Array<String>, ?translateItems:Bool);
 	KeyOption;
 	ButtonOption;
+	Unselectable;
 }
 
 class Option {
 	public var name:String;
 	public var desc:String;
-	public var sound:String = "menu_setting_tick";
+	public var sound:String = "scroll";
 
 	public var id:String;
 	public var type:OptionType;
@@ -706,7 +682,11 @@ class Option {
 	//type specific
 	public var powMult:Float = 1;
 	public var curKey:Int = 0;
-	
+	public var controllerMode:Bool = false;
+
+	public var hasEnter:Bool = false;
+	public var hasMove:Bool = true;
+
 	public dynamic function onChange(v:Dynamic) {}
 
 	public dynamic function formatText(selected:Bool):String {
@@ -721,17 +701,25 @@ class Option {
 
 		switch (type) {
 			case BoolOption:
-				sound = "menu_toggle";
 				formatText = function(_) {
 					return _t(value ? "on" : "off").toUpperCase();
 				};
 			case KeyOption:
 				formatText = function(selected) {
+				    if(controllerMode) {
+						final buttons:Array<FlxGamepadInputID> = cast value;
+						return selected ? (curKey == buttons.length ? 'New Button' : '#${curKey + 1} (${formatGamepadButton(buttons[curKey])})') : [for (button in buttons) formatGamepadButton(button)].join(", ");
+					}
 					final keys:Array<FlxKey> = cast value;
 					return selected ? (curKey == keys.length ? 'New Key' : '#${curKey + 1} (${formatKey(keys[curKey])})') : [for (key in keys) formatKey(key)].join(", ");
 				};
-			case ButtonOption:
+			case ButtonOption | Unselectable:
 				formatText = function(_) {return "";};
+			case ListOption(options, translateItems):
+				if (translateItems == true) // == true to account for null
+					formatText = function(_) {return _t(id + "_" + value);};
+				else
+					formatText = function(_) {return value.toLowerCase() == "off" ? "OFF" : value;};
 			case FloatOption(min, max, inc, wrap):
 				// add some increment specific rounding to prevent .599999999999999999999
 				inc ??= 0.05;
@@ -770,7 +758,7 @@ class Option {
 				value = Math.round(curVal * powMult) / powMult;
 			case BoolOption:
 				value = !value;
-			case ListOption(list):
+			case ListOption(list, translateItems):
 				final inc = left ? -1 : 1;
 				value = list[FlxMath.wrap(list.indexOf(value) + inc, 0, list.length - 1)];
 			case KeyOption:
@@ -783,15 +771,27 @@ class Option {
 		}
 	}
 
+	public function isValid(settingFields:Array<String>) {
+		return switch (type) {
+			case ButtonOption | Unselectable: true;
+			case KeyOption: controllerMode ? Controls.gamepad_binds.exists(id) : Controls.binds.exists(id);
+			default: id != null && settingFields.contains(id);
+		}
+	}
+
 	function get_value():Dynamic {
 		if (type == KeyOption)
-			return Controls.binds[id];
+			return (controllerMode) ? Controls.gamepad_binds[id] : Controls.binds[id];
 		return Reflect.field(Settings.data, id);
 	}
 
 	function set_value(v:Dynamic):Dynamic {
-		if (type == KeyOption)
-			Controls.binds.set(id, v);
+		if (type == KeyOption) {
+		    if(controllerMode)
+				Controls.gamepad_binds.set(id, v);
+			else
+			    Controls.binds.set(id, v);
+		}
 		else
 			Reflect.setField(Settings.data, id, v);
 
@@ -835,6 +835,133 @@ class Option {
 			case BACKSLASH: "\\";
 			case CAPSLOCK: "CAPS";
 			default: key.toString();
+		}
+	}
+
+	public static function formatGamepadButton(button:FlxGamepadInputID) {
+        final gamepad:FlxGamepad = FlxG.gamepads.firstActive;
+        final model:FlxGamepadModel = gamepad != null ? gamepad.detectedModel : UNKNOWN;
+	    switch(button) {
+			// Analogs
+			case LEFT_STICK_DIGITAL_LEFT:
+				return "Left";
+
+			case LEFT_STICK_DIGITAL_RIGHT:
+				return "Right";
+
+			case LEFT_STICK_DIGITAL_UP:
+				return "Up";
+
+			case LEFT_STICK_DIGITAL_DOWN:
+				return "Down";
+
+			case LEFT_STICK_CLICK:
+				switch (model) {
+					case PS4: return "L3";
+					case XINPUT: return "LS";
+					default: return "Analog Click";
+				}
+
+			case RIGHT_STICK_DIGITAL_LEFT:
+				return "C. Left";
+
+			case RIGHT_STICK_DIGITAL_RIGHT:
+				return "C. Right";
+
+			case RIGHT_STICK_DIGITAL_UP:
+				return "C. Up";
+
+			case RIGHT_STICK_DIGITAL_DOWN:
+				return "C. Down";
+
+			case RIGHT_STICK_CLICK:
+				switch (model) {
+					case PS4: return "R3";
+					case XINPUT: return "RS";
+					default: return "C. Click";
+				}
+
+			// Directional
+			case DPAD_LEFT:
+				return "D. Left";
+			case DPAD_RIGHT:
+				return "D. Right";
+			case DPAD_UP:
+				return "D. Up";
+			case DPAD_DOWN:
+				return "D. Down";
+
+			// Top buttons
+			case LEFT_SHOULDER:
+				switch(model) {
+					case PS4: return "L1";
+					case XINPUT: return "LB";
+					default: return "L. Bumper";
+				}
+
+			case RIGHT_SHOULDER:
+				switch(model) {
+					case PS4: return "R1";
+					case XINPUT: return "RB";
+					default: return "R. Bumper";
+				}
+
+			case LEFT_TRIGGER, LEFT_TRIGGER_BUTTON:
+				switch(model) {
+					case PS4: return "L2";
+					case XINPUT: return "LT";
+					default: return "L. Trigger";
+				}
+
+			case RIGHT_TRIGGER, RIGHT_TRIGGER_BUTTON:
+				switch(model) {
+					case PS4: return "R2";
+					case XINPUT: return "RT";
+					default: return "R. Trigger";
+				}
+
+			// Buttons
+			case A:
+				switch (model) {
+					case PS4: return "X";
+					case XINPUT: return "A";
+					default: return "Action Down";
+				}
+			case B:
+				switch (model) {
+					case PS4: return "O";
+					case XINPUT: return "B";
+					default: return "Action Right";
+				}
+			case X:
+				switch (model) {
+					case PS4: return "ロ";
+					case XINPUT: return "X";
+					default: return "Action Left";
+				}
+			case Y:
+				switch (model) {
+					case PS4: return "Δ";
+					case XINPUT: return "Y";
+					default: return "Action Up";
+				}
+
+			case BACK:
+				switch(model) {
+					case PS4: return "Share";
+					case XINPUT: return "Back";
+					default: return "Select";
+				}
+			case START:
+				switch(model) {
+					case PS4: return "Options";
+					default: return "Start";
+				}
+
+			case NONE:
+				return '---';
+
+			default: return button.toString();
 		}
 	}
 }
