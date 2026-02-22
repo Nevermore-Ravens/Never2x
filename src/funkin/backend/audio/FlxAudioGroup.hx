@@ -44,7 +44,6 @@ class FlxAudioGroup {
 	public function play():Void {
 		for (sound in members) {
 			if (sound == null) continue;
-			trace('bro what');
 			sound.play();
 		}
 	}

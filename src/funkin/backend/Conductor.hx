@@ -129,10 +129,7 @@ class Conductor extends flixel.FlxBasic {
         floatMeasure = measure = 0;
 
 		timingPoints = null;
-		if (vocals != null) {
-			vocals.destroy();
-			vocals = null;
-		}
+		vocals.destroy();
 		beatsPerMeasure = 4;
 		bpm = 120;
 
@@ -156,8 +153,14 @@ class Conductor extends flixel.FlxBasic {
 		syncBeats();
 
 		//if (inst != null && vocals != null && Math.abs(vocals.getActualTime() - inst.getActualTime()) > vocalResyncDiff * inst.getActualPitch())
-		if (inst != null && vocals != null && Math.abs(vocals.time - inst.time) > vocalResyncDiff * inst.pitch)
-			syncMusic();
+		if (inst != null) {
+			for (vocal in vocals.members) {
+				if (vocal != null && Math.abs(vocal.time - inst.time) > vocalResyncDiff * inst.pitch) {
+					syncMusic();
+					break;
+				}
+			}
+		}
 	}
 
 	public static var _time:Float = 0.0;
@@ -200,15 +203,17 @@ class Conductor extends flixel.FlxBasic {
 
 		final time:Float = _songPlaying ? inst.time : rawTime - offset;
 		inst.pause();
-		if (!_songPlaying) inst.time = time;
-		if (vocals != null) {
-			vocals.pause();
+		vocals.pause();
+
+		//if (!_songPlaying) { ill be honest i dont get this if
+			inst.time = time;
 			for (vocal in vocals.members) {
 				if (vocal.length <= time) continue;
 				vocal.time = time;
 			}
-			vocals.play();
-		}
+		//}
+
+		vocals.play();
 		inst.play();
 	}
 
@@ -250,7 +255,7 @@ class Conductor extends flixel.FlxBasic {
 		_songPlaying = false;
 
 		if (inst != null) inst.stop();
-		if (vocals != null) vocals.stop();
+		vocals.stop();
 	}
 
 	public static function play() {
@@ -262,7 +267,7 @@ class Conductor extends flixel.FlxBasic {
 	public static function pause() {
 		playing = false;
 		if (inst != null) inst.pause();
-		if (vocals != null) vocals.pause();
+		vocals.pause();
 	}
 
 	public static function resume() {
@@ -291,7 +296,7 @@ class Conductor extends flixel.FlxBasic {
 
 	static function set_volume(value:Float):Float {
 		inst.volume = value;
-		if (vocals != null) vocals.volume = value;
+		vocals.volume = value;
 
 		return volume = value;
 	}

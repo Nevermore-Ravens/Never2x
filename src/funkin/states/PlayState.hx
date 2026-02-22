@@ -736,7 +736,7 @@ class PlayState extends FunkinState {
 		hitErrorBar.screenCenter(X);
 		hitErrorBar.visible = Settings.data.hitErrorBar;
 
-		hud.add(timingIndicator = new FlxText(0, hitErrorBar.y + 20, 500, '0 ms', 16));
+		hud.add(timingIndicator = new FlxText(0, hitErrorBar.y + (downscroll ? -30 : 20), 500, '0 ms', 16));
 		timingIndicator.alignment = 'center';
 		timingIndicator.screenCenter(X);
 		timingIndicator.alpha = 0;
@@ -1028,8 +1028,8 @@ class PlayState extends FunkinState {
 				Conductor.mainVocals = mainFile;
 				if (opponentFile != null) Conductor.opponentVocals = opponentFile;
 			}
-		} catch (e:Dynamic) {
-			Sys.println('Vocals failed to load: $e');
+		} catch (e) {
+			Sys.println('Vocals failed to load: ${e.details()}');
 		}
 
 		ScriptHandler.loadFromDir('songs/$songID');
@@ -1085,10 +1085,7 @@ class PlayState extends FunkinState {
 
 		FlxG.timeScale = 1;
 		Conductor.stop();
-		if (Conductor.vocals != null) {
-			Conductor.vocals.destroy();
-			Conductor.vocals = null;
-		}
+		Conductor.vocals.destroy();
 		deaths = 0;
 
 		Util.cancelAllTimers();
@@ -1101,7 +1098,7 @@ class PlayState extends FunkinState {
 
 		if (exitToMenu || forceLeave) {
 			persistentUpdate = false;
-			Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu'), true);
+			Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true);
 			Conductor.play();
 			Difficulty.reset();
 			Addons.current = '';
@@ -1120,7 +1117,6 @@ class PlayState extends FunkinState {
 		ScriptHandler.clear();
 		FlxG.mouse.visible = true;
 		self = null;
-		Conductor.vocals = null;
 		noteHitList.resize(0);
 		super.destroy();
 	}
@@ -1233,9 +1229,7 @@ class PlayState extends FunkinState {
 		camHUD.fade(0x42FF0000, 5);
 		FlxTween.tween(camGame, {zoom: camGame.zoom + 0.5, angle: (FlxG.random.bool() ? -10 : 10)}, 5, {ease: FlxEase.linear});
 
-		if (Conductor.vocals != null)
-			FlxTween.tween(Conductor.vocals, {pitch: 0.1}, 5, {ease: FlxEase.linear});
-
+		FlxTween.tween(Conductor.vocals, {pitch: 0.1}, 5, {ease: FlxEase.linear});
 		FlxTween.tween(Conductor.inst, {pitch: 0.1}, 5, {ease: FlxEase.linear, 
 			onComplete: t -> {
 				Conductor.stop();
