@@ -732,18 +732,19 @@ class PlayState extends FunkinState {
 	function loadHUD():Void {
 		hud.clear();
 
-		hud.add(hitErrorBar = new HitErrorBar(0, downscroll ? FlxG.height - 50 : 45));
-		hitErrorBar.screenCenter(X);
+		hud.add(hitErrorBar = new HitErrorBar(Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? 20 : FlxG.width - 25, 0));
+		hitErrorBar.screenCenter(Y);
 		hitErrorBar.visible = Settings.data.hitErrorBar;
 
-		hud.add(timingIndicator = new FlxText(0, hitErrorBar.y + (downscroll ? -30 : 20), 500, '0 ms', 16));
+		hud.add(timingIndicator = new FlxText((hitErrorBar.x + (Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? 25 : -25)) - 150, 0, 300, '0 ms', 16));
 		timingIndicator.alignment = 'center';
-		timingIndicator.screenCenter(X);
 		timingIndicator.alpha = 0;
 		timingIndicator.font = Paths.font('LineSeed.ttf');
 		timingIndicator.borderSize = 1.25;
 		timingIndicator.borderStyle = OUTLINE;
 		timingIndicator.borderColor = 0xFF000000;
+		timingIndicator.angle = Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? -90 : 90;
+		timingIndicator.screenCenter(Y);
 
 		hud.add(healthBar = new Bar(0, downscroll ? 55 : 640, function() return health, 0, 100));
 		healthBar.setColors(dad.healthColor, bf.healthColor);
@@ -785,6 +786,7 @@ class PlayState extends FunkinState {
 		judgeNames.borderStyle = FlxTextBorderStyle.OUTLINE;
 		judgeNames.borderSize = 1.5;
 		judgeNames.color = 0xFF999999; // sets the default format color to the miss color
+		judgeNames.x = (Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? FlxG.width - 5 - judgeNames.width : 5);
 		//@:privateAccess judgeNames._defaultFormat.leading = 5;
 
 		hud.add(judgeCounter = new FlxText(judgeNames.x, judgeNames.y, judgeNames.fieldWidth, '', judgeNames.size));
@@ -801,7 +803,6 @@ class PlayState extends FunkinState {
 
 		hud.add(ranking = new FlxText(judgeNames.x, 0, judgeCounter.fieldWidth, '?'));
 		ranking.setFormat(Paths.font('cafeSquare.ttf'), 20, 0xFF000000, CENTER, OUTLINE, 0xFF000000);
-		ranking.x = (Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? FlxG.width - 5 - ranking.width : 5);
 		ranking.y = ((judgeNames.visible) ? judgeNames.y + judgeNames.height : FlxG.height - 5 - ranking.height);
 		ranking.borderSize = 1.5;
 

@@ -65,7 +65,7 @@ class HitErrorBar extends FlxSpriteGroup
 		for (i in widthArray)
 			totalWidth += i;
 
-		var judgeLine:BitmapData = new BitmapData(Std.int(totalWidth), 5, true);
+		var judgeLine:BitmapData = new BitmapData(5, Std.int(totalWidth), true);
 
 		var daOffset = 0.0;
 
@@ -78,18 +78,18 @@ class HitErrorBar extends FlxSpriteGroup
 			final shitWidth = widthArray[i];
             final curColor:FlxColor = i < Judgement.list.length ? Judgement.list[Judgement.list.length-id-1].color : Judgement.list[id].color;
 
-			judgeLine.fillRect(new openfl.geom.Rectangle(daOffset, 0, shitWidth, 5),
+			judgeLine.fillRect(new openfl.geom.Rectangle(0, daOffset, 5, shitWidth),
 				curColor);
 			daOffset += widthArray[i];
 		}
 
 		timingBar = new FlxSprite().loadGraphic(FlxGraphic.fromBitmapData(judgeLine, false, "judgeLine"));
 
-		timingBar.setGraphicSize(300, 5); // Set to a determined scale to don't have a large timing bar because of really high timings.
+		timingBar.setGraphicSize(5, 300); // Set to a determined scale to don't have a large timing bar because of really high timings.
 
 		timingBar.updateHitbox();
 
-		trianglePointer = new FlxSprite((timingBar.x + timingBar.width / 2) - 5, 0).makeGraphic(10, 10, FlxColor.TRANSPARENT);
+		trianglePointer = new FlxSprite(0, (timingBar.y + timingBar.height / 2) - 5).makeGraphic(10, 10, FlxColor.TRANSPARENT);
 
 		FlxSpriteUtil.drawTriangle(trianglePointer, 0, 0, 10, FlxColor.WHITE, {thickness: 0, color: FlxColor.WHITE}, {smoothing: true});
 
@@ -97,38 +97,31 @@ class HitErrorBar extends FlxSpriteGroup
 		trianglePointer.updateHitbox();
 		trianglePointer.moves = false;
         trianglePointer.visible = true;
-
-		trianglePointer.antialiasing = FlxG.save.data.antialiasing;
-
-		middleLine = new FlxSprite((timingBar.x + timingBar.width / 2) - 1.5, -10.5).makeGraphic(3, 25, FlxColor.WHITE);
-
+		trianglePointer.antialiasing = Settings.data.antialiasing;
 		updatePointerFlip();
-		trianglePointer.alpha = 0.7;
 
-		add(timingBar);
+		middleLine = new FlxSprite(-10.5, (timingBar.y + timingBar.height / 2) - 1.5).makeGraphic(25, 3, FlxColor.WHITE);
 
 		hitNotesGroup = new FlxTypedSpriteGroup<NoteHitBar>(0, 0, 0);
 
 		for (i in 0...hitNotesGroup.maxSize + 1)
 		{
 			final dummyBar = new NoteHitBar(this, (timingBar.x + timingBar.width / 2) - 1.5, -10.5);
-
-			dummyBar.makeGraphic(3, 18, FlxColor.WHITE);
-
+			dummyBar.makeGraphic(18, 3, FlxColor.WHITE);
 			dummyBar.moves = false;
-
 			hitNotesGroup.insert(0, dummyBar);
-
 			dummyBar.kill();
 		}
 
 		missHitNote = new NoteHitBar(this, timingBar.x + timingBar.width - 1.5, -10.5);
-		missHitNote.makeGraphic(3, 18, FlxColor.WHITE);
+		missHitNote.makeGraphic(18, 3, FlxColor.WHITE);
 		missHitNote.visible = false;
 		missHitNote.moves = false;
 		missHitNote.kill();
 
 		curVisibleBars = 0;
+
+		add(timingBar);
 
 		add(middleLine);
 		add(trianglePointer);
@@ -139,15 +132,15 @@ class HitErrorBar extends FlxSpriteGroup
 
 	public function updatePointerFlip()
 	{
-		if (Settings.data.downscroll)
+		if (Settings.data.gameplayModifiers['playingSide'] == 'Opponent')
 		{
-			trianglePointer.flipY = true;
-			trianglePointer.y = -12;
+			trianglePointer.angle = 90;
+			trianglePointer.x = -12;
 		}
 		else
 		{
-			trianglePointer.flipY = false;
-			trianglePointer.y = 12.5;
+			trianglePointer.angle = -90;
+			trianglePointer.x = 12.5;
 		}
 
 		trianglePointer.alpha = 0.7;
@@ -159,16 +152,16 @@ class HitErrorBar extends FlxSpriteGroup
 	{
 		if (trianglePointer.visible)
 		{
-			var rawPos = FlxMath.remapToRange((timingBar.x + timingBar.width / 2)
-				+ currentMS, (timingBar.x + timingBar.width / 2),
-				(timingBar.x + timingBar.width / 2)
-				+ Judgement.max.timing, (timingBar.x + timingBar.width / 2), timingBar.x
-				+ timingBar.width)
+			var rawPos = FlxMath.remapToRange((timingBar.y + timingBar.height * 0.5)
+				+ currentMS, (timingBar.y + timingBar.height * 0.5),
+				(timingBar.y + timingBar.height * 0.5)
+				+ Judgement.max.timing, (timingBar.y + timingBar.height * 0.5), timingBar.y
+				+ timingBar.height)
 				- 5;
 
 			trianglePos = rawPos;
 
-			trianglePointer.x = Util.expDecay(trianglePointer.x, rawPos, 7.5);
+			trianglePointer.y = Util.expDecay(trianglePointer.y, rawPos, 7.5);
 		}
 
 		if (timingBar.visible)
@@ -186,22 +179,22 @@ class HitErrorBar extends FlxSpriteGroup
 		timingBar.alpha = 0.7;
 		trianglePointer.alpha = 0.7;
 
-		var barPos = FlxMath.remapToRange((timingBar.x + timingBar.width / 2)
-			+ currentMS, (timingBar.x + timingBar.width / 2),
-			(timingBar.x + timingBar.width / 2)
-			+ Judgement.max.timing, (timingBar.x + timingBar.width / 2), timingBar.x
-			+ timingBar.width)
+		var barPos = FlxMath.remapToRange((timingBar.y + timingBar.height * 0.5)
+			+ currentMS, (timingBar.y + timingBar.height * 0.5),
+			(timingBar.y + timingBar.height * 0.5)
+			+ Judgement.max.timing, (timingBar.y + timingBar.height * 0.5), timingBar.y
+			+ timingBar.height)
 			- 1.5;
 
 		final hitBar:NoteHitBar = hitNotesGroup.recycle(NoteHitBar, generateNewHitBar);
         hitBar.loadGraphic(hitNotesGroup.members[0].graphic);
 		hitBar.camera = camera;
-		hitBar.setPosition(barPos, y - 7);
+		hitBar.setPosition(x - 7, barPos);
 	}
 
     private function generateNewHitBar()
     {
-        return new NoteHitBar(this, (timingBar.x + timingBar.width / 2) - 1.5, -10.5);
+        return new NoteHitBar(this, -10.5, (timingBar.y + timingBar.height / 2) - 1.5);
     }
 
 	public function registerMiss()
@@ -213,10 +206,10 @@ class HitErrorBar extends FlxSpriteGroup
         lastMS = currentMS;
 		currentMS = Judgement.max.timing;
 
-		triangleRawPosition = timingBar.x + timingBar.width - 1.5;
+		triangleRawPosition = timingBar.y + timingBar.height - 1.5;
 		missHitNote.revive();
         missHitNote.visible = true;
-		missHitNote.setPosition(timingBar.x + timingBar.width - 1.5, y - 7);
+		missHitNote.setPosition(x - 7, timingBar.y + timingBar.height - 1.5);
 	}
 
 	override function destroy()
