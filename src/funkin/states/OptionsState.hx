@@ -1,8 +1,11 @@
 package funkin.states;
 
 import haxe.io.Path;
+import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.FunkinSprite;
+import funkin.objects.PlayField;
+import funkin.objects.Strumline;
 import funkin.backend.Settings.SaveVariables;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
@@ -15,18 +18,32 @@ class OptionsState extends FunkinState {
 	final categoryList:Array<String> = ["Keybinds", "Gameplay", "HUD", "Visuals", "Performance", "Misc."];
 	final optionsList:Map<String, Array<Option>> = [
 		"Keybinds" => [
+            {
+    			var opt = new Option("swap_keybind_mode_generic", "swap_keybind_mode_desc", "", ButtonOption);
+    			opt.onChange = function(_) {
+                    self.controllerMode = !self.controllerMode;
+
+         			final prevCategory:Int = self.selCategory;
+         			self.selCategory = -1; // force a regen of the menu cuz Fuck
+         			self.openCategory(prevCategory);
+                };
+    			opt;
+    		},
+			new Option("", "", "", Unselectable),
 			new Option("left_note", "left_note_desc", "note_left", KeyOption),
 			new Option("down_note", "down_note_desc", "note_down", KeyOption),
 			new Option("up_note", "up_note_desc", "note_up", KeyOption),
 			new Option("right_note", "right_note_desc", "note_right", KeyOption),
 			new Option("pause", "pause_desc", "pause", KeyOption),
 			new Option("reset", "reset_desc", "reset", KeyOption),
+			new Option("", "", "", Unselectable),
 			new Option("ui_left", "ui_left_desc", "ui_left", KeyOption),
 			new Option("ui_down", "ui_down_desc", "ui_down", KeyOption),
 			new Option("ui_up", "ui_up_desc", "ui_up", KeyOption),
 			new Option("ui_right", "ui_right_desc", "ui_right", KeyOption),
 			new Option("accept", "accept_desc", "accept", KeyOption),
 			new Option("back", "back_desc", "back", KeyOption),
+			new Option("", "", "", Unselectable),
 			{
 				var opt = new Option("mute", "mute_desc", "volume_mute", KeyOption);
 				opt.onChange = function(v) {
@@ -57,8 +74,33 @@ class OptionsState extends FunkinState {
 			// ill not add the debug keys
 		],
 		"Gameplay" => [
-			new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"])),
-			new Option('scroll_speed', 'scroll_speed_desc', "scrollSpeed", FloatOption(0.5, 7, 0.05)),
+			{
+				var opt = new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"]));
+				opt.onChange = function(val) {
+					var endPercent = val == "Down" ? 1 : 0;
+					var percent = 1.0 - endPercent;
+					var time = 0.5;
+					if (self.scrollTwn != null && !self.scrollTwn.finished) {
+						@:privateAccess time = self.scrollTwn._secondsSinceStart;
+						percent = Math.abs(endPercent - self.scrollTwn.scale);
+						self.scrollTwn.cancel();
+					}
+					self.scrollTwn = FlxTween.num(percent, endPercent, time, {ease: FlxEase.cubeInOut}, function(num) {
+						self.playfield.downscroll = num >= 0.5;
+						self.strumline.overrideScrollSpeed = Math.abs(num - endPercent) <= 0.01 ? 0 : Math.max(self.playfield.scrollSpeed * Math.abs(num - 0.5) * 2, 0.001);
+						self.strumline.y = FlxMath.lerp(50, FlxG.height - 50 - Strumline.swagWidth, num);
+						//self.text.y = FlxMath.lerp(600, 50, num);
+					});
+				};
+				opt;
+			},
+			{
+				var opt = new Option('scroll_speed', 'scroll_speed_desc', "scrollSpeed", FloatOption(0.5, 7, 0.05));
+				opt.onChange = function(val) {
+					FlxTween.tween(self.playfield, {scrollSpeed: val}, 0.25, {ease: FlxEase.cubeOut});
+				};
+				opt;
+			},
 			{
 				final possible: Array<String> = [];
 				final names: Map<String, String> = [];
@@ -71,7 +113,14 @@ class OptionsState extends FunkinState {
 						names.set(name, data.displayName);
 					}
 	
-				var opt = new Option("note_skin", "<NO-LANG>What texture the notes will use in game.", "noteSkin", ListOption(possible));
+				var opt = new Option("note_skin", "note_skin_desc", "noteSkin", ListOption(possible));
+				opt.onChange = function(val) {
+					self.strumline.skin = val;
+					@:privateAccess for (note in self.playfield.notes.members) {
+						if (note.exists)
+							note.skin = val;
+					}
+				}
 				opt.formatText = function(_) {
 					return names[opt.value];
 				};
@@ -89,7 +138,14 @@ class OptionsState extends FunkinState {
 						notesplashNames.set(splashName, data.name);
 					}
 
-				var opt = new Option("splash_skin", "<NO-LANG>What texture the note splashes will use in game.", "noteSplashSkin", ListOption(possibleNotesplashes));
+				var opt = new Option("splash_skin", "splash_skin_desc", "noteSplashSkin", ListOption(possibleNotesplashes));
+				opt.onChange = function(val) {
+					self.strumline.style = val;
+					@:privateAccess for (note in self.playfield.notes.members) {
+						if (note.exists)
+							note.style = val;
+					}
+				}
 				opt.formatText = function(_) {
 					return notesplashNames.get(opt.value) ?? 'Fallback (${opt.value})'; // Display the name so you can figure out what the splash WAS
 				};
@@ -121,28 +177,28 @@ class OptionsState extends FunkinState {
 			//standardized score based on judgements now i really don't see a need to have complex acc at all -fox
 		],
 		"HUD" => [
-			new Option("<NO-LANG>Judgement Counter", "<NO-LANG>If there will be a counter on the corner showing your judgement totals.", "judgementCounter", BoolOption),
+			new Option("judge_counter", "judge_counter_desc", "judgementCounter", BoolOption),
 			new Option('hit_error_bar', 'hit_error_bar_desc', "hitErrorBar", BoolOption),
-			new Option("<NO-LANG>Combo Tinting","<NO-LANG>Allows the combo numbers to be tinted by judgements.", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"])),
-			new Option("<NO-LANG>Score Popup Center", "<NO-LANG>Where the judgements and combo are positioned. (WILL BE FORCED TO \"HUD\" WITH CENTERED NOTES!)", "popupCenter", ListOption(["Top", "Field", "HUD"])),
-			new Option("<NO-LANG>Hide Accuracy", "<NO-LANG>Hides the accuracy % in the HUD", "hideAcc", BoolOption),
-			new Option("hide_hud", "<NO-LANG>Makes the entire HUD disappear, if you want just the notes. Or if you're showcasing something.", "hideHUD", BoolOption),
+			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"])),
+			new Option("popup_cent", "popup_cent_desc", "popupCenter", ListOption(["Top", "Field", "HUD"])),
+			new Option("hide_acc", "hide_acc_desc", "hideAcc", BoolOption),
+			new Option("hide_hud", "hide_hud_desc", "hideHUD", BoolOption),
 			{
-				var opt = new Option("judge_alpha", "<NO-LANG>How much you can see the judgements of the notes you hit.", "judgementAlpha", FloatOption(0, 1, 0.05));
+				var opt = new Option("judge_alpha", "judge_alpha_desc", "judgementAlpha", FloatOption(0, 1, 0.05));
 					opt.formatText = function(_) {
 						return (opt.value * 100) + "%";
 					};
 					opt;
 			},
 			{
-				var opt = new Option("combo_alpha", "<NO-LANG>How much you can see the combo counter.", "comboAlpha", FloatOption(0, 1, 0.05));
+				var opt = new Option("combo_alpha", "combo_alpha_desc", "comboAlpha", FloatOption(0, 1, 0.05));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
 				opt;
 			},
 			{
-				var opt = new Option("<NO-LANG>Health Bar Alpha", "<NO-LANG>How much you can see the the health bar in game.", "healthBarAlpha", FloatOption(0, 1, 0.05));
+				var opt = new Option("hp_alpha", "hp_alpha_desc", "healthBarAlpha", FloatOption(0, 1, 0.05));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
@@ -157,38 +213,70 @@ class OptionsState extends FunkinState {
 					for (i => cata in self.listGrp.members)
 						cata.text = _t(self.categoryList[i]).toUpperCase();
 
-					if (self.selCategory >= 0) {
-						for (i => txt in self.optTxt.members) {
-							final opt = self.curOptList[i];
-							txt.text = (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase();
-							self.optValTxt.members[i].text = opt.formatText(i == self.curSelected);
-						}
-
-						self.lastDescHeight = self.descBG.scale.y;
-						self.descTxt.text = self.getDesc(self.curOptList[self.curSelected]);
+					for (i => txt in self.optTxt.members) {
+						final opt = self.curOptList[i];
+						txt.text = (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase();
+						self.optValTxt.members[i].text = opt.formatText(i == self.curSelected);
 					}
+
+					self.lastDescHeight = self.descBG.scale.y;
+					self.descTxt.text = self.getDesc(self.curOptList[self.curSelected]);
 				}
 				opt;
 			},
-			new Option("flashing_lights", "<NO-LANG>If the game is allowed to risk seizures for fast colored effects.", "flashingLights", BoolOption),
+			new Option("flashing_lights", "flashing_lights_desc", "flashingLights", BoolOption),
+			{
+				var opt = new Option('strum_size', 'strum_size_desc', 'strumSize', FloatOption(0.05, 3, 0.05, false));
+				opt.formatText = function(_) {
+					return (opt.value * 100) + "%";
+				};
+				opt.onChange = function(val) {
+					if (self.sizeTwn != null && !self.sizeTwn.finished)
+						self.sizeTwn.cancel();
+
+					self.sizeTwn = FlxTween.num(Strumline.size, val, 0.5, {ease: FlxEase.quadOut}, function(num) {
+						Strumline.size = num;
+						if (self.playfield.downscroll)
+							self.strumline.y = FlxG.height - 50 - Strumline.swagWidth;
+
+						for (i => strum in self.strumline.members) {
+							final skinScale = self.strumline.styleData.getScale(strum);
+							strum.scale.set(skinScale * num, skinScale * num);
+							strum.updateHitbox();
+							strum.setPosition(
+								self.strumline.x + Strumline.swagWidth * i,
+								self.strumline.y + (Strumline.swagWidth - strum.height) * 0.5
+							);
+						}
+						@:privateAccess for (note in self.playfield.notes.members) {
+							if (!note.exists) continue;
+							final skinScale = note.styleData.getScale(note);
+							note.scale.set(skinScale * num, skinScale * num);
+							note.updateHitbox();
+						}
+						self.strumline.x = (FlxG.width - self.strumline.width) * 0.5 + 400;
+					});
+				};
+				opt;
+			},
 			new Option('center_notes', 'center_notes_desc', "centeredNotes", BoolOption),
 			new Option('opp_notes', 'opp_notes_desc', "opponentNotes", BoolOption),
 			//and this is where i would put lane underlay ^_^...........IF I HAD ONE!!
-			new Option("cam_zooms", "<NO-LANG>If the game is allowed to bump the camera every measure. If it's on \"Legacy\", it affects Week 2 only.", "cameraZooms", ListOption(["Default", "Legacy", "Off"])),
-			new Option("cam_movement", "<NO-LANG>If hitting a note will shift the camera in the note's direction.", "notesMoveCamera", BoolOption),
-			new Option('<NO-LANG>Strum Glow', '<NO-LANG>How the strums will glow when you hit a note.', 'strumGlow', ListOption(['Off', 'Judgement', 'Per-Note'])),
-			new Option("can_unglow", "<NO-LANG>Whether or not the strum going back to static relies on the animation finishing or the player releasing the key.", "unglowOnAnimFinish", BoolOption),
+			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"])),
+			new Option("cam_movement", "cam_movement_desc", "notesMoveCamera", BoolOption),
+			new Option('strum_glow', 'strum_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Per-Note'])),
+			new Option("can_unglow", "can_unglow_desc", "unglowOnAnimFinish", BoolOption),
 		],
 		"Performance" => [
 			{
 				var opt = new Option("framerate", "framerate_desc", "framerate", IntOption(15, 1000, 5));
 				opt.onChange = function(v) {
-						FlxG.drawFramerate = FlxG.updateFramerate = v;
+					FlxG.drawFramerate = FlxG.updateFramerate = v;
 				};
 				opt;
 			},
 			{
-				var opt = new Option("Antialiasing", "<NO-LANG>If textures will have a linear transition between pixels instead of instant.", "antialiasing", BoolOption);
+				var opt = new Option("antialiasing", "antialiasing_desc", "antialiasing", BoolOption);
 				opt.onChange = function(v) {
 					for (i => cata in self.listGrp.members)
 						cata.antialiasing = v;
@@ -205,27 +293,27 @@ class OptionsState extends FunkinState {
 				}
 				opt;
 			},
-			new Option("<NO-LANG>Audio Streams", "<NO-LANG>If music will load as it plays or simply load all at once.", "audioStreams", BoolOption),
+			new Option("streams", "streams_desc", "audioStreams", BoolOption),
 			{
-				var opt = new Option("reduced_quality", "<NO-LANG>If the game can cut out a few things for less work.", "reducedQuality", BoolOption);
+				var opt = new Option("reduced_quality", "reduced_quality", "reducedQuality", BoolOption);
 				opt.onChange = function(v) {
 					//self.lineBG.shader = v ? null : self.lineShader;
 				}
 				opt;
 			},
 			{
-				var opt = new Option("game_alpha", "<NO-LANG>How much you can see the visuals behind the HUD.", "gameVisibility", IntOption(0, 100, 5));
+				var opt = new Option("game_alpha", "game_alpha_desc", "gameVisibility", IntOption(0, 100, 5));
 				opt.formatText = function(_) {
 						return opt.value + "%";
 				};
 				opt;
 			},
-			new Option('videos', '<NO-LANG>Whether the game can run videos or not. Can impact performance/load times if enabled.', 'videos', BoolOption),
-			new Option("reflections", "<NO-LANG>If some characters will shine reflections on the stage.", "reflections", BoolOption),
-			new Option("shaders", "<NO-LANG>If some sprites can use special code to create special visuals.", "shaders", BoolOption),
-			new Option("hold_grain", "<NO-LANG>How many times the game will compress sustain vertices. Higher Values will stretch the hold graphic for more performance.", "holdGrain", IntOption(1, 8, 1)),
+			new Option('videos', 'videos_desc', 'videos', BoolOption),
+			new Option("reflections", "reflections_desc", "reflections", BoolOption),
+			new Option("shaders", "shaders_desc", "shaders", BoolOption),
+			new Option("hold_grain", "hold_grain_desc", "holdGrain", IntOption(1, 8, 1)),
 			{
-				var opt = new Option("gpu_cache", "<NO-LANG>If the game will use VRAM for texture storage to reduce RAM.\n\n(1GB OF VRAM RECOMMENDED, WILL RESTART IF CHANGED.)", "gpuCache", BoolOption);
+				var opt = new Option("gpu_cache", "gpu_cache_desc", "gpuCache", BoolOption);
 				opt.onChange = function(v) {
 						Controls.save();
 						Settings.save();
@@ -236,35 +324,45 @@ class OptionsState extends FunkinState {
 		],
 		"Misc." => [
 			{
-				var opt = new Option("fps_counter", "<NO-LANG>If the will show a counter in the corner of your framerate.", 'fpsCounter', BoolOption);
+				var opt = new Option("fps_counter", "fps_counter_desc", 'fpsCounter', BoolOption);
 				opt.onChange = function(v) {
 						Main.fpsCounter.visible = v;
 				};
 				opt;
 			},
 			{
-				var opt = new Option("fullscreen", "<NO-LANG>Whether or not the game will take all of your screen space.", "fullscreen", BoolOption);
+				var opt = new Option("fullscreen", "fullscreen_desc", "fullscreen", BoolOption);
 				opt.onChange = function(v) {
 						FlxG.fullscreen = v;
 				};
 				opt;
 			}, 
 			{
-				var opt = new Option("<NO-LANG>Discord RPC", "<NO-LANG>If the game can connect to your Discord client and display that you are playing VS Camellia.", "discordRPC", BoolOption);
+				var opt = new Option("discord_rpc", "discord_rpc_desc", "discordRPC", BoolOption);
 				opt.onChange = function(_) DiscordClient.check();
 				opt;
 			},
 			{
-				var opt = new Option("<NO-LANG>Auto Pause", "<NO-LANG>If the game will freeze when unfocused.", "autoPause", BoolOption);
+				var opt = new Option("auto_pause", "auto_pause_desc", "autoPause", BoolOption);
 				opt.onChange = function(v) {
 						FlxG.autoPause = v;
 				};
 				opt;
 			},
-			new Option("close_animation", "<NO-LANG>If the game should fade out when closed.", "closeAnimation", BoolOption),
 			{
-				var opt = new Option("<NO-LANG>Calibrate Offset", "<NO-LANG>Find your offset automatically.", "", ButtonOption);
-				opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
+				var opt = new Option("calc_offset", "calc_offset_desc", "", ButtonOption);
+				//opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
+				opt.onChange = function(_) {
+					self.playfield.botplay = false;
+					self.totalNoteDifference = 0;
+					self.notesHit = 0;
+					self.finalOffset = Settings.data.noteOffset;
+
+					self.selOptScale = 0;
+					self.descTxt.text = _formatT("offset_cali_result", [Std.string(self.finalOffset), self.finalOffset > 0 ? _t("late") : _t("early")]);
+					self.descTxt.alignment = CENTER;
+					self.lastDescHeight = self.descBG.scale.y;
+				};
 				opt;
 			}
 		]
@@ -285,6 +383,7 @@ class OptionsState extends FunkinState {
 	var curHolding:Int = 0;
 	var holdWait:Float = 0.5;
 
+	var keysInOpts:Bool = false;
 	var waitingForKey:Bool = false;
 	var controllerMode:Bool = false;
 
@@ -306,6 +405,15 @@ class OptionsState extends FunkinState {
 	var lastDescHeight:Float = 0;
 	var descBG:FunkinSprite;
 	var descTxt:FlxText;
+
+	var nextNote:Note;
+	var playfield:PlayField;
+	var strumline:Strumline;
+	var totalNoteDifference:Float = 0;
+	var notesHit:Int = 0;
+	var finalOffset:Float = 0;
+	var scrollTwn:FlxTween;
+	var sizeTwn:FlxTween;
 
 	override function create() {
 		super.create();
@@ -332,15 +440,9 @@ class OptionsState extends FunkinState {
 			y += 30;
 		}
 
-		// add(listGrp = new CategoryList(20, 120, categoryList));
-		// listGrp.open = openCategory;
-		// listGrp.onRetarget = (i) -> {bg.speed = 5;};
-
-		add(optBG = new FunkinSprite(listBG.x + listBG.width + 10, listBG.y).makeGraphic(1, 700, 0x70000000));
-		optBG.scale.set(500, 0);
+		add(optBG = new FunkinSprite(listBG.x + listBG.width + 10, listBG.y).makeGraphic(1, 1, 0x70000000));
+		optBG.scale.set(500, 700);
 		optBG.updateHitbox();
-		optBG.offset.set();
-		optBG.origin.set();
 
 		add(optValTxt = new FlxTypedGroup<FlxText>());
 		add(optTxt = new FlxTypedGroup<FlxText>());
@@ -354,6 +456,33 @@ class OptionsState extends FunkinState {
 
 		add(descTxt = new FlxText(descBG.x + 10, descBG.y + 10, descBG.width - 20, ""));
 		descTxt.setFormat(Paths.font("vcr.ttf"), 20, 0xFFFFFFFF, LEFT);
+
+		openCategory(curCategory);
+		keysInOpts = false;
+
+		strumline = new Strumline(0, 0, true);
+		strumline.screenCenter(X);
+		strumline.x += 400;
+		strumline.alpha = 0.3;
+		strumline.directAlpha = true;
+
+		add(playfield = new PlayField([strumline]));
+		playfield.downscroll = Settings.data.downscroll;
+		playfield.scrollSpeed = Settings.data.scrollSpeed;
+		playfield.playAssistClaps = false;
+		playfield.botplay = true;
+		playfield.playerID = 0;
+		playfield.noteHit = noteHit;
+		playfield.noteMiss = recoverNote;
+		strumline.y = playfield.downscroll ? FlxG.height - 50 - Strumline.swagWidth : 50;
+
+		playfield.load([
+			{time: Conductor.crotchet * Math.ceil(Conductor.floatBeat * 0.5) * 2, lane: 0, type: ""},
+			{time: Conductor.crotchet * Math.ceil(Conductor.floatBeat * 0.5) * 2 + 2, lane: 0, type: ""}
+		]);
+		nextNote = new Note();
+		nextNote.kill();
+		@:privateAccess playfield.notes.add(nextNote);
 	}
 
 	override function update(delta:Float) {
@@ -369,7 +498,10 @@ class OptionsState extends FunkinState {
 			mouseMoved = true;
 		}
 
+		var listAlpha = 0.3;
+		var optAlpha = 0.3;
 		if (waitingForKey) {
+			optAlpha = 1;
 			final opt = curOptList[curSelected];
 			final keys:Array<FlxKey> = cast opt.value;
 			if (FlxG.keys.justPressed.ESCAPE) {
@@ -391,59 +523,54 @@ class OptionsState extends FunkinState {
 				return;
 			}
 
-			if(controllerMode) {
-			    var button = FlxG.gamepads.lastActive?.firstJustPressedID() ?? -1;
-				if (button != -1) {
-				    final buttons:Array<FlxGamepadInputID> = cast opt.value;
-					waitingForKey = false;
+			var input = controllerMode ? (FlxG.gamepads.lastActive?.firstJustPressedID() ?? -1) : FlxG.keys.firstJustPressed();
+			if (input != -1) {
+				final binds:Array<Int> = cast opt.value;
+				waitingForKey = false;
 
-					if (opt.curKey == buttons.length)
-    					buttons.push(button);
-    				else
-   					    buttons[opt.curKey] = button;
+				if (opt.curKey == binds.length)
+					binds.push(input);
+				else
+					binds[opt.curKey] = input;
 
-                    opt.value = buttons;
+				opt.value = binds;
 
-    				optValTxt.members[curSelected].text = opt.formatText(true);
-    				descTxt.text = getDesc(curOptList[curSelected]);
-				}
-			} else {
-    			var key = FlxG.keys.firstJustPressed();
-    			if (key != -1) {
-                    final keys:Array<FlxKey> = cast opt.value;
-    				waitingForKey = false;
-
-    				if (opt.curKey == keys.length)
-    					keys.push(key);
-    				else
-    					keys[opt.curKey] = key;
-
-    				opt.value = keys;
-
-    				optValTxt.members[curSelected].text = opt.formatText(true);
-    				descTxt.text = getDesc(curOptList[curSelected]);
-    			}
+				optValTxt.members[curSelected].text = opt.formatText(true);
+				descTxt.text = getDesc(opt);
+				FlxG.sound.play(Paths.audio("confirm", "sfx"));
 			}
-		} else if (selCategory > -2) {
-			if (FlxG.mouse.screenX >= listBG.x && FlxG.mouse.screenX <= listBG.x + listBG.width) {
-				for (i in 0...listGrp.length) {
-					var top = listBG.y + 15 + 30 * i;
-	
-					if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30) {
-						retargetCate(mouseMoved ? i : curCategory);
-	
-						if (FlxG.mouse.justPressed)
-							openCategory(i);
-						break;
-					}
-				}
-			}
+		} else if (playfield.botplay) {
+			if (mouseOpts() || keysInOpts)
+				optAlpha = 1;
+			if (mouseCategories() || !keysInOpts)
+				listAlpha = 1;
 
-			(selCategory >= 0 ? optInputs : cateInputs)(delta);
+			(keysInOpts ? optInputs : cateInputs)(delta);
+		} else {
+			final acceptJustPressed = Controls.justPressed("accept");
+			if (acceptJustPressed || Controls.justPressed("back") || FlxG.mouse.justPressedRight) {
+				if (acceptJustPressed) {
+					Settings.data.noteOffset = finalOffset;
+					FlxG.sound.play(Paths.audio("scroll", "sfx"));
+				} else
+					FlxG.sound.play(Paths.audio("cancel", "sfx"));
+				playfield.botplay = true;
+				selOptScale = 0;
+				descTxt.text = getDesc(curOptList[curSelected]);
+				self.descTxt.alignment = LEFT;
+				lastDescHeight = descBG.scale.y;
+			}
 		}
+		listBG.alpha = FlxMath.lerp(listBG.alpha, listAlpha, delta * 15);
+		optBG.alpha = FlxMath.lerp(optBG.alpha, optAlpha, delta * 15);
+		strumline.alpha = FlxMath.lerp(strumline.alpha, (playfield.botplay ? 0.3 : 1), delta * 15);
 
-
-		optBG.scale.y = FlxMath.lerp(optBG.scale.y, (selCategory < 0 ? 0 : 1), delta * 15);
+		for (item in listGrp.members)
+			item.alpha = listBG.alpha;
+		for (item in optTxt.members)
+			item.alpha = optBG.alpha;
+		for (item in optValTxt.members)
+			item.alpha = optBG.alpha;
 
 		curOptScroll = FlxMath.lerp(curOptScroll, optScrollInc * curSelected, delta * 15);
 		/*final topMargin = optBG.y;
@@ -465,15 +592,22 @@ class OptionsState extends FunkinState {
 			Util.clipByCoords(val, optSel.x, null, tMargin, bMargin);
 		});*/
 
-		selOptScale = Math.min(Math.max(selOptScale + delta * (selCategory < 0 ? -8 : 4), 0.0), 1.0);
-		descBG.scale.y = FlxMath.lerp(lastDescHeight, descTxt.height + 50, FlxEase.backOut(selOptScale));
+		selOptScale = Math.min(Math.max(selOptScale + delta * 4, 0.0), 1.0);
+		descBG.scale.y = FlxMath.lerp(lastDescHeight, descTxt.height + 30, FlxEase.backOut(selOptScale));
 		Util.clipByCoords(descTxt, null, null, null, descBG.y + descBG.scale.y);
+
+		var targetDescY = Math.min(optTxt.members[curSelected].y - 15, FlxG.height - 10 - (descTxt.height + 30));
+		descBG.y = FlxMath.lerp(descBG.y, ((playfield.botplay && !waitingForKey) ? targetDescY : (FlxG.height - descTxt.height) * 0.5 - 15), delta * 20);
+		descTxt.y = descBG.y + 15;
 	}
 
 	function openCategory(cate:Int) {
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+		if (cate == selCategory)
+			return;
 
 		selCategory = cate;
+		keysInOpts = true;
 
 		while (optTxt.length > 0) {
 			final txt = optTxt.members[0];
@@ -507,9 +641,8 @@ class OptionsState extends FunkinState {
 		}
 		optScrollInc = Math.max(curOptList.length * 35 + 60 - optBG.frameHeight, 0) / curOptList.length;
 
+		selOptScale = 0;
 		descTxt.text = getDesc(curOptList[curSelected]);
-		descBG.y = Math.min(optTxt.members[curSelected].y, FlxG.height - 10 - descTxt.height + 20);
-		descTxt.y = descBG.y + 10;
 		lastDescHeight = descBG.scale.y;
 	}
 
@@ -525,6 +658,24 @@ class OptionsState extends FunkinState {
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 	}
 
+	function mouseCategories() {
+		if (FlxG.mouse.screenX < listBG.x || FlxG.mouse.screenX > listBG.x + listBG.width)
+			return false;
+
+		for (i in 0...listGrp.length) {
+			var top = listBG.y + 15 + 30 * i;
+
+			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30) {
+				retargetCate(mouseMoved ? i : curCategory);
+
+				if (FlxG.mouse.justPressed)
+					openCategory(i);
+				break;
+			}
+		}
+		return true;
+	}
+
 	function cateInputs(delta:Float) {
 		final downJustPressed = Controls.justPressed("ui_down");
 		if (downJustPressed || Controls.justPressed("ui_up"))
@@ -534,7 +685,6 @@ class OptionsState extends FunkinState {
 			openCategory(curCategory);
 		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
 			descTxt.text = "";
-			selCategory = -2;
 			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
 			//Border.transitionTween(true, false, border, 0.25, 0.25, function() {
@@ -563,45 +713,48 @@ class OptionsState extends FunkinState {
 		optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
 
 		descTxt.text = getDesc(curOptList[curSelected]);
-		descBG.y = Math.min(optTxt.members[curSelected].y, FlxG.height - 10 - descTxt.height + 20);
-		descTxt.y = descBG.y + 10;
 		lastDescHeight = descBG.scale.y;
 
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 	}
 
-	function optInputs(delta:Float) {
-		if (FlxG.mouse.screenX >= optBG.x && FlxG.mouse.screenX <= optBG.x + optBG.width) {
-			for (i in 0...optTxt.length) {
-				var top = listBG.y + 15 + 30 * i;
-				if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30 && curOptList[i].type != Unselectable) {
-					retargetOpt(mouseMoved ? i : curSelected);
-					if (FlxG.mouse.justPressed) {
-						if (curOptList[curSelected].type == ButtonOption) {
-							curOptList[curSelected].change(false);
-						} else if (curOptList[curSelected].type == BoolOption) {
-							curOptList[curSelected].change(false);
-							FlxG.sound.play(Paths.audio(curOptList[curSelected].sound, 'sfx'));
-							optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
-						} else if (curOptList[curSelected].type == KeyOption) {
-							waitingForKey = true;
-							descTxt.text = _formatT("sel_key_desc", [","]);
-							optValTxt.members[curSelected].text = "Setting...";
-						} else if (Math.abs(FlxG.mouse.screenX - (optBG.x + optBG.width * 0.5)) >= optBG.width * 0.5 - 25) {
-							final isLeft = FlxG.mouse.screenX <= optBG.x + 25;
-							curHolding = isLeft ? 3 : 4;
-							holdWait = 0.5;
+	function mouseOpts() {
+		if (FlxG.mouse.screenX < optBG.x || FlxG.mouse.screenX > optBG.x + optBG.width)
+			return false;
 
-							curOptList[curSelected].change(isLeft);
-							FlxG.sound.play(Paths.audio(curOptList[curSelected].sound, 'sfx'));
-							optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
-						}
+		for (i in 0...optTxt.length) {
+			var top = listBG.y + 15 + 30 * i;
+			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30 && curOptList[i].type != Unselectable) {
+				retargetOpt(mouseMoved ? i : curSelected);
+				if (FlxG.mouse.justPressed) {
+					if (curOptList[curSelected].type == ButtonOption) {
+						curOptList[curSelected].change(false);
+					} else if (curOptList[curSelected].type == BoolOption) {
+						curOptList[curSelected].change(false);
+						FlxG.sound.play(Paths.audio(curOptList[curSelected].sound, 'sfx'));
+						optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
+					} else if (curOptList[curSelected].type == KeyOption) {
+						waitingForKey = true;
+						descTxt.text = _formatT("sel_key_desc", [","]);
+						optValTxt.members[curSelected].text = "Setting...";
+						FlxG.sound.play(Paths.audio("scroll", "sfx"));
+					} else if (Math.abs(FlxG.mouse.screenX - (optBG.x + optBG.width * 0.5)) >= optBG.width * 0.5 - 25) {
+						final isLeft = FlxG.mouse.screenX <= optBG.x + 25;
+						curHolding = isLeft ? 3 : 4;
+						holdWait = 0.5;
+
+						curOptList[curSelected].change(isLeft);
+						FlxG.sound.play(Paths.audio(curOptList[curSelected].sound, 'sfx'));
+						optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
 					}
-					break;
 				}
+				break;
 			}
 		}
+		return true;
+	}
 
+	function optInputs(delta:Float) {
 		final downJustPressed:Bool = Controls.justPressed('ui_down');
 		final leftJustPressed:Bool = Controls.justPressed('ui_left');
 
@@ -650,19 +803,44 @@ class OptionsState extends FunkinState {
 				waitingForKey = true;
 				descTxt.text = _formatT("sel_key_desc", [","]);
 				optValTxt.members[curSelected].text = "Setting...";
+				FlxG.sound.play(Paths.audio("scroll", "sfx"));
 			} else if (curOption.type == ButtonOption) curOption.change(false);
 		}
 
 		if (Controls.justPressed("back") || FlxG.mouse.justPressedRight) {
-			selCategory = -1;
+			keysInOpts = false;
 			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 		}
+	}
+
+	function recoverNote(_, note:Note):Void {
+		note.data.time += Conductor.crotchet * 4;
+		nextNote.revive();
+		nextNote.setup(note.data);
+		nextNote = note;
+	}
+	function noteHit(_, note:Note):Void {
+		if (playfield.botplay) {
+			recoverNote(_, note);
+			return;
+		}
+
+		totalNoteDifference += note.hitTime;
+		notesHit++;
+
+		finalOffset = Math.round(totalNoteDifference / notesHit) + Settings.data.noteOffset; // don't want the base offset screwing this up.
+		//text.text = _formatT(resultText, [Std.string(finalOffset), finalOffset > 0 ? _t("late") : _t("early")]);
+		//text.offset.y = 0;
+		recoverNote(_, note);
 	}
 
 	override function destroy() {
 		super.destroy();
 		Controls.save();
 		Settings.save();
+		if (sizeTwn != null && !sizeTwn.finished)
+			sizeTwn.cancel();
+		Strumline.size = Settings.data.strumSize;
 		self = null;
 	}
 }
