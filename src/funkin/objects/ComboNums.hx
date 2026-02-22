@@ -15,7 +15,7 @@ class ComboNums extends FlxTypedSpriteGroup<Number> {
 	public function new(?x:Float, ?y:Float) {
 		super(x, y);
 		for (i in 0...default_precacheDigits) add(new Number());
-		scale.set(0.5, 0.5);
+		scale.set(0.45, 0.45);
 	}
 
 	public function clearNums(?until:Int = 0) {

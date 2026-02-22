@@ -34,7 +34,7 @@ class JudgementSpr extends FunkinSprite {
 		visibility = 0;
 
 		active = true;
-		scale.set(0.7, 0.7);
+		scale.set(0.65, 0.65);
 		updateHitbox();
 	}
 	
