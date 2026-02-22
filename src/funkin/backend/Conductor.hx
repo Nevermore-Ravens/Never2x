@@ -52,8 +52,7 @@ class Conductor extends flixel.FlxBasic {
 	public static var time:Float = 0.0;
     public static var rawTime:Float = 0.0;
 
-	//static var _lastTime:Float = 0.0;
-	static var _resyncTimer:Float = 0.0;
+	static var _lastTime:Float = 0.0;
 
     public static var timingPoints(default, set):Array<TimingPoint> = [];
     static function set_timingPoints(value:Array<TimingPoint>):Array<TimingPoint> {
