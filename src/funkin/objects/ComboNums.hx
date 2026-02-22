@@ -7,18 +7,15 @@ using flixel.util.FlxColorTransformUtil;
 
 class ComboNums extends FlxTypedSpriteGroup<Number> {
 	public static inline final default_precacheDigits:Int = 4;
-	public static inline final default_startingDigits:Int = 3;
 
-	public var size:Float = 0.6;
-	public var spacing:Float = 6;
+	public var minDigits:Int = 3;
+	public var simple:Bool = false;
+	public var spacing:Float = 0;
 
-	public var originalPos:FlxPoint = FlxPoint.get();
 	public function new(?x:Float, ?y:Float) {
 		super(x, y);
 		for (i in 0...default_precacheDigits) add(new Number());
-		scale.set(size, size);
-
-		originalPos.set(x, y);
+		scale.set(0.5, 0.5);
 	}
 
 	public function clearNums(?until:Int = 0) {
@@ -32,7 +29,7 @@ class ComboNums extends FlxTypedSpriteGroup<Number> {
 	public function display(comboNum:Int) {
 		if (Settings.data.comboAlpha <= 0) return;
 
-		final comboStr:String = '$comboNum'.lpad('0', default_startingDigits);
+		final comboStr:String = '$comboNum'.lpad('0', minDigits);
 		// remove any excess numbers
 		clearNums(comboStr.length);
 
@@ -49,17 +46,25 @@ class ComboNums extends FlxTypedSpriteGroup<Number> {
 			if (num.animation.frameIndex != convertedNum) num.animation.frameIndex = convertedNum;
 			num.scale.set(scale.x, scale.y);
 			num.updateHitbox();
-			num.setPosition((originalPos.x + ((num.width * centerI) * scale.x)) + spacing * centerI, originalPos.y - 5);
+			num.setPosition(x + ((num.width + spacing) * centerI), y - 5);
 			num.color = color;
 			num.visibility = Settings.data.comboAlpha;
 
 			Main.tweenManager.cancelTweensOf(num);
 			Main.tweenManager.tween(num, {visibility: 0}, 0.35, {startDelay: 0.75});
 
-			Main.tweenManager.tween(num, {y: originalPos.y}, 0.1, {
-				onComplete: function(_) num.y = originalPos.y,
-				ease: FlxEase.cubeIn
-			});
+			num.moves = !simple;
+			if (simple) {
+				num.velocity.set();
+				num.acceleration.y = 0;
+				Main.tweenManager.tween(num, {y: y}, 0.1, {
+					onComplete: function(_) num.y = y,
+					ease: FlxEase.cubeIn
+				});
+			} else {
+				num.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
+				num.acceleration.y = FlxG.random.int(250, 300);
+			}
 		}
 
 		//this.x = originalPos.x - ((width * 0.5) * scale.x);
@@ -83,7 +88,8 @@ private class Number extends FunkinSprite {
 	public function new() {
 		super();
 
-		loadGraphic(Paths.image('ui/comboNums'), true, 70, 48);
+		final texture = Paths.image('ui/comboNums');
+		loadGraphic(texture, true, Math.floor(texture.width * 0.2), Math.floor(texture.height * 0.5));
 		visibility = 0;
 
 		active = true;

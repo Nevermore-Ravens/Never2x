@@ -11,6 +11,7 @@ class Judgement {
 	static function get_min():Judgement return list[0];
 
 	public var name:String;
+	public var shortName:String;
 	public var timing(get, default):Float;
 	function get_timing():Float return timing * FlxG.timeScale;
 	public var accuracy:Float = 0.0;
@@ -48,40 +49,38 @@ class Judgement {
 	inline public static function reset():Void {
 		list = [
 			{
-				name: 'marv', 
-				timing: 22.5, 
-				accuracy: 100, 
-				health: 2.5, 
-				splashes: true, color: 0xFFD76058
+				name: 'sick',
+				shortName: "SK",
+				timing: 45,
+				accuracy: 100,
+				health: 2.5,
+				splashes: true,
+				color: 0xFF2CEDFF
 			},
 			{
-				name: 'sick', 
-				timing: 45, 
-				accuracy: 100, 
-				health: 2.5, 
-				splashes: true, color: 0xFFF9FF5C
-			},
-			{
-				name: 'good', 
-				timing: 90, 
+				name: 'good',
+				shortName: "GD",
+				timing: 90,
 				accuracy: 85,
 				health: 1,
-				color: 0xFF006EFF
+				color: 0xFF43FF2E
 			},
 			{
-				name: 'bad', 
-				timing: 135, 
+				name: 'bad',
+				shortName: "BD",
+				timing: 135,
 				accuracy: 45,
-				health: -6, 
-				color: 0xFFFF7707
+				health: -6,
+				color: 0xFFFF8F34
 			},
 			{
-				name: 'shit', 
-				timing: 180, 
-				accuracy: 30, 
+				name: 'shit',
+				shortName: "SH",
+				timing: 180,
+				accuracy: 30,
 				health: -10,
-				breakCombo: true, 
-				color: 0xFF707070
+				breakCombo: true,
+				color: 0xFFFF2533
 			}
 		];
 	}

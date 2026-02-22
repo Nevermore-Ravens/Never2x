@@ -291,6 +291,8 @@ class OptionsState extends FunkinState {
 	// applied on openCategory, basically optionsList[categoryList[selCategory]] with some filtering
 	var curOptList:Array<Option> = [];
 
+	var scrollTime:Float = 0;
+	var bg:FunkinSprite;
 	var listBG:FunkinSprite;
 	var listGrp:FlxTypedGroup<FlxText>;
 
@@ -309,10 +311,11 @@ class OptionsState extends FunkinState {
 		super.create();
 		self = this;
 
-		var bg:FunkinSprite = new FunkinSprite().loadGraphic(Paths.image('menus/magentaBG'));
+		bg = new FunkinSprite().loadGraphic(Paths.image('menus/magentaBG'));
 		bg.scale.scale(1.175);
 		bg.updateHitbox();
 		bg.screenCenter();
+		bg.wrapMode = REPEAT;
 		add(bg);
 
 		add(listBG = new FunkinSprite(10, 10).makeGraphic(1, 1, 0x70000000));
@@ -355,6 +358,9 @@ class OptionsState extends FunkinState {
 
 	override function update(delta:Float) {
 		super.update(delta);
+
+		scrollTime += delta * 25;
+		bg.clipGraphic(scrollTime, 0, bg.frameWidth, bg.frameHeight);
 
         mouseMoved = false;
 		if (Math.abs(FlxG.mouse.screenX - lastMouseX) >= MOUSE_DEADZONE || Math.abs(FlxG.mouse.screenY - lastMouseY) >= MOUSE_DEADZONE) {

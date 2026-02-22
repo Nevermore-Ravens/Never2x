@@ -8,6 +8,8 @@ import flixel.tweens.FlxEase;
 using flixel.util.FlxColorTransformUtil;
 
 class JudgementSpr extends FunkinSprite {
+	public var simple:Bool = false;
+	
 	// using this instead of `alpha`
 	// so you can set the `alpha` variable without fucking up anything
 	var visibility(default, set):Float = 1;
@@ -19,15 +21,20 @@ class JudgementSpr extends FunkinSprite {
 		return visibility;
 	}
 
+	var ogX:Float = 0;
+	var ogY:Float = 0;
+	var inMotion:Bool = false;
 	public function new(?x:Float, ?y:Float) {
 		super(x, y);
-		loadGraphic(Paths.image('ui/judgements'), true, 500, 250);
+		ogX = x;
+		ogY = y;
+		final texture = Paths.image('ui/judgements');
+		loadGraphic(texture, true, texture.width, Math.floor(texture.height / Judgement.list.length));
 		
 		visibility = 0;
 
-		moves = true;
 		active = true;
-		scale.set(0.45, 0.45);
+		scale.set(0.7, 0.7);
 		updateHitbox();
 	}
 	
@@ -35,20 +42,38 @@ class JudgementSpr extends FunkinSprite {
 		if (Settings.data.judgementAlpha <= 0) return;
 
 		Main.tweenManager.cancelTweensOf(this);
-		Main.tweenManager.cancelTweensOf(this.scale);
 		animation.frameIndex = Judgement.getIDFromTiming(timing);
 		if (animation.frameIndex == 0 && Settings.data.hideHighest) {
 			visibility = 0;
 			return;
 		}
-
+		
 		centerOffsets();
 		visibility = Settings.data.judgementAlpha;
-		scale.set(0.45, 0.45);
-
-
 		Main.tweenManager.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
-		Main.tweenManager.tween(this.scale, {x: 0.4, y: 0.4}, 0.2, {ease: FlxEase.cubeIn});
+		
+		moves = !simple;
+		setPosition(ogX, ogY);
+		if (simple) {
+			velocity.set();
+			acceleration.y = 0;
+			scale.scale(1.125);
+			Main.tweenManager.cancelTweensOf(this.scale);
+			Main.tweenManager.tween(this.scale, {x: scale.x / 1.125, y: scale.y / 1.125}, 0.2, {ease: FlxEase.cubeIn});
+		} else {
+			velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
+			acceleration.y = 550;
+		}
+	}
+
+	override function update(elapsed:Float) {
+		if (moves) {
+			inMotion = true;
+			updateMotion(elapsed);
+			inMotion = false;
+		}
+
+		updateAnimation(elapsed);
 	}
 
 	override function draw():Void {
@@ -65,5 +90,16 @@ class JudgementSpr extends FunkinSprite {
 		else this.colorTransform.setMultipliers(1, 1, 1, 1);
 
 		dirty = true;
+	}
+
+	override function set_x(to:Float) {
+		if (!inMotion)
+			ogX = to;
+		return x = to; 
+	}
+	override function set_y(to:Float) {
+		if (!inMotion)
+			ogY = to;
+		return y = to; 
 	}
 }

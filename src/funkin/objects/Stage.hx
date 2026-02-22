@@ -66,7 +66,7 @@ class Stage {
 
 			cameraPos: [0, 0],
 			reflective: false,
-			canMoveCamera: false
+			canMoveCamera: true
 		}
 	}
 }

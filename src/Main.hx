@@ -97,6 +97,7 @@ class InitState extends flixel.FlxState {
 		#if MODCHARTS_ALLOWED funkin.modchart.ModchartManager.setupRedirects(); #end
 		LanguageHandler.loadTranslations();
 
+		Settings.validate();
 		LanguageHandler.setLanguage(Settings.data.language);
 
 		Judgement.reset();

@@ -39,7 +39,6 @@ class PlayState extends FunkinState {
 
 	public var noteHitList:Array<NoteHit> = [];
 	public var score:Int = 0;
-	var maxScore:Int = 1000000;
 	var metronome:Bool = false;
 	public var comboBreaks:Int = 0;
 	var combo:Int = 0;
@@ -121,7 +120,6 @@ class PlayState extends FunkinState {
 	var comboNumbers:ComboNums;
 
 	var ranking:FlxText;
-	var judgeBg:FunkinSprite;
 	var judgeFormats:Array<FlxTextFormat> = [];
 	var judgeNames:FlxText;
 	var judgeCounter:FlxText;
@@ -137,8 +135,8 @@ class PlayState extends FunkinState {
 	];
 	var noteCamDelay:Float = 0;
 
-	var scoreBg:FunkinSprite;
-	var scoreTxt:FlxText;
+	var timeText:FlxText;
+	var infoText:FlxText;
 	var healthBar:Bar;
 
 	var iconP1:CharIcon;
@@ -240,18 +238,17 @@ class PlayState extends FunkinState {
 		}
 		var popupX:Float = (!Settings.data.centeredNotes && Settings.data.popupCenter == "Field") ? strumlines[playerID].centerX : FlxG.width * 0.5;
 
-		add(judgeSpr = new JudgementSpr(popupX, downscroll ? FlxG.height - 155 : 40));
+		add(judgeSpr = new JudgementSpr(popupX, downscroll ? FlxG.height - 175 : 40));
 		judgeSpr.cameras = [camHUD];
 		judgeSpr.x -= judgeSpr.width * 0.5;
 
-		add(comboNumbers = new ComboNums(popupX, downscroll ? FlxG.height - 170 : 135));
+		add(comboNumbers = new ComboNums(popupX, downscroll ? FlxG.height - 50 : 165));
 		comboNumbers.cameras = [camHUD];
 		comboNumbers.x -= comboNumbers.width * 0.5;
 
 		if (Settings.data.centeredNotes || Settings.data.popupCenter != "Top") {
 			judgeSpr.screenCenter(Y);
-			comboNumbers.y = judgeSpr.y + 95;
-			comboNumbers.originalPos.y = comboNumbers.y;
+			comboNumbers.y = judgeSpr.y + 125;
 		}
 
 		add(playfield = new PlayField(strumlines));
@@ -530,6 +527,8 @@ class PlayState extends FunkinState {
 		updateCameraScale(delta);
 		updateIconScales(delta);
 		updateIconPositions();
+		if (Conductor.rawTime > 0)
+			updateTimeText();
 
 		if (Settings.data.notesMoveCamera) {
 			if (noteCamDelay > 0) noteCamDelay -= delta;
@@ -654,6 +653,7 @@ class PlayState extends FunkinState {
 			note.sustain.hitJudgement = judge;
 
 		if (note.breakOnHit) {
+			score -= 10;
 			health -= note.missHealth * field.healthMult;
 			combo = 0;
 			comboBreaks++;
@@ -663,11 +663,11 @@ class PlayState extends FunkinState {
 			judge.hits++;
 			combo++;
 			health += judge.health * field.healthMult;
+			score += Math.floor(500 - (Math.pow(Math.abs(note.hitTime / judge.timing), 2.5) * 300));
 		}
 
 		accuracy = updateAccuracy();
 		clearType = updateClearType();
-		score = updateScore();
 		timingIndicator.text = '${Util.truncateFloat(divHitTime, 2)} ms';
 		Main.tweenManager.cancelTweensOf(timingIndicator);
 		timingIndicator.alpha = 1;
@@ -691,8 +691,7 @@ class PlayState extends FunkinState {
 		if (!judge.splashes && Settings.data.gameplayModifiers["onlySicks"])
 			death();
 
-		updateScoreTxt();
-		updateJudgeCounter();
+		updateInfo();
 		judgeSpr.display(note.hitTime);
 		switch (Settings.data.comboTinting){
 			case 'Clear Flag':
@@ -737,11 +736,11 @@ class PlayState extends FunkinState {
 		hitErrorBar.screenCenter(X);
 		hitErrorBar.visible = Settings.data.hitErrorBar;
 
-		hud.add(timingIndicator = new FlxText(0, downscroll ? FlxG.height - 30 : 25, 500, '0 ms', 16));
+		hud.add(timingIndicator = new FlxText(0, hitErrorBar.y + 20, 500, '0 ms', 16));
 		timingIndicator.alignment = 'center';
 		timingIndicator.screenCenter(X);
 		timingIndicator.alpha = 0;
-		timingIndicator.font = Paths.font('Rockford-NTLG Light Italic.ttf');
+		timingIndicator.font = Paths.font('LineSeed.ttf');
 		timingIndicator.borderSize = 1.25;
 		timingIndicator.borderStyle = OUTLINE;
 		timingIndicator.borderColor = 0xFF000000;
@@ -766,50 +765,52 @@ class PlayState extends FunkinState {
 
 		updateIconPositions();
 
-		hud.add(scoreBg = new FunkinSprite(0, downscroll ? 21 : FlxG.height - 39));
-		scoreBg.loadGraphic(Paths.image('ui/scoreBack'));
-		scoreBg.screenCenter(X);
+		// fuck it im pulling a forever engine
+		hud.add(timeText = new FlxText(0, 15, 500, '$songName (Starting...)', 18));
+		timeText.screenCenter(X);
+		timeText.alignment = 'center';
+		timeText.font = Paths.font('LineSeed.ttf');
+		timeText.borderStyle = FlxTextBorderStyle.OUTLINE;
+		timeText.borderSize = 1.5;
 
-		hud.add(scoreTxt = new FlxText(0, scoreBg.y, FlxG.width, '', 20));
-		scoreTxt.font = Paths.font('Rockford-NTLG Light Italic.ttf');
-		scoreTxt.alignment = CENTER;
-		scoreTxt.borderStyle = FlxTextBorderStyle.OUTLINE;
-		scoreTxt.borderColor = FlxColor.BLACK;
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.screenCenter(X);
+		hud.add(infoText = new FlxText(0, 680, FlxG.width, '', 18));
+		infoText.alignment = 'center';
+		infoText.font = Paths.font('LineSeed.ttf');
+		infoText.borderStyle = FlxTextBorderStyle.OUTLINE;
+		infoText.borderSize = 1.5;
 
-		hud.add(judgeBg = new FunkinSprite(0, 0));
-		judgeBg.loadGraphic(Paths.image('ui/judgementCt'));
-		judgeBg.x = Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? (FlxG.width - judgeBg.width) - 5 : 5;
-		judgeBg.screenCenter(Y);
-		judgeBg.visible = Settings.data.judgementCounter;
-
-		hud.add(ranking = new FlxText(judgeBg.x + 5, 0, 120, '?'));
-		ranking.setFormat(Paths.font('cafeSquare.ttf'), 20, 0xFF000000, (Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? RIGHT : LEFT));
-		ranking.x = (Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? FlxG.width - 5 - ranking.width : 5);
-		ranking.y = ((judgeBg.visible) ? judgeBg.y : FlxG.height) - 5 - ranking.height;
-
-		hud.add(judgeNames = new FlxText(judgeBg.x + 5, judgeBg.y + 20, judgeBg.width - 10, '', 20));
-		judgeNames.font = Paths.font('cafeSquare.ttf');
-		judgeNames.color = 0xFF800000; // sets the default format color to the miss color
+		hud.add(judgeNames = new FlxText(5, 0, 140, '', 18));
+		judgeNames.font = Paths.font('LineSeedB.ttf');
 		judgeNames.visible = Settings.data.judgementCounter;
+		judgeNames.borderStyle = FlxTextBorderStyle.OUTLINE;
+		judgeNames.borderSize = 1.5;
+		judgeNames.color = 0xFF999999; // sets the default format color to the miss color
 		//@:privateAccess judgeNames._defaultFormat.leading = 5;
 
 		hud.add(judgeCounter = new FlxText(judgeNames.x, judgeNames.y, judgeNames.fieldWidth, '', judgeNames.size));
-		judgeCounter.font = Paths.font('cafeSquare.ttf');
-		judgeCounter.color = 0xFF800000; // sets the default format color to the miss color
+		judgeCounter.font = Paths.font('LineSeed.ttf');
 		judgeCounter.alignment = RIGHT;
 		judgeCounter.visible = Settings.data.judgementCounter;
+		judgeCounter.borderStyle = FlxTextBorderStyle.OUTLINE;
+		judgeCounter.borderSize = 1.5;
+		//judgeCounter.color = 0xFF999999; // sets the default format color to the miss color
 		//@:privateAccess judgeCounter._defaultFormat.leading = 5;
 		regenJudgeCounter();
+		judgeNames.screenCenter(Y);
+		judgeCounter.y = judgeNames.y;
+
+		hud.add(ranking = new FlxText(judgeNames.x, 0, judgeCounter.fieldWidth, '?'));
+		ranking.setFormat(Paths.font('cafeSquare.ttf'), 20, 0xFF000000, CENTER, OUTLINE, 0xFF000000);
+		ranking.x = (Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? FlxG.width - 5 - ranking.width : 5);
+		ranking.y = ((judgeNames.visible) ? judgeNames.y + judgeNames.height : FlxG.height - 5 - ranking.height);
+		ranking.borderSize = 1.5;
 
 		add(botplayTxt = new FunkinSprite().loadGraphic(Paths.image('ui/botplay')));
 		botplayTxt.visible = false;
 		botplayTxt.screenCenter();
 		botplayTxt.camera = camHUD;
 
-		updateScoreTxt();
-		updateJudgeCounter();
+		updateInfo();
 	}
 
 	/**
@@ -824,12 +825,12 @@ class PlayState extends FunkinState {
 		judgeNames.text = "";
 		judgeCounter.text = "";
 		var lastNameEnd = 0;
-		var lastCountEnd = 0;
+		//var lastCountEnd = 0;
 		var judgeBreaks = 0;
 		for (i in 0...Judgement.list.length) {
 			final judge = Judgement.list[i];
 
-			judgeNames.text += judge.name.charAt(0).toUpperCase() + judge.name.substring(1, judge.name.length) + "\n";
+			judgeNames.text += judge.shortName + "\n";
 			judgeCounter.text += judge.hits + "\n";
 			if (judgeFormats[i] == null) {
 				judgeFormats[i] = new FlxTextFormat(judge.color);
@@ -837,18 +838,18 @@ class PlayState extends FunkinState {
 			} else {
 				@:privateAccess judgeFormats[i].format.color = judge.color;
 				judgeNames.removeFormat(judgeFormats[i]);
-				judgeCounter.removeFormat(judgeFormats[i]);
+				//judgeCounter.removeFormat(judgeFormats[i]);
 			}
 
 			judgeNames.addFormat(judgeFormats[i], lastNameEnd, judgeNames.text.length);
-			judgeCounter.addFormat(judgeFormats[i], lastCountEnd, judgeCounter.text.length);
+			//judgeCounter.addFormat(judgeFormats[i], lastCountEnd, judgeCounter.text.length);
 			lastNameEnd = judgeNames.text.length;
-			lastCountEnd = judgeCounter.text.length;
+			//lastCountEnd = judgeCounter.text.length;
 
 			if (judge.breakCombo)
 				judgeBreaks += judge.hits;
 		}
-		judgeNames.text += "Miss";
+		judgeNames.text += "MS";
 		judgeCounter.text += comboBreaks - judgeBreaks;
 
 		judgeNames.updateHitbox();
@@ -885,6 +886,7 @@ class PlayState extends FunkinState {
 			gf.specialAnim = true;
 		}
 
+		score -= 10;
 		comboBreaks++;
 		combo = 0;
 
@@ -896,11 +898,9 @@ class PlayState extends FunkinState {
 		if (Settings.data.gameplayModifiers["instakill"] || Settings.data.gameplayModifiers["onlySicks"])
 			death();
 
-		score = updateScore();
 		accuracy = updateAccuracy();
 		clearType = updateClearType();
-		updateScoreTxt();
-		updateJudgeCounter();
+		updateInfo();
 
 		var curCharacter:Character = strumline.character();
 
@@ -919,11 +919,13 @@ class PlayState extends FunkinState {
 			final judge = Judgement.list[i];
 
 			judgeCounter.text += judge.hits + "\n";
+			/*
 			// don't do what i'm doing. i just wanted to reduce cycles since i can trust my ranges to be sorted and regenerated.
 			@:privateAccess final range = judgeCounter._formatRanges[i].range;
 			range.start = lastCountEnd;
 			range.end = judgeCounter.text.length;
 			lastCountEnd = judgeCounter.text.length;
+			*/
 
 			if (judge.breakCombo)
 				judgeBreaks += judge.hits;
@@ -932,11 +934,10 @@ class PlayState extends FunkinState {
 	}
 
 	function updateClearType():String {
-		var marvs:Int = Judgement.list[0].hits;
-		var sicks:Int = Judgement.list[1].hits;
-		var goods:Int = Judgement.list[2].hits;
-		var bads:Int = Judgement.list[3].hits;
-		var shits:Int = Judgement.list[4].hits;
+		var sicks:Int = Judgement.list[0].hits;
+		var goods:Int = Judgement.list[1].hits;
+		var bads:Int = Judgement.list[2].hits;
+		var shits:Int = Judgement.list[3].hits;
 
 		var type:String = 'N/A';
 
@@ -946,11 +947,7 @@ class PlayState extends FunkinState {
 				if (goods == 1) type = 'BF';
 				else if (goods <= 9) type = 'SDG';
 				else if (goods >= 10) type = 'GFC';
-			} else if (sicks > 0) {
-				if (sicks == 1) type = 'WF';
-				else if (sicks <= 9) type = 'SDP';
-				else if (sicks >= 10) type = 'PFC';
-			} else if (marvs > 0) type = 'MFC';
+			} else if (sicks > 0) type = 'MFC';
 		} else {
 			if (comboBreaks == 1) type = 'MF';
 			else if (comboBreaks <= 9) type = 'SDCB';
@@ -960,31 +957,22 @@ class PlayState extends FunkinState {
 		return type;
 	}
 
-	// pretty much just osu simplified
-	function updateScore():Int {
-		var marvs:Int = Judgement.list[0].hits;
-		var sicks:Int = Judgement.list[1].hits;
-		var goods:Int = Judgement.list[2].hits;
-		var bads:Int = Judgement.list[3].hits;
-		var shits:Int = Judgement.list[4].hits;
-		return Math.floor(((marvs * 1.01 + sicks + goods * 0.7 + bads * 0.35 + shits * 0.1) / totalNotes) * maxScore) - ((comboBreaks - shits) * 200);
-	}
-
 	inline function updateAccuracy():Float {
 		return notesPlayed / (notesHit + comboBreaks);
 	}
 
-	function updateScoreTxt():Void {
+	function updateInfo():Void {
+		updateJudgeCounter();
 		final rank:Ranking = (notesHit == 0) ? {} : Ranking.getFromAccuracy(accuracy);
 
 		ranking.text = '${rank.name} | $clearType';
 		ranking.color = rank.color;
-		if(Settings.data.hideAcc)
-			scoreTxt.text = _formatT("score_no_acc", ['$score']);//'Score: $score | Accuracy: ${Util.truncateFloat(accuracy, 2)}%';
-		else
-			scoreTxt.text = _formatT("score", ['$score', '${Util.truncateFloat(accuracy, 2)}']);//'Score: $score | Accuracy: ${Util.truncateFloat(accuracy, 2)}%';
 
-		ScriptHandler.call("updateScoreTxt", []);
+		infoText.text = 'Score: ${Util.moneyString(score)} | Combo Breaks: $comboBreaks';
+		if(!Settings.data.hideAcc)
+			infoText.text += ' | Accuracy: ${Util.truncateFloat(accuracy)}%';
+
+		ScriptHandler.call("updateInfo", []);
 	}
 
 	function loadSong():Void {
@@ -1163,6 +1151,13 @@ class PlayState extends FunkinState {
 		mult = FlxMath.lerp(0.8, iconP2.scale.x, Math.exp(-delta * 9));
 		iconP2.scale.set(mult, mult);
 		iconP2.centerOrigin();
+	}
+
+	dynamic function updateTimeText() {
+		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.rawTime * 0.001, false);
+		var duration:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.length * 0.001, false);
+
+		timeText.text = '$songName ($current / $duration)';
 	}
 
 	override function stepHit(step:Int) {
