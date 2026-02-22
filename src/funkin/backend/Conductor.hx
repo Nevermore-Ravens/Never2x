@@ -174,7 +174,7 @@ class Conductor extends flixel.FlxBasic {
 			return;
 		}
 
-		/*
+		// using this for now until we get the new audio system working
 		rawTime = inst.time + offset;
 		
 		if (inst.time == _lastTime)
@@ -190,10 +190,9 @@ class Conductor extends flixel.FlxBasic {
 
 			_lastTime = inst.time;
 		}
-		*/
 
-		time = inst.time + offset;
-		rawTime = inst.time + offset;
+/*		time = inst.time + offset;
+		rawTime = inst.time + offset;*/
 
 		//time = FlxMath.lerp(inst.time + offset, rawTime, Math.exp(-deltaTime * 5));	
 	}
