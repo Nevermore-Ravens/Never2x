@@ -63,7 +63,7 @@ class NoteSplashData {
 		}
 
 		splash.targetFramerate = framerate;
-		splash.scale.set(scale[0] ?? 0.7, scale[1] ?? 0.7);
+		splash.scale.set((scale[0] ?? 0.7) * Strumline.size, (scale[1] ?? 0.7) * Strumline.size);
 		splash.updateHitbox();
 		splash.offset.set(offset[0] ?? 0.0, offset[1] ?? 0.0);
 		splash.visible = false;
@@ -80,7 +80,7 @@ class NoteSplash extends FunkinSprite {
 	public var skin(default, set):String;
 	public var modchartPos:Vector3 = new Vector3();
 	public var stealth:Float = 0;
-	public var isQuant:Bool = false;
+	public var luminColors:Bool = false;
 	public var lane:Int = 0;
 	function set_skin(value:String):String {
 		reload(value);
@@ -147,10 +147,12 @@ class NoteSplash extends FunkinSprite {
 	} */
 
 	override public function drawComplex(camera:FlxCamera) {
-		prepareMatrix(camera);
-		camera.drawNote(_frame, _matrix, colorTransform, blend, antialiasing, isQuant);
+		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
+		prepareMatrix(_matrix, camera);
+		camera.drawNote(_frame, _matrix, colorTransform, blend, antialiasing, luminColors);
 	}
 
+	#if MODCHARTS_ALLOWED
 	// ive had to copy this func so many times dear lord i shoulda made a note object
 	public function drawCrazy(modchart:ModchartManager, strumline:Int, downscroll:Bool, field:Strumline) {
 		final oldX = x;
@@ -160,8 +162,10 @@ class NoteSplash extends FunkinSprite {
 		final mult: Float = downscroll ? -1 : 1;
 		modchart.stealthColor.set(1.0, 1.0, 1.0);
 		modchart.scrollMult = mult;
+		modchart.curLane = lane;
+		modchart.curField = strumline;
 
-		final distance: Float = modchart.adjustDistance(this, 0, ID, strumline, field, STRUM);
+		final distance: Float = modchart.adjustDistance(this, 0, lane, strumline, field, STRUM);
 		modchartPos.set(x + width * 0.5, y + height * 0.5 + (distance * mult), 0);
 		modchart.adjustPos(this, modchartPos, distance, 0, lane, strumline, field, STRUM);
 		modchart.adjustScale(this, scale, distance, lane, strumline, field, STRUM);
@@ -170,7 +174,8 @@ class NoteSplash extends FunkinSprite {
 		x = modchartPos.x - width * 0.5;
 		y = modchartPos.y - height * 0.5;
 		final layer = modchartPos.z;
-		prepareMatrix(cameras[0]);
+		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
+		prepareMatrix(_matrix, cameras[0]);
 		_matrix.translate(cameras[0].scroll.x * scrollFactor.x, cameras[0].scroll.y * scrollFactor.y);
 		x = oldX;
 		y = oldY;
@@ -186,6 +191,7 @@ class NoteSplash extends FunkinSprite {
 			vert.project();
 		}
 
-		modchart.pushDraw(strumline, field, cameras, scrollFactor, _frame, Note.modchartVertices, colorTransform, blend, antialiasing, isQuant, stealth, layer, true);
+		modchart.pushDraw(strumline, field, cameras, scrollFactor, _frame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer, true);
 	}
+	#end
 }

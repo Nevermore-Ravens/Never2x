@@ -7,16 +7,16 @@ echo Makking the main haxelib and setuping folder in same time..
 mkdir ~/haxelib && haxelib setup ~/haxelib
 echo Installing dependencies...
 echo This might take a few moments depending on your internet speed.
-haxelib install lime 8.1.2 --quiet
+haxelib git lime https://github.com/Cam-VSRG/lime --quiet --skip-dependencies
 haxelib run lime setup
-haxelib install openfl 9.3.3 --quiet
-haxelib install flixel 5.5.0 --quiet
-haxelib git hscript-iris https://github.com/crowplexus/hscript-iris --quiet
-haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate --quiet
-haxelib git moonchart https://github.com/MaybeMaru/moonchart --quiet
-haxelib install hxvlc 1.9.2 --quiet
-haxelib install hxcpp 4.3.2 --quiet
-haxelib install hxdiscord_rpc 1.2.4 --quiet
-haxelib install hxjson5 --quiet
-haxelib install flixel-addons 3.0.2 --quiet
+haxelib install openfl 9.5.0 --quiet --skip-dependencies
+haxelib git flixel https://github.com/Cam-VSRG/flixel --quiet --skip-dependencies
+haxelib git hscript-iris https://github.com/crowplexus/hscript-iris --quiet --skip-dependencies
+haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate --quiet --skip-dependencies
+haxelib git moonchart https://github.com/MaybeMaru/moonchart --quiet --skip-dependencies
+haxelib install hxvlc 1.9.2 --quiet --skip-dependencies
+haxelib install hxcpp 4.3.2 --quiet --skip-dependencies
+haxelib install hxdiscord_rpc 1.2.4 --quiet --skip-dependencies
+haxelib install hxjson5 --quiet --skip-dependencies
+haxelib install flixel-addons 3.0.2 --quiet --skip-dependencies
 echo Finished!

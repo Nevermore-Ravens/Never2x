@@ -11,13 +11,13 @@ import funkin.objects.FunkinSprite;
 	public var value:Float;
 }*/
 
+@:autoBuild(funkin.modchart.ModifierMacro.createModifier())
 class BaseModifier {
-	var parent:ModchartManager;
+	public var parent:ModchartManager;
 	
-	var grandparent(get, null):PlayField; // funny
+	public var grandparent(get, null):PlayField; // funny
 	function get_grandparent()return parent.parent;
 	
-
 	public var priority:Int = 0;
 	public var active:Array<Bool> = [];
 	public var values:Array<Array<Float>> = [];
@@ -28,6 +28,8 @@ class BaseModifier {
 	public function new(parent:ModchartManager) {
 		this.parent = parent;
 
+		for (i in 0...parent.laneCount)
+			addLane();
 		while (active.length < parent.strumlineCount)
 			addStrumlineSet();
 	}
@@ -49,13 +51,14 @@ class BaseModifier {
 
 	public function setValue(index:Int, value:Float, strumline:Int) {
 		if (strumline < 0) {
-			for (i in 0...values.length)
+			for (i in 0...values.length) {
 				values[i][index] = value;
-		} else if (strumline < values.length)
+				active[i] = isActive(values[i]);
+			}
+		} else if (strumline < values.length) {
 			values[strumline][index] = value;
-
-		for (i in 0...active.length)
-			active[i] = isActive(values[i]);
+			active[strumline] = isActive(values[strumline]);
+		}
 	}
 
 	/*public function prepareSet(index:Int, value:Float, strumline:Int) {
@@ -113,6 +116,7 @@ class BaseModifier {
 		}
 	}
 
+	public function addLane() {}
 	public function addStrumlineSet() {
 		active.push(false);
 	}

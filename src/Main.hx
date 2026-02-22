@@ -2,6 +2,7 @@ package;
 
 import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
+import funkin.backend.LanguageHandler;
 import funkin.backend.FPSCounter;
 import haxe.CallStack;
 import haxe.io.Path;
@@ -9,10 +10,19 @@ import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.events.UncaughtErrorEvent;
 
+#if (linux && !debug)
+@:cppInclude('../../_external/gamemode_client.h')
+@:cppFileCode('#define GAMEMODE_AUTO')
+#end
 class Main extends Sprite {
 	public static var fpsCounter:FPSCounter;
 
 	public static var engineVersion:String = '1.0.0';
+	/**
+	 * Tween Manager that works regardless FlxG.timeScale
+	 */
+	public static var tweenManager:FlxTweenManager = null;
+
 	public function new() {
 		super();
 
@@ -23,6 +33,14 @@ class Main extends Sprite {
 		fpsCounter.visible = Settings.data.fpsCounter;
 
 		@:privateAccess FlxG.keys._nativeCorrection.set("0_43", FlxKey.PLUS);
+	}
+
+	override function __enterFrame(delta:Int) {
+		FlxG.game.__enterFrame(delta);
+		fpsCounter.__enterFrame(delta);
+		
+		@:privateAccess
+		FlxG.mouse.enabled = !FlxG.game._lostFocus;
 	}
 
 	#if windows
@@ -68,6 +86,7 @@ class InitState extends flixel.FlxState {
 	}
 
 	private function setDefines() {
+		Main.tweenManager = new FlxTweenManager();
 		Controls.load();
 		Settings.load();
 		Scores.load();
@@ -75,9 +94,14 @@ class InitState extends flixel.FlxState {
 		Addons.load();
 		Meta.cacheFiles();
 		Alphabet.loadData();
-		funkin.modchart.ModchartManager.setupRedirects();
-		funkin.backend.LanguageHandler.loadTranslations();
-		funkin.backend.LanguageHandler.setLanguage(Settings.data.language);
+		#if MODCHARTS_ALLOWED funkin.modchart.ModchartManager.setupRedirects(); #end
+		LanguageHandler.loadTranslations();
+
+		LanguageHandler.setLanguage(Settings.data.language);
+
+		Judgement.reset();
+
+		funkin.objects.Strumline.size = Settings.data.strumSize;
 
 		FlxG.fullscreen = Settings.data.fullscreen;
 		FlxG.fixedTimestep = false;
@@ -105,18 +129,32 @@ class InitState extends flixel.FlxState {
 		FlxG.sound.volumeDownKeys = Controls.binds["volume_down"];
 		FlxG.sound.muteKeys = Controls.binds["volume_mute"];
 
+		FlxG.signals.preUpdate.add(()->{
+			Main.tweenManager.update(FlxG.elapsed/FlxG.timeScale);
+		});
+
 		FlxG.signals.preStateSwitch.add(()->{
+			// this if is duct tape in case we get crashes again but hopefully we're getting a better asset system
+			// @:privateAccess if (Type.getClass(FlxG.game._requestedState) != Type.getClass(FlxG.state))
+			 	// Paths.clearTracking();
 			Conductor.reset();
 			FlxAudioHandler.checkStoredSounds();
+		});
+		FlxG.signals.postStateSwitch.add(()->{
+			Paths.clearUnusedMemory();
 		});
 
 		FlxG.sound.volume = FlxG.save.data.volume ?? 1.0;
 		FlxG.sound.muted = FlxG.save.data.muted ?? false;
 		FlxG.sound.volumeHandler(FlxG.sound.muted ? 0 : FlxG.sound.volume);
-		FlxG.game.soundTray.updateWithSettings();
+		//FlxG.game.soundTray.updateWithSettings();
 
-		var isClosing:Bool = false;
 		openfl.Lib.application.window.onClose.add(function () {
+			if (FlxG.state is funkin.states.OptionsState) {
+				Controls.save();
+				Settings.save();
+			}
+
 			FlxG.save.data.volume = FlxG.sound.volume;
 			FlxG.save.data.muted = FlxG.sound.muted;
 			FlxG.save.flush();

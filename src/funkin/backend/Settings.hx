@@ -15,8 +15,10 @@ class SaveVariables {
 	var scrollDirection:String = 'Up';
 	var quantColouring:String = "None";
 	var strumGlow:String = 'Per-Note';
-	var scrollSpeed:Float = 3.35;
+	var scrollSpeed:Float = 3;
+	var strumSize:Float = 1;
 	var centeredNotes:Bool = false;
+	var laneUnderlay:Float = 0;
 	var opponentNotes:Bool = true;
 	var hideAcc:Bool = false;
 	var comboTinting:String = 'Off';
@@ -25,11 +27,27 @@ class SaveVariables {
 	var canReset:Bool = true;
 	var noteOffset:Float = 0;
 	var assistClaps:Bool = false;
+	var accuracyType:String = 'Simple';
 	var hitErrorBar:Bool = true;
 	var modcharts:Bool = true;
 	var pauseType:String = 'Unlimited';
 	var pauseMusic:String = 'Breakfast';
 	var pauseMusicVolume:Float = 0.7;
+
+	var customColumns:Array<FlxColor> = [0xFFED34A9, 0xFF9653D6, 0xFF596AF6, 0xFF69E4B5];
+	var customQuants:Array<FlxColor> = [
+		0xFFED34A9,
+		0xFF596AF6,
+		0xFF9653D6,
+		0xFF69E4B5,
+		0xFF9581A8,
+		0xFF9653D6,
+		0xFFFFFCA3,
+		0xFF9653D6,
+		0xFF52B6EB,
+		0xFF9581A8,
+		0xFF9581A8
+	];
 
 	// graphics (that affect performance)
 	var framerate:ShortUInt = 60;
@@ -47,6 +65,7 @@ class SaveVariables {
 	// visuals (that don't affect performance)
 	var flashingLights:Bool = true;
 	var noteSkin:String = 'camv2';
+	var noteSkinStyle:String = 'default';
 	var noteSplashSkin:String = 'classic';
 	var unglowOnAnimFinish:Bool = true;
 	var gameVisibility:ByteUInt = 100;
@@ -54,6 +73,7 @@ class SaveVariables {
 	var popupCenter:String = "Top";
 	var judgementAlpha:Float = 1;
 	var judgementCounter:Bool = false;
+	var hideHighest:Bool = false;
 	var comboAlpha:Float = 1;
 	var healthBarAlpha:Float = 1;
 	var language:String = 'English';
@@ -65,7 +85,7 @@ class SaveVariables {
 	var notesMoveCamera:Bool = false;
 
 	// miscellaneous
-	var discordRPC:Bool = false;
+	var discordRPC:Bool = true;
 	var autoPause:Bool = true;
 
 	var gameplayModifiers:Map<String, Dynamic> = [
@@ -124,7 +144,39 @@ class Settings {
 		#if DISCORD_ALLOWED DiscordClient.check(); #end
 	}
 
-	public static inline function reset() {
-		data = default_data;
+	public static inline function reset(?saveToDisk:Bool = false) {
+		data = {};
+		if (saveToDisk) save();
+	}
+
+	public static function validate() {
+		if (!funkin.backend.LanguageHandler.getLanguages().contains(data.language)) {
+			data.language = "English";
+			Sys.println("Invalid language! Resetting value in settings.");
+		}
+
+		if (!["Default", "Legacy", "Off"].contains(data.cameraZooms)) {
+			data.cameraZooms = (data.cameraZooms.toLowerCase() == "false") ? "Off" : "Default";
+			Sys.println("Recieved bool instead of string in camera zooms! Adjusting value in settings.");
+		}
+
+		final possibleNotesplashes: Array<String> = ['none'];
+		for (splashPath in Paths.readDirectory("data/noteSplashes"))
+			if (splashPath.endsWith(".json5") || splashPath.endsWith(".json")) {
+				var splashName:String = haxe.io.Path.withoutDirectory(haxe.io.Path.withoutExtension(splashPath));
+				if(possibleNotesplashes.contains(splashName)) continue;
+				possibleNotesplashes.insert(0, splashName);
+			}
+
+		if (!possibleNotesplashes.contains(data.noteSplashSkin)) {
+			data.noteSplashSkin = "classic";
+			Sys.println("Note splash doesn't exist! Resetting value in settings.");
+		}
+
+		/*final curDevices = FunkinAudioHandler.getPlaybackDeviceNames();
+		if (data.audioDevice != "Default" && !curDevices.contains(data.audioDevice)) {
+			data.audioDevice = "Default";
+			Sys.println("Cannot find the selected audio device! Resetting value in settings.");
+		}*/
 	}
 }

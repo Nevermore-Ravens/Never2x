@@ -8,9 +8,13 @@ import lime.utils.Assets as LimeAssets;
 import openfl.media.Sound;
 
 import openfl.display.BitmapData;
+import flixel.util.typeLimit.OneOfTwo;
 
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.graphics.frames.FlxAtlasFrames;
+
+import lime.app.Promise;
+import lime.app.Future;
 
 // credits to Chris Speciale (lead openfl maintainer) for giving me this abstract lmao
 // was a pain in the ass to deal with Dynamic
@@ -19,10 +23,14 @@ abstract CachedAsset(Dynamic) {
     @:from static inline function fromFlxGraphic(graphic:FlxGraphic):CachedAsset {
         return cast graphic;
     }
-    // cast from Sound to CachedAsset
+	// cast from Sound to CachedAsset
     @:from static inline function fromSound(sound:Sound):CachedAsset {
         return cast sound;
     }
+	// cast from FlxAnimateFrames to CachedAsset
+    @:from static inline function fromFlxAnimateFrames(frames:FlxAnimateFrames):CachedAsset {
+        return cast frames;
+	}
 	// cast from FlxFramesCollection to CachedAsset
     @:from static inline function fromFlxFramesCollection(frames:FlxFramesCollection):CachedAsset {
         return cast frames;
@@ -36,6 +44,11 @@ abstract CachedAsset(Dynamic) {
     @:to inline function toSound():Sound {
         return cast this;
     }
+	
+	// cast from CachedAsset to FlxAnimateFrames
+	@:to inline function toFlxAnimateFrames():FlxAnimateFrames {
+		return cast this;
+	}
 
 	// cast from CachedAsset to FlxFramesCollection
     @:to inline function toFlxFramesCollection():FlxFramesCollection {
@@ -84,7 +97,7 @@ class Paths {
 				(asset:Sound).close();
 				//LimeAssets.cache.clear(key);
 			// destroying method for frames
-			case TClass(FlxFramesCollection):
+			case TClass(FlxFramesCollection) | TClass(FlxAtlasFrames) | TClass(FlxAnimateFrames):
 				(asset:FlxFramesCollection).destroy();
 				
 			// if grabbed asset doesn't exist then we stop the function
@@ -94,6 +107,11 @@ class Paths {
 		}
 
 		cachedAssets.remove(key);
+	}
+
+	// clear what's said to be used for assets
+	public static dynamic function clearTracking() {
+		localTrackedAssets.resize(0); // fine rudy ill use this and not splice
 	}
 
 	// deload unused assets from memory
@@ -110,7 +128,7 @@ class Paths {
 	public static dynamic function clearExcept(assets:Array<String>) {
 		localTrackedAssets = assets;
 		clearUnusedMemory();
-	}	
+	}
 
 	// clear all assets from memory
 	public static dynamic function clearStoredMemory() {
@@ -154,30 +172,63 @@ class Paths {
 		}
 		#end
 
-		// if that doesn't exist there either just return assets
+		// if that doesn't exist there OneOfTwo just return assets
 		return 'assets/$path';
 	}
 
 	// images
-	public static dynamic function image(key:String, ?subFolder:String = 'images'):FlxGraphic {
+	public static dynamic function image(key:String, ?subFolder:String = 'images', ?pushToGPU:Null<Bool>):FlxGraphic {
+
+		if (pushToGPU == null)
+			pushToGPU = Settings.data.gpuCache;
+
 		if (key.lastIndexOf('.') < 0) key += '.$IMAGE_EXT';
 		
 		final cacheKey = getCacheKey(key, "IMG", subFolder);
-		if (cachedAssets.exists(cacheKey)) return cachedAssets.get(cacheKey);
+
+		if (cachedAssets.exists(cacheKey)) {
+			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
+			return cachedAssets.get(cacheKey);
+		}
 		
 		key = get(key, subFolder, true);
 		
 		if (!FileSystem.exists(key)) return null;
 		if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 
-		return cacheBitmap(key, cacheKey);
+		return cacheBitmap(key, cacheKey, pushToGPU);
 	}
 
-	public static dynamic function cacheBitmap(key:String, cacheKey:String):FlxGraphic {
+	public static dynamic function imageAsync(key:String, ?subFolder:String = 'images', ?pushToGPU:Null<Bool>):Future<FlxGraphic>
+	{
+		if (pushToGPU == null)
+			pushToGPU = Settings.data.gpuCache;
+
+		final future:Future<FlxGraphic> = new Future<FlxGraphic>(()->{
+			// Force gpu cache to be off since uploading textures to gpu isn't thread safe. (-Bolo)
+			return image(key, subFolder, false);
+		}, true);
+
+		final graphicPromise:Promise<FlxGraphic> = new Promise<FlxGraphic>();
+
+		future.onComplete((graphic:FlxGraphic)->{
+				// At this point we are on the main thread context again.
+				if (pushToGPU)
+					openfl.utils.BitmapDataUtil.toHardware(graphic.bitmap);
+
+				graphicPromise.complete(graphic);
+			}
+		);
+
+		return graphicPromise.future;
+	}
+
+	public static dynamic function cacheBitmap(key:String, cacheKey:String, ?pushToGPU:Bool = false):FlxGraphic {
 		//bitmap.disposeImage();
 
-		final bitmapO:BitmapData = funkin.backend.OptimizedBitmapData.fromFile(key);
-		final graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmapO, false, key);
+		final bitmapO = openfl.display.BitmapData.fromFile(key);
+		if (pushToGPU) openfl.utils.BitmapDataUtil.toHardware(bitmapO);
+		final graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmapO, false, cacheKey);
 		graph.persist = true;
 		graph.destroyOnNoUse = false;
 
@@ -260,60 +311,109 @@ class Paths {
 	}
 
 	public static dynamic function animateAtlas(path:String, ?subFolder:String = 'images'):FlxAnimateFrames {
+		final cacheKey = getCacheKey(path, "ANI", subFolder);
+		if (cachedAssets.exists(cacheKey)) {
+			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
+			return cachedAssets.get(cacheKey);
+		}
+
 		final folder:String = get(path, subFolder, true);
 		if (!FileSystem.exists(folder)) return null;
+		if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 
-		return FlxAnimateFrames.fromAnimate(folder);
+		final frames = FlxAnimateFrames.fromAnimate(folder);
+		frames.parent.persist = true;
+		cachedAssets.set(cacheKey, frames);
+		return frames;
 	}
 
-	public static dynamic function multiAtlas(keys:Array<String>, ?subFolder:String = null):FlxAtlasFrames {
-		var parentFrames:FlxAtlasFrames = cast sparrowAtlas(keys[0].trim());
-		if (keys.length < 1) return parentFrames;
+	// we don't want to overcombine.
+	static function combineAtlas(atlasA:FlxAtlasFrames, atlasB:FlxAtlasFrames):FlxAtlasFrames {
+		if (atlasA is FlxAnimateFrames) {
+			@:privateAccess if (atlasB is FlxAnimateFrames && cast (atlasA, FlxAnimateFrames).addedCollections.contains(cast atlasB))
+				return atlasA;
+			return atlasA.addAtlas(atlasB, false);
+		}
+
+		@:privateAccess if (atlasA is FlxAnimateFrames && cast (atlasB, FlxAnimateFrames).addedCollections.contains(cast atlasA))
+			return atlasB;
+		return atlasB.addAtlas(atlasA, false);
+	}
+
+	public static dynamic function multiAtlas(keys:Array<String>, ?subFolder:String = 'images'):Dynamic {
+		function getFrames(key:String, subFolder:String):OneOfTwo<FlxAtlasFrames, FlxAnimateFrames> {
+			var frames:OneOfTwo<FlxAtlasFrames, FlxAnimateFrames> = null;
+			if (Paths.exists('$subFolder/$key/Animation.json')) frames = cast animateAtlas(key, subFolder);
+			else frames = cast sparrowAtlas(key, subFolder);
+
+			return frames;
+		}
+
+		var parentFrames = cast getFrames(keys[0], subFolder);
+		if (keys.length == 1) return parentFrames;
 
 		if (parentFrames == null) return null;
 
-		var original:FlxAtlasFrames = parentFrames;
-		parentFrames = new FlxAtlasFrames(parentFrames.parent);
-		parentFrames.addAtlas(original, true);
 		for (i in 1...keys.length) {
-			var extraFrames:FlxAtlasFrames = cast sparrowAtlas(keys[i].trim(), subFolder);
+			var extraFrames = cast getFrames(keys[i], subFolder);
 			if (extraFrames == null) continue;
-			parentFrames.addAtlas(extraFrames, true);
+			parentFrames = combineAtlas(parentFrames, extraFrames);
 		}
-
+		
 		return parentFrames;
 	}
 
 	public static dynamic function sparrowAtlas(path:String, ?subFolder:String = 'images'):FlxFramesCollection {
 		final cacheKey = getCacheKey(path, "SPR", subFolder);
-		if (cachedAssets.exists(cacheKey)) return cachedAssets.get(cacheKey);
+		if (cachedAssets.exists(cacheKey)) {
+			final imgKey = getCacheKey(path, "IMG", subFolder);
+			if (!localTrackedAssets.contains(imgKey)) localTrackedAssets.push(imgKey);
+			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
+			return cachedAssets.get(cacheKey);
+		}
 
 		final dataFile:String = get('$path.xml', subFolder, true);
 		if (!FileSystem.exists(dataFile)) return null;
 		if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 
-		return FlxAtlasFrames.fromSparrow(image(path, subFolder), File.getContent(dataFile));
+		cachedAssets.set(cacheKey, FlxAtlasFrames.fromSparrow(image(path, subFolder), File.getContent(dataFile)));
+		return cachedAssets.get(cacheKey);
+		// return FlxAtlasFrames.fromSparrow(image(path, subFolder), File.getContent(dataFile));
 	}
 
 	public static dynamic function packerAtlas(path:String, ?subFolder:String = 'images'):FlxFramesCollection {
 		final cacheKey = getCacheKey(path, "PAK", subFolder);
-		if (cachedAssets.exists(cacheKey)) return cachedAssets.get(cacheKey);
+		if (cachedAssets.exists(cacheKey)) {
+			final imgKey = getCacheKey(path, "IMG", subFolder);
+			if (!localTrackedAssets.contains(imgKey)) localTrackedAssets.push(imgKey);
+			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
+			return cachedAssets.get(cacheKey);
+		}
 
 		final dataFile:String = get('$path.txt', subFolder, true);
 		if (!FileSystem.exists(dataFile)) return null;
 		if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 
-		return FlxAtlasFrames.fromSpriteSheetPacker(image(path, subFolder), File.getContent(dataFile));
+		cachedAssets.set(cacheKey, FlxAtlasFrames.fromSpriteSheetPacker(image(path, subFolder), File.getContent(dataFile)));
+		return cachedAssets.get(cacheKey);
+		// return FlxAtlasFrames.fromSpriteSheetPacker(image(path, subFolder), File.getContent(dataFile));
 	}
 
 	public static dynamic function asepriteAtlas(path:String, ?subFolder:String = 'images'):FlxFramesCollection {
 		final cacheKey = getCacheKey(path, "ASE", subFolder);
-		if (cachedAssets.exists(cacheKey)) return cachedAssets.get(cacheKey);
+		if (cachedAssets.exists(cacheKey)) {
+			final imgKey = getCacheKey(path, "IMG", subFolder);
+			if (!localTrackedAssets.contains(imgKey)) localTrackedAssets.push(imgKey);
+			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
+			return cachedAssets.get(cacheKey);
+		}
 
 		final dataFile:String = get('$path.json', subFolder, true);
 		if (!FileSystem.exists(dataFile)) return null;
 		if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 
-		return FlxAtlasFrames.fromTexturePackerJson(image(path, subFolder), File.getContent(dataFile));
+		cachedAssets.set(cacheKey, FlxAtlasFrames.fromTexturePackerJson(image(path, subFolder), File.getContent(dataFile)));
+		return cachedAssets.get(cacheKey);
+		// return FlxAtlasFrames.fromTexturePackerJson(image(path, subFolder), File.getContent(dataFile));
 	}
 }

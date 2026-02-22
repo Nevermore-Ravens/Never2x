@@ -82,15 +82,13 @@ class Countdown extends FunkinSprite {
 		onTick(curTick);
 		alpha = 1;
 
-		if (curTick <= 0) {
-			finished = true;
-			active = false;
-			alpha = 0;
-			onFinish();
-		}
+		if (curTick <= 0) stop();
 	}
 
 	public function stop():Void {
+		finished = true;
 		active = false;
+		alpha = 0;
+		onFinish();
 	}
 }

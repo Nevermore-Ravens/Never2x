@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import funkin.backend.NoteSkin.NoteSkinStyle;
 import flixel.math.FlxAngle;
 import funkin.backend.Util;
 import funkin.shaders.NoteShader;
@@ -9,86 +10,17 @@ import flixel.math.FlxRect;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
 
-// TODO: implement
-/* typedef NoteSkinPixelData = {
-	image: String,
-	holdImage: String,
-	noteRows: Int,
-	noteColumns: Int,
-	holdRows: Int,
-	holdColumns: Int,
-
-	staticIndices: Array<Array<Int>>,
-	noteIndices: Array<Array<Int>>,
-	pressIndices: Array<Array<Int>>,
-	glowIndices: Array<Array<Int>>,
-	holdIndices: Array<Array<Int>>,
-	holdEndIndices: Array<Array<Int>>,
-
-	?staticFramerate: Float,
-	?noteFramerate: Float,
-	?pressFramerate: Float,
-	?glowFramerate: Float,
-	?holdFramerate: Float
-}
-
-typedef NoteSkinNormalData = {
-	image: String,
-
-	staticPrefixes: Array<String>,
-	notePrefixes: Array<String>,
-	pressPrefixes: Array<String>,
-	glowPrefixes: Array<String>,
-
-	?staticFramerate: Float,
-	?noteFramerate: Float,
-	?pressFramerate: Float,
-	?glowFramerate: Float
-}
-
-typedef NoteSkinDataFile = {
-	displayName: String,
-	pixel: NoteSplashPixelData,
-	normal: NoteSplashNormalData
-}
-
-@:structInit
-class NoteSkinData {
-	public var displayName: String = 'Fallback';
-	public var pixel: NoteSplashPixelData = {
-		image: "pixelFunkin",
-		holdImage: "pixelFunkinHolds",
-		noteRows: 4,
-		noteColumns: 5,
-		holdRows: 4,
-		holdColumns: 2,
-
-		staticIndices: [[0], [1], [2], [3]],
-		noteIndices: [[4], [5], [6], [7]],
-		pressIndices: [[4, 8], [5, 9], [6, 10], [7, 11]],
-		glowIndices: [[12, 16], [13, 17], [14, 18], [15, 19]],
-		holdIndices: [[0], [1], [2], [3]],
-
-	}
-} */
-
 @:structInit
 class NoteData {
 	public var time:Float = 0;
-	public var beat:Float = 0;
 	public var lane:Int = 0;
 	public var speed:Single = 1;
 	public var player:Int = 0;
 	public var type:String;
-
 	public var length:Single = 0;
 
-	public var parent:NoteData = null;
-	public var spotInLine:Int = 0;
-	public var children:Array<NoteData> = [];
-	public var connectedNote:Note = null;
-
 	public var quant:Int = -1;
+	public var beat:Float = 0;
 }
 
 //@:nullSafety(Strict)
@@ -96,8 +28,8 @@ class Note extends FunkinSprite {
 	public var data:NoteData;
 
 	public static var colourShader:NoteShader = new NoteShader();
-	// personal quant palette. highly prone to change. -srt
-	public static var quantColours:Array<FlxColor> = null;
+	public static var byQuant:Bool = false;
+	public static var curPalette:Array<FlxColor> = null;
 	public static final quantPalettes:Map<String, Array<FlxColor>> = [ //changed some vars to final since they won't be changing
 		"Funkin" => [ // Basically just improved Kade quants, using 9k colours for the yellow/blue and Receptor grey for the misc quants
 			// though if it gets killed idc LOL
@@ -198,6 +130,8 @@ class Note extends FunkinSprite {
 		'No Animation'
 	];
 
+	public static final defaultMissHealth:Float = 6;
+
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
 	public var copyAngle:Bool = true;
@@ -206,7 +140,7 @@ class Note extends FunkinSprite {
 	public var sustain:Sustain;
 
 	public var multAlpha:Float = 1.0;
-	public var isQuant:Bool = false;
+	public var luminColors:Bool = false;
 
 	public var distance:Float = 2000;
 	public var correctionOffset:FlxPoint = FlxPoint.get(0, 0);
@@ -218,6 +152,7 @@ class Note extends FunkinSprite {
 	public var breakOnHit:Bool = false;
 	public var ignore:Bool = false;
 	public var missHealth:Float = 6;
+	public var glowStrum:Bool = true;
 
 	public var noAnimation:Bool = false;
 	public var animSuffix:String = '';
@@ -229,24 +164,33 @@ class Note extends FunkinSprite {
 	public var rawTime(get, never):Float;
 	inline function get_rawTime():Float return data.time;
 
-	public var rawHitTime(get, never):Float;
-	inline function get_rawHitTime():Float return time - Conductor.rawTime;
-
 	public var hitTime(get, never):Float;
-	inline function get_hitTime():Float return time - Conductor.visualTime;
+	inline function get_hitTime():Float return time - Conductor.time;
+
+	@:isVar public var lane(get, set):Int = 0;
+	function get_lane():Int return data.lane;
+	function set_lane(v:Int):Int return data.lane = v;
+
+	@:isVar public var player(get, set):Int = 0;
+	function get_player():Int return data.player;
+	function set_player(v:Int):Int return data.player = v;
+
+	@:isVar public var length(get, set):Single = 0;
+	function get_length():Single return data.length;
+	function set_length(v:Single):Single return data.length = v;
 
 	public var canHit:Bool = true;
 	public var inHitRange(get, never):Bool;
 	function get_inHitRange():Bool {
-		final early:Bool = time < Conductor.rawTime + (Judgement.max.timing * earlyHitMult);
-		final late:Bool = time > Conductor.rawTime - (Judgement.max.timing * lateHitMult);
+		final early:Bool = time < Conductor.time + (Judgement.max.timing * earlyHitMult);
+		final late:Bool = time > Conductor.time - (Judgement.max.timing * lateHitMult);
 
 		return early && late;
 	}
 
 	public var tooLate(get, never):Bool;
 	function get_tooLate():Bool {
-		return rawHitTime < -((Judgement.max.timing + 25 * FlxG.timeScale));
+		return hitTime < -((Judgement.max.timing + 25 * FlxG.timeScale));
 	}
 
 	public var hitJudgement:Judgement = Judgement.list[0];
@@ -259,20 +203,21 @@ class Note extends FunkinSprite {
 
 	public var type(default, set):String;
 	function set_type(value:String):String {
-		var textureToSet:String = '';
+		type = value;
+		var finalSkin:String = '';
 		ignore = false;
 		breakOnHit = false;
 		earlyHitMult = 1.0;
 		lateHitMult = 1.0;
 		animSuffix = '';
 		sound = '';
-		missHealth = 6;
+		missHealth = defaultMissHealth;
 		switch (value) {
 			case 'Mine':
-				textureToSet = 'mine';
+				finalSkin = 'special/mine';
 				sound = 'sfx/mine';
 				data.length = 0;
-				isQuant = false;
+				luminColors = false;
 				ignore = true;
 				breakOnHit = true;
 				earlyHitMult = 0.4;
@@ -288,27 +233,38 @@ class Note extends FunkinSprite {
 
 			case 'Alt Animation':
 				animSuffix = '-alt';
+
+			case 'Cheer':
+				noAnimation = true;
 		}
 
-		texture = textureToSet;
-		return type = value;
+		skin = finalSkin;
+		return type;
 	}
 
-	public var noteSuffix:String = "0";
-	public var texture(default, set):String;
-	function set_texture(value:String):String {
-		if (value == null || value.length == 0) value = '';
+	public var styleData:NoteSkinStyle;
+	public var skinData:NoteSkin;
+	public var style(default, set):String = "normal";
+	public var skin(default, set):String;
+	function set_style(value:String):String {
+		style = value;
+		styleData = skinData.getStyle(Settings.data.noteSkinStyle != "default" ? Settings.data.noteSkinStyle : style);
+		reload(styleData);
+		return value;
+	}
+	function set_skin(value:String):String {
+		skin = value ?? '';
+		if (skin.length == 0) value = Settings.data.noteSkin;
+		value = Util.format(value);
 		
-		reload(value);
-		return texture = value;
+		skinData = NoteSkin.get(value);
+		styleData = skinData.getStyle(Settings.data.noteSkinStyle != "default" ? Settings.data.noteSkinStyle : style);
+		reload(styleData);
+		return value;
 	}
 
-	public function reload(?skin:String) {
-		frames = getSkin(skin);
-
-		scale.set(Strumline.size, Strumline.size);
-		loadAnims(colours[data.lane % colours.length]);
-		updateHitbox();
+	public function reload(data:NoteSkinStyle) {
+		data.apply(this);
 	}
 
 	public static function getSkin(?name:String):FlxFramesCollection {
@@ -328,11 +284,6 @@ class Note extends FunkinSprite {
 		return Paths.sparrowAtlas('noteSkins/${getTextureKey(name)}');
 	}
 
-	function loadAnims(colour:String) {
-		animation.addByPrefix('default', colour + noteSuffix);
-		playAnim('default');
-	}
-
 	public function new() {
 		super();
 
@@ -343,7 +294,6 @@ class Note extends FunkinSprite {
 			player: 0,
 			length: 0,
 			type: '',
-			connectedNote: this
 		}
 
 		active = false;
@@ -351,11 +301,10 @@ class Note extends FunkinSprite {
 
 	public function setup(data:NoteData):Note {
 		this.data = data;
-		data.connectedNote = this;
 		isSustain = false;
 		sustain = null;
 		noAnimation = false;
-		isQuant = quantColours != null;
+		luminColors = curPalette != null;
 
 		missed = false;
 		wasHit = false;
@@ -364,24 +313,20 @@ class Note extends FunkinSprite {
 		multAlpha = 1.0;
 		copyAngle = true;
 		copyAlpha = true;
+		glowStrum = true;
 		type = data.type;
 		
-		if (isQuant) color = quantColours[Conductor.quants.indexOf(data.quant)];
-		else color = 0xFFFFFFFF;
+		if (!luminColors) color = 0xFFFFFFFF;
+		else color = curPalette[byQuant ? Conductor.quants.indexOf(data.quant) : data.lane];
 
 		return this;
 	}
 
 	override function update(delta:Float) {
-		super.update(delta);
+		last.set(x, y);
+		animation.update(delta);
+		
 		if (type == 'Mine') angle += 135 * delta;
-	}
-
-	// custom kill handling for allowing sustain heads to stay "existant" when hit
-	override public function kill():Void {
-		alive = false;
-		exists = false;
-		data.connectedNote = null;
 	}
 
 	override public function revive():Void {
@@ -404,18 +349,23 @@ class Note extends FunkinSprite {
 	}
 
 	override public function drawComplex(camera:FlxCamera) {
-		prepareMatrix(camera);
-		camera.drawNote(_frame, _matrix, colorTransform, blend, antialiasing, isQuant);
+		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
+		prepareMatrix(_matrix, camera);
+		camera.drawNote(_frame, _matrix, colorTransform, blend, antialiasing, luminColors);
 	}
 	
 	@:allow(funkin.objects.Strumline)
 	static var cachePoint = FlxPoint.get();
 
+	#if MODCHARTS_ALLOWED
 	public function drawCrazy(modchart:ModchartManager, downscroll:Bool, field:Strumline) {
 		final strumline = data.player;
 		final mult = downscroll ? -1 : 1;
 		modchart.stealthColor.set(1.0, 1.0, 1.0);
 		modchart.scrollMult = mult;
+
+		modchart.curLane = data.lane;
+		modchart.curField = strumline;
 		
 		final oldX = x;
 		final oldY = y;
@@ -434,7 +384,8 @@ class Note extends FunkinSprite {
 		x = modchartPos.x - width * 0.5;
 		y = modchartPos.y - height * 0.5;
 		final layer = modchartPos.z;
-		prepareMatrix(cameras[0]);
+		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
+		prepareMatrix(_matrix, cameras[0]);
 		_matrix.translate(cameras[0].scroll.x * scrollFactor.x, cameras[0].scroll.y * scrollFactor.y);
 		x = oldX;
 		y = oldY;
@@ -477,8 +428,9 @@ class Note extends FunkinSprite {
 			vert.project();
 		}
 
-		modchart.pushDraw(strumline, field, cameras, scrollFactor, _frame, Note.modchartVertices, colorTransform, blend, antialiasing, isQuant, stealth, layer);
+		modchart.pushDraw(strumline, field, cameras, scrollFactor, _frame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer);
 	}
+	#end
 
 	override public function toString():String {
 		return 'Lane ${data.lane} at ${data.time}';

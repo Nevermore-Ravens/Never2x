@@ -1,0 +1,65 @@
+{
+    "displayName": "Cam. V2",
+    "styles": [
+        {
+            "type": "sparrow",
+            "name": "normal",
+            "displayName": "Normal",
+
+            "image": "camv2",
+			"scale": 0.65,
+			"antialiasing": true,
+
+			"noteAnims": ["purple0", "blue0", "green0", "red0"],
+			"holdAnims": ["purple hold piece", "blue hold piece", "green hold piece", "red hold piece"],
+			"holdEndAnims": ["purple hold end", "blue hold end", "green hold end", "red hold end"],
+			"rollAnims": ["purple roll piece", "blue roll piece", "green roll piece", "red roll piece"],
+			"rollEndAnims": ["purple roll end", "blue roll end", "green roll end", "red roll end"],
+			"staticPrefixes": ["arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT"],
+			"pressPrefixes": ["left press", "down press", "up press", "right press"],
+			"glowPrefixes": ["left confirm", "down confirm", "up confirm", "right confirm"],
+
+			"staticFramerate": 24,
+			"noteFramerate": 24,
+			"pressFramerate": 48,
+			"glowFramerate": 48,
+			"holdFramerate": 24,
+			"rollFramerate": 24
+        },
+		{
+			"type": "grid",
+            "name": "pixel",
+            "displayName": "Pixel",
+
+            "image": "pixel/camv2",
+			"holdImage": "pixel/camv2ENDS",
+			"hasRolls": false,
+			//"rollImage": "pixel/camv2ROLLS",
+			"scale": 6.5,
+			"antialiasing": false,
+
+			"noteRows": 4,
+			"noteColumns": 5,
+			"holdRows": 4,
+			"holdColumns": 2,
+			//"rollRows": 4,
+			//"rollColumns": 2,
+
+			"staticIndices": [[0], [1], [2], [3]],
+			"noteIndices": [[16], [17], [18], [19]],
+			"pressIndices": [[4], [5], [6], [7]],
+			"glowIndices": [[8, 12], [9, 13], [10, 14], [11, 15]],
+			"holdIndices": [[0], [1], [2], [3]],
+			"holdEndIndices": [[4], [5], [6], [7]],
+			//"rollIndices": [[0], [1], [2], [3]],
+			//"rollEndIndices": [[4], [5], [6], [7]],
+
+			"staticFramerate": 12,
+			"noteFramerate": 12,
+			"pressFramerate": 12,
+			"glowFramerate": 12,
+			"holdFramerate": 12
+			//"rollFramerate": 12
+		}
+    ]
+}

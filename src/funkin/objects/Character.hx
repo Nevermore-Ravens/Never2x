@@ -9,6 +9,7 @@ typedef CharacterFile = {
 	var healthColor:FlxColor;
 	var sheets:String;
 	var offset:Array<Float>;
+	var cameraOffset:Array<Float>;
 	var danceInterval:Int;
 	var reflectionOffset:Int;
 
@@ -21,7 +22,7 @@ typedef CharacterAnim = {
 	var indices:Array<Int>;
 	var framerate:Int;
 	var looped:Bool;
-	var offsets:Array<Float>;
+	var offset:Array<Float>;
 }
 
 class Character extends FunkinSprite {
@@ -44,7 +45,9 @@ class Character extends FunkinSprite {
 	public var reflectionY:Int = 0; //i'll use a smaller type of number to save some memory
 	var _file:CharacterFile;
 
-	public function new(?x:Float, ?y:Float, ?name:String, ?player:Bool = true, ?hasReflection:Bool = true) {
+	public var cameraOffset:FlxPoint = FlxPoint.get(0, 0);
+
+	public function new(?x:Float, ?y:Float, ?name:String, ?hasReflection:Bool = true) {
 		name ??= default_name;
 		super(x, y);
 
@@ -68,31 +71,35 @@ class Character extends FunkinSprite {
 		flipX = _file.flipX;
 		antialiasing = _file.antialiasing;
 
-		if (Paths.exists('images/${this.sheets[0]}/Animation.json')) {
-			frames = Paths.animateAtlas(this.sheets[0]);
-		} else frames = Paths.multiAtlas(this.sheets);
+		frames = Paths.multiAtlas(this.sheets);
 
 		for (fnfAnim in _file.animations) {
-			if (isAnimate) {
-				if (fnfAnim.indices.length == 0) {
-					anim.addBySymbol(fnfAnim.name, fnfAnim.id, fnfAnim.framerate, fnfAnim.looped);
+			var indices:Array<Int> = fnfAnim.indices ?? [];
+			var framerate:Float = fnfAnim.framerate ?? 24;
+			var looped:Bool = fnfAnim.looped ?? false;
+			var offsets:Array<Float> = fnfAnim.offset ?? [0.0, 0.0];
+
+			if (isAnimate && library != null && library.getSymbol(fnfAnim.id) != null) {
+				if (indices.length == 0) {
+					anim.addBySymbol(fnfAnim.name, fnfAnim.id, framerate, looped);
 				} else {
-					anim.addBySymbolIndices(fnfAnim.name, fnfAnim.id, fnfAnim.indices, fnfAnim.framerate, fnfAnim.looped);
+					anim.addBySymbolIndices(fnfAnim.name, fnfAnim.id, indices, framerate, looped);
 				}
 			} else {
-				if (fnfAnim.indices.length == 0) {
-					animation.addByPrefix(fnfAnim.name, fnfAnim.id, fnfAnim.framerate, fnfAnim.looped);
+				if (indices.length == 0) {
+					animation.addByPrefix(fnfAnim.name, fnfAnim.id, framerate, looped);
 				} else {
-					animation.addByIndices(fnfAnim.name, fnfAnim.id, fnfAnim.indices, '', fnfAnim.framerate, fnfAnim.looped);
+					animation.addByIndices(fnfAnim.name, fnfAnim.id, indices, '', framerate, looped);
 				}
 			}
 
-			offsetMap.set(fnfAnim.name, fnfAnim.offsets);
+			offsetMap.set(fnfAnim.name, offsets);
 		}
 
 		scale.set(_file.scale, _file.scale);
 		updateHitbox();
 		offset.set(_file.offset[0] * scale.x, _file.offset[1] * scale.y);
+		cameraOffset.set(_file.cameraOffset[0], _file.cameraOffset[1]);
 
 		if (animation.exists('danceLeft') || animation.exists('danceRight')) {
 			danceList = ['danceLeft', 'danceRight'];
@@ -152,8 +159,8 @@ class Character extends FunkinSprite {
 		oldOffset.put();
 	}
 
-	override function playAnim(name:String, ?forced:Bool = true) {
-		super.playAnim(name, forced);
+	override function playAnim(name:String, ?forced:Bool = true, ?suffix:String = "") {
+		super.playAnim(name, forced, suffix);
 		if (name.startsWith('sing') || name.startsWith('miss')) {
 			_singTimer = singDuration * (Conductor.stepCrotchet * 0.15);
 		}
@@ -171,6 +178,7 @@ class Character extends FunkinSprite {
 			sheets: 'characters/bf',
 			reflectionOffset: 0,
 			offset: [0, 0],
+			cameraOffset: [0, 0],
 
 			animations: [
 				{
@@ -179,7 +187,7 @@ class Character extends FunkinSprite {
 					indices: [],
 					framerate: 24,
 					looped: false,
-					offsets: [0, 0]
+					offset: [0, 0]
 				}
 			],
 		}
@@ -198,7 +206,7 @@ class Character extends FunkinSprite {
 		return file;
 	}
 
-	public var reflectionAlpha:Float = 0.5;
+	public var reflectionAlpha:Float = 0.25;
 	public var isVisible(get, never):Bool;
 	
 	inline function get_isVisible() return visible && alpha > 0;

@@ -1,0 +1,30 @@
+{
+    "displayName": "boom",
+    "styles": [
+        {
+            "type": "sparrow",
+            "name": "normal",
+            "displayName": "Normal",
+
+            "image": "mine",
+			"scale": 0.65,
+			"antialiasing": true,
+
+			"noteAnims": ["purple0", "blue0", "green0", "red0"],
+			"holdAnims": ["purple hold piece", "blue hold piece", "green hold piece", "red hold piece"],
+			"holdEndAnims": ["purple hold end", "blue hold end", "green hold end", "red hold end"],
+			"rollAnims": ["purple roll piece", "blue roll piece", "green roll piece", "red roll piece"],
+			"rollEndAnims": ["purple roll end", "blue roll end", "green roll end", "red roll end"],
+			"staticPrefixes": ["arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT"],
+			"pressPrefixes": ["left press", "down press", "up press", "right press"],
+			"glowPrefixes": ["left confirm", "down confirm", "up confirm", "right confirm"],
+
+			"staticFramerate": 24,
+			"noteFramerate": 24,
+			"pressFramerate": 48,
+			"glowFramerate": 48,
+			"holdFramerate": 24,
+			"rollFramerate": 24
+        }
+    ]
+}

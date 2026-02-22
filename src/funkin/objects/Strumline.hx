@@ -1,23 +1,39 @@
 package funkin.objects;
 
+import funkin.backend.NoteSkin;
 import funkin.modchart.ModchartManager;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxAngle;
+
 class Strumline extends FlxTypedSpriteGroup<StrumNote> {
 	public static final keyCount:Int = 4;
-	public static var size(default, set):Float = 0.65;
+	public static var size(default, set):Float = 1.0;
 	static function set_size(value:Float) {
-		swagWidth = 160.0 * value;
+		swagWidth = 160.0 * 0.65 * value;
 		return size = value;
 	}
-	public static var swagWidth:Float = 160.0 * size;
+	public static var swagWidth:Float = 160.0 * 0.65 * size;
 
 	public var overrideScrollSpeed:Float = 0; // When 0, defer to PlayField.scrollSpeed
 
+	public var styleData:NoteSkinStyle;
+	public var skinData:NoteSkin;
+	public var style(default, set):String = "normal";
 	public var skin(default, set):String;
 	//public static inline var default_skin:String = Settings.default_data.noteSkin;
+	function set_style(value:String):String {
+		style = value;
+		styleData = skinData.getStyle(Settings.data.noteSkinStyle != "default" ? Settings.data.noteSkinStyle : style);
+		regenerate();
+		return value;
+	}
 	function set_skin(value:String):String {
-		skin = value;
+		skin = value ?? '';
+		if (skin.length == 0) skin = Settings.data.noteSkin;
+		skin = Util.format(skin);
+
+		skinData = NoteSkin.get(skin);
+		styleData = skinData.getStyle(Settings.data.noteSkinStyle != "default" ? Settings.data.noteSkinStyle : style);
 		regenerate();
 		return value;
 	}
@@ -54,8 +70,6 @@ class Strumline extends FlxTypedSpriteGroup<StrumNote> {
 		for (i in 0...keyCount) {
 			add(strum = new StrumNote(this, i));
 			strum.ID = i;
-			strum.scale.set(size, size);
-			strum.updateHitbox();
 			strum.x += swagWidth * i;
 			strum.y += (swagWidth - strum.height) * 0.5;
 		}
@@ -75,7 +89,7 @@ class Strumline extends FlxTypedSpriteGroup<StrumNote> {
 @:allow(funkin.objects.PlayField)
 class StrumNote extends FunkinSprite {
 	public var queueStatic:Bool = false;
-	public var isQuant:Bool = false;
+	public var luminColors:Bool = false;
 	public var modchartPos:Vector3 = new Vector3();
 	public var stealth:Float = 0;
 	public var parent:Strumline;
@@ -95,33 +109,29 @@ class StrumNote extends FunkinSprite {
 			playAnim('default');
 		}
 
-		// modding by length will cause different behaviour here
-		// left, down, up, right, if it goes beyond that, it loops back, left down up right, and so on.
-		final anim:String = Note.directions[lane % Note.directions.length];
-
-		frames = Note.getSkin(parent.skin);
-		animation.addByPrefix('default', 'arrow${anim.toUpperCase()}', 24);
-		animation.addByPrefix('pressed', '$anim press', 48, false);
-		animation.addByPrefix('notePressed', '$anim confirm', 48, false);
-
-		playAnim('default');
+		parent.styleData.applyStrum(this, lane);
 	}
 
-	override function playAnim(name:String, ?forced:Bool = true) {
+	override function playAnim(name:String, ?forced:Bool = true, ?suffix:String = "") {
 		queueStatic = false;
-		isQuant = false;
+		luminColors = false;
 		color = 0xFFFFFFFF;
-		super.playAnim(name, forced);
+		active = true;
+		if (animation.exists(name + suffix)) animation.play(name + suffix, forced);
 		centerOffsets();
 		centerOrigin();
 	}
 
 	override public function drawComplex(camera:FlxCamera) {
-		prepareMatrix(camera);
-		camera.drawNote(_frame, _matrix, colorTransform, blend, antialiasing, isQuant);
+		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
+		prepareMatrix(_matrix, camera);
+		camera.drawNote(_frame, _matrix, colorTransform, blend, antialiasing, luminColors);
 	}
 
+	#if MODCHARTS_ALLOWED
 	public function drawCrazy(modchart:ModchartManager, strumline:Int, downscroll:Bool, field:Strumline) {
+		modchart.curLane = ID;
+		modchart.curField = strumline;
 		if (modchart.arrowPath != null)
 			modchart.arrowPath.drawPath(this, strumline, downscroll, field);
 
@@ -142,7 +152,8 @@ class StrumNote extends FunkinSprite {
 		x = modchartPos.x - width * 0.5;
 		y = modchartPos.y - height * 0.5;
 		final layer = modchartPos.z;
-		prepareMatrix(cameras[0]);
+		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
+		prepareMatrix(_matrix, cameras[0]);
 		_matrix.translate(cameras[0].scroll.x * scrollFactor.x, cameras[0].scroll.y * scrollFactor.y);
 		x = oldX;
 		y = oldY;
@@ -185,6 +196,7 @@ class StrumNote extends FunkinSprite {
 			vert.project();
 		}
 
-		modchart.pushDraw(strumline, field, cameras, scrollFactor, _frame, Note.modchartVertices, colorTransform, blend, antialiasing, isQuant, stealth, layer, true);
+		modchart.pushDraw(strumline, field, cameras, scrollFactor, _frame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer, true);
 	}
+	#end
 }

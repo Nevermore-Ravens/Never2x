@@ -21,12 +21,20 @@ class ComboNums extends FlxTypedSpriteGroup<Number> {
 		originalPos.set(x, y);
 	}
 
+	public function clearNums(?until:Int = 0) {
+		while (length > until) {
+			final num = members[0];
+			remove(num, true);
+			num.destroy();
+		}
+	}
+
 	public function display(comboNum:Int) {
 		if (Settings.data.comboAlpha <= 0) return;
 
 		final comboStr:String = '$comboNum'.lpad('0', default_startingDigits);
 		// remove any excess numbers
-		while (length > comboStr.length) remove(members[0], true);
+		clearNums(comboStr.length);
 
 		// then add any new ones
 		for (_ in 0...comboStr.length - length) insert(0, new Number());
@@ -45,10 +53,10 @@ class ComboNums extends FlxTypedSpriteGroup<Number> {
 			num.color = color;
 			num.visibility = Settings.data.comboAlpha;
 
-			FlxTween.cancelTweensOf(num);
-			FlxTween.tween(num, {visibility: 0}, 0.35, {startDelay: 0.75});
+			Main.tweenManager.cancelTweensOf(num);
+			Main.tweenManager.tween(num, {visibility: 0}, 0.35, {startDelay: 0.75});
 
-			FlxTween.tween(num, {y: originalPos.y}, 0.1, {
+			Main.tweenManager.tween(num, {y: originalPos.y}, 0.1, {
 				onComplete: function(_) num.y = originalPos.y,
 				ease: FlxEase.cubeIn
 			});
@@ -83,7 +91,7 @@ private class Number extends FunkinSprite {
 	}
 
 	override function destroy() {
-		FlxTween.cancelTweensOf(this);
+		Main.tweenManager.cancelTweensOf(this);
 		super.destroy();
 	}
 

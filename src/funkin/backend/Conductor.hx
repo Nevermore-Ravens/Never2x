@@ -49,10 +49,10 @@ class Conductor extends flixel.FlxBasic {
 
 	public static var volume(default, set):Float = 1.0;
 
-	public static var visualTime:Float = 0.0;
+	public static var time:Float = 0.0;
     public static var rawTime:Float = 0.0;
 
-	static var _lastTime:Float = 0.0;
+	//static var _lastTime:Float = 0.0;
 	static var _resyncTimer:Float = 0.0;
 
     public static var timingPoints(default, set):Array<TimingPoint> = [];
@@ -63,17 +63,18 @@ class Conductor extends flixel.FlxBasic {
 			return timingPoints;
 		}
 
-        var lastPoint:TimingPoint = {
+/*        var lastPoint:TimingPoint = {
 			bpm: 0,
 			beatsPerMeasure: 0
 		};
 
         // so that the end-user doesn't have to specify a bpm/numerator every time they add a new point for smth else
+		// nvm this shit is NOT worth the hassle
         for (point in value) {
             if (point.bpm <= 0) point.bpm = lastPoint.bpm;
             if (point.beatsPerMeasure <= 0) point.beatsPerMeasure = lastPoint.beatsPerMeasure;
             lastPoint = point;
-        }
+        }*/
         timingPoints.resize(0);
         timingPoints = value.copy();
 
@@ -88,7 +89,7 @@ class Conductor extends flixel.FlxBasic {
     @:isVar public static var mainVocals(get, set):FlxAudio;
     @:isVar public static var opponentVocals(get, set):FlxAudio;
 
-	public static final vocalResyncDiff:Float = 10.0;
+	public static final vocalResyncDiff:Float = 16.0;
 
 	public static var step:Int = 0;
 	public static var beat:Int = 0;
@@ -120,7 +121,7 @@ class Conductor extends flixel.FlxBasic {
         playing = false;
 		@:bypassAccessor
 		rawTime = 0.0;
-		visualTime = 0.0;
+		time = 0.0;
         _time = 0.0;
 
         floatStep = step = 0;
@@ -128,7 +129,10 @@ class Conductor extends flixel.FlxBasic {
         floatMeasure = measure = 0;
 
 		timingPoints = null;
-		vocals.destroy();
+		if (vocals != null) {
+			vocals.destroy();
+			vocals = null;
+		}
 		beatsPerMeasure = 4;
 		bpm = 120;
 
@@ -149,52 +153,87 @@ class Conductor extends flixel.FlxBasic {
 		_prevMeasure = measure;
 
 		syncTime(elapsed);
-		syncVocals();
 		syncBeats();
+
+		//if (inst != null && vocals != null && Math.abs(vocals.getActualTime() - inst.getActualTime()) > vocalResyncDiff * inst.getActualPitch())
+		if (inst != null && vocals != null && Math.abs(vocals.time - inst.time) > vocalResyncDiff * inst.pitch)
+			syncMusic();
 	}
 
 	public static var _time:Float = 0.0;
 	public static dynamic function syncTime(deltaTime:Float):Void {
 		if (!playing) return;
-		
-		deltaTime *= 1000;
+
 		if (inst == null || !inst.playing) {
-			_time += deltaTime;
+			_time += deltaTime * 1000;
 			rawTime = _time + offset;
-			visualTime = rawTime;
+			time = rawTime;
 			return;
 		}
-		
-		@:privateAccess
-		deltaTime = FlxG.game._elapsedMS;
 
-		visualTime = FlxMath.lerp(inst.time + offset, rawTime, Math.exp(-deltaTime * 5));
+		/*
 		rawTime = inst.time + offset;
+		
+		if (inst.time == _lastTime)
+		{
+			time += deltaTime;
+		}
+		else
+		{
+			if (Math.abs(rawTime - time) >= deltaTime)
+				time = rawTime;
+			else
+				time += deltaTime;
+
+			_lastTime = inst.time;
+		}
+		*/
+
+		time = inst.time + offset;
+		rawTime = inst.time + offset;
+
+		//time = FlxMath.lerp(inst.time + offset, rawTime, Math.exp(-deltaTime * 5));	
 	}
 
-	public static dynamic function syncVocals() {
-		if (!playing || inst == null || !inst.playing) return;
+	public static dynamic function syncMusic() {
+		if (!playing || inst == null) return;
 
-		final instTime:Float = inst.time;
-        for (vocal in vocals.members) {
-            if (vocal == null || !vocal.playing || vocal.length < instTime) continue;
-
-            final vocalDT:Float = Math.abs(vocal.time - instTime);
-            if (vocalDT > vocalResyncDiff) vocal.time = instTime;
-        }
+		final time:Float = _songPlaying ? inst.time : rawTime - offset;
+		inst.pause();
+		if (!_songPlaying) inst.time = time;
+		if (vocals != null) {
+			vocals.pause();
+			for (vocal in vocals.members) {
+				if (vocal.length <= time) continue;
+				vocal.time = time;
+			}
+			vocals.play();
+		}
+		inst.play();
 	}
 
     public static dynamic function syncBeats() {
         var point:TimingPoint = getPointFromTime(rawTime);
-		var visPoint:TimingPoint = getPointFromTime(visualTime);
-        if (point.bpm != bpm) bpm = point.bpm;
+		var visPoint:TimingPoint = getPointFromTime(time);
+		
+        if (point.bpm != 0 && point.bpm != bpm)
+			bpm = point.bpm;
+		if (point.beatsPerMeasure != 0 && point.beatsPerMeasure != beatsPerMeasure)
+			beatsPerMeasure = point.beatsPerMeasure;
 
-		// beatsPerMeasure
-		if (point.beatsPerMeasure != beatsPerMeasure) beatsPerMeasure = point.beatsPerMeasure;
+		if (timingPoints.length > 1) {
+			var beatDist = (rawTime - point.time) / crotchet;
+			floatBeat = getBeatFromTime(rawTime) + beatDist;
+			floatMeasure = getMeasureFromTime(rawTime) + (beatDist / beatsPerMeasure);
 
-        floatBeat = getBeatFromTime(rawTime) + ((rawTime - point.time) / crotchet);
-		visualBeat = getBeatFromTime(visualTime) + ((visualTime - visPoint.time) / crotchet);
-        floatMeasure = floatBeat / beatsPerMeasure;
+			visualBeat = getBeatFromTime(time) + ((time - visPoint.time) / crotchet);
+		} else {
+			floatBeat = rawTime / crotchet;
+			floatMeasure = floatBeat / beatsPerMeasure;
+
+			visualBeat = time / crotchet;
+		}
+        
 		floatStep = floatBeat * 4;
 
         var nextStep:Int = Math.floor(floatStep);
@@ -209,31 +248,26 @@ class Conductor extends flixel.FlxBasic {
 	public static function stop() {
 		playing = false;
 		_songPlaying = false;
-		
-		inst.stop();
-		vocals.stop();
+
+		if (inst != null) inst.stop();
+		if (vocals != null) vocals.stop();
 	}
 
 	public static function play() {
 		playing = true;
+		syncMusic();
 		_songPlaying = true;
-
-		inst.play();
-		vocals.play();
 	}
 
 	public static function pause() {
 		playing = false;
-		inst.pause();
-		vocals.pause();
+		if (inst != null) inst.pause();
+		if (vocals != null) vocals.pause();
 	}
 
 	public static function resume() {
 		playing = true;
-		if (!_songPlaying) return;
-
-		inst.play();
-		vocals.play();
+		if (_songPlaying) syncMusic();
 	}
 
     static function set_bpm(value:Float):Float {
@@ -256,7 +290,9 @@ class Conductor extends flixel.FlxBasic {
 	}
 
 	static function set_volume(value:Float):Float {
-		inst.volume = vocals.volume = value;
+		inst.volume = value;
+		if (vocals != null) vocals.volume = value;
+
 		return volume = value;
 	}
 
@@ -284,10 +320,30 @@ class Conductor extends flixel.FlxBasic {
 		return (60 / bpm) * 1000;
 	}
 
+    public static function getMeasureFromTime(timeAt:Float, ?useOffset:Bool = true):Float {
+		var measureFromTime:Float = 0;
+		var lastPointTime:Float = useOffset ? offset : 0;
+		
+        var curBPM:Float = timingPoints[0].bpm;
+		var curPerMeasure:Float = timingPoints[0].beatsPerMeasure != 0 ? timingPoints[0].beatsPerMeasure : 4;
+
+        for (point in timingPoints) {
+			var pointTime:Float = (useOffset ? point.offsettedTime : point.time);
+			if (timeAt >= pointTime) {
+				measureFromTime += ((pointTime - lastPointTime) / calculateCrotchet(curBPM)) / curPerMeasure;
+				lastPointTime = pointTime;
+
+				curBPM = point.bpm != 0 ? point.bpm : curBPM;
+				curPerMeasure = point.beatsPerMeasure != 0 ? point.beatsPerMeasure : curPerMeasure;
+			} else break;
+        }
+
+        return measureFromTime;
+    }
+
     public static function getBeatFromTime(timeAt:Float, ?useOffset:Bool = true):Float {
 		var beatFromTime:Float = 0;
 		var lastPointTime:Float = useOffset ? offset : 0;
-		if (timingPoints.length <= 1) return beatFromTime;
 
         var curBPM:Float = timingPoints[0].bpm;
 
@@ -297,7 +353,7 @@ class Conductor extends flixel.FlxBasic {
 				beatFromTime += (pointTime - lastPointTime) / calculateCrotchet(curBPM);
 				lastPointTime = pointTime;
 
-				curBPM = point.bpm;
+				curBPM = point.bpm != 0 ? point.bpm : curBPM;
 			} else break;
         }
 
@@ -308,9 +364,6 @@ class Conductor extends flixel.FlxBasic {
         var lastPoint:TimingPoint = {};
         if (timingPoints.length == 0) return lastPoint;
 		lastPoint = timingPoints[0];
-
-		// to prevent running a for loop just for one object
-		if (timingPoints.length == 1) return timingPoints[0];
 
         for (i => point in timingPoints) {
             if (timeAt >= (useOffset ? point.offsettedTime : point.time)) lastPoint = point;

@@ -11,8 +11,9 @@ class FunkinState extends FlxState {
 	
 	override function create() {
 		super.create();
+		FlxG.camera.bgColor.alpha = 0;
 		//Conductor.reset();
-		Paths.clearUnusedMemory();
+		//Paths.clearUnusedMemory();
 
 		Conductor.onStep.add(stepHit);
 		Conductor.onBeat.add(beatHit);

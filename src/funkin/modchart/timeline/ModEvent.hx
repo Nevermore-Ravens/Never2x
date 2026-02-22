@@ -9,6 +9,7 @@ class ModEvent extends BaseEvent {
 	public var ease:Float->Float;
 
 	public var mod:BaseModifier;
+	public var lane:Int = -1;
 	public var index:Int = 0;
 	public var startValue:Float = Math.NaN;
 	public var endValue:Float;
@@ -23,12 +24,14 @@ class ModEvent extends BaseEvent {
 		
 		this.mod = redirect.toInstance;
 		this.endValue = value;
+		this.lane = redirect.lane;
 		this.index = redirect.index;
 		this.strumline = strumline;
 		this.startValue = startVal ?? Math.NaN;
 	}
 
 	override function start() {
+		mod.parent.curLane = lane;
 		if(Math.isNaN(startValue))
 			this.startValue = mod.getValue(index, strumline < 0 ? 0 : strumline);
 		
@@ -37,6 +40,7 @@ class ModEvent extends BaseEvent {
 	}
 
 	override function tick(curBeat:Float) {
+		mod.parent.curLane = lane;
 		if (length <= 0){
 			mod.setValue(index, endValue, strumline);
 		}else{

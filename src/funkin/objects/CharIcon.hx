@@ -5,6 +5,11 @@ import flixel.graphics.FlxGraphic;
 class CharIcon extends FunkinSprite {
 	public var name:String;
 	public var player(default, set):Bool;
+	
+	// how many icons are in the grid
+	// yes this allows for winning icons im so psych engine
+	// all of them have to be in a row never more than one row
+	var count:Int = 2;
 
 	var iconOffsets:Array<Float> = [0, 0];
 
@@ -19,7 +24,7 @@ class CharIcon extends FunkinSprite {
 		var graphic:FlxGraphic = Paths.image('icons/$value');
 		var size:Float = Math.round(graphic.width / graphic.height);
 
-		loadGraphic(graphic, true, 150, 150);
+		loadGraphic(graphic, true, Std.int(graphic.width / count), graphic.height);
 		animation.add(value, [for (i in 0...frames.frames.length) i], 0, false);
 		animation.play(value);
 

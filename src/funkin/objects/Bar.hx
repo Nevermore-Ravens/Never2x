@@ -4,8 +4,6 @@ import flixel.math.FlxRect;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 
-// taken from psych 
-// but slightly edited with some fixes
 class Bar extends FlxSpriteGroup {
 	public var leftBar:FlxSprite;
 	public var rightBar:FlxSprite;
@@ -21,33 +19,40 @@ class Bar extends FlxSpriteGroup {
 	public var barHeight(default, set):Int = 1;
 	public var barOffset:FlxPoint = new FlxPoint(0, 0);
 
-	public function new(x:Float, y:Float, valueFunction:Void -> Float = null, boundX:Float = 0, boundY:Float = 1) {
+	public function new(x:Float, y:Float, valueFunction:Void -> Float = null, boundX:Float = 0, boundY:Float = 1, bgImg:String = 'ui/health border', fillImg:String = 'ui/healthBar', bgBehind:Bool = false) {
 		super(x, y);
 		
 		this.valueFunction = valueFunction;
 		setBounds(boundX, boundY);
 		
-		bg = new FlxSprite().loadGraphic(Paths.image('ui/health border'));
+		bg = new FlxSprite().loadGraphic(Paths.image(bgImg));
 		barWidth = Math.floor(bg.width);
 		barHeight = Math.floor(bg.height);
 
-		leftBar = new FlxSprite().loadGraphic(Paths.image('ui/healthbar'));
-		rightBar = new FlxSprite().loadGraphic(Paths.image('ui/healthbar'));
+		leftBar = new FlxSprite().loadGraphic(Paths.image(fillImg));
+		rightBar = new FlxSprite().loadGraphic(Paths.image(fillImg));
 
+		if (bgBehind)
+			add(bg);
 		add(leftBar);
 		add(rightBar);
-		add(bg);
+		if (!bgBehind)
+			add(bg);
+
 		regenerateClips();
 	}
 
-	override function update(elapsed:Float) {
+	public function updatePercent() {
 		if (valueFunction == null) {
 			percent = 0.0;
-			super.update(elapsed);
 			return;
 		}
 
 		percent = FlxMath.remapToRange(FlxMath.bound(valueFunction(), bounds.min, bounds.max), bounds.min, bounds.max, 0, 100);
+	}
+
+	override function update(elapsed:Float) {
+		updatePercent();
 		super.update(elapsed);
 	}
 	
@@ -65,8 +70,8 @@ class Bar extends FlxSpriteGroup {
 		if (leftBar == null || rightBar == null) return;
 
 		var leftSize:Float = 0;
-		if (leftToRight) leftSize = FlxMath.lerp(0, barWidth, percent / 100);
-		else leftSize = FlxMath.lerp(0, barWidth, 1 - percent / 100);
+		if (leftToRight) leftSize = FlxMath.lerp(0, barWidth, percent * 0.01);
+		else leftSize = FlxMath.lerp(0, barWidth, 1 - percent * 0.01);
 
 		leftBar.clipRect.width = leftSize;
 		leftBar.clipRect.height = barHeight;

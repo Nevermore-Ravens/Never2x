@@ -34,16 +34,21 @@ class JudgementSpr extends FunkinSprite {
 	public function display(timing:Float) {
 		if (Settings.data.judgementAlpha <= 0) return;
 
+		Main.tweenManager.cancelTweensOf(this);
+		Main.tweenManager.cancelTweensOf(this.scale);
 		animation.frameIndex = Judgement.getIDFromTiming(timing);
+		if (animation.frameIndex == 0 && Settings.data.hideHighest) {
+			visibility = 0;
+			return;
+		}
+
 		centerOffsets();
 		visibility = Settings.data.judgementAlpha;
 		scale.set(0.45, 0.45);
 
-		FlxTween.cancelTweensOf(this);
-		FlxTween.cancelTweensOf(this.scale);
 
-		FlxTween.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
-		FlxTween.tween(this.scale, {x: 0.4, y: 0.4}, 0.2, {ease: FlxEase.cubeIn});
+		Main.tweenManager.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
+		Main.tweenManager.tween(this.scale, {x: 0.4, y: 0.4}, 0.2, {ease: FlxEase.cubeIn});
 	}
 
 	override function draw():Void {

@@ -60,19 +60,20 @@ class OptionsState extends FunkinState {
 			new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"])),
 			new Option('scroll_speed', 'scroll_speed_desc', "scrollSpeed", FloatOption(0.5, 7, 0.05)),
 			{
-				var opt = new Option("note_skin", "<NO-LANG>What texture the notes will use in game.", "noteSkin", ListOption(['camv2', 'camv1', 'funkin', 'circle','voltexArrow', 'voltexCircle', 'voltexBar', 'holofunk']));
-				opt.formatText = function(_) {
-					return switch (opt.value) {
-						case 'camv2': "Cam. V2";
-						case 'camv1': "Cam. V1";
-						case 'funkin': "Funkin";
-						case 'circle': "Circles";
-						case 'voltexArrow': "FNVX (Arrow)";
-						case 'voltexCircle': "FNVX (Circle)";
-						case 'voltexBar': "FNVX (Bar)";
-						case 'holofunk': "Holofunk";
-						default: "how'd you get out the list";
+				final possible: Array<String> = [];
+				final names: Map<String, String> = [];
+				for (path in Paths.readDirectory("data/noteSkins"))
+					if (path.endsWith(".json5") || path.endsWith(".json")) {
+						var name:String = Path.withoutDirectory(Path.withoutExtension(path));
+						if(name == "default" || possible.contains(name)) continue;
+						var data = funkin.backend.NoteSkin.get(name);
+						possible.push(name);
+						names.set(name, data.displayName);
 					}
+	
+				var opt = new Option("note_skin", "<NO-LANG>What texture the notes will use in game.", "noteSkin", ListOption(possible));
+				opt.formatText = function(_) {
+					return names[opt.value];
 				};
 				opt;
 			},

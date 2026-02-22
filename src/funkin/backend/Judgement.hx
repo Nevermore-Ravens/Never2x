@@ -2,44 +2,7 @@ package funkin.backend;
 
 @:structInit
 class Judgement {
-	public static var list:Array<Judgement> = [
-		{
-			name: 'marv', 
-			timing: 22.5, 
-			accuracy: 100, 
-			health: 2.5, 
-			splashes: true, color: 0xFFD76058
-		},
-		{
-			name: 'sick', 
-			timing: 45, 
-			accuracy: 100, 
-			health: 2.5, 
-			splashes: true, color: 0xFFF9FF5C
-		},
-		{
-			name: 'good', 
-			timing: 90, 
-			accuracy: 85,
-			health: 1,
-			color: 0xFF006EFF
-		},
-		{
-			name: 'bad', 
-			timing: 135, 
-			accuracy: 45,
-			health: -6, 
-			color: 0xFFFF7707
-		},
-		{
-			name: 'shit', 
-			timing: 180, 
-			accuracy: 30, 
-			health: -10,
-			breakCombo: true, 
-			color: 0xFF707070
-		}
-	];
+	public static var list:Array<Judgement>;
 
 	public static var max(get, never):Judgement;
 	static function get_max():Judgement return list[list.length - 1];
@@ -82,8 +45,45 @@ class Judgement {
 		return judge;
 	}
 	
-	inline public static function resetHits():Void {
-		for (judge in list) judge.hits = 0;
+	inline public static function reset():Void {
+		list = [
+			{
+				name: 'marv', 
+				timing: 22.5, 
+				accuracy: 100, 
+				health: 2.5, 
+				splashes: true, color: 0xFFD76058
+			},
+			{
+				name: 'sick', 
+				timing: 45, 
+				accuracy: 100, 
+				health: 2.5, 
+				splashes: true, color: 0xFFF9FF5C
+			},
+			{
+				name: 'good', 
+				timing: 90, 
+				accuracy: 85,
+				health: 1,
+				color: 0xFF006EFF
+			},
+			{
+				name: 'bad', 
+				timing: 135, 
+				accuracy: 45,
+				health: -6, 
+				color: 0xFFFF7707
+			},
+			{
+				name: 'shit', 
+				timing: 180, 
+				accuracy: 30, 
+				health: -10,
+				breakCombo: true, 
+				color: 0xFF707070
+			}
+		];
 	}
 
 	public function toString():String {

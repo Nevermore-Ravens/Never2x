@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import funkin.backend.NoteSkin.NoteSkinStyle;
 import funkin.objects.Note.NoteData;
 import funkin.modchart.ModchartManager;
 import funkin.objects.Strumline;
@@ -20,16 +21,10 @@ class Sustain extends Note {
 	var tailAnim:FlxAnimation;
 	var tailHeight:Float = 0;
 
-	// set to false by default
-	// because it causes some weird overlapping bug if it's set to true
-	// might try to workaround this in the future
-	public var holdAntialiasing:Bool = false;
-	public var holdSuffix:String = " hold piece";
-	public var tailSuffix:String = " hold end";
-
 	// public var stealthBottom:Float = 0;
 
 	public var tapHolding:Bool = false;
+	public var coyoteAlpha:Float = 0.7;
 	public var coyoteHitMult:Float = 1.0;
 	public var coyoteTimer:Float = 0.175;
 	public var timeOffset:Float = 0;
@@ -39,11 +34,6 @@ class Sustain extends Note {
 	static var curStealthColor:Vector3 = new Vector3();
 	static var nextStealthColor:Vector3 = new Vector3();
 	static var nextScale:FlxPoint = new FlxPoint();
-
-	public var parent(get, never):Note;
-	function get_parent():Note {
-		return data.parent.connectedNote;
-	}
 
 	// stupid shit to make texture setting not break this
 	override function updateHitbox() {}
@@ -64,18 +54,15 @@ class Sustain extends Note {
 	}
 
 	override function set_type(value:String):String {
-		var textureToSet:String = '';
+		type = value;
+		var finalSkin:String = '';
 		coyoteHitMult = 1.0;
-		holdSuffix = " hold piece";
-		tailSuffix = " hold end";
 		animSuffix = '';
 		tapHolding = false;
 		switch (value) {
 			case 'Roll':
 				tapHolding = true;
 				coyoteHitMult = 1.75;
-				holdSuffix = " roll piece";
-				tailSuffix = " roll end";
 
 			case 'GF Sing':
 				noAnimation = true;
@@ -84,18 +71,17 @@ class Sustain extends Note {
 				animSuffix = '-alt';
 		}
 
-		texture = textureToSet;
-		return type = value;
+		skin = finalSkin;
+		return type;
 	}
 
-	override function loadAnims(colour:String) {
-		animation.addByPrefix('hold', colour + holdSuffix);
-		animation.addByPrefix('holdend', colour + tailSuffix);
+	override function reload(data:NoteSkinStyle) {
+		data.applySustain(this);
 
 		holdAnim = animation.getByName("hold");
 		tailAnim = animation.getByName("holdend");
-		holdHeight = frames.frames[holdAnim.frames[0]].sourceSize.y;
-		tailHeight = frames.frames[tailAnim.frames[0]].sourceSize.y;
+		holdHeight = frames.frames[holdAnim.frames[0]].frame.height;
+		tailHeight = frames.frames[tailAnim.frames[0]].frame.height;
 
 		final divisionsFloat:Float = ((height - tailHeight * scale.y) / (holdHeight * scale.y)) / Settings.data.holdGrain;
 		sustainDivisions = Math.ceil(divisionsFloat);
@@ -104,10 +90,10 @@ class Sustain extends Note {
 
 	override function setup(data:NoteData) {
 		super.setup(data);
+		coyoteAlpha = 0.7;
 		lastScaleY = -1; // basically these two will force it to recalc height.
 		lastSustainScale = -1;
 		isSustain = true;
-		holdAntialiasing = antialiasing;
 		flipY = Settings.data.downscroll;
 		coyoteTimer = 0.175 * coyoteHitMult * FlxG.timeScale;
 		timeOffset = 0;
@@ -120,7 +106,7 @@ class Sustain extends Note {
 		distance = (hitTime + timeOffset) * 0.45 * scrollSpeed;
 		distance *= downscroll ? -1 : 1;
 
- 		/*if (copyAlpha)*/ alpha = strum.alpha * multAlpha;
+ 		if (copyAlpha) alpha = strum.alpha * multAlpha;
 
 		if (copyX)
 			x = strum.x + strum.width * 0.5;
@@ -138,11 +124,11 @@ class Sustain extends Note {
 	}
 
 	override public function draw() {
-		if (alpha == 0 || height <= 0)
+		if (alpha == 0 || coyoteAlpha <= 0 || height <= 0)
 			return;
 
-		holdFrame = frames.frames[holdAnim.frames[Math.floor(Math.abs(Conductor.visualTime * 0.001 * holdAnim.frameRate) % holdAnim.frames.length)]];
-		tailFrame = frames.frames[tailAnim.frames[Math.floor(Math.abs(Conductor.visualTime * 0.001 * tailAnim.frameRate) % tailAnim.frames.length)]];
+		holdFrame = frames.frames[holdAnim.frames[Math.floor(Math.abs(Conductor.time * 0.001 * holdAnim.frameRate) % holdAnim.frames.length)]];
+		tailFrame = frames.frames[tailAnim.frames[Math.floor(Math.abs(Conductor.time * 0.001 * tailAnim.frameRate) % tailAnim.frames.length)]];
 		for (camera in cameras) {
 			if (!camera.visible || !camera.exists)
 				continue;
@@ -180,7 +166,7 @@ class Sustain extends Note {
 			Note.finalVertices[5] = Note.finalVertices[7] = y + curY;
 
 			if (Math.min(Note.finalVertices[1], Note.finalVertices[5]) <= camera.viewMarginBottom && Math.max(Note.finalVertices[1], Note.finalVertices[5]) >= camera.viewMarginTop)
-				camera.drawNoteVertices(holdFrame, Note.finalVertices, colorTransform, blend, holdAntialiasing, isQuant, 0, colorTransform.alphaMultiplier);
+				camera.drawNoteVertices(holdFrame, Note.finalVertices, colorTransform, blend, antialiasing, luminColors, 0, colorTransform.alphaMultiplier * coyoteAlpha);
 		}
 		holdFrame.frame.y = backupHoldY;
 		holdFrame.frame.height = backupHoldHeight;
@@ -194,16 +180,19 @@ class Sustain extends Note {
 		Note.finalVertices[5] = Note.finalVertices[7] = y + curY + (tailFrame.frame.height * scale.y * yMult);
 
 		if (Math.min(Note.finalVertices[1], Note.finalVertices[5]) <= camera.viewMarginBottom && Math.max(Note.finalVertices[1], Note.finalVertices[5]) >= camera.viewMarginTop)
-			camera.drawNoteVertices(tailFrame, Note.finalVertices, colorTransform, blend, antialiasing, isQuant, 0, colorTransform.alphaMultiplier);
+			camera.drawNoteVertices(tailFrame, Note.finalVertices, colorTransform, blend, antialiasing, luminColors, 0, colorTransform.alphaMultiplier * coyoteAlpha);
 
 		tailFrame.frame.y = backupTailY;
 		tailFrame.frame.height = backupTailHeight;
 	}
 
+	#if MODCHARTS_ALLOWED
 	override public function drawCrazy(modchart:ModchartManager, downscroll:Bool, field:Strumline) {
-		if (alpha == 0 || height <= 0)
+		if (alpha == 0 || coyoteAlpha  <= 0 || height <= 0)
 			return;
 
+		final ogAlpha = colorTransform.alphaMultiplier;
+		colorTransform.alphaMultiplier *= coyoteAlpha;
 		final strumline = data.player;
 		final yMult = downscroll ? -1 : 1;
 		final oldScaleX = scale.x;
@@ -215,11 +204,14 @@ class Sustain extends Note {
 		var angleUp:Float = 0;
 		var angleDown:Float = 0;
 
+		modchart.curLane = data.lane;
+		modchart.curField = strumline;
+
 		var curDist = distance * yMult;
 		var curY = 0.0;
 
-		holdFrame = frames.frames[holdAnim.frames[Math.floor(Math.abs(Conductor.visualTime * 0.001 * holdAnim.frameRate) % holdAnim.frames.length)]];
-		tailFrame = frames.frames[tailAnim.frames[Math.floor(Math.abs(Conductor.visualTime * 0.001 * tailAnim.frameRate) % tailAnim.frames.length)]];
+		holdFrame = frames.frames[holdAnim.frames[Math.floor(Math.abs(Conductor.time * 0.001 * holdAnim.frameRate) % holdAnim.frames.length)]];
+		tailFrame = frames.frames[tailAnim.frames[Math.floor(Math.abs(Conductor.time * 0.001 * tailAnim.frameRate) % tailAnim.frames.length)]];
 		
 		var newDist: Float = modchart.adjustDistance(this, curDist, data.lane, strumline, field, SUSTAIN);
 		final rawY:Float = (y - distance);
@@ -273,8 +265,10 @@ class Sustain extends Note {
 				FlxMath.lerp(modchartPosLow.z, 0, superstraight)
 			);
 			
-			if (spiral)
+			if (spiral) {
 				angleDown = Math.atan2(modchartPosLow.y - modchartPos.y, modchartPosLow.x - modchartPos.x);
+				angleUp += Math.abs(angleDown - angleUp) > 180 ? Math.PI * 2 : 0;
+			}
 
 			return modchartPosLow.z;
 		}
@@ -328,7 +322,7 @@ class Sustain extends Note {
 			Note.modchartVertices[3].project();
 
 			modchart.stealthColor.copyFrom(curStealthColor);
-			modchart.pushDraw(strumline, field, cameras, scrollFactor, holdFrame, Note.modchartVertices, colorTransform, blend, holdAntialiasing, isQuant, stealth, layer);
+			modchart.pushDraw(strumline, field, cameras, scrollFactor, holdFrame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer);
 			modchart.stealthColor.copyFrom(nextStealthColor);
 
 			Note.modchartVertices[0].copyFrom(Note.modchartVertices[2]);
@@ -363,13 +357,15 @@ class Sustain extends Note {
 		modchart.adjustVertex(this, Note.modchartVertices[3], modchartPos, newDist, curDist, data.lane, strumline, field, SUSTAIN);
 		Note.modchartVertices[3].project();
 
-		modchart.pushDraw(strumline, field, cameras, scrollFactor, tailFrame, Note.modchartVertices, colorTransform, blend, antialiasing, isQuant, stealth, layer);
+		modchart.pushDraw(strumline, field, cameras, scrollFactor, tailFrame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer);
 
 		tailFrame.frame.y = backupTailY;
 		tailFrame.frame.height = backupTailHeight;
 
 		scale.set(oldScaleX, oldScaleY);
+		colorTransform.alphaMultiplier = ogAlpha;
 	}
+	#end
 
 	override function set_height(value:Float) {
 		if (height == value) return height;
@@ -397,8 +393,8 @@ class Sustain extends Note {
 		var curDist = distance * yMult;
 		var curY = 0.0;
 
-		holdFrame = frames.frames[holdAnim.frames[Math.floor(Math.abs(Conductor.visualTime * 0.001 * holdAnim.frameRate) % holdAnim.frames.length)]];
-		tailFrame = frames.frames[tailAnim.frames[Math.floor(Math.abs(Conductor.visualTime * 0.001 * tailAnim.frameRate) % tailAnim.frames.length)]];
+		holdFrame = frames.frames[holdAnim.frames[Math.floor(Math.abs(Conductor.time * 0.001 * holdAnim.frameRate) % holdAnim.frames.length)]];
+		tailFrame = frames.frames[tailAnim.frames[Math.floor(Math.abs(Conductor.time * 0.001 * tailAnim.frameRate) % tailAnim.frames.length)]];
 		
 		var newDist: Float = modchart.adjustDistance(this, curDist, data.lane, strumline, field, SUSTAIN);
 		final rawY:Float = (y - distance);
@@ -482,7 +478,7 @@ class Sustain extends Note {
 			modchart.adjustVertex(this, Note.modchartVertices[3], modchartPos, newDist, curDist, data.lane, strumline, field, SUSTAIN);
 			Note.modchartVertices[3].project();
 
-			modchart.pushDraw(strumline, field, cameras, scrollFactor, holdFrame, Note.modchartVertices, colorTransform, blend, holdAntialiasing, isQuant, stealth, layer);
+			modchart.pushDraw(strumline, field, cameras, scrollFactor, holdFrame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer);
 
 			Note.modchartVertices[0].copyFrom(Note.modchartVertices[2]);
 			Note.modchartVertices[1].copyFrom(Note.modchartVertices[3]);
@@ -536,7 +532,7 @@ class Sustain extends Note {
 		modchart.adjustVertex(this, Note.modchartVertices[3], modchartPos, newDist, curDist, data.lane, strumline, field, SUSTAIN);
 		Note.modchartVertices[3].project();
 
-		modchart.pushDraw(strumline, field, cameras, scrollFactor, tailFrame, Note.modchartVertices, colorTransform, blend, antialiasing, isQuant, stealth, layer);
+		modchart.pushDraw(strumline, field, cameras, scrollFactor, tailFrame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer);
 
 		tailFrame.frame.y = backupTailY;
 		tailFrame.frame.height = backupTailHeight;

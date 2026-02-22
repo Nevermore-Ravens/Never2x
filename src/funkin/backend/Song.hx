@@ -1,5 +1,7 @@
 package funkin.backend;
 
+import haxe.io.Path;
+import moonchart.formats.fnf.FNFVSlice;
 import funkin.backend.Meta;
 import funkin.objects.Note;
 import funkin.objects.Strumline;
@@ -12,11 +14,12 @@ typedef JsonChart = {
 	var notes:Array<JsonSection>;
 	var speed:Float;
 }
-typedef JsonSection = {sectionNotes:Array<Dynamic>, mustHitSection:Bool};
+typedef JsonSection = {sectionNotes:Array<Dynamic>, mustHitSection:Bool, ?changeBPM:Bool, ?bpm:Float, ?sectionBeats:Float, ?lengthInSteps:Float};
 
 typedef Chart = {
 	var notes:Array<NoteData>;
 	var speed:Float;
+	var ?format:DynamicFormat;
 	var ?meta:MetaFile;
 }
 
@@ -28,32 +31,145 @@ class Song {
 		}
 	}
 
-	public static function loadFromPath(path:String):Chart {
+	public static function loadFromPath(path:String, ?meta:MetaFile):Chart {
 		var file:Chart = createDummyFile();
+		file.meta = meta;
 
 		if (!FileSystem.exists(path)) return file;
 
+		inline function tryBpmChanges(basic:DynamicFormat, offsetMult:Float) {
+			if (meta == null) return;
+			if (meta.timingPoints != null && meta.timingPoints.length > 0) return;
+			meta.timingPoints ??= [];
+
+			final basicMeta = basic.getChartMeta();
+			meta.offset = basicMeta.offset * offsetMult;
+			for (bpm in basicMeta.bpmChanges) {
+				meta.timingPoints.push({
+					time: bpm.time,
+					bpm: bpm.bpm,
+					beatsPerMeasure: Std.int(bpm.beatsPerMeasure)
+				});
+			}
+		}
+
 		var rawChart:JsonChart = switch haxe.io.Path.extension(path) {
 			case 'json':
-				cast Json.parse(File.getContent(path)).song;
+				var result:Dynamic = null;
+				var json = Json.parse(File.getContent(path));
+				if (json.scrollSpeed != null && json.version != null) {
+					// VSLICE
+					if (meta == null) {
+						Sys.println("NOPE NOT PARSING VSLICE WITHOUT A META FILE");
+						return file;
+					}
+
+					final diff = Path.withoutExtension(Path.withoutDirectory(path));
+					var vslice = new FNFVSlice(cast json, {
+						timeFormat: "ms",
+						artist: "um",//meta.instComposer + " & " + meta.vocalComposer,
+						charter: "um",//meta.charter.get(diff),
+						generatedBy: "Never2x",
+						version: "2.2.4",
+						looped: false,
+						playData: {
+							album: "um",//meta.album,
+							previewStart: 0,
+							previewEnd: 5000,
+							ratings: {},
+							characters: {
+								player: meta.player,
+								girlfriend: meta.spectator,
+								opponent: meta.enemy,
+
+								// if this gives you compiler errors, you may need to update moonchart.
+								instrumental: "", altInstrumentals: [],
+								opponentVocals: [], playerVocals: []
+							},
+							difficulties: [diff],
+							songVariations: [],
+							noteStyle: "funkin",
+							stage: meta.stage
+						},
+						songName: meta.songName,
+						offsets: {
+							instrumental: 0,
+							vocals: {},
+							altInstrumentals: {},
+							altVocals: {}
+						},
+						timeChanges: [
+							for (bpm in meta.timingPoints)
+								{t: bpm.time, bpm: bpm.bpm, n: bpm.beatsPerMeasure, d: 4}
+						]
+					});
+					vslice.diffs = [diff];
+					file.format = vslice;
+					var fnf:CamelliaChart = new CamelliaChart();
+					fnf.bakedOffset = false;
+					fnf.offsetHolds = false;
+					result = fnf.fromFormat(vslice).data.song;
+				} else {
+					final form = new CamelliaChart();
+					form.data = cast json;
+					file.format = form;
+					json = json.song;
+					result = json;
+				}
+
+				if (meta != null && (meta.timingPoints == null || meta.timingPoints.length <= 0)) {
+					meta.timingPoints ??= [];
+					final sects:Array<JsonSection> = cast json.notes;
+
+					var curTime:Float = 0;
+					var curBpm = json.bpm;
+					meta.timingPoints.push({
+						time: curTime,
+						bpm: curBpm,
+						beatsPerMeasure: 4
+					});
+					for (section in sects) {
+						if (section.changeBPM == true && (section.bpm ?? 0.0) > 0) { // using == true in case theres a null changeBPM
+							curBpm = section.bpm;
+							meta.timingPoints.push({
+								time: curTime,
+								bpm: curBpm,
+								beatsPerMeasure: 4
+							});
+						}
+
+						final len = section.sectionBeats ?? ((section.lengthInSteps ?? 16) * 0.25);
+						curTime += Conductor.calculateCrotchet(curBpm) * len;
+					}
+				}
+				cast result;
 
 			case 'sm':
 				var fnf:CamelliaChart = new CamelliaChart();
 				fnf.bakedOffset = false;
 				fnf.offsetHolds = false;
-				cast fnf.fromFormat(new StepMania().fromFile(path)).data.song;
+				var sm:StepMania = new StepMania().fromFile(path);
+				file.format = sm;
+				tryBpmChanges(sm, 1);
+				cast fnf.fromFormat(sm).data.song;
 
 			case 'ssc':
 				var fnf:CamelliaChart = new CamelliaChart();
 				fnf.bakedOffset = false;
 				fnf.offsetHolds = false;
-				cast fnf.fromFormat(new StepManiaShark().fromFile(path)).data.song;
+				var ssc:StepManiaShark = new StepManiaShark().fromFile(path);
+				file.format = ssc;
+				tryBpmChanges(ssc, 1);
+				cast fnf.fromFormat(ssc).data.song;
 
 			case 'osu':
 				var fnf:CamelliaChart = new CamelliaChart();
 				fnf.bakedOffset = false;
 				fnf.offsetHolds = false;
-				cast fnf.fromFormat(new CamOsuChart().fromFile(path)).data.song;
+				final osu:CamOsuChart = cast new CamOsuChart().fromFile(path);
+				file.format = osu;
+				tryBpmChanges(osu, 0); // AudioLeadIn is NOT a song offset.
+				cast fnf.fromFormat(osu).data.song;
 
 			default: null;
 		}
@@ -77,10 +193,7 @@ class Song {
 	}
 
 	public static function load(song:String, diff:String):Chart {
-		var file:Chart = loadFromPath(Paths.get('songs/$song/${getFile(song, diff)}'));
-		file.meta = Meta.load(song);
-
-		return file;
+		return loadFromPath(Paths.get('songs/$song/${getFile(song, diff)}'), Meta.load(song));
 	}
 
 	static var formats:Array<String> = ['json', 'sm', 'ssc', 'osu'];
@@ -149,6 +262,7 @@ class CamelliaChart extends moonchart.formats.fnf.legacy.FNFLegacy {
     	super();
 		noteTypeResolver.register("Roll", BasicNoteType.ROLL);
 		noteTypeResolver.register("Mine", BasicNoteType.MINE);
+		noteTypeResolver.register('Cheer', CamOsuChart.encodeType(4));
 		noteTypeResolver.register("Alt Animation", CamOsuChart.encodeType(8));
     	noteTypeResolver.register("this is a duel note", CamOsuChart.encodeType(10));
 		noteTypeResolver.register("this is a uufo only note", CamOsuChart.encodeType(2));

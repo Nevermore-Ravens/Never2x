@@ -211,7 +211,7 @@ class HitErrorBar extends FlxSpriteGroup
 		trianglePointer.alpha = 0.7;
 
         lastMS = currentMS;
-		currentMS = Math.POSITIVE_INFINITY;
+		currentMS = Judgement.max.timing;
 
 		triangleRawPosition = timingBar.x + timingBar.width - 1.5;
 		missHitNote.revive();

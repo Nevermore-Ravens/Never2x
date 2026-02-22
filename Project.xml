@@ -18,19 +18,36 @@
 	<define name="DISCORD_ALLOWED"/>
 	<define name="AWARDS_ALLOWED"/>
 	<define name="WATERMARKS_ALLOWED"/>
+	<define name="MODCHARTS_ALLOWED"/>
 
 	<!-- makes errors show exactly what the issue is instead of being vague -->
 	<haxedef name="message.reporting" value="pretty" />
 
 	<!-- codebase -->
+	<set name="BUILD_DIR" value="export/debug" if="debug" />
+	<set name="BUILD_DIR" value="export/release" unless="debug" />
+	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+
 	<source path="src" />
-	<assets path="assets" type="template"/>
-	<assets path="addons" type="template" if="ADDONS_ALLOWED"/>
+	
+	<!-- use templates for assets -->
+	<section unless="mac">
+		<assets path="assets" type="template"/>
+		<assets path="addons" type="template" if="ADDONS_ALLOWED"/>
+	</section>
+	
+	<!--
+		...unless we're on macOS, then don't because lime is stupid and places
+		these folders in the wrong location in the final .app file
+	-->
+	<section if="mac">
+		<assets path="assets"/>
+		<assets path="addons" if="ADDONS_ALLOWED"/>
+	</section>
 
 	<!-- libraries -->
-	<haxelib name="lime" version="8.1.2" />
-	<haxelib name="openfl" version="9.3.3" />
-	<haxelib name="flixel" version="5.5.0" />
+	<haxelib name="openfl" version="9.5.0" />
+	<haxelib name="flixel" version="git" />
 	<haxelib name="flixel-addons" version="3.0.2"/>
 	<haxelib name="hxdiscord_rpc" version="1.2.4" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxjson5"/>
@@ -42,13 +59,16 @@
 	<haxelib name="hscript" if="debug" /> <!-- for debugging -->
 
 	<!-- miscellaneous -->
-	<set name="BUILD_DIR" value="export/debug" if="debug" />
-	<set name="BUILD_DIR" value="export/release" unless="debug" />
-	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+	<!-- let the macro run on the modifiers (TODO: look more on genericBuild, it may help with my issue which this fixes)-->
+	<haxeflag name="--macro" value="haxe.macro.Compiler.include('funkin.modchart.mods')" if="MODCHARTS_ALLOWED"/>
 
-	<define name="FLX_NO_TOUCH" />
-	<!--<define name="FLX_NO_GAMEPAD"/>-->
-	<define name="FLX_NO_DEBUG" unless="debug" />
+	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN"/>
+	<haxedef name="FLX_NO_TOUCH"/>
+	<!--<haxedef name="FLX_NO_GAMEPAD"/>-->
+	<haxedef name="FLX_NO_DEBUG" unless="debug"/>
+	<haxedef name="openfl_pool_events" unless="debug"/>
+	<haxedef name="IRIS_DEBUG"/>
+	<haxedef name="hscriptPos"/>
 
 	<define name="HXCPP_GC_BIG_BLOCKS"/>
 
@@ -56,11 +76,7 @@
 	<haxedef name="HXCPP_STACK_LINE" />
 	<haxedef name="HXCPP_STACK_TRACE" />
 
-	<define name="IRIS_DEBUG"/>
-	<define name="hscriptPos"/>
-
-	<define name="no-deprecation-warnings" />
-	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
+	<define name="no-deprecation-warnings"/>
 
 	<!-- Fix compiling issues -->
     <setenv name="HAXEPATH" value="./"/>

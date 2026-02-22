@@ -140,7 +140,7 @@ class CalibrateOffsetState extends FunkinState {
 	}
 
 	function noteHit(_, note:Note):Void {
-		totalNoteDifference += note.rawHitTime;
+		totalNoteDifference += note.hitTime;
 		notesHit++;
 	}
 }

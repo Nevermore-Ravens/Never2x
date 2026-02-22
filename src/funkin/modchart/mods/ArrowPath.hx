@@ -11,6 +11,26 @@ class ArrowPath extends BaseModifier {
 	static var nextStealthColor:Vector3 = new Vector3();
 	public var pathFrame:FlxFrame;
 
+	var arrowPath:ModifierValue = 0;
+	var arrowPathLANE:ModifierValue = 0;
+
+	@:alias(arrowpathgirth, arrowpathsize) var arrowPathWidth:ModifierValue = 0;
+	@:alias(arrowpathgirthLANE, arrowpathsizeLANE) var arrowPathWidthLANE:ModifierValue = 0;
+
+	var arrowPathRed:ModifierValue = 1;
+	var arrowPathGreen:ModifierValue = 1;
+	var arrowPathBlue:ModifierValue = 1;
+	var arrowPathRedLANE:ModifierValue = 1;
+	var arrowPathGreenLANE:ModifierValue = 1;
+	var arrowPathBlueLANE:ModifierValue = 1;
+
+	@:alias(arrowpathdrawsizefront) var arrowPathDrawSize:ModifierValue = 0;
+	var arrowPathDrawSizeBack:ModifierValue = 0;
+
+	var arrowPathGrain:ModifierValue = 0;
+	var arrowPathStealth:ModifierValue = 1;
+	@:alias(spiralarrowpath, spiralpaths) var arrowPathSpiral:ModifierValue = 0;
+
 	public function new(parent:ModchartManager) {
 		super(parent);
 		parent.arrowPath = this;
@@ -21,14 +41,14 @@ class ArrowPath extends BaseModifier {
 	public function drawPath(strum:StrumNote, strumline:Int, downscroll:Bool, field:Strumline) {
 		if (!active[strumline]) return;
 
-		final spiral = getValue(SPIRAL_INDEX, strumline) == 1;
+		final spiral = arrowPathSpiral == 1;
 		final modchartPos = strum.modchartPos;
-		final distInc = Math.max(20 * (getValue(GRAIN_INDEX, strumline) + Settings.data.holdGrain), 3);
+		final distInc = Math.max(20 * (arrowPathGrain + Settings.data.holdGrain), 3);
 		final mult = downscroll ? -1 : 1;
-		final start = -65 * (getValue(BACK_DRAW_SIZE_INDEX, strumline) + 1) - Strumline.swagWidth * 0.5;
-		final end = FlxG.height * (getValue(DRAW_SIZE_INDEX, strumline) + 1);
-		final width = (1 + getValue(WIDTH_INDEX, strumline) + getValue(WIDTH_LANE_INDEX + strum.ID, strumline)); // a base width of 2 but we also half it for the vertex offsetting so it cancels out.
-		final stealthEffective = getValue(STEALTH_INDEX, strumline);
+		final start = -65 * (arrowPathDrawSizeBack + 1) - Strumline.swagWidth * 0.5;
+		final end = FlxG.height * (arrowPathDrawSize + 1);
+		final width = (1 + arrowPathWidth + arrowPathWidthLANE); // a base width of 2 but we also half it for the vertex offsetting so it cancels out.
+		final stealthEffective = arrowPathStealth;
 		var stealth = 0.0;
 		var angleUp = 0.0;
 		var angleDown = 0.0;
@@ -40,7 +60,7 @@ class ArrowPath extends BaseModifier {
 		modchartPos.set(strum.x + strum.width * 0.5, strum.y + strum.height * 0.5 + (dist * mult), 0);
 		parent.adjustPos(strum, modchartPos, newDist, dist, strum.ID, strumline, field, SUSTAIN);
 
-		final perc = getValue(INDEX, strumline) + getValue(LANE_INDEX + strum.ID, strumline);
+		final perc = arrowPath + arrowPathLANE;
 		var curAlpha = 0.0;
 		inline function getNextPos() {
 			parent.stealthColor.set(1.0, 1.0, 1.0);
@@ -49,7 +69,7 @@ class ArrowPath extends BaseModifier {
 			
 			var alpha = 
 				dist < (start + distInc * 2) ?
-				1.0 - (dist - (start + distInc * 2)) / (distInc * 2) :
+				1.0 + (dist - (start + distInc * 2)) / (distInc * 2) :
 				(dist >= (end - distInc * 2) ? 1.0 - (dist - (end - distInc * 2)) / (distInc * 2) : 1.0);
 			alpha *= perc;
 
@@ -60,8 +80,10 @@ class ArrowPath extends BaseModifier {
 			modchartPosLow.set(strum.x + strum.width * 0.5, strum.y + strum.height * 0.5 + (dist * mult), 0);
 			parent.adjustPos(strum, modchartPosLow, newDist, dist, strum.ID, strumline, field, SUSTAIN);
 			
-			if (spiral)
+			if (spiral) {
 				angleDown = Math.atan2(modchartPosLow.y - modchartPos.y, modchartPosLow.x - modchartPos.x);
+				angleUp += Math.abs(angleDown - angleUp) > 180 ? Math.PI * 2 : 0;
+			}
 
 			return alpha;
 		}
@@ -84,9 +106,9 @@ class ArrowPath extends BaseModifier {
 		parent.adjustVertex(strum, Note.modchartVertices[1], modchartPos, newDist, dist, strum.ID, strumline, field, SUSTAIN);
 		Note.modchartVertices[1].project();
 
-		pathColor.redMultiplier = getValue(RED_INDEX, strumline) * getValue(RED_LANE_INDEX + strum.ID, strumline);
-		pathColor.greenMultiplier = getValue(GREEN_INDEX, strumline) * getValue(GREEN_LANE_INDEX + strum.ID, strumline);
-		pathColor.blueMultiplier = getValue(BLUE_INDEX, strumline) * getValue(BLUE_LANE_INDEX + strum.ID, strumline);
+		pathColor.redMultiplier = arrowPathRed * arrowPathRedLANE;
+		pathColor.greenMultiplier = arrowPathGreen * arrowPathGreenLANE;
+		pathColor.blueMultiplier = arrowPathBlue * arrowPathBlueLANE;
 
 		angleUp = angleDown;
 		modchartPos.copyFrom(modchartPosLow);
@@ -123,78 +145,5 @@ class ArrowPath extends BaseModifier {
 			angleUp = angleDown;
 			modchartPos.copyFrom(modchartPosLow);
 		}
-	}
-
-	override function addStrumlineSet() {
-		super.addStrumlineSet();
-        // highest index + 4 if it's lane specific, + 1 if not.
-        final newValSet = [for (i in 0...(STEALTH_INDEX + 1)) 0.0];
-        for (i in RED_INDEX...(BLUE_LANE_INDEX + 4))
-            newValSet[i] = 1.0;
-		newValSet[STEALTH_INDEX] = 1.0;
-
-        values.push(newValSet);
-	}
-
-	override function isActive(vals:Array<Float>) {
-		for (i in 0...5) {
-			if (vals[i] != 0.0)
-				return true;
-		}
-		return false;
-	}
-
-	public static inline var INDEX:Int = 0;
-	public static inline var LANE_INDEX:Int = 1;
-
-	public static inline var WIDTH_INDEX:Int = 5;
-	public static inline var WIDTH_LANE_INDEX:Int = 6;
-
-	public static inline var RED_INDEX:Int = 10;
-	public static inline var GREEN_INDEX:Int = 11;
-	public static inline var BLUE_INDEX:Int = 12;
-	public static inline var RED_LANE_INDEX:Int = 13;
-	public static inline var GREEN_LANE_INDEX:Int = 17;
-	public static inline var BLUE_LANE_INDEX:Int = 21;
-
-	public static inline var DRAW_SIZE_INDEX:Int = 25;
-	public static inline var BACK_DRAW_SIZE_INDEX:Int = 26;
-
-	public static inline var GRAIN_INDEX:Int = 27;
-	public static inline var STEALTH_INDEX:Int = 28;
-	public static inline var SPIRAL_INDEX:Int = 28;
-
-	public static function attachToRedirects() {
-		ModchartManager.defaultRedirects.set("arrowpath", {toClass: ArrowPath, index: INDEX});
-		for (i in 0...4)
-			ModchartManager.defaultRedirects.set("arrowpath" + i, {toClass: ArrowPath, index: LANE_INDEX + i});
-
-		ModchartManager.defaultRedirects.set("arrowpathwidth", {toClass: ArrowPath, index: WIDTH_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathgirth", {toClass: ArrowPath, index: WIDTH_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathsize", {toClass: ArrowPath, index: WIDTH_INDEX});
-		for (i in 0...4) {
-			ModchartManager.defaultRedirects.set("arrowpathwidth" + i, {toClass: ArrowPath, index: WIDTH_LANE_INDEX + i});
-			ModchartManager.defaultRedirects.set("arrowpathgirth" + i, {toClass: ArrowPath, index: WIDTH_LANE_INDEX + i});
-			ModchartManager.defaultRedirects.set("arrowpathsize" + i, {toClass: ArrowPath, index: WIDTH_LANE_INDEX + i});
-		}
-
-		ModchartManager.defaultRedirects.set("arrowpathred", {toClass: ArrowPath, index: RED_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathgreen", {toClass: ArrowPath, index: GREEN_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathblue", {toClass: ArrowPath, index: BLUE_INDEX});
-		for (i in 0...4) {
-			ModchartManager.defaultRedirects.set("arrowpathred" + i, {toClass: ArrowPath, index: RED_LANE_INDEX + i});
-			ModchartManager.defaultRedirects.set("arrowpathgreen" + i, {toClass: ArrowPath, index: GREEN_LANE_INDEX + i});
-			ModchartManager.defaultRedirects.set("arrowpathblue" + i, {toClass: ArrowPath, index: BLUE_LANE_INDEX + i});
-		}
-
-		ModchartManager.defaultRedirects.set("arrowpathdrawsize", {toClass: ArrowPath, index: DRAW_SIZE_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathdrawsizefront", {toClass: ArrowPath, index: DRAW_SIZE_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathdrawsizeback", {toClass: ArrowPath, index: BACK_DRAW_SIZE_INDEX});
-
-		ModchartManager.defaultRedirects.set("arrowpathgrain", {toClass: ArrowPath, index: GRAIN_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathstealth", {toClass:ArrowPath, index: STEALTH_INDEX});
-		ModchartManager.defaultRedirects.set("arrowpathspiral", {toClass: ArrowPath, index: SPIRAL_INDEX});
-		ModchartManager.defaultRedirects.set("spiralarrowpath", {toClass: ArrowPath, index: SPIRAL_INDEX});
-		ModchartManager.defaultRedirects.set("spiralpaths", {toClass: ArrowPath, index: SPIRAL_INDEX});
 	}
 }

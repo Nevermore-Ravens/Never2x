@@ -7,7 +7,7 @@ import openfl.display.BlendMode;
 @:structInit class QueuedDraw {
     public var layer:Float;
 
-    public var isQuant:Bool;
+    public var luminColors:Bool;
     public var blend:BlendMode;
     public var antialiasing:Bool;
 

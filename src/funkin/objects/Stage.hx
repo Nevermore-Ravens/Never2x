@@ -9,6 +9,9 @@ typedef StageFile = {
 	var ?opponentPos:Array<Float>;
 
 	var ?cameraPos:Array<Float>;
+
+	var ?reflective:Bool;
+	var ?canMoveCamera:Bool;
 }
 
 class Stage {
@@ -21,6 +24,8 @@ class Stage {
 
 	public var zoom:Float = 1;
 	public var isSpectatorVisible:Bool = true;
+	public var reflective:Bool = false;
+	public var canMoveCamera:Bool = false;
 
 	public function new(name:String) {
 		_file = getFile('stages/$name.json');
@@ -32,6 +37,8 @@ class Stage {
 
 		zoom = _file.zoom;
 		isSpectatorVisible = _file.isSpectatorVisible;
+		reflective = _file.reflective;
+		canMoveCamera = _file.canMoveCamera;
 	}
 
 	public static function getFile(path:String):StageFile {
@@ -57,7 +64,9 @@ class Stage {
 			spectatorPos: [350, 0],
 			opponentPos: [100, 225],
 
-			cameraPos: [0, 0]
+			cameraPos: [0, 0],
+			reflective: false,
+			canMoveCamera: false
 		}
 	}
 }

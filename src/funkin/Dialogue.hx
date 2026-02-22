@@ -96,7 +96,7 @@ class Dialogue extends FlxSubState {
 
 		updateLine();
 
-		add(new BasicBorderTransition(fromMenu ? BOTH : BOTTOM, true, 0.5, 0));
+		//add(new BasicBorderTransition(fromMenu ? BOTH : BOTTOM, true, 0.5, 0));
 	}
 
 	override function update(delta:Float) {

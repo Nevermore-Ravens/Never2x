@@ -11,42 +11,42 @@ import lime.app.Application;
 import lime.ui.KeyCode;
 
 class PlayField extends flixel.group.FlxSpriteGroup {
+	public var disableWithSubstates:Bool = true;
 	public var mirrorStrumlines: Array<Int> = []; // A list of strumlines to mirror input to
 
 	public var modchart:ModchartManager;
 	public var noteSplashes: FlxTypedSpriteGroup<NoteSplash>; // for sorting reasons in modcharted songs
 
-	public var playerID(default, set):Int = 1;
+	public var playerID(default, set):Int = 0;
 	function set_playerID(value:Int):Int {
-		if (playerID == value) return value;
-
-		if (value >= strumlines.length) {
-			return playerID;
+		var strumlineCount = strumlines.length;
+		if (value >= strumlineCount) {
+			value = strumlineCount - 1;
+			currentPlayer = getStrumline(value);
+			return playerID = value;
 		}
 
 		for (i => line in strumlines.members) {
 			line.ai = (value == i) ? botplay : true;
 		}
 
+		currentPlayer = getStrumline(value);
 		return playerID = value;
 	}
-	public var currentPlayer(get, never):Strumline;
-	function get_currentPlayer():Strumline {
-		if (playerID >= strumlines.length) {
-			return strumlines.members[strumlines.length - 1];
-		}
-
-		return strumlines.members[playerID];
+	public var currentPlayer(default, set):Strumline;
+	function set_currentPlayer(v:Strumline):Strumline {
+		v.ai = botplay;
+		return currentPlayer = v;
 	}
 
 	var leftSide(get, never):Strumline;
 	function get_leftSide():Strumline {
-		return strumlines.members[0];
+		return getStrumline(0);
 	}
 
 	var rightSide(get, never):Strumline;
 	function get_rightSide():Strumline {
-		return strumlines.members[1];
+		return getStrumline(1);
 	}
 
 	public var strumlines:FlxTypedSpriteGroup<Strumline>;
@@ -58,20 +58,27 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 	var noteSpawnIndex:Int = 0;
 	var noteSpawnDelay:Float = 1500;
 	var sustainInterval:Float = 120;
+	public var mineTypes:Array<String> = ['Mine'];
 
 	public var scrollSpeed(default, set):Float = 1.0;
 	function set_scrollSpeed(value:Float) {
 		if (scrollSpeed == value) return scrollSpeed;
 
 		for (obj in sustains.members) {
-			if (!obj.exists || strumlines.members[obj.data.player].overrideScrollSpeed > 0) continue;
-			final longHolds:Float = (modchart == null ? 1 : (modchart.get("longholds", obj.data.player) + 1));
+			if (!obj.exists || getStrumline(obj.player).overrideScrollSpeed > 0) continue;
+
+			#if MODCHARTS_ALLOWED
+			final longHolds:Float = (modchart == null ? 1 : (modchart.get("longholds", obj.player) + 1));
 			obj.calcHeight(value * longHolds);
+			#else
+			obj.calcHeight(value);
+			#end
 		}
 		return scrollSpeed = value;
 	}
 
 	public var downscroll:Bool = false;
+	public var playAssistClaps:Bool = Settings.data.assistClaps;
 
 	@:unreflective public var botplay(default, set):Bool = false;
 	function set_botplay(value:Bool):Bool {
@@ -81,12 +88,19 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 	public dynamic function noteHit(strumline:Strumline, note:Note):Void {}
 	public dynamic function noteMiss(strumline:Strumline, note:Note):Void {}
 	public dynamic function sustainHit(strumline:Strumline, note:Sustain, mostRecent:Bool):Void {}
-	public dynamic function ghostTap(strumline:Strumline):Void {}
+	public dynamic function ghostTap(strumline:Strumline, dir:Int, shouldMiss:Bool):Void {}
 	public dynamic function noteSpawned(note:Note):Void {}
 
-	public function new(strumlineList:Array<Strumline>) {
+	public function new(strumlineList:Array<Strumline>, playerID:Int = 0) {
 		super();
-		Note.quantColours = (Settings.data.quantColouring == "None" || !Note.quantPalettes.exists(Settings.data.quantColouring)) ? null : Note.quantPalettes[Settings.data.quantColouring];
+		funkin.backend.NoteSkin.clear();
+		if (StringTools.startsWith(Settings.data.quantColouring, "Custom")) { // too lazy to import
+			Note.byQuant = Settings.data.quantColouring == "Custom";
+			Note.curPalette = Note.byQuant ? Settings.data.customQuants : Settings.data.customColumns;
+		} else {
+			Note.curPalette = (Settings.data.quantColouring == "None" || !Note.quantPalettes.exists(Settings.data.quantColouring)) ? null : Note.quantPalettes[Settings.data.quantColouring];
+			Note.byQuant = Note.curPalette != null;
+		}
 
 		// really wish i wouldn't have to do this but with layering i have no choice
 		add(sustains = new FlxTypedSpriteGroup<Sustain>());
@@ -97,6 +111,8 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 		add(notes = new FlxTypedSpriteGroup<Note>());
 		notes.active = false;
+
+		this.playerID = playerID;
 
 		Application.current.window.onKeyDown.add(input);
 		Application.current.window.onKeyUp.add(release);
@@ -110,11 +126,11 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 	}
 
 	function glowStrum(strum:StrumNote, note:Note):Bool {
-		if (Settings.data.strumGlow == 'Off') return false;
+		if (Settings.data.strumGlow == 'Off' || !note.glowStrum) return false;
 
 		final byJudge = Settings.data.strumGlow == 'Judgement';
 		strum.playAnim('notePressed', true);
-		strum.isQuant = byJudge || note.isQuant;
+		strum.luminColors = byJudge || note.luminColors;
 		strum.color = byJudge ? note.hitJudgement.color : note.color;
 		return true;
 	}
@@ -122,9 +138,9 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 	dynamic function sustainInputs(strum:StrumNote, note:Sustain, noteSpeed:Float, longHolds:Float) {
 		if (!note.wasHit || note.missed) return;
 
-		var held:Bool = held[note.data.lane] && !note.tapHolding;
+		var held:Bool = held[note.lane] && !note.tapHolding;
 		var playerHeld:Bool = (held || note.coyoteTimer > 0);
-		var heldKey:Bool = (!strum.parent.ai && playerHeld) || (strum.parent.ai && note.time <= Conductor.rawTime);
+		var heldKey:Bool = (!strum.parent.ai && playerHeld) || (strum.parent.ai && note.time <= Conductor.time);
 
 		final coyoteLim = 0.175 * note.coyoteHitMult * FlxG.timeScale;
 		if(note.coyoteTimer < coyoteLim && held){
@@ -133,6 +149,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		}
 
 		note.coyoteTimer = held ? coyoteLim : note.coyoteTimer - FlxG.elapsed;
+		note.coyoteAlpha = strum.parent.ai ? 1 : 0.6 + 0.4 * (note.coyoteTimer / coyoteLim);
 		if (note.tapHolding && strum.parent.ai && note.coyoteTimer <= 0) {
 			note.coyoteTimer = coyoteLim;
 			sustainHit(strum.parent, note, true);
@@ -144,28 +161,28 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			if (!strum.parent.ai) {
 				noteMiss(strum.parent, note);
 				curHolds.remove(note);
-				note.multAlpha = 0.25;
+				note.coyoteAlpha = 0.2;
 				note.missed = true;
 			}
 
 			return;
 		}
 
-		note.timeOffset = -note.hitTime;
+		note.timeOffset = -Math.min(note.hitTime, 0);
 		note.forceHeightRecalc = true;
 		strum.isHolding = true;
 
 		if (!curHolds.contains(note)) {
 			// we want the most recent, but we also dont wanna prioritize super short sustains
-			final idx = note.data.length >= 250 ? curHolds.length : 0;
+			final idx = note.length >= 250 ? curHolds.length : 0;
 			curHolds.insert(idx, note);
-		} else if (note.time + note.data.length <= Conductor.rawTime) {
+		} else if (note.time + note.length <= Conductor.time) {
 			curHolds.remove(note);
 			note.kill();
 			strum.isHolding = !strum.parent.ai && held;
 			if (strum.parent.ai && strum.animation.finished)
 				strum.playAnim('default', true);
-			note.untilTick = 0; // Hit it one last time, to make sure 
+			note.untilTick = 0; // Hit it one last time, to make sure
 		}
 
 
@@ -185,6 +202,11 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		'note_right'
 	];
 
+	public function getStrumline(id:Int):Strumline {
+		if (id >= strumlines.length) return strumlines.members[strumlines.length - 1];
+		return strumlines.members[id];
+	}
+
 	// to be used when unpausing.
 	public function refreshInputs() {
 		if (botplay) return;
@@ -195,28 +217,28 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 	var held:Array<Bool> = [for (_ in 0...Strumline.keyCount) false];
 
-	function attemptNoteInput(dir:Int, strumline:Int){
-		var currentPlayer = strumlines.members[strumlines.length - 1];
-		if (strumline < strumlines.length)
-			currentPlayer = strumlines.members[strumline];
-		var currentStrum:StrumNote = currentPlayer.members[dir];
+	function attemptNoteInput(dir:Int, lineID:Int) {
+		var currentLine = getStrumline(lineID);
+		var currentStrum:StrumNote = currentLine.members[dir];
 		currentStrum.isHolding = true;
 
+		var rollHit:Bool = false;
 		for (sustain in sustains.members) {
-			if (!sustain.exists || !sustain.tapHolding || !sustain.wasHit || sustain.data.player != strumline || sustain.data.lane != dir) continue;
+			if (!sustain.exists || !sustain.tapHolding || !sustain.wasHit || sustain.player != lineID || sustain.lane != dir) continue;
 
 			sustain.coyoteTimer = 0.175 * sustain.coyoteHitMult * FlxG.timeScale;
-			sustainHit(currentPlayer, sustain, true);
+			sustainHit(currentLine, sustain, true);
 			glowStrum(currentStrum, sustain);
+			rollHit = true;
 		}
 
 		var closestDistance:Float = Math.POSITIVE_INFINITY;
 		var noteToHit:Note = null;
 		for (note in notes.members) {
 			if (!note.exists) continue;
-			if (note.data.player != strumline || !note.hittable || note.data.lane != dir) continue;
-			
-			var distance:Float = Math.abs(note.rawHitTime);
+			if (note.player != lineID || !note.hittable || note.lane != dir) continue;
+
+			var distance:Float = Math.abs(note.hitTime);
 			if (distance < closestDistance) {
 				closestDistance = distance;
 				noteToHit = note;
@@ -224,10 +246,12 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		}
 
 		if (noteToHit == null) {
+			if (rollHit) return;
+
 			currentStrum.playAnim('pressed');
-			ghostTap(currentPlayer);
+			ghostTap(currentPlayer, dir, !Settings.data.ghostTapping);
 			return;
-		} 
+		}
 
 		noteHit(currentPlayer, noteToHit);
 		glowStrum(currentStrum, noteToHit);
@@ -240,14 +264,14 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 	function input(id:KeyCode, _):Void {
 					    // i hate this check but whatever it works
-		if (botplay || (FlxG.state.subState != null && !FlxG.state.persistentUpdate)) return; 
+		if (botplay || (disableWithSubstates && FlxG.state.subState != null && !FlxG.state.persistentUpdate)) return;
 
 		final dir:Int = Controls.convertStrumKey(keys, Controls.convertLimeKeyCode(id));
 		if (dir == -1 || held[dir]) return;
 		held[dir] = true;
 
 		attemptNoteInput(dir, playerID);
-		for(id in mirrorStrumlines)attemptNoteInput(dir, id);
+		for (id in mirrorStrumlines) attemptNoteInput(dir, id);
 	}
 
 	inline function release(id:KeyCode, _):Void {
@@ -260,27 +284,32 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		currentPlayer.members[dir].isHolding = false;
 		for(id in mirrorStrumlines){
 			if (id < strumlines.length) {
-				strumlines.members[id].members[dir].playAnim('default');
-				strumlines.members[id].members[dir].isHolding = false;
+				getStrumline(id).members[dir].playAnim('default');
+				getStrumline(id).members[dir].isHolding = false;
 			}
 		}
 	}
 
 	function addNote<T:Note>(data:NoteData, group:FlxTypedSpriteGroup<T>, cls:Class<T>):T {
-		var strumline:Strumline = strumlines.members[data.player];
+		var strumline:Strumline = getStrumline(data.player);
 
 		var note:T = group.recycle(cls);
 		group.remove(note, true); // keep ordering
 		group.add(cast note.setup(data));
-		if (note.texture == '') note.texture = strumline.skin;
+		if (note.skin == '') {
+			@:bypassAccessor @:bypassAccessor note.style = strumline.style; // two bypassAccessors just in case (i actually had to do this once)
+			note.skin = strumline.skin;
+		}
 
 		return note;
 	}
 
 	override function update(delta:Float):Void {
 		super.update(delta);
+		#if MODCHARTS_ALLOWED
 		if (modchart != null)
 			modchart.update();
+		#end
 
 		while (noteSpawnIndex < unspawnedNotes.length) {
 			final noteData:NoteData = unspawnedNotes[noteSpawnIndex];
@@ -291,10 +320,15 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			if (noteData.length > 0) {
 				note.sustain = addNote(noteData, sustains, Sustain);
 				//note.sustain.type = note.type;
-				final strum:StrumNote = strumlines.members[note.data.player].members[note.data.lane];
+				final strum:StrumNote = getStrumline(note.player).members[note.lane];
 				final noteSpeed:Float = strum.parent.overrideScrollSpeed <= 0 ? scrollSpeed : strum.parent.overrideScrollSpeed;
-				final longHolds:Float = modchart == null ? 1 : (modchart.get("longholds", note.data.player) + 1);
+
+				#if MODCHARTS_ALLOWED
+				final longHolds:Float = (modchart == null ? 1 : (modchart.get("longholds", note.player) + 1));
 				note.sustain.calcHeight(noteSpeed * longHolds);
+				#else
+				note.sustain.calcHeight(noteSpeed);
+				#end
 			}
 			noteSpawned(note);
 			noteSpawnIndex++;
@@ -302,28 +336,57 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 		var nextNote:NoteData = unspawnedNotes[notePassedIndex];
 		if (nextNote != null && nextNote.time - Conductor.rawTime <= 0) {
-			// this crashes and idk why
-			// so im just gonna comment it out for now
-			if (/*!nextNote.connectedNote.breakOnHit*/ nextNote.type != 'Mine' && nextNote.player == playerID && Settings.data.assistClaps) {
+			if (playAssistClaps && !mineTypes.contains(nextNote.type) && nextNote.player == playerID) {
 				FlxG.sound.play(Paths.audio('sfx/hitsound'));
 			}
 			notePassedIndex++;
 		}
-		
+
+		// gamepad inputs (doingt it on update because i don't wanna mess with lime signals right now!!!)
+		// i feel like this is probably not the best way to implement it this way but like whatevr  r
+		if (!botplay) {
+    		for (i in 0...4) {
+    		    final dir:String = Note.directions[i];
+    			if(!held[i] && Controls.gamepadJustPressed('note_${dir}')) {
+    			    held[i] = true;
+
+    				attemptNoteInput(i, playerID);
+    				for (id in mirrorStrumlines) attemptNoteInput(i, id);
+    			}
+    			if (held[i] && Controls.gamepadReleased('note_${dir}')) {
+    			    held[i] = false;
+
+    				currentPlayer.members[i].playAnim('default');
+    				currentPlayer.members[i].isHolding = false;
+    				for (id in mirrorStrumlines) {
+    					if (id < strumlines.length) {
+    						getStrumline(id).members[i].playAnim('default');
+    						getStrumline(id).members[i].isHolding = false;
+    					}
+    				}
+    			}
+    		}
+		}
+
 		for (obj in sustains.members) {
 			if (!obj.exists) continue;
 
 			obj.update(delta);
 
-			final strum:StrumNote = strumlines.members[obj.data.player].members[obj.data.lane];
+			final strum:StrumNote = getStrumline(obj.player).members[obj.lane];
 			final noteSpeed:Float = strum.parent.overrideScrollSpeed <= 0 ? scrollSpeed : strum.parent.overrideScrollSpeed;
-			final longHolds:Float = modchart == null ? 1 : (modchart.get("longholds", obj.data.player) + 1);
+			final longHolds:Float = 
+			#if MODCHARTS_ALLOWED 
+			modchart == null ? 1 : (modchart.get("longholds", obj.player) + 1);
+			#else
+			1;
+			#end
 
 			sustainInputs(strum, obj, noteSpeed, longHolds);
 			obj.followStrum(strum, downscroll, noteSpeed);
 			obj.calcHeight(noteSpeed * longHolds);
 
-			if (obj.time + obj.data.length + 300 * FlxG.timeScale < Conductor.rawTime)
+			if (obj.time + obj.length + 300 * FlxG.timeScale < Conductor.rawTime)
 				obj.kill();
 		}
 
@@ -332,7 +395,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 			obj.update(delta);
 
-			final strum:StrumNote = strumlines.members[obj.data.player].members[obj.data.lane];
+			final strum:StrumNote = getStrumline(obj.player).members[obj.lane];
 			final noteSpeed:Float = strum.parent.overrideScrollSpeed <= 0 ? scrollSpeed : strum.parent.overrideScrollSpeed;
 
 			obj.followStrum(strum, downscroll, noteSpeed);
@@ -355,7 +418,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 	// ai note hitting
 	function botplayInputs(strum:StrumNote, note:Note):Void {
-		if (!note.canHit || note.breakOnHit || note.time > Conductor.rawTime) return;
+		if (!note.canHit || note.breakOnHit || note.time > Conductor.time) return;
 
 		// normal notes
 		note.wasHit = true;
@@ -364,24 +427,24 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		note.kill();
 
 		if (Settings.data.strumGlow != 'Off')
-			strum.playAnim('notePressed', true);
+			glowStrum(strum, note);
 
 		noteHit(strum.parent, note);
 
 		if (Settings.data.strumGlow != 'Off'){
 			if (Settings.data.strumGlow == 'Judgement' && note.hitJudgement != null){
-				strum.isQuant = true;
+				strum.luminColors = true;
 				strum.color = note.hitJudgement.color;
-			}else if (Note.quantColours != null) {
-				strum.isQuant = true;
+			}else if (Note.curPalette != null) {
+				strum.luminColors = true;
 				strum.color = note.color;
 			}
 		}
-		/*if (note.data.player) {
+		/*if (note.player) {
 			strum.playAnim('notePressed');
 
-			if (Note.quantColours != null) {
-				strum.isQuant = true;
+			if (Note.curPalette != null) {
+				strum.luminColors = true;
 				strum.color = note.color;
 			}
 
@@ -389,8 +452,8 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		} else {
 			strum.playAnim('notePressed');
 
-			if (Note.quantColours != null) {
-				strum.isQuant = true;
+			if (Note.curPalette != null) {
+				strum.luminColors = true;
 				strum.color = note.color;
 			}
 
@@ -471,7 +534,8 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			this.sustains.add(newNote);
 		}
 	}
-	
+
+	#if MODCHARTS_ALLOWED
 	override function draw() {
 		if (modchart == null) {
 			super.draw();
@@ -490,7 +554,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		for (sustain in sustains.members) {
 			if (!sustain.exists || !sustain.visible) continue;
 
-			sustain.drawCrazy(modchart, downscroll, strumlines.members[sustain.data.player]);
+			sustain.drawCrazy(modchart, downscroll, getStrumline(sustain.player));
 		}
 
 		for (i => strumline in strumlines.members) {
@@ -501,13 +565,13 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 				strum.drawCrazy(modchart, i, downscroll, strumline);
 			}
 		}
-		
+
 		for (note in notes.members) {
 			if (!note.exists || !note.visible) continue;
 
-			note.drawCrazy(modchart, downscroll, strumlines.members[note.data.player]);
+			note.drawCrazy(modchart, downscroll, getStrumline(note.player));
 		}
-		
+
 		if(noteSplashes != null){
 			for (i => splash in noteSplashes.members) {
 				if (!splash.exists || !splash.visible) continue;
@@ -520,4 +584,5 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 		@:privateAccess FlxCamera._defaultCameras = oldDefaultCameras;
 	}
+	#end
 }
