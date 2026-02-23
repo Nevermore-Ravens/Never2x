@@ -48,6 +48,7 @@ class Meta {
 		
 		var path:String = 'songs/$song/meta.json';
 		var file:MetaFile = {};
+		file.songName = song;
 
 		// still keeping this check here
 		// in case the file isn't in the cache
