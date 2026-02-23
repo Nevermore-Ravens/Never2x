@@ -206,7 +206,7 @@ class Conductor extends flixel.FlxBasic {
 		//if (!_songPlaying) { ill be honest i dont get this if
 			inst.time = time;
 			for (vocal in vocals.members) {
-				if (vocal.length <= time) continue;
+				if (vocal == null || vocal.length <= time) continue;
 				vocal.time = time;
 			}
 		//}
