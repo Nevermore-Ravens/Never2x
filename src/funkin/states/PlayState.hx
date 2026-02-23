@@ -775,6 +775,7 @@ class PlayState extends FunkinState {
 		timeText.borderStyle = FlxTextBorderStyle.OUTLINE;
 		timeText.borderSize = 1.5;
 		updateTimeText();
+		timeText.visible = Settings.data.timeText;
 
 		hud.add(infoText = new FlxText(0, 680, FlxG.width, '', 18));
 		infoText.alignment = 'center';
@@ -787,6 +788,7 @@ class PlayState extends FunkinState {
 		judgeNames.color = 0xFF999999; // sets the default format color to the miss color
 		judgeNames.borderStyle = FlxTextBorderStyle.OUTLINE;
 		judgeNames.borderSize = 1.5;
+		judgeNames.visible = Settings.data.judgementCounter;
 		generateJudgeColors();
 		judgeNames.screenCenter(Y);
 
@@ -796,17 +798,27 @@ class PlayState extends FunkinState {
 		judgeCounters.borderStyle = FlxTextBorderStyle.OUTLINE;
 		judgeCounters.borderSize = 1.5;
 		judgeCounters.wordWrap = false;
+		judgeCounters.visible = Settings.data.judgementCounter;
 		updateJudgeCounter();
 
+		var clearTypePos = FlxPoint.get();
+		if (Settings.data.judgementCounter) {
+			clearTypePos.x = judgeNames.x + 45;
+			clearTypePos.y = (judgeNames.y + judgeNames.height);
+		} else {
+			clearTypePos.x = 10;
+			clearTypePos.y = FlxG.height - 30;
+		}
+
 		hud.add(clearType = new FlxText(
-			judgeNames.x + 45, 
-			(judgeNames.y + judgeNames.height), 
+			clearTypePos.x, 
+			clearTypePos.y, 
 			judgeCounters.fieldWidth, '', judgeNames.size
 		));
 		clearType.font = judgeNames.font;
 		clearType.borderStyle = FlxTextBorderStyle.OUTLINE;
 		clearType.borderSize = 1.5;
-		clearType.alignment = 'center';
+		clearType.alignment = Settings.data.judgementCounter ? 'center' : 'left';
 
 		hud.add(botplayTxt = new FunkinSprite().loadGraphic(Paths.image('ui/botplay')));
 		botplayTxt.visible = false;
@@ -823,6 +835,8 @@ class PlayState extends FunkinState {
 
 	var judgeFormats:Array<FlxTextFormat> = [];
 	public function generateJudgeColors() {
+		if (!Settings.data.judgementCounter) return;
+
 		judgeFormats.resize(Judgement.list.length);
 		judgeNames.text = "";
 		var lastNameEnd = 0;
@@ -838,6 +852,8 @@ class PlayState extends FunkinState {
 	}
 
 	function updateJudgeCounter() {
+		if (!Settings.data.judgementCounter) return;
+
 		judgeCounters.text = '';
 		var judgeBreaks:Int = 0;
 		for (i in 0...Judgement.list.length) {
@@ -1121,6 +1137,8 @@ class PlayState extends FunkinState {
 	}
 
 	dynamic function updateTimeText() {
+		if (!Settings.data.timeText) return;
+
 		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.time * 0.001, false);
 		var duration:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.length * 0.001, false);
 

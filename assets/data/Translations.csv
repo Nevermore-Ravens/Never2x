@@ -126,6 +126,8 @@ strum_size,Strumline Size,Strumline Size,Strumline Size
 strum_size_desc,How much scaling gets applied to your playfield.,How much scaling gets applied to your playfield.,How much scaling gets applied to your playfield.
 center_notes,Centered Notes,Coluna Centralizada,画面中心音符
 center_notes_desc,If your field should be in the middle of the game instead of the side.,Permite que suas notas sejam centralizadas no meio da tela,プレイフィールドが側面ではなく中央を占めるべきの場合
+time_text,Time Text,Time Text,Time Text
+time_text_desc,Whether the game will display text to show where you're at in the song.,Whether the game will display text to show where you're at in the song.,Whether the game will display text to show where you're at in the song.
 opp_notes,Opponent Notes,Coluna do oponente,敵音符
 opp_notes_desc,If your opponent's field should be visible.,Se as notas do seu oponente devem ser visíveis.,敵音符が見えるべきの場合
 cam_zooms,Camera Zooms,Zooms da Cãmera,カメラ拡大縮小

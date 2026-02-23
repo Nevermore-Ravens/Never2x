@@ -79,7 +79,7 @@ class SaveVariables {
 	var language:String = 'English';
 	var fpsCounter:Bool = true;
 	var transitions:Bool = true;
-	var timeBarType:String = 'Disabled';
+	var timeText:Bool = true;
 	var hideHUD:Bool = false;
 	var lyrics:Bool = true;
 	var notesMoveCamera:Bool = false;
