@@ -12,7 +12,7 @@ class TimingPoint {
 
 	public var time:Float = 0;
 	public var bpm:Float = 120;
-	public var beatsPerMeasure:ByteUInt = 4;
+	public var beatsPerMeasure:ByteUInt = 0;
 
 	public function toString():String {
 		return 'Time: $time | Tempo: $bpm | Beats per measure: $beatsPerMeasure';

@@ -62,7 +62,7 @@ class JudgementSpr extends FunkinSprite {
 			Main.tweenManager.tween(this.scale, {x: scale.x / 1.125, y: scale.y / 1.125}, 0.2, {ease: FlxEase.cubeIn});
 		} else {
 			velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
-			acceleration.y = 550;
+			acceleration.y = 450;
 		}
 	}
 

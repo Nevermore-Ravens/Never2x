@@ -20,6 +20,13 @@ class FunkinState extends FlxState {
 		Conductor.onMeasure.add(measureHit);
 	}
 
+	override function destroy() {
+		super.destroy();
+		Conductor.onStep.remove(stepHit);
+		Conductor.onBeat.remove(beatHit);
+		Conductor.onMeasure.remove(measureHit);
+	}
+
 	// i am so sorry (this is just taken directly from psych im not trying to bother with flixel's transition bs
 	public static function switchState(nextState:FlxState = null) {
 		nextState ??= FlxG.state;
@@ -54,7 +61,6 @@ class FunkinState extends FlxState {
 	}
 
 	public function stepHit(step:Int):Void {}
-
 	public function beatHit(beat:Int):Void {}
 	public function measureHit(measure:Int):Void {}
 }

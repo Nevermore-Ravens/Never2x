@@ -242,7 +242,7 @@ class PlayState extends FunkinState {
 		judgeSpr.cameras = [camHUD];
 		judgeSpr.x -= judgeSpr.width * 0.5;
 
-		add(comboNumbers = new ComboNums(popupX, downscroll ? FlxG.height - 50 : 165));
+		add(comboNumbers = new ComboNums(popupX, downscroll ? FlxG.height - 65 : 150));
 		comboNumbers.cameras = [camHUD];
 		comboNumbers.x -= comboNumbers.width * 0.5;
 
@@ -1100,6 +1100,7 @@ class PlayState extends FunkinState {
 		if (exitToMenu || forceLeave) {
 			persistentUpdate = false;
 			Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true);
+			Conductor.timingPoints = [{bpm: 102, beatsPerMeasure: 4}];
 			Conductor.play();
 			Difficulty.reset();
 			Addons.current = '';

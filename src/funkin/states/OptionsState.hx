@@ -406,9 +406,12 @@ class OptionsState extends FunkinState {
 	var descBG:FunkinSprite;
 	var descTxt:FlxText;
 
+	// Calibration Stuff
 	var nextNote:Note;
 	var playfield:PlayField;
 	var strumline:Strumline;
+	var musicBeatLen:Float = 2;
+	var aboutToLoop:Bool = false;
 	var totalNoteDifference:Float = 0;
 	var notesHit:Int = 0;
 	var finalOffset:Float = 0;
@@ -418,6 +421,7 @@ class OptionsState extends FunkinState {
 	override function create() {
 		super.create();
 		self = this;
+		musicBeatLen = Conductor.inst.length / Conductor.crotchet;
 
 		bg = new FunkinSprite().loadGraphic(Paths.image('menus/magentaBG'));
 		bg.scale.scale(1.175);
@@ -425,6 +429,8 @@ class OptionsState extends FunkinState {
 		bg.screenCenter();
 		bg.wrapMode = REPEAT;
 		add(bg);
+
+		initCalibrationField();
 
 		add(listBG = new FunkinSprite(10, 10).makeGraphic(1, 1, 0x70000000));
 		listBG.setGraphicSize(300, 700);
@@ -434,7 +440,7 @@ class OptionsState extends FunkinState {
 		var y = listBG.y + 15;
 		for (i => cate in categoryList) {
 			var txt = new FlxText(listBG.x + 15, y, listBG.width - 30, _t(cate));
-			txt.setFormat(Paths.font("vcr.ttf"), 24, i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF);
+			txt.setFormat(Paths.font("cafeSquare.ttf"), 24, i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF);
 			txt.antialiasing = Settings.data.antialiasing;
 			listGrp.add(txt);
 			y += 30;
@@ -459,30 +465,6 @@ class OptionsState extends FunkinState {
 
 		openCategory(curCategory);
 		keysInOpts = false;
-
-		strumline = new Strumline(0, 0, true);
-		strumline.screenCenter(X);
-		strumline.x += 400;
-		strumline.alpha = 0.3;
-		strumline.directAlpha = true;
-
-		add(playfield = new PlayField([strumline]));
-		playfield.downscroll = Settings.data.downscroll;
-		playfield.scrollSpeed = Settings.data.scrollSpeed;
-		playfield.playAssistClaps = false;
-		playfield.botplay = true;
-		playfield.playerID = 0;
-		playfield.noteHit = noteHit;
-		playfield.noteMiss = recoverNote;
-		strumline.y = playfield.downscroll ? FlxG.height - 50 - Strumline.swagWidth : 50;
-
-		playfield.load([
-			{time: Conductor.crotchet * Math.ceil(Conductor.floatBeat * 0.5) * 2, lane: 0, type: ""},
-			{time: Conductor.crotchet * Math.ceil(Conductor.floatBeat * 0.5) * 2 + 2, lane: 0, type: ""}
-		]);
-		nextNote = new Note();
-		nextNote.kill();
-		@:privateAccess playfield.notes.add(nextNote);
 	}
 
 	override function update(delta:Float) {
@@ -497,6 +479,15 @@ class OptionsState extends FunkinState {
 			lastMouseY = FlxG.mouse.screenY;
 			mouseMoved = true;
 		}
+
+		// Calibration looping
+		final time = Conductor.rawTime - Conductor.offset;
+		if (aboutToLoop && time <= Conductor.crotchet * 2) {
+			aboutToLoop = false;
+			trace("looped!");
+			Conductor.offset += Math.ceil(musicBeatLen * 0.5) * 2 * Conductor.crotchet; // snap it to the next even beat
+		}
+		aboutToLoop = time >= Conductor.crotchet * (musicBeatLen - 2);
 
 		var listAlpha = 0.3;
 		var optAlpha = 0.3;
@@ -601,6 +592,32 @@ class OptionsState extends FunkinState {
 		descTxt.y = descBG.y + 15;
 	}
 
+	function initCalibrationField() {
+		strumline = new Strumline(0, 0, true);
+		strumline.screenCenter(X);
+		strumline.x += 400;
+		strumline.alpha = 0.3;
+		strumline.directAlpha = true;
+
+		add(playfield = new PlayField([strumline]));
+		playfield.downscroll = Settings.data.downscroll;
+		playfield.scrollSpeed = Settings.data.scrollSpeed;
+		playfield.playAssistClaps = false;
+		playfield.botplay = true;
+		playfield.playerID = 0;
+		playfield.noteHit = noteHit;
+		playfield.noteMiss = recoverNote;
+		strumline.y = playfield.downscroll ? FlxG.height - 50 - Strumline.swagWidth : 50;
+
+		playfield.load([
+			{time: Conductor.crotchet * Math.ceil(Conductor.floatBeat * 0.5) * 2, lane: 0, type: ""},
+			{time: Conductor.crotchet * (Math.ceil(Conductor.floatBeat * 0.5) * 2 + 2), lane: 3, type: ""}
+		]);
+		nextNote = new Note();
+		nextNote.kill();
+		@:privateAccess playfield.notes.add(nextNote);
+	}
+
 	function openCategory(cate:Int) {
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 		if (cate == selCategory)
@@ -629,9 +646,9 @@ class OptionsState extends FunkinState {
 		curSelected = 0;
 		var y = optBG.y + 15;
 		for (i => opt in curOptList) {
-			var txt = new FlxText(optBG.x + 15, y, optBG.width - 30, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase());
+			var txt = new FlxText(optBG.x + 15, y, optBG.width - 30, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)));
 			var val = new FlxText(txt.x, txt.y, optBG.width - 30, opt.formatText(i == curSelected));
-			txt.setFormat(Paths.font("vcr.ttf"), 24, (i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF), LEFT);
+			txt.setFormat(Paths.font("cafeSquare.ttf"), 24, (i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF), LEFT);
 			val.setFormat(Paths.font("vcr.ttf"), 24, (i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF), RIGHT);
 			txt.antialiasing = Settings.data.antialiasing;
 			val.antialiasing = Settings.data.antialiasing;
@@ -829,8 +846,7 @@ class OptionsState extends FunkinState {
 		notesHit++;
 
 		finalOffset = Math.round(totalNoteDifference / notesHit) + Settings.data.noteOffset; // don't want the base offset screwing this up.
-		//text.text = _formatT(resultText, [Std.string(finalOffset), finalOffset > 0 ? _t("late") : _t("early")]);
-		//text.offset.y = 0;
+		descTxt.text = _formatT("offset_cali_result", [Std.string(finalOffset), finalOffset > 0 ? _t("late") : _t("early")]);
 		recoverNote(_, note);
 	}
 
