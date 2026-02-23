@@ -25,6 +25,13 @@ class PauseMenu extends flixel.FlxSubState {
 	}
 
 	override function create():Void {
+		Main.tweenManager.forEach(function(twn:FlxTween) if (twn != null)
+			twn.active = false);
+		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null)
+			twn.active = false);
+		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
+			tmr.active = false);
+
 		if (Difficulty.list.length > 1) options.insert(2, 'Change Difficulty');
 
 		if (Settings.data.pauseType != 'Unlimited') {
@@ -171,8 +178,12 @@ class PauseMenu extends flixel.FlxSubState {
 
 	override function close() {
 		PauseMenu.wentToOptions = false; // reset
-		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (!tmr.finished) tmr.active = true);
-		FlxTween.globalManager.forEach(function(twn:FlxTween) if (!twn.finished) twn.active = true);
+		Main.tweenManager.forEach(function(twn:FlxTween) if (twn != null)
+			twn.active = true);
+		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null)
+			twn.active = true);
+		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
+			tmr.active = true);
 		PlayState.self.paused = false;
 		super.close();
 	}
