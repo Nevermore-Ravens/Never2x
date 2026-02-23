@@ -50,19 +50,23 @@ class JudgementSpr extends FunkinSprite {
 		
 		centerOffsets();
 		visibility = Settings.data.judgementAlpha;
-		Main.tweenManager.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
 		
 		moves = !simple;
 		setPosition(ogX, ogY);
-		if (simple) {
+	
+		if (simple) { // camellia/notitg-like judgements
 			velocity.set();
 			acceleration.y = 0;
-			scale.scale(1.125);
+
 			Main.tweenManager.cancelTweensOf(this.scale);
-			Main.tweenManager.tween(this.scale, {x: scale.x / 1.125, y: scale.y / 1.125}, 0.2, {ease: FlxEase.cubeIn});
-		} else {
+			scale.set(0.7, 0.7);
+
+			Main.tweenManager.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
+			Main.tweenManager.tween(this.scale, {x: 0.65, y: 0.65}, 0.2, {ease: FlxEase.cubeIn});
+		} else { // fnf-like judgements
 			velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
-			acceleration.y = 450;
+			acceleration.y = 550;
+			Main.tweenManager.tween(this, {visibility: 0}, 0.2, {startDelay: Conductor.crotchet * 0.001});
 		}
 	}
 

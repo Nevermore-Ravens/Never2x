@@ -180,7 +180,7 @@ class OptionsState extends FunkinState {
 			new Option("judge_counter", "judge_counter_desc", "judgementCounter", BoolOption),
 			new Option('hit_error_bar', 'hit_error_bar_desc', "hitErrorBar", BoolOption),
 			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"])),
-			new Option("popup_cent", "popup_cent_desc", "popupCenter", ListOption(["Top", "Field", "HUD"])),
+			new Option("popup_cent", "popup_cent_desc", "popupCenter", ListOption(["FNF", "Field", "Center"])),
 			new Option("hide_acc", "hide_acc_desc", "hideAcc", BoolOption),
 			new Option("hide_hud", "hide_hud_desc", "hideHUD", BoolOption),
 			{

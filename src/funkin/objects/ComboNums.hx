@@ -51,12 +51,12 @@ class ComboNums extends FlxTypedSpriteGroup<Number> {
 			num.visibility = Settings.data.comboAlpha;
 
 			Main.tweenManager.cancelTweensOf(num);
-			Main.tweenManager.tween(num, {visibility: 0}, 0.35, {startDelay: 0.75});
-
+			
 			num.moves = !simple;
 			if (simple) {
 				num.velocity.set();
 				num.acceleration.y = 0;
+				Main.tweenManager.tween(num, {visibility: 0}, 0.35, {startDelay: 0.75});
 				Main.tweenManager.tween(num, {y: y}, 0.1, {
 					onComplete: function(_) num.y = y,
 					ease: FlxEase.cubeIn
@@ -64,12 +64,12 @@ class ComboNums extends FlxTypedSpriteGroup<Number> {
 			} else {
 				num.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
 				num.acceleration.y = FlxG.random.int(250, 300);
+				Main.tweenManager.tween(num, {visibility: 0}, 0.2, {
+					onComplete: function(_) num.visibility = 0,
+					startDelay: Conductor.crotchet * 0.001
+				});
 			}
 		}
-
-		//this.x = originalPos.x - ((width * 0.5) * scale.x);
-		// fuck this im just gonna
-		// screenCenter(X);
 	}
 }
 
