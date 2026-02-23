@@ -755,12 +755,16 @@ class PlayState extends FunkinState {
 		healthBar.setColors(dad.healthColor, bf.healthColor);
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
+		healthBar.alpha = Settings.data.healthBarAlpha;
 
 		hud.add(iconP1 = new CharIcon('bf', true));
 		iconP1.y = healthBar.y - (iconP1.height * 0.5);
+		iconP1.alpha = Settings.data.healthBarAlpha;
 
 		hud.add(iconP2 = new CharIcon('dad'));
 		iconP2.y = healthBar.y - (iconP2.height * 0.5);
+		iconP2.alpha = Settings.data.healthBarAlpha;
+
 		updateIconPositions();
 
 		// fuck it im pulling a forever engine
@@ -921,7 +925,7 @@ class PlayState extends FunkinState {
 
 	inline function updateAccuracy():Float {
 		if (notesHit <= 0) return 0;
-		
+
 		return notesPlayed / (notesHit + comboBreaks);
 	}
 
@@ -1117,7 +1121,7 @@ class PlayState extends FunkinState {
 	}
 
 	dynamic function updateTimeText() {
-		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.rawTime * 0.001, false);
+		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.time * 0.001, false);
 		var duration:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.length * 0.001, false);
 
 		timeText.text = '$songName ($current / $duration)';

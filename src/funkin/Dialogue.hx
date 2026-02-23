@@ -183,7 +183,6 @@ class Dialogue extends FlxSubState {
 	}
 
 	public static function fileExists(songID:String, ?fileName:String = 'dialogue'):Bool {
-		trace('songs/$songID/$fileName.json');
 		if (!Paths.exists('songs/$songID')) return false;
 
 		return Paths.exists('songs/$songID/$fileName.json');
