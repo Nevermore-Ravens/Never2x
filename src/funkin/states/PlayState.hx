@@ -768,7 +768,7 @@ class PlayState extends FunkinState {
 		updateIconPositions();
 
 		// fuck it im pulling a forever engine
-		hud.add(timeText = new FlxText(0, 15, 500, '$songName (0:00 / 0:00)', 18));
+		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songName (0:00 / 0:00)', 18));
 		timeText.screenCenter(X);
 		timeText.alignment = 'center';
 		timeText.font = Paths.font('LineSeed.ttf');
@@ -777,7 +777,7 @@ class PlayState extends FunkinState {
 		updateTimeText();
 		timeText.visible = Settings.data.timeText;
 
-		hud.add(infoText = new FlxText(0, 680, FlxG.width, '', 18));
+		hud.add(infoText = new FlxText(0, downscroll ? 15 : 675, FlxG.width, '', 18));
 		infoText.alignment = 'center';
 		infoText.font = Paths.font('LineSeed.ttf');
 		infoText.borderStyle = FlxTextBorderStyle.OUTLINE;
