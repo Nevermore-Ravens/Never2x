@@ -1,4 +1,4 @@
-package funkin;
+package funkin.substates;
 
 class PauseMenu extends flixel.FlxSubState {
 	var options:Array<String> = ['Resume', 'Restart', 'Exit to Menu'];

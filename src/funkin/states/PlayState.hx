@@ -6,7 +6,8 @@ import funkin.backend.Song.Chart;
 import funkin.objects.*;
 import funkin.backend.EventHandler;
 import funkin.objects.Strumline.StrumNote;
-//import funkin.Dialogue;
+import funkin.substates.PauseMenu;
+import funkin.substates.Dialogue;
 
 @:structInit class NoteHit {
 	public var time:Float;

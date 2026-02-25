@@ -1,4 +1,4 @@
-package funkin;
+package funkin.substates;
 
 import flixel.addons.text.FlxTypeText;
 
