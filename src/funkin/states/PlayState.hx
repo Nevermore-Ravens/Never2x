@@ -309,9 +309,7 @@ class PlayState extends FunkinState {
 		stage = new Stage(stageName);
 		ScriptHandler.loadFile(Paths.get('stages/$stageName.hx'));
 		camGame.zoom = defaultCamZoom = stage.zoom;
-		camFollow.setPosition(stage.camera.x, stage.camera.y);
 		canMoveCamera = stage.canMoveCamera;
-		camGame.snapToTarget();
 
 		add(gf = new Character(stage.spectator.x, stage.spectator.y, song.meta.spectator, stage.reflective));
 		gf.visible = stage.isSpectatorVisible;
@@ -329,6 +327,12 @@ class PlayState extends FunkinState {
 		opponentStrums.healthMult = -1.0;
 
 		makeHUD();
+
+		if (canMoveCamera)
+			moveCamera(dad);
+		else
+			camFollow.setPosition(stage.camera.x, stage.camera.y);
+		camGame.snapToTarget();
 
 		Conductor.syncBeats();
 		ScriptHandler.call('create');
@@ -758,11 +762,11 @@ class PlayState extends FunkinState {
 		healthBar.leftToRight = false;
 		healthBar.alpha = Settings.data.healthBarAlpha;
 
-		hud.add(iconP1 = new CharIcon('bf', true));
+		hud.add(iconP1 = new CharIcon(bf.icon, true));
 		iconP1.y = healthBar.y - (iconP1.height * 0.5);
 		iconP1.alpha = Settings.data.healthBarAlpha;
 
-		hud.add(iconP2 = new CharIcon('dad'));
+		hud.add(iconP2 = new CharIcon(dad.icon));
 		iconP2.y = healthBar.y - (iconP2.height * 0.5);
 		iconP2.alpha = Settings.data.healthBarAlpha;
 
