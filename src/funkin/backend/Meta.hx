@@ -10,7 +10,7 @@ class MetaFile {
 
 	public var player:String = 'bf';
 	public var spectator:String = 'bf';
-	public var enemy:String = 'bf';
+	public var opponent:String = 'bf';
 	public var stage:String = 'stage';
 }
 
@@ -55,6 +55,9 @@ class Meta {
 		// but the user wants to parse it anyways
 		if (!Paths.exists(path)) return file;
 		var data:Dynamic = Json5.parse(Paths.getFileContent(path));
+
+		if (data.enemy != null)
+			file.opponent = data.enemy;
 
 		for (property in Reflect.fields(data)) {
 			// ??????? ok i guess no `Reflect.hasField()` for you

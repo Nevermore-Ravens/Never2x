@@ -14,6 +14,7 @@ import funkin.substates.Dialogue;
 	public var diff:Float;
 	public var color:FlxColor;
 	public var countMean:Bool = true;
+	public var judge:String;
 }
 
 class PlayState extends FunkinState {
@@ -26,6 +27,9 @@ class PlayState extends FunkinState {
 
 	public static var inTransition:Bool = false;
 	public static var songList:Array<String> = [];
+	public static var resultHits:Array<Array<NoteHit>> = [];
+	public static var resultJudges:Array<Array<Judgement>> = [];
+	public static var resultLengths:Array<Float> = [];
 	public static var storyMode:Bool = false;
 
 	public static var currentLevel:Int = 0;
@@ -317,7 +321,7 @@ class PlayState extends FunkinState {
 		extraStrumline.character = function() return gf;
 
 		//to-do add to the json the character positions and position of it's reflections
-		add(dad = new Character(stage.opponent.x, stage.opponent.y, song.meta.enemy, stage.reflective));
+		add(dad = new Character(stage.opponent.x, stage.opponent.y, song.meta.opponent, stage.reflective));
 		ScriptHandler.loadFile(Paths.get('characters/${dad.name}.hx'));
 		add(bf = new Character(stage.player.x, stage.player.y, song.meta.player, stage.reflective));
 		ScriptHandler.loadFile(Paths.get('characters/${bf.name}.hx'));
@@ -618,7 +622,8 @@ class PlayState extends FunkinState {
 				time: note.rawTime,
 				diff: judge.timing,
 				color: judge.color,
-				countMean: false
+				countMean: false,
+				judge: judge.name
 			});
 
 			return;
@@ -653,7 +658,8 @@ class PlayState extends FunkinState {
 			noteHitList.push({
 				time: note.rawTime,
 				diff: divHitTime,
-				color: judge.color
+				color: judge.color,
+				judge: judge.name
 			});
 		}
 
@@ -890,7 +896,8 @@ class PlayState extends FunkinState {
 			time: note.rawTime,
 			diff: Judgement.max.timing,
 			color: 0xFFFFFFFF,
-			countMean: false
+			countMean: false,
+			judge: "miss"
 		});
 	}
 
@@ -1086,17 +1093,45 @@ class PlayState extends FunkinState {
 		var exitToMenu:Bool = !storyMode;
 		if (storyMode) 
 			++currentLevel < songList.length ? FunkinState.resetState() : exitToMenu = true;
+		
+		var judgeBreaks = 0;
+		for (judge in Judgement.list)
+			judgeBreaks += judge.breakCombo ? judge.hits : 0;
+		Judgement.list.push({
+			name: "miss",
+			shortName: "MS",
+			timing: Judgement.max.timing,
+			color: 0xFF808080,
+			hits: comboBreaks - judgeBreaks
+		});
+		resultHits.push(noteHitList);
+		resultJudges.push(Judgement.list);
+		resultLengths.push(Conductor.inst.length);
 
 		if (exitToMenu || forceLeave) {
 			persistentUpdate = false;
-			Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true);
-			Conductor.timingPoints = [{bpm: 102, beatsPerMeasure: 4}];
-			Conductor.play();
+			if (forceLeave) {
+				Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true);
+				Conductor.timingPoints = [{bpm: 102, beatsPerMeasure: 4}];
+				Conductor.play();
+				Addons.current = '';
+				Paths.clearUnusedMemory();
+				FunkinState.switchState(new FreeplayState());
+			} else {
+				FunkinState.switchState(new ResultsScreen(
+					storyMode,
+					Difficulty.current,
+					storyMode ? songList.copy() : [songID],
+					resultHits.copy(),
+					resultJudges.copy(),
+					resultLengths.copy()
+				));
+			}
 			Difficulty.reset();
-			Addons.current = '';
-			Paths.clearUnusedMemory();
-			FunkinState.switchState(new FreeplayState());
 			songList.resize(0);
+			resultHits.resize(0);
+			resultJudges.resize(0);
+			resultLengths.resize(0);
 			storyMode = false;
 			currentLevel = 0;
 			disqualified = false;
@@ -1109,7 +1144,6 @@ class PlayState extends FunkinState {
 		ScriptHandler.clear();
 		FlxG.mouse.visible = true;
 		self = null;
-		noteHitList.resize(0);
 		super.destroy();
 	}
 

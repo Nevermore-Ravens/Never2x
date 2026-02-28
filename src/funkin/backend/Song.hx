@@ -80,7 +80,7 @@ class Song {
 							characters: {
 								player: meta.player,
 								girlfriend: meta.spectator,
-								opponent: meta.enemy,
+								opponent: meta.opponent,
 
 								// if this gives you compiler errors, you may need to update moonchart.
 								instrumental: "", altInstrumentals: [],

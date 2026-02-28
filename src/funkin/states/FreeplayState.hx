@@ -47,10 +47,11 @@ class FreeplayState extends FunkinState {
 			colour: 0xFF000000,
 			folder: '',
 			icon: 'random',
-			difficulties: ['???']
+			difficulties: ['???'],
+			weekIdx: 0
 		});
 
-		for (week in WeekData.list) {
+		for (i => week in WeekData.list) {
 			for (song in week.songs) {
 				var diffs:Array<String> = song?.difficulties;
 				if (song.difficulties == null || song.difficulties.length == 0) diffs = Difficulty.loadFromWeek(week);
@@ -60,7 +61,8 @@ class FreeplayState extends FunkinState {
 					colour: song.color,
 					folder: week.folder,
 					icon: song.icon,
-					difficulties: diffs
+					difficulties: diffs,
+					weekIdx: i
 				});
 			}
 		}
@@ -155,6 +157,7 @@ class FreeplayState extends FunkinState {
 		final diff:String = Difficulty.format(curDiffName);
 		final path:String = 'songs/$songID/${Song.getFile(songID, diff)}';
 		if (Paths.exists(path)) {
+			WeekData.current = songList[curSelected].weekIdx;
 			PlayState.songID = songID;
 			Difficulty.list = curDiffs;
 			Difficulty.current = curDiffName;
@@ -288,4 +291,5 @@ typedef SongMeta = {
 	var colour:FlxColor;
 	var folder:String;
 	var difficulties:Array<String>;
+	var weekIdx:Int;
 }
