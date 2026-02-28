@@ -1,6 +1,7 @@
 package funkin.states;
 
 import funkin.states.PlayState.NoteHit;
+import funkin.shaders.SwirlBGShader;
 
 // ok so   uhhhhhhhhhhhhhh
 // clone hero
@@ -17,6 +18,7 @@ class ResultsScreen extends FunkinState {
 
 	var colorPulse:Float = 0;
 	var songColor:FlxColor = 0xFF808080;
+	var swirlShader:SwirlBGShader;
 	var bg:FunkinSprite;
 	
 	var timeBoxes:FlxTypedGroup<FunkinSprite>;
@@ -42,9 +44,19 @@ class ResultsScreen extends FunkinState {
 		for (song in weekFile.songs)
 			songColor = (song.id == songsPlayed[songsPlayed.length - 1]) ? song.color : songColor;
 
-		add(bg = new FunkinSprite(0, 0, Paths.image("menus/lineBG")));
-		bg.screenCenter();
-		bg.color = songColor;
+		var swirlBG = new FunkinSprite(0, 0, Paths.image("menus/results/fluid"));
+		swirlBG.screenCenter();
+		swirlBG.shader = swirlShader = new SwirlBGShader();
+		swirlBG.alpha = 0.5;
+		var col1 = FlxColor.interpolate(0xFF000018, songColor, 0.5);
+		var col2 = FlxColor.interpolate(0xFF000018, songColor, 0.25);
+		swirlShader.redCol.value = [col1.redFloat, col1.greenFloat, col1.blueFloat];
+		swirlShader.greenCol.value = [col2.redFloat, col2.greenFloat, col2.blueFloat];
+		add(swirlBG);
+
+		// add(bg = new FunkinSprite(0, 0, Paths.image("menus/lineBG")));
+		// bg.screenCenter();
+		// bg.color = songColor;
 		
 		// offset.
 		var clear:FlxText = new FlxText(20, 10, 0, (wasStory ? "Week" : "Song") + " Cleared!", 48);
@@ -129,7 +141,7 @@ class ResultsScreen extends FunkinState {
 				Util.clipByCoords(txt, null, bars.members[0].x + bars.members[0].scale.x, null, null);
 		});
 
-		var timeDot = Paths.image("menus/noteHitDot", "images", false); // need gpu cache off cuz imma be fucking with bitmaps a bit
+		var timeDot = Paths.image("menus/results/noteHitDot", "images", false); // need gpu cache off cuz imma be fucking with bitmaps a bit
 		var missLine = FlxG.bitmap.create(timeDot.width, Std.int(timeBoxes.members[0].height), 0xFF808080);
 		missLine.destroyOnNoUse = false;
 
@@ -159,7 +171,8 @@ class ResultsScreen extends FunkinState {
 		super.update(delta);
 
 		colorPulse += delta;
-		bg.color = FlxColor.interpolate(0xFF000018, songColor, (Math.cos(colorPulse) * 0.125 + 0.375));
+		swirlShader.iTime.value[0] = colorPulse;
+		//bg.color = FlxColor.interpolate(0xFF000018, songColor, (Math.cos(colorPulse) * 0.125 + 0.375));
 
 		if (Controls.justPressed("back") || Controls.justPressed("accept")) {
 			Conductor.stop();
