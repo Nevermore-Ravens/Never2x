@@ -11,7 +11,7 @@ class ModEvent extends BaseEvent {
 	public var mod:BaseModifier;
 	public var lane:Int = -1;
 	public var index:Int = 0;
-	public var startValue:Float = Math.NaN;
+	public var startValue:Array<Float> = null;
 	public var endValue:Float;
 	public var strumline:Int = -1;
 
@@ -27,14 +27,20 @@ class ModEvent extends BaseEvent {
 		this.lane = redirect.lane;
 		this.index = redirect.index;
 		this.strumline = strumline;
-		this.startValue = startVal ?? Math.NaN;
+		this.startValue = startVal != null ? [startVal] : null;
 	}
 
 	override function start() {
+		inline function getVal(plr:Int)
+			return startValue == null ? mod.getValue(index, plr) : startValue[0];
+
 		mod.parent.curLane = lane;
-		if(Math.isNaN(startValue))
-			this.startValue = mod.getValue(index, strumline < 0 ? 0 : strumline);
-		
+		var newStarts = (strumline < 0) ? [
+			for (plr in 0...mod.values.length)
+				getVal(plr)
+		] : [getVal(strumline)];
+		startValue = newStarts;
+
 		if (length <= 0)
 			mod.setValue(index, endValue, strumline);
 	}
@@ -47,7 +53,11 @@ class ModEvent extends BaseEvent {
 			var percent: Float = Math.min((curBeat - beat) / length, 1);
 			percent = ease(percent);
 
-			mod.setValue(index, FlxMath.lerp(startValue, endValue, percent), strumline);
+			if (strumline < 0) {
+				for (plr in 0...startValue.length)
+					mod.setValue(index, FlxMath.lerp(startValue[plr], endValue, percent), plr);
+			} else
+			mod.setValue(index, FlxMath.lerp(startValue[0], endValue, percent), strumline);
 		}
 	}
 

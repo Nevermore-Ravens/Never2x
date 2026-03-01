@@ -27,9 +27,7 @@ class PlayState extends FunkinState {
 
 	public static var inTransition:Bool = false;
 	public static var songList:Array<String> = [];
-	public static var resultHits:Array<Array<NoteHit>> = [];
-	public static var resultJudges:Array<Array<Judgement>> = [];
-	public static var resultLengths:Array<Float> = [];
+	public static var songResults:Array<funkin.states.ResultsScreen.SongResult> = [];
 	public static var storyMode:Bool = false;
 
 	public static var currentLevel:Int = 0;
@@ -1104,9 +1102,15 @@ class PlayState extends FunkinState {
 			color: 0xFF808080,
 			hits: comboBreaks - judgeBreaks
 		});
-		resultHits.push(noteHitList);
-		resultJudges.push(Judgement.list);
-		resultLengths.push(Conductor.inst.length);
+
+		songResults.push({
+			song: songID,
+			score: score,
+			accuracy: accuracy,
+			notesHit: noteHitList,
+			judges: Judgement.list,
+			songLength: Conductor.inst.length
+		});
 
 		if (exitToMenu || forceLeave) {
 			persistentUpdate = false;
@@ -1121,17 +1125,12 @@ class PlayState extends FunkinState {
 				FunkinState.switchState(new ResultsScreen(
 					storyMode,
 					Difficulty.current,
-					storyMode ? songList.copy() : [songID],
-					resultHits.copy(),
-					resultJudges.copy(),
-					resultLengths.copy()
+					songResults.copy()
 				));
 			}
 			Difficulty.reset();
 			songList.resize(0);
-			resultHits.resize(0);
-			resultJudges.resize(0);
-			resultLengths.resize(0);
+			songResults.resize(0);
 			storyMode = false;
 			currentLevel = 0;
 			disqualified = false;
