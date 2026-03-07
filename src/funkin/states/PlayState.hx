@@ -1115,12 +1115,8 @@ class PlayState extends FunkinState {
 		if (exitToMenu || forceLeave) {
 			persistentUpdate = false;
 			if (forceLeave) {
-				Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true);
-				Conductor.timingPoints = [{bpm: 102, beatsPerMeasure: 4}];
-				Conductor.play();
-				Addons.current = '';
+				Util.toMenu(new FreeplayState());
 				Paths.clearUnusedMemory();
-				FunkinState.switchState(new FreeplayState());
 			} else {
 				FunkinState.switchState(new ResultsScreen(
 					storyMode,

@@ -1,7 +1,9 @@
 package funkin.substates;
 
+import funkin.states.OptionsState;
+
 class PauseMenu extends flixel.FlxSubState {
-	var options:Array<String> = ['Resume', 'Restart', 'Exit to Menu'];
+	var options:Array<String> = ['Resume', 'Restart', 'Options', 'Exit to Menu'];
 	var optionGrp:FlxTypedSpriteGroup<Alphabet>;
 
 	var difficulty:String;
@@ -32,7 +34,7 @@ class PauseMenu extends flixel.FlxSubState {
 		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
 			tmr.active = false);
 
-		if (Difficulty.list.length > 1) options.insert(2, 'Change Difficulty');
+		if (Difficulty.list.length > 1) options.insert(3, 'Change Difficulty');
 
 		if (Settings.data.pauseType != 'Unlimited') {
 			openCount++;
@@ -144,6 +146,13 @@ class PauseMenu extends flixel.FlxSubState {
 					FlxG.mouse.visible = false;
 					FunkinState.resetState();
 					FlxG.autoPause = Settings.data.autoPause;
+
+				case 'Options':
+					Conductor.stop();
+					Conductor.reset();
+					Util.toMenu(new FreeplayState());
+					FunkinState.switchState(new OptionsState());
+					OptionsState.inPlayState = true;
 
 				case 'Change Difficulty': 
 					regenerateOptions(Difficulty.list);

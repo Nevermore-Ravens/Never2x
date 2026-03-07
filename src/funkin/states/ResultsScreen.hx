@@ -338,12 +338,8 @@ class ResultsScreen extends FunkinState {
 		if (Controls.justPressed("back") || Controls.justPressed("accept")) {
 			Conductor.stop();
 			Conductor.reset();
-			Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true);
-			Conductor.timingPoints = [{bpm: 102, beatsPerMeasure: 4}];
-			Conductor.play();
-			Addons.current = '';
+			Util.toMenu(new FreeplayState());
 			Paths.clearUnusedMemory();
-			FunkinState.switchState(new FreeplayState());
 		}
 
 		for (dot in timeDots.members) {

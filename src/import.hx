@@ -5,7 +5,7 @@ import funkin.backend.WeekData.WeekFile;
 import funkin.backend.EventHandler.Event;
 import funkin.backend.Scores.PlayData;
 import funkin.backend.Song.Chart;
-import funkin.objects.Alphabet;
+import funkin.objects.menu.Alphabet;
 import funkin.objects.FunkinSprite;
 import funkin.backend.ScriptHandler;
 import funkin.states.*;

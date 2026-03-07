@@ -1,6 +1,7 @@
 package funkin.states;
 
 import haxe.io.Path;
+import funkin.objects.menu.TextList;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.FunkinSprite;
@@ -211,17 +212,17 @@ class OptionsState extends FunkinState {
 				var opt = new Option('language', 'language_desc', "language", ListOption(LanguageHandler.getLanguages()));
 				opt.onChange = function(v) {
 					LanguageHandler.setLanguage(v);
-					for (i => cata in self.listGrp.members)
-						cata.text = _t(self.categoryList[i]).toUpperCase();
+					for (i => cate in self.categoryList)
+						self.cateText.setText(i, _t(cate));
 
-					for (i => txt in self.optTxt.members) {
+					for (i => opt in self.curOptList) {
 						final opt = self.curOptList[i];
-						txt.text = (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase();
-						self.optValTxt.members[i].text = opt.formatText(i == self.curSelected);
+						self.optText.setText(i, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase());
+						self.optText.setSubText(i, opt.formatText(i == self.optText.current));
 					}
 
 					self.lastDescHeight = self.descBG.scale.y;
-					self.descTxt.text = self.getDesc(self.curOptList[self.curSelected]);
+					self.descTxt.text = self.getDesc(self.curOptList[self.optText.current]);
 				}
 				opt;
 			},
@@ -279,12 +280,12 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("antialiasing", "antialiasing_desc", "antialiasing", BoolOption);
 				opt.onChange = function(v) {
-					for (i => cata in self.listGrp.members)
+					for (i => cata in self.cateText.texts.members)
 						cata.antialiasing = v;
 
-					for (i => txt in self.optTxt.members)
+					for (i => txt in self.optText.texts.members)
 						txt.antialiasing = v;
-					for (i => val in self.optValTxt.members)
+					for (i => val in self.optText.subTexts.members)
 						val.antialiasing = v;
 
 					for (member in self.members) {
@@ -296,7 +297,7 @@ class OptionsState extends FunkinState {
 			},
 			new Option("streams", "streams_desc", "audioStreams", BoolOption),
 			{
-				var opt = new Option("reduced_quality", "reduced_quality", "reducedQuality", BoolOption);
+				var opt = new Option("reduced_quality", "reduced_quality_desc", "reducedQuality", BoolOption);
 				opt.onChange = function(v) {
 					//self.lineBG.shader = v ? null : self.lineShader;
 				}
@@ -354,6 +355,12 @@ class OptionsState extends FunkinState {
 				var opt = new Option("calc_offset", "calc_offset_desc", "", ButtonOption);
 				//opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
 				opt.onChange = function(_) {
+					self.wasInOpts = self.optText.allowKeys;
+					self.cateText.allowMouse = false;
+					self.cateText.allowKeys = false;
+					self.optText.allowMouse = false;
+					self.optText.allowKeys = false;
+
 					self.playfield.botplay = false;
 					self.totalNoteDifference = 0;
 					self.notesHit = 0;
@@ -371,20 +378,12 @@ class OptionsState extends FunkinState {
 
 	public static var inPlayState:Bool = false;
 	var selCategory:Int = -1;
-	var curCategory:Int = 0;
-	var curSelected:Int = 0;
-
-	// variables to create a mouse deadzone
-	final MOUSE_DEADZONE = 5; // technically 10, but goes in both directions.
-	var lastMouseX:Float = 0;
-	var lastMouseY:Float = 0;
-	public var mouseMoved:Bool = false;
 
 	// 0 - None, 1 - Left, 2 - Right, 3 - Mouse Left, 4 - Mouse Right
 	var curHolding:Int = 0;
 	var holdWait:Float = 0.5;
 
-	var keysInOpts:Bool = false;
+	var wasInOpts:Bool = false;
 	var waitingForKey:Bool = false;
 	var controllerMode:Bool = false;
 
@@ -393,15 +392,9 @@ class OptionsState extends FunkinState {
 
 	var scrollTime:Float = 0;
 	var bg:FunkinSprite;
-	var listBG:FunkinSprite;
-	var listGrp:FlxTypedGroup<FlxText>;
-
-	var curOptScroll:Float = 0;
-	var optScrollInc:Float = 0;
+	var cateText:TextList;
+	var optText:TextList;
 	var selOptScale:Float = 0;
-	var optBG:FunkinSprite;
-	var optTxt:FlxTypedGroup<FlxText>;
-	var optValTxt:FlxTypedGroup<FlxText>;
 
 	var lastDescHeight:Float = 0;
 	var descBG:FunkinSprite;
@@ -433,28 +426,19 @@ class OptionsState extends FunkinState {
 
 		initCalibrationField();
 
-		add(listBG = new FunkinSprite(10, 10).makeGraphic(1, 1, 0x70000000));
-		listBG.setGraphicSize(300, 700);
-		listBG.updateHitbox();
+		add(cateText = new TextList(10, 10, 300, 700, [for (cate in categoryList) _t(cate)]));
+		cateText.onAccept = openCategory;
+		cateText.onClick = openCategory;
+		cateText.onSelect = function(_, __) {
+			FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+		};
 
-		add(listGrp = new FlxTypedGroup<FlxText>());
-		var y = listBG.y + 15;
-		for (i => cate in categoryList) {
-			var txt = new FlxText(listBG.x + 15, y, listBG.width - 30, _t(cate));
-			txt.setFormat(Paths.font("cafeSquare.ttf"), 24, i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF);
-			txt.antialiasing = Settings.data.antialiasing;
-			listGrp.add(txt);
-			y += 30;
-		}
-
-		add(optBG = new FunkinSprite(listBG.x + listBG.width + 10, listBG.y).makeGraphic(1, 1, 0x70000000));
-		optBG.scale.set(500, 700);
-		optBG.updateHitbox();
-
-		add(optValTxt = new FlxTypedGroup<FlxText>());
-		add(optTxt = new FlxTypedGroup<FlxText>());
-
-		add(descBG = new FunkinSprite(optBG.x + optBG.width + 10, 0).makeGraphic(1, 1, 0x70000000));
+		add(optText = new TextList(cateText.x + cateText.width + 10, cateText.y, 500, 700, []));
+		optText.onClick = optClick;
+		optText.onSelect = retargetOpt;
+		optText.canSelect = (target) -> curOptList[target].type != Unselectable;
+		
+		add(descBG = new FunkinSprite(optText.x + optText.width + 10, 0).makeGraphic(1, 1, 0x70000000));
 		descBG.scale.set(FlxG.width - descBG.x - 10, 120);
 		descBG.updateHitbox();
 		descBG.scale.y = 0;
@@ -462,10 +446,12 @@ class OptionsState extends FunkinState {
 		descBG.origin.set();
 
 		add(descTxt = new FlxText(descBG.x + 10, descBG.y + 10, descBG.width - 20, ""));
-		descTxt.setFormat(Paths.font("vcr.ttf"), 20, 0xFFFFFFFF, LEFT);
+		descTxt.setFormat(Paths.font("vcr.ttf"), 20, 0xFFFFFFFF, LEFT, OUTLINE, 0xFF000000);
+		descTxt.borderSize = 1.5;
 
-		openCategory(curCategory);
-		keysInOpts = false;
+		openCategory(0);
+		cateText.allowKeys = true;
+		optText.allowKeys = false;
 	}
 
 	override function update(delta:Float) {
@@ -473,13 +459,6 @@ class OptionsState extends FunkinState {
 
 		scrollTime += delta * 25;
 		bg.clipGraphic(scrollTime, 0, bg.frameWidth, bg.frameHeight);
-
-        mouseMoved = false;
-		if (Math.abs(FlxG.mouse.screenX - lastMouseX) >= MOUSE_DEADZONE || Math.abs(FlxG.mouse.screenY - lastMouseY) >= MOUSE_DEADZONE) {
-			lastMouseX = FlxG.mouse.screenX;
-			lastMouseY = FlxG.mouse.screenY;
-			mouseMoved = true;
-		}
 
 		// Calibration looping
 		final time = Conductor.rawTime - Conductor.offset;
@@ -494,14 +473,14 @@ class OptionsState extends FunkinState {
 		var optAlpha = 0.3;
 		if (waitingForKey) {
 			optAlpha = 1;
-			final opt = curOptList[curSelected];
+			final opt = curOptList[optText.current];
 			final keys:Array<FlxKey> = cast opt.value;
 			if (FlxG.keys.justPressed.ESCAPE) {
 				waitingForKey = false;
 				FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
-				optValTxt.members[curSelected].text = opt.formatText(true);
-				descTxt.text = getDesc(curOptList[curSelected]);
+				optText.setSubText(optText.current, opt.formatText(true));
+				descTxt.text = getDesc(curOptList[optText.current]);
 				return;
 			} else if (opt.curKey < keys.length && FlxG.keys.justPressed.DELETE) {
 				waitingForKey = false;
@@ -510,8 +489,8 @@ class OptionsState extends FunkinState {
 				keys.splice(opt.curKey, 1);
 				opt.value = keys;
 
-				optValTxt.members[curSelected].text = opt.formatText(true);
-				descTxt.text = getDesc(curOptList[curSelected]);
+				optText.setSubText(optText.current, opt.formatText(true));
+				descTxt.text = getDesc(curOptList[optText.current]);
 				return;
 			}
 
@@ -527,17 +506,17 @@ class OptionsState extends FunkinState {
 
 				opt.value = binds;
 
-				optValTxt.members[curSelected].text = opt.formatText(true);
+				optText.setSubText(optText.current, opt.formatText(true));
 				descTxt.text = getDesc(opt);
 				FlxG.sound.play(Paths.audio("confirm", "sfx"));
 			}
 		} else if (playfield.botplay) {
-			if (mouseOpts() || keysInOpts)
+			if (optText.hovered || optText.allowKeys)
 				optAlpha = 1;
-			if (mouseCategories() || !keysInOpts)
+			if (cateText.hovered || cateText.allowKeys)
 				listAlpha = 1;
 
-			(keysInOpts ? optInputs : cateInputs)(delta);
+			(optText.allowKeys ? optInputs : cateInputs)(delta);
 		} else {
 			final acceptJustPressed = Controls.justPressed("accept");
 			if (acceptJustPressed || Controls.justPressed("back") || FlxG.mouse.justPressedRight) {
@@ -546,25 +525,23 @@ class OptionsState extends FunkinState {
 					FlxG.sound.play(Paths.audio("scroll", "sfx"));
 				} else
 					FlxG.sound.play(Paths.audio("cancel", "sfx"));
+
 				playfield.botplay = true;
+				cateText.allowMouse = true;
+				cateText.allowKeys = !wasInOpts;
+				optText.allowMouse = true;
+				optText.allowKeys = wasInOpts;
+
 				selOptScale = 0;
-				descTxt.text = getDesc(curOptList[curSelected]);
+				descTxt.text = getDesc(curOptList[optText.current]);
 				self.descTxt.alignment = LEFT;
 				lastDescHeight = descBG.scale.y;
 			}
 		}
-		listBG.alpha = FlxMath.lerp(listBG.alpha, listAlpha, delta * 15);
-		optBG.alpha = FlxMath.lerp(optBG.alpha, optAlpha, delta * 15);
+		cateText.alpha = FlxMath.lerp(cateText.alpha, listAlpha, delta * 15);
+		optText.alpha = FlxMath.lerp(optText.alpha, optAlpha, delta * 15);
 		strumline.alpha = FlxMath.lerp(strumline.alpha, (playfield.botplay ? 0.3 : 1), delta * 15);
 
-		for (item in listGrp.members)
-			item.alpha = listBG.alpha;
-		for (item in optTxt.members)
-			item.alpha = optBG.alpha;
-		for (item in optValTxt.members)
-			item.alpha = optBG.alpha;
-
-		curOptScroll = FlxMath.lerp(curOptScroll, optScrollInc * curSelected, delta * 15);
 		/*final topMargin = optBG.y;
 		final botMargin = (optBG.y + optBG.frameHeight * optBG.scale.y);
 		Util.reposNClipTexts(optTxt, curSelected, topMargin, botMargin, (optBG.y + 25 - curOptScroll), delta, function(idx:Int, y:Float, scale:Float) {
@@ -588,7 +565,7 @@ class OptionsState extends FunkinState {
 		descBG.scale.y = FlxMath.lerp(lastDescHeight, descTxt.height + 30, FlxEase.backOut(selOptScale));
 		Util.clipByCoords(descTxt, null, null, null, descBG.y + descBG.scale.y);
 
-		var targetDescY = Math.min(optTxt.members[curSelected].y - 15, FlxG.height - 10 - (descTxt.height + 30));
+		var targetDescY = Math.min(optText.texts.members[optText.current].y - 15, FlxG.height - 10 - (descTxt.height + 30));
 		descBG.y = FlxMath.lerp(descBG.y, ((playfield.botplay && !waitingForKey) ? targetDescY : (FlxG.height - descTxt.height) * 0.5 - 15), delta * 20);
 		descTxt.y = descBG.y + 15;
 	}
@@ -625,16 +602,8 @@ class OptionsState extends FunkinState {
 			return;
 
 		selCategory = cate;
-		keysInOpts = true;
-
-		while (optTxt.length > 0) {
-			final txt = optTxt.members[0];
-			final val = optValTxt.members[0];
-			optTxt.remove(txt, true);
-			optValTxt.remove(val, true);
-			txt.destroy();
-			val.destroy();
-		}
+		cateText.allowKeys = false;
+		optText.allowKeys = true;
 
 		curOptList.resize(0);
 		final settingFields = Type.getInstanceFields(SaveVariables);
@@ -644,71 +613,22 @@ class OptionsState extends FunkinState {
 				curOptList.push(opt);
 		}
 
-		curSelected = 0;
-		var y = optBG.y + 15;
-		for (i => opt in curOptList) {
-			var txt = new FlxText(optBG.x + 15, y, optBG.width - 30, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)));
-			var val = new FlxText(txt.x, txt.y, optBG.width - 30, opt.formatText(i == curSelected));
-			txt.setFormat(Paths.font("cafeSquare.ttf"), 24, (i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF), LEFT);
-			val.setFormat(Paths.font("vcr.ttf"), 24, (i != curSelected ?0xFF90A0A0 : 0xFFFFFFFF), RIGHT);
-			txt.antialiasing = Settings.data.antialiasing;
-			val.antialiasing = Settings.data.antialiasing;
-			optTxt.add(txt);
-			optValTxt.add(val);
-			y += 30;
-		}
-		optScrollInc = Math.max(curOptList.length * 35 + 60 - optBG.frameHeight, 0) / curOptList.length;
+		var txts = [for (opt in curOptList) (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name))];
+		var subs = [for (i => opt in curOptList) opt.formatText(i == 0)];
+		optText.regenerate(txts, subs);
 
 		selOptScale = 0;
-		descTxt.text = getDesc(curOptList[curSelected]);
+		descTxt.text = getDesc(curOptList[optText.current]);
 		lastDescHeight = descBG.scale.y;
 	}
 
-	function retargetCate(target:Int) {
-		if (target == curCategory) return;
-
-		listGrp.members[curCategory].color = 0xFF90A0A0;
-
-		curCategory = target;
-
-		listGrp.members[curCategory].color = -1;
-
-		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
-	}
-
-	function mouseCategories() {
-		if (FlxG.mouse.screenX < listBG.x || FlxG.mouse.screenX > listBG.x + listBG.width)
-			return false;
-
-		for (i in 0...listGrp.length) {
-			var top = listBG.y + 15 + 30 * i;
-
-			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30) {
-				retargetCate(mouseMoved ? i : curCategory);
-
-				if (FlxG.mouse.justPressed)
-					openCategory(i);
-				break;
-			}
-		}
-		return true;
-	}
-
 	function cateInputs(delta:Float) {
-		final downJustPressed = Controls.justPressed("ui_down");
-		if (downJustPressed || Controls.justPressed("ui_up"))
-			retargetCate(FlxMath.wrap(curCategory + (downJustPressed ? 1 : -1), 0, categoryList.length - 1));
-
-		if (Controls.justPressed('accept')) {
-			openCategory(curCategory);
-		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
+		if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
 			descTxt.text = "";
 			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
-			//Border.transitionTween(true, false, border, 0.25, 0.25, function() {
-				if (inPlayState) FlxG.switchState(new PlayState());
-				else FlxG.switchState(new MainMenuState());
-			//});
+			if (inPlayState) FunkinState.switchState(new PlayState());
+			else FunkinState.switchState(new MainMenuState());
 		}
 	}
 
@@ -716,85 +636,67 @@ class OptionsState extends FunkinState {
 		return (opt.desc.startsWith("<NO-LANG>") ? opt.desc.substring(9, opt.desc.length) : _formatT(opt.desc, [_t("accept").toUpperCase()])) + (opt.type == KeyOption ? "\n\n" + _formatT("key_opt_desc", [_t("accept").toUpperCase()]) : "");
 	}
 
-	function retargetOpt(target:Int) {
-		if (target == curSelected) return;
+	function retargetOpt(cur:Int, last:Int) {
+		optText.setSubText(last, curOptList[last].formatText(false));
+		optText.setSubText(cur, curOptList[cur].formatText(false));
 
-		optTxt.members[curSelected].color = 0xFF90A0A0;
-		optValTxt.members[curSelected].color = 0xFF90A0A0;
-		optValTxt.members[curSelected].text = curOptList[curSelected].formatText(false);
-
-		curSelected = target;
 		selOptScale = 0;
-
-		optTxt.members[curSelected].color = -1;
-		optValTxt.members[curSelected].color = -1;
-		optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
-
-		descTxt.text = getDesc(curOptList[curSelected]);
+		descTxt.text = getDesc(curOptList[cur]);
 		lastDescHeight = descBG.scale.y;
 
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 	}
 
-	function mouseOpts() {
-		if (FlxG.mouse.screenX < optBG.x || FlxG.mouse.screenX > optBG.x + optBG.width)
-			return false;
+	function optClick(current:Int) {
+		if (curOptList[current].type == ButtonOption) {
+			curOptList[current].change(false);
+		} else if (curOptList[current].type == BoolOption) {
+			curOptList[current].change(false);
+			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
+			optText.setSubText(current, curOptList[current].formatText(true));
+		} else if (curOptList[current].type == KeyOption) {
+			waitingForKey = true;
+			descTxt.text = _formatT("sel_key_desc", [","]);
+			optText.setSubText(current, "Setting...");
+			FlxG.sound.play(Paths.audio("scroll", "sfx"));
+		} else if (Math.abs(FlxG.mouse.screenX - (optText.x + optText.width * 0.5)) >= optText.width * 0.5 - 25) {
+			final isLeft = FlxG.mouse.screenX <= optText.x + 25;
+			curHolding = isLeft ? 3 : 4;
+			holdWait = 0.5;
 
-		for (i in 0...optTxt.length) {
-			var top = listBG.y + 15 + 30 * i;
-			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30 && curOptList[i].type != Unselectable) {
-				retargetOpt(mouseMoved ? i : curSelected);
-				if (FlxG.mouse.justPressed) {
-					if (curOptList[curSelected].type == ButtonOption) {
-						curOptList[curSelected].change(false);
-					} else if (curOptList[curSelected].type == BoolOption) {
-						curOptList[curSelected].change(false);
-						FlxG.sound.play(Paths.audio(curOptList[curSelected].sound, 'sfx'));
-						optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
-					} else if (curOptList[curSelected].type == KeyOption) {
-						waitingForKey = true;
-						descTxt.text = _formatT("sel_key_desc", [","]);
-						optValTxt.members[curSelected].text = "Setting...";
-						FlxG.sound.play(Paths.audio("scroll", "sfx"));
-					} else if (Math.abs(FlxG.mouse.screenX - (optBG.x + optBG.width * 0.5)) >= optBG.width * 0.5 - 25) {
-						final isLeft = FlxG.mouse.screenX <= optBG.x + 25;
-						curHolding = isLeft ? 3 : 4;
-						holdWait = 0.5;
-
-						curOptList[curSelected].change(isLeft);
-						FlxG.sound.play(Paths.audio(curOptList[curSelected].sound, 'sfx'));
-						optValTxt.members[curSelected].text = curOptList[curSelected].formatText(true);
-					}
-				}
-				break;
-			}
+			curOptList[current].change(isLeft);
+			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
+			optText.setSubText(current, curOptList[current].formatText(true));
 		}
-		return true;
+	}
+
+	function optEnter(current:Int) {
+		final curOption = curOptList[current];
+
+		if (curOption.type == BoolOption) {
+			curOption.change(false);
+			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
+			optText.setSubText(current, curOption.formatText(true));
+		} else if (curOption.type == KeyOption) {
+			waitingForKey = true;
+			descTxt.text = _formatT("sel_key_desc", [","]);
+			optText.setSubText(current, "Setting...");
+			FlxG.sound.play(Paths.audio("scroll", "sfx"));
+		} else if (curOption.type == ButtonOption)
+			curOption.change(false);
 	}
 
 	function optInputs(delta:Float) {
-		final downJustPressed:Bool = Controls.justPressed('ui_down');
 		final leftJustPressed:Bool = Controls.justPressed('ui_left');
 
-		if (downJustPressed || Controls.justPressed('ui_up')) {
-			final firstNew = FlxMath.wrap(curSelected + (downJustPressed ? 1 : -1), 0, curOptList.length - 1);
-			var newOpt = firstNew;
-			while (curOptList[newOpt].type == Unselectable) {
-				newOpt = FlxMath.wrap(newOpt + (downJustPressed ? 1 : -1), 0, curOptList.length - 1);
-				if (newOpt == firstNew)
-					break; // safety
-			}
-			retargetOpt(newOpt);
-		}
-
-		final curOption = curOptList[curSelected];
+		final curOption = curOptList[optText.current];
 		if ((leftJustPressed || Controls.justPressed('ui_right'))) {
 			curHolding = leftJustPressed ? 1 : 2;
 			holdWait = 0.5;
 
 			curOption.change(leftJustPressed);
 			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-			optValTxt.members[curSelected].text = curOption.formatText(true);
+			optText.setSubText(optText.current, curOption.formatText(true));
 		}
 		
 		curHolding = switch (curHolding) {
@@ -808,25 +710,13 @@ class OptionsState extends FunkinState {
 			if (holdWait <= 0) {
 				holdWait = 0.035; // make the changing more consistent
 				curOption.change(curHolding % 2 == 1);
-				optValTxt.members[curSelected].text = curOption.formatText(true);
+				optText.setSubText(optText.current, curOption.formatText(true));
 			}
-		}
-		
-		if (Controls.justPressed("accept")) {
-			if (curOption.type == BoolOption) {
-				curOption.change(false);
-				FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-				optValTxt.members[curSelected].text = curOption.formatText(true);
-			} else if (curOption.type == KeyOption) {
-				waitingForKey = true;
-				descTxt.text = _formatT("sel_key_desc", [","]);
-				optValTxt.members[curSelected].text = "Setting...";
-				FlxG.sound.play(Paths.audio("scroll", "sfx"));
-			} else if (curOption.type == ButtonOption) curOption.change(false);
 		}
 
 		if (Controls.justPressed("back") || FlxG.mouse.justPressedRight) {
-			keysInOpts = false;
+			cateText.allowKeys = true;
+			optText.allowKeys = false;
 			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 		}
 	}

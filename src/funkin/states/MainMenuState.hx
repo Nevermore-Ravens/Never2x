@@ -106,7 +106,7 @@ class MainMenuState extends FunkinState {
 						
 					case 'options':
 						FunkinState.switchState(new OptionsState());
-						funkin.states.OptionsState.inPlayState = false;
+						OptionsState.inPlayState = false;
 
 					default:
 						optionGrp.members[curSelected].alpha = 0.0;

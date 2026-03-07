@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.menu;
 
 import flixel.math.FlxPoint;
 import flixel.group.FlxSpriteGroup;
