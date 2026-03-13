@@ -13,7 +13,7 @@ echo This might take a few moments depending on your internet speed.
 haxelib git lime https://github.com/Cam-VSRG/lime --quiet --skip-dependencies
 haxelib install flixel-addons 3.0.2 --quiet --skip-dependencies
 haxelib install openfl 9.5.0 --quiet --skip-dependencies
-haxelib install flixel 5.5.0 --quiet --skip-dependencies
+haxelib git flixel https://github.com/Cam-VSRG/flixel --quiet --skip-dependencies
 haxelib git hscript-iris https://github.com/crowplexus/hscript-iris --quiet --skip-dependencies
 haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate --quiet --skip-dependencies
 haxelib git moonchart https://github.com/MaybeMaru/moonchart --quiet --skip-dependencies
