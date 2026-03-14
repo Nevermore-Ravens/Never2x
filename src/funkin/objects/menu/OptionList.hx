@@ -4,11 +4,18 @@ import flixel.math.FlxRect;
 import funkin.states.OptionsState.Option;
 
 class OptionList extends TextList {
+	// 0 - None, 1 - Left, 2 - Right, 3 - Mouse Left, 4 - Mouse Right
+	public var curHolding:Int = 0;
+	public var holdWait:Float = 0.5;
+	public var dragging:Bool = false;
+
 	var list:Array<Option>;
     var selPercentages:Array<Float> = [];
 	var componGrp:FlxTypedGroup<FlxSprite>;
 	var invertCompons:FlxTypedGroup<FlxSprite>;
 	public var components:Array<OptionComponent<FlxSprite>> = [];
+
+	public var onRequestKey:Void->Void;
 
 	public function new(x:Float, y:Float, width:Float, height:Float) {
 		super(x, y, width, height, []);
@@ -16,15 +23,92 @@ class OptionList extends TextList {
 		invertCompons = new FlxTypedGroup();
 	}
 
+	override function retarget(target:Int) {
+		if (current == target) return;
+
+		var last:Int = current;
+		current = target;
+
+		components[last].selectionChanged(list[last], false);
+		components[current].selectionChanged(list[current], true);
+		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+
+		if (onSelect != null)
+			onSelect(current, last);
+	}
+
+	override function keyControl(elapsed:Float) {
+		final downJustPressed:Bool = Controls.justPressed('ui_down');
+		if (downJustPressed || Controls.justPressed('ui_up')) {
+			final firstNew = FlxMath.wrap(current + (downJustPressed ? 1 : -1), 0, texts.length - 1);
+			var target = firstNew;
+			while (!canSelect(target)) {
+				target = FlxMath.wrap(target + (downJustPressed ? 1 : -1), 0, texts.length - 1);
+				if (target == firstNew)
+					break; // safety
+			}
+			dragging = false;
+			curHolding = 0;
+			retarget(target);
+		}
+
+		final curOption = list[current];
+		final leftJustPressed:Bool = Controls.justPressed('ui_left');
+		if ((leftJustPressed || Controls.justPressed('ui_right')) && curOption.hasMove) {
+			dragging = false;
+			curHolding = leftJustPressed ? 1 : 2;
+			holdWait = 0.5;
+
+			if (curOption.hasSound)
+				FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
+			curOption.change(leftJustPressed);
+			components[current].change(curOption);
+		}
+		if (Controls.justPressed('accept')) {
+			if (curOption.hasEnter) {
+				if (curOption.hasSound)
+					FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
+
+				dragging = false;
+				curHolding = 0;
+				curOption.enter(onRequestKey);
+				components[current].change(curOption);
+			}
+
+			if (onAccept != null)
+				onAccept(current);
+		}
+		
+		curHolding = switch (curHolding) {
+			case 1: Controls.pressed("ui_left") ? 1 : 0;
+			case 2: Controls.pressed("ui_right") ? 2 : 0;
+			case 3 | 4: FlxG.mouse.pressed ? curHolding : 0;
+			default: 0;
+		};
+		if (curHolding != 0) {
+			holdWait -= elapsed;
+			if (holdWait <= 0) {
+				holdWait = 0.035; // make the changing more consistent
+				curOption.change(curHolding % 2 == 1);
+				components[current].change(curOption);
+			}
+		}
+	}
+
     override function mouseControl() {
+		if (dragging) {
+			components[current].hovering(list[current], this);
+			return;
+		}
+
 		for (i in 0...texts.length) {
             var height = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height + 5) * selPercentages[i] : 0));
 			var top = texts.members[i].y - 5;
 
 			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + height && canSelect(i)) {
-				retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
+					retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
 
-				components[i].hovering(list[i]);
+				components[i].hovering(list[i], this);
 				if (FlxG.mouse.justPressed && onClick != null)
 					onClick(i);
 				break;
@@ -104,6 +188,9 @@ class OptionList extends TextList {
 		scrollInc = Math.max((y - this.y - 15 + 60) - height, 0) / txts.length;
 	}
 	public function setOptions(list:Array<Option>) {
+		curHolding = 0;
+		dragging = false;
+
 		var txts = [for (opt in list) (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name))];
 		var subs = [for (i => opt in list) getDesc(opt)];
 		regenerate(txts, subs);
@@ -168,7 +255,7 @@ interface OptionComponent<T:FlxSprite> {
 	public var obj:T;
 	public var canInvert:Bool;
 
-	public function hovering(opt:Option):Void;
+	public function hovering(opt:Option, list:OptionList):Void;
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float):Void;
 	public function clip(top:Float, bottom:Float):Void;
 	public function change(opt:Option):Void;
@@ -179,13 +266,19 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 	public var obj:Checkbox;
 	public var canInvert:Bool;
 
-	public function hovering(opt:Option) {}
+	public function hovering(opt:Option, list:OptionList) {
+		if (!FlxG.mouse.justPressed) return;
+
+		FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+		opt.enter(list.onRequestKey);
+		change(opt);
+	}
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float) {
 		var y = txt.y - 5;
 		var height = txt.height + (sub.height + 5) * selPercent;
 
 		setPosition(txt.x + txt.width - width, y + (height - this.height) * 0.5);
-		scale.x = scale.y = 0.5 + 0.5 * selPercent;
+		scale.x = scale.y = 0.65 + 0.35 * selPercent;
 	}
 	public function clip(top:Float, bottom:Float) {
 		//var y =  Math.max(top - y, 0);
@@ -223,14 +316,44 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 	public var obj:Textbox;
 	public var canInvert:Bool;
 
-	public function hovering(opt:Option) {}
+	public function hovering(opt:Option, list:OptionList) {
+		if (!FlxG.mouse.justPressed) return;
+
+		if (opt.hasSound)
+			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+
+		if (opt.textboxArrows && opt.hasEnter && opt.hasMove) {
+			final leftRect = textField.getCharBoundaries(2);
+			final rightRect = textField.getCharBoundaries(text.length - 2);
+
+			var x = x - graphic.width * scale.x;
+			if (FlxG.mouse.x >= x + leftRect.x * scale.x && FlxG.mouse.x <= x + rightRect.x * scale.x)
+				opt.enter(list.onRequestKey)
+			else {
+				final isLeft = FlxG.mouse.x <= x + leftRect.x * scale.x;
+				list.curHolding = isLeft ? 3 : 4;
+				list.holdWait = 0.5;
+	
+				opt.change(isLeft);
+			}
+		} else if (opt.hasEnter && !opt.hasMove) {
+			opt.enter(list.onRequestKey);
+		} else if (!opt.hasEnter && opt.hasMove) {
+			final isLeft = FlxG.mouse.x <= x - graphic.width * scale.x * 0.5;
+			list.curHolding = isLeft ? 3 : 4;
+			list.holdWait = 0.5;
+
+			opt.change(isLeft);
+		}
+		change(opt);
+	}
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float) {
 		var y = txt.y - 5;
 		var height = txt.height + (sub.height + 5) * selPercent;
 
 		regenGraphic();
 		offset.x = origin.x = graphic.width;
-		scale.x = scale.y = 0.65 + 0.35 * selPercent;
+		scale.x = scale.y = 0.5 + 0.5 * selPercent;
 		setPosition(txt.x + txt.width, y + (height - this.height) * 0.5);
 	}
 	public function clip(top:Float, bottom:Float) {
@@ -266,28 +389,47 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 	var fillPercent:Float;
 	var fill:FunkinSprite;
 	var label:FlxText;
+	var sliderScale:Float = 1;
 
 	var min:Float;
 	var max:Float;
+	var snap:Float;
 
-	public function hovering(opt:Option) {}
+	public function hovering(opt:Option, list:OptionList) {
+		if (!list.dragging && (
+			!FlxG.mouse.pressed ||
+			FlxG.mouse.x < x + BAR_PADDING * sliderScale ||
+			FlxG.mouse.x > x + scale.x - BAR_PADDING * sliderScale ||
+			FlxG.mouse.y < y + BAR_PADDING * sliderScale ||
+			FlxG.mouse.y > y + scale.y - BAR_PADDING * sliderScale
+		)) return;
+
+		list.dragging = FlxG.mouse.pressed;
+		if (opt.hasSound && FlxG.mouse.justPressed)
+			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+
+		// eh dont feel like Math.max(Math.min today
+		final remapped = FlxMath.remapToRange(FlxG.mouse.x, x + BAR_PADDING * label.scale.x, x + scale.x - BAR_PADDING * label.scale.x, min, max);
+		opt.value = FlxMath.bound(Math.round(remapped * opt.powMult) / opt.powMult , min, max);
+		change(opt);
+	}
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float) {
 		var y = txt.y - 5;
 		var height = txt.height + (sub.height + 5) * selPercent;
-		final scale = 0.5 + 0.5 * selPercent;
+		sliderScale = selPercent;
 
-		this.scale.set(this.width * scale, this.height * scale);
+		this.scale.set(this.width * sliderScale, this.height * sliderScale);
 		this.setPosition(txt.x + txt.width - this.scale.x, y + (height - this.scale.y) * 0.5);
 
 		fill.scale.set(
-			(this.width - BAR_PADDING * 2) * scale * fillPercent,
-			(this.height - BAR_PADDING * 2) * scale
+			(this.width - BAR_PADDING * 2) * sliderScale * fillPercent,
+			(this.height - BAR_PADDING * 2) * sliderScale
 		);
-		fill.setPosition(this.x + BAR_PADDING * scale, this.y + BAR_PADDING * scale);
+		fill.setPosition(this.x + BAR_PADDING * sliderScale, this.y + BAR_PADDING * sliderScale);
 
 		@:privateAccess label.regenGraphic();
 		label.offset.x = label.origin.x = label.graphic.width;
-		label.scale.set(scale, scale);
+		label.scale.x = label.scale.y = 0.5 + 0.5 * selPercent;
 		label.setPosition(x, this.y + (this.scale.y - label.height) * 0.5);
 	}
 	public function clip(top:Float, bottom:Float) {

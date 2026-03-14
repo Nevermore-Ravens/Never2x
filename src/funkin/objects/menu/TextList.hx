@@ -112,12 +112,12 @@ class TextList extends FunkinSprite {
 			hoverTmr = 0;
 
 		if (allowKeys)
-			keyControl();
+			keyControl(elapsed);
 
 		position(elapsed);
 	}
 
-	function keyControl() {
+	function keyControl(elapsed:Float) {
 		final downJustPressed:Bool = Controls.justPressed('ui_down');
 	
 		if (downJustPressed || Controls.justPressed('ui_up')) {

@@ -19,7 +19,7 @@ swap_keybind_mode_generic,Swap keybind mode,Swap keybind mode,Swap keybind mode
 swap_keybind_mode_keyboard,Swap to keyboard mode,Swap to keyboard mode,Swap to keyboard mode
 swap_keybind_mode_gamepad,Swap to gamepad mode,Swap to gamepad mode,Swap to gamepad mode
 key_opt_desc,When selected{C} hit {0} to change the indicated key.\nPress CTRL to swap between controller & keyboard binds.,Quando selecionado{C} aperte {0} para mudar o controle indicado.\nPress CTRL to swap between controller & keyboard binds.,選んだら{C}、指定されたボタンを変わるために{0}を叩いてください\nPress CTRL to swap between controller & keyboard binds.
-sel_key_desc,Input any key to set the bind.\n\nTo cancel{C} press ESCAPE. To delete{C} press DELETE.,Pressione qualquer tecla para definir o controle.\n\nPara cancelar{C} aperte ESCAPE. Para apagar{C} aperte DELETE,Input any key to set the bind.\n\nTo cancel{C} press ESCAPE. To delete{C} press DELETE.
+sel_key_desc,Input any key to set the bind.\nTo cancel{C} press ESCAPE. To delete{C} press DELETE.,Pressione qualquer tecla para definir o controle.\nPara cancelar{C} aperte ESCAPE. Para apagar{C} aperte DELETE,Input any key to set the bind.\nTo cancel{C} press ESCAPE. To delete{C} press DELETE.
 left_note,Left Note,Esquerda (Jogo),左ノート
 left_note_desc,For hitting left notes.,Para acertar notas à esquerda.,左音符を叩くに
 down_note,Down Note,Abaixo (Jogo),下ノート

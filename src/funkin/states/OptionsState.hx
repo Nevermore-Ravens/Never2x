@@ -302,17 +302,14 @@ class OptionsState extends FunkinState {
 	];
 
 	public static var inPlayState:Bool = false;
-	var selCategory:Int = -1;
-
-	// 0 - None, 1 - Left, 2 - Right, 3 - Mouse Left, 4 - Mouse Right
-	var curHolding:Int = 0;
-	var holdWait:Float = 0.5;
-
+	
+	var wasInOpts:Bool = false;
 	var waitingForKey:Bool = false;
 	var controllerMode:Bool = false;
-
+	
 	// applied on openCategory, basically optionsList[categoryList[selCategory]] with some filtering
 	var curOptList:Array<Option> = [];
+	var selCategory:Int = -1;
 
 	var bg:FunkinSprite;
 	var cateText:TextList;
@@ -337,10 +334,17 @@ class OptionsState extends FunkinState {
 		};
 
 		add(optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700));
-		optText.onClick = optClick;
-		optText.onAccept = optEnter;
-		optText.onSelect = retargetOpt;
 		optText.canSelect = (target) -> curOptList[target].type != Unselectable;
+		optText.onRequestKey = function() {
+			wasInOpts = optText.allowKeys;
+			cateText.allowKeys = false;
+			cateText.allowMouse = false;
+			optText.allowKeys = false;
+			optText.allowMouse = false;
+
+			waitingForKey = true;
+			optText.setSubText(optText.current, _t("sel_key_desc"));
+		};
 		add(cateText); // not have onAccept call on both
 
 		openCategory(0);
@@ -350,30 +354,35 @@ class OptionsState extends FunkinState {
 
 	override function update(delta:Float) {
 		if (waitingForKey) {
+			super.update(delta);
+			cast (optText.components[optText.current], Textbox).text = "Setting...";
+
 			final opt = curOptList[optText.current];
-			final keys:Array<FlxKey> = cast opt.value;
+			inline function restore(sound:String) {
+				optText.setSubText(optText.current, OptionList.getDesc(opt));
+				optText.components[optText.current].change(opt);
+				cateText.allowKeys = !wasInOpts;
+				cateText.allowMouse = true;
+				optText.allowKeys = wasInOpts;
+				optText.allowMouse = true;
+
+				FlxG.sound.play(Paths.audio(sound, 'sfx'));
+				waitingForKey = false;
+			}
+
+			final binds:Array<Int> = cast opt.value;
 			if (FlxG.keys.justPressed.ESCAPE) {
-				waitingForKey = false;
-				FlxG.sound.play(Paths.audio("cancel", 'sfx'));
-
-				optText.components[optText.current].change(opt);
+				restore("cancel");
 				return;
-			} else if (opt.curKey < keys.length && FlxG.keys.justPressed.DELETE) {
-				waitingForKey = false;
-				FlxG.sound.play(Paths.audio("cancel", 'sfx'));
-				
-				keys.splice(opt.curKey, 1);
-				opt.value = keys;
-
-				optText.components[optText.current].change(opt);
+			} else if (opt.curKey < binds.length && FlxG.keys.justPressed.DELETE) {
+				binds.splice(opt.curKey, 1);
+				opt.value = binds;
+				restore("cancel");
 				return;
 			}
 
 			var input = controllerMode ? (FlxG.gamepads.lastActive?.firstJustPressedID() ?? -1) : FlxG.keys.firstJustPressed();
 			if (input != -1) {
-				final binds:Array<Int> = cast opt.value;
-				waitingForKey = false;
-
 				if (opt.curKey == binds.length)
 					binds.push(input);
 				else
@@ -381,11 +390,21 @@ class OptionsState extends FunkinState {
 
 				opt.value = binds;
 
-				optText.components[optText.current].change(opt);
-				FlxG.sound.play(Paths.audio("confirm", "sfx"));
+				restore("confirm");
 			}
-		} else
-			(optText.allowKeys ? optInputs : cateInputs)(delta);
+			return;
+		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
+			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
+
+			if (optText.allowKeys) {
+				cateText.allowKeys = true;
+				optText.allowKeys = false;
+			} else {
+				if (inPlayState) FunkinState.switchState(new PlayState());
+				else FunkinState.switchState(new MainMenuState());
+			}
+		}
+		super.update(delta);
 
 		/*final topMargin = optBG.y;
 		final botMargin = (optBG.y + optBG.frameHeight * optBG.scale.y);
@@ -405,7 +424,6 @@ class OptionsState extends FunkinState {
 			final bMargin = (idx == curSelected) ? Math.min(optSel.y + (optSel.height + optSel.scale.y) * 0.5, botMargin) : botMargin;
 			Util.clipByCoords(val, optSel.x, null, tMargin, bMargin);
 		});*/
-		super.update(delta);
 	}
 
 	function openCategory(cate:Int) {
@@ -426,97 +444,6 @@ class OptionsState extends FunkinState {
 		}
 
 		optText.setOptions(curOptList);
-	}
-
-	function cateInputs(delta:Float) {
-		if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
-			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
-
-			if (inPlayState) FunkinState.switchState(new PlayState());
-			else FunkinState.switchState(new MainMenuState());
-		}
-	}
-
-	function retargetOpt(cur:Int, last:Int) {
-		optText.components[last].selectionChanged(curOptList[last], false);
-		optText.components[cur].selectionChanged(curOptList[cur], true);
-
-		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
-	}
-
-	function optClick(current:Int) {
-		final compon = optText.components[current];
-		if (curOptList[current].type == ButtonOption) {
-			curOptList[current].change(false);
-		} else if (curOptList[current].type == BoolOption) {
-			curOptList[current].change(false);
-			compon.change(curOptList[optText.current]);
-			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
-		} else if (curOptList[current].type == KeyOption) {
-			waitingForKey = true;
-			cast (compon, Textbox).text = "Setting...";
-			FlxG.sound.play(Paths.audio("scroll", "sfx"));
-		} else {
-			final isLeft = FlxG.mouse.screenX <= compon.obj.x - compon.obj.graphic.width * compon.obj.scale.x * 0.5;
-			curHolding = isLeft ? 3 : 4;
-			holdWait = 0.5;
-
-			curOptList[current].change(isLeft);
-			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
-			compon.change(curOptList[current]);
-		}
-	}
-
-	function optEnter(current:Int) {
-		final curOption = curOptList[current];
-		if (!curOption.hasEnter)
-			return;
-
-		if (curOption.type == BoolOption) {
-			curOption.change(false);
-			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-			optText.components[current].change(curOptList[current]);
-		} else if (curOption.type == KeyOption) {
-			waitingForKey = true;
-			cast (optText.components[current], Textbox).text = "Setting...";
-			FlxG.sound.play(Paths.audio("scroll", "sfx"));
-		} else if (curOption.type == ButtonOption)
-			curOption.change(false);
-	}
-
-	function optInputs(delta:Float) {
-		final leftJustPressed:Bool = Controls.justPressed('ui_left');
-
-		final curOption = curOptList[optText.current];
-		if ((leftJustPressed || Controls.justPressed('ui_right')) && curOption.hasMove) {
-			curHolding = leftJustPressed ? 1 : 2;
-			holdWait = 0.5;
-
-			curOption.change(leftJustPressed);
-			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-			optText.components[optText.current].change(curOption);
-		}
-		
-		curHolding = switch (curHolding) {
-			case 1: Controls.pressed("ui_left") ? 1 : 0;
-			case 2: Controls.pressed("ui_right") ? 2 : 0;
-			case 3 | 4: FlxG.mouse.pressed ? curHolding : 0;
-			default: 0;
-		};
-		if (curHolding != 0) {
-			holdWait -= delta;
-			if (holdWait <= 0) {
-				holdWait = 0.035; // make the changing more consistent
-				curOption.change(curHolding % 2 == 1);
-				optText.components[optText.current].change(curOption);
-			}
-		}
-
-		if (Controls.justPressed("back") || FlxG.mouse.justPressedRight) {
-			cateText.allowKeys = true;
-			optText.allowKeys = false;
-			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
-		}
 	}
 
 	override function destroy() {
@@ -554,6 +481,7 @@ class Option {
 
 	public var hasEnter:Bool = false;
 	public var hasMove:Bool = true;
+	public var hasSound:Bool = true;
 	public var textboxArrows:Bool = true;
 
 	public dynamic function onChange(v:Dynamic) {}
@@ -576,6 +504,7 @@ class Option {
 				};
 			case KeyOption:
 				hasEnter = true;
+				sound = "scroll";
 				formatText = function(selected) {
 				    if(controllerMode) {
 						final buttons:Array<FlxGamepadInputID> = cast value;
@@ -588,6 +517,7 @@ class Option {
 				textboxArrows = false;
 				hasMove = false;
 				hasEnter = true;
+				hasSound = false;
 				formatText = function(_) {return "";};
 			case ListOption(options, translateItems):
 				if (translateItems == true) // == true to account for null
@@ -606,6 +536,19 @@ class Option {
 					inc *= 0.1;
 					powMult *= 0.1;
 				}
+			default: // nothin
+		}
+	}
+
+	public function enter(?keySignal:Void->Void) {
+		switch (type) {
+			case BoolOption:
+				value = !value;
+			case KeyOption:
+				if (keySignal != null)
+					keySignal();
+			case ButtonOption:
+				onChange(null);
 			default: // nothin
 		}
 	}
