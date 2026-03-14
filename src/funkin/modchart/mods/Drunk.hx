@@ -25,7 +25,7 @@ class Drunk extends BaseModifier {
 	}
 
 	inline function sin(rads:Float, clip:Float){
-		var value = FlxMath.fastSin(rads);
+		var value = Math.sin(rads);
 		var sign = value / Math.abs(value);
 		if(Math.abs(value) > Math.abs(clip))return Math.abs(clip) * sign;
 		return value;

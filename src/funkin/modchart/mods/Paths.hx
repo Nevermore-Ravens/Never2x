@@ -43,7 +43,7 @@ class Paths extends BaseModifier {
 	// maybe this should be an aux mod in modmanager that every path mod that requires note's y pos follows? we should also add stealthtype lol
 
 	inline function sin(rads:Float, clip:Float){
-		var value = FlxMath.fastSin(rads);
+		var value = Math.sin(rads);
 		var sign = value / Math.abs(value);
 		if(Math.abs(value) > Math.abs(clip))return Math.abs(clip) * sign;
 		return value;

@@ -34,7 +34,7 @@ class Accel extends BaseModifier {
 		final wave = wave;
 		final wavePeriod = wavePeriod;
 		if (wavePeriod != -1 /**< no division by 0**/ && wave != 0) 
-			yAdjust += wave * 40 * FlxMath.fastSin(distance / ((114 * wavePeriod) + 114));
+			yAdjust += wave * 40 * Math.sin(distance / ((114 * wavePeriod) + 114));
 
 		return distance + yAdjust;
 	}
