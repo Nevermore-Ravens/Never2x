@@ -22,6 +22,9 @@ class OptionsState extends FunkinState {
 		"Keybinds" => [
             {
     			var opt = new Option("swap_keybind_mode_generic", "swap_keybind_mode_desc", "", ButtonOption);
+				opt.formatText = function(selected) {
+					return selected ? (self.controllerMode ? "Edit Keys" : "Edit Buttons") : "";
+				}
     			opt.onChange = function(_) {
                     self.controllerMode = !self.controllerMode;
 
@@ -154,21 +157,21 @@ class OptionsState extends FunkinState {
 			new Option("hide_acc", "hide_acc_desc", "hideAcc", BoolOption),
 			new Option("hide_hud", "hide_hud_desc", "hideHUD", BoolOption),
 			{
-				var opt = new Option("judge_alpha", "judge_alpha_desc", "judgementAlpha", FloatOption(0, 1, 0.05));
+				var opt = new Option("judge_alpha", "judge_alpha_desc", "judgementAlpha", FloatOption(0, 1, 0.05, false, true));
 					opt.formatText = function(_) {
 						return (opt.value * 100) + "%";
 					};
 					opt;
 			},
 			{
-				var opt = new Option("combo_alpha", "combo_alpha_desc", "comboAlpha", FloatOption(0, 1, 0.05));
+				var opt = new Option("combo_alpha", "combo_alpha_desc", "comboAlpha", FloatOption(0, 1, 0.05, false, true));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
 				opt;
 			},
 			{
-				var opt = new Option("hp_alpha", "hp_alpha_desc", "healthBarAlpha", FloatOption(0, 1, 0.05));
+				var opt = new Option("hp_alpha", "hp_alpha_desc", "healthBarAlpha", FloatOption(0, 1, 0.05, false, true));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
@@ -194,7 +197,7 @@ class OptionsState extends FunkinState {
 			},
 			new Option("flashing_lights", "flashing_lights_desc", "flashingLights", BoolOption),
 			{
-				var opt = new Option('strum_size', 'strum_size_desc', 'strumSize', FloatOption(0.05, 3, 0.05, false));
+				var opt = new Option('strum_size', 'strum_size_desc', 'strumSize', FloatOption(0.05, 3, 0.05, false, true));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
@@ -243,7 +246,7 @@ class OptionsState extends FunkinState {
 				opt;
 			},
 			{
-				var opt = new Option("game_alpha", "game_alpha_desc", "gameVisibility", IntOption(0, 100, 5));
+				var opt = new Option("game_alpha", "game_alpha_desc", "gameVisibility", IntOption(0, 100, 5, false, true));
 				opt.formatText = function(_) {
 						return opt.value + "%";
 				};
@@ -252,7 +255,7 @@ class OptionsState extends FunkinState {
 			new Option('videos', 'videos_desc', 'videos', BoolOption),
 			new Option("reflections", "reflections_desc", "reflections", BoolOption),
 			new Option("shaders", "shaders_desc", "shaders", BoolOption),
-			new Option("hold_grain", "hold_grain_desc", "holdGrain", IntOption(1, 8, 1)),
+			new Option("hold_grain", "hold_grain_desc", "holdGrain", IntOption(1, 8, 1, false, true)),
 			{
 				var opt = new Option("gpu_cache", "gpu_cache_desc", "gpuCache", BoolOption);
 				opt.onChange = function(v) {
@@ -326,7 +329,7 @@ class OptionsState extends FunkinState {
 		bg.wrapMode = REPEAT;
 		add(bg);
 
-		add(cateText = new TextList(10, 10, 300, 700, [for (cate in categoryList) _t(cate)]));
+		cateText = new TextList(10, 10, 300, 700, [for (cate in categoryList) _t(cate)]);
 		cateText.onAccept = openCategory;
 		cateText.onClick = openCategory;
 		cateText.onSelect = function(_, __) {
@@ -335,8 +338,10 @@ class OptionsState extends FunkinState {
 
 		add(optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700));
 		optText.onClick = optClick;
+		optText.onAccept = optEnter;
 		optText.onSelect = retargetOpt;
 		optText.canSelect = (target) -> curOptList[target].type != Unselectable;
+		add(cateText); // not have onAccept call on both
 
 		openCategory(0);
 		cateText.allowKeys = true;
@@ -344,8 +349,6 @@ class OptionsState extends FunkinState {
 	}
 
 	override function update(delta:Float) {
-		super.update(delta);
-
 		if (waitingForKey) {
 			final opt = curOptList[optText.current];
 			final keys:Array<FlxKey> = cast opt.value;
@@ -353,7 +356,7 @@ class OptionsState extends FunkinState {
 				waitingForKey = false;
 				FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
-				// optText.setSubText(optText.current, opt.formatText(true));
+				optText.components[optText.current].change(opt);
 				return;
 			} else if (opt.curKey < keys.length && FlxG.keys.justPressed.DELETE) {
 				waitingForKey = false;
@@ -362,7 +365,7 @@ class OptionsState extends FunkinState {
 				keys.splice(opt.curKey, 1);
 				opt.value = keys;
 
-				// optText.setSubText(optText.current, opt.formatText(true));
+				optText.components[optText.current].change(opt);
 				return;
 			}
 
@@ -378,7 +381,7 @@ class OptionsState extends FunkinState {
 
 				opt.value = binds;
 
-				// optText.setSubText(optText.current, opt.formatText(true));
+				optText.components[optText.current].change(opt);
 				FlxG.sound.play(Paths.audio("confirm", "sfx"));
 			}
 		} else
@@ -402,6 +405,7 @@ class OptionsState extends FunkinState {
 			final bMargin = (idx == curSelected) ? Math.min(optSel.y + (optSel.height + optSel.scale.y) * 0.5, botMargin) : botMargin;
 			Util.clipByCoords(val, optSel.x, null, tMargin, bMargin);
 		});*/
+		super.update(delta);
 	}
 
 	function openCategory(cate:Int) {
@@ -434,47 +438,47 @@ class OptionsState extends FunkinState {
 	}
 
 	function retargetOpt(cur:Int, last:Int) {
-		// optText.setSubText(last, curOptList[last].formatText(false));
-		// optText.setSubText(cur, curOptList[cur].formatText(false));
+		optText.components[last].selectionChanged(curOptList[last], false);
+		optText.components[cur].selectionChanged(curOptList[cur], true);
 
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 	}
 
 	function optClick(current:Int) {
+		final compon = optText.components[current];
 		if (curOptList[current].type == ButtonOption) {
 			curOptList[current].change(false);
 		} else if (curOptList[current].type == BoolOption) {
 			curOptList[current].change(false);
-			optText.components[optText.current].change(curOptList[optText.current]);
+			compon.change(curOptList[optText.current]);
 			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
-			// optText.setSubText(current, curOptList[current].formatText(true));
 		} else if (curOptList[current].type == KeyOption) {
 			waitingForKey = true;
-			// optText.setSubText(current, "Setting...");
+			cast (compon, Textbox).text = "Setting...";
 			FlxG.sound.play(Paths.audio("scroll", "sfx"));
-		} else if (Math.abs(FlxG.mouse.screenX - (optText.x + optText.width * 0.5)) >= optText.width * 0.5 - 25) {
-			final isLeft = FlxG.mouse.screenX <= optText.x + 25;
+		} else {
+			final isLeft = FlxG.mouse.screenX <= compon.obj.x - compon.obj.graphic.width * compon.obj.scale.x * 0.5;
 			curHolding = isLeft ? 3 : 4;
 			holdWait = 0.5;
 
 			curOptList[current].change(isLeft);
 			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
-			optText.components[optText.current].change(curOptList[optText.current]);
-			// optText.setSubText(current, curOptList[current].formatText(true));
+			compon.change(curOptList[current]);
 		}
 	}
 
 	function optEnter(current:Int) {
 		final curOption = curOptList[current];
+		if (!curOption.hasEnter)
+			return;
 
 		if (curOption.type == BoolOption) {
 			curOption.change(false);
 			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-			optText.components[optText.current].change(curOptList[optText.current]);
-			// optText.setSubText(current, curOption.formatText(true));
+			optText.components[current].change(curOptList[current]);
 		} else if (curOption.type == KeyOption) {
 			waitingForKey = true;
-			// optText.setSubText(current, "Setting...");
+			cast (optText.components[current], Textbox).text = "Setting...";
 			FlxG.sound.play(Paths.audio("scroll", "sfx"));
 		} else if (curOption.type == ButtonOption)
 			curOption.change(false);
@@ -484,14 +488,13 @@ class OptionsState extends FunkinState {
 		final leftJustPressed:Bool = Controls.justPressed('ui_left');
 
 		final curOption = curOptList[optText.current];
-		if ((leftJustPressed || Controls.justPressed('ui_right'))) {
+		if ((leftJustPressed || Controls.justPressed('ui_right')) && curOption.hasMove) {
 			curHolding = leftJustPressed ? 1 : 2;
 			holdWait = 0.5;
 
 			curOption.change(leftJustPressed);
 			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-			optText.components[optText.current].change(curOptList[optText.current]);
-			// optText.setSubText(optText.current, curOption.formatText(true));
+			optText.components[optText.current].change(curOption);
 		}
 		
 		curHolding = switch (curHolding) {
@@ -505,7 +508,7 @@ class OptionsState extends FunkinState {
 			if (holdWait <= 0) {
 				holdWait = 0.035; // make the changing more consistent
 				curOption.change(curHolding % 2 == 1);
-				// optText.setSubText(optText.current, curOption.formatText(true));
+				optText.components[optText.current].change(curOption);
 			}
 		}
 
@@ -526,8 +529,8 @@ class OptionsState extends FunkinState {
 }
 
 enum OptionType {
-	IntOption(min:Int, max:Int, ?inc:Int, ?wrap:Bool);
-	FloatOption(min:Float, max:Float, ?inc:Float, ?wrap:Bool);
+	IntOption(min:Int, max:Int, ?inc:Int, ?wrap:Bool, ?slider:Bool);
+	FloatOption(min:Float, max:Float, ?inc:Float, ?wrap:Bool, ?slider:Bool);
 	BoolOption;
 	ListOption(options:Array<String>, ?translateItems:Bool);
 	KeyOption;
@@ -551,6 +554,7 @@ class Option {
 
 	public var hasEnter:Bool = false;
 	public var hasMove:Bool = true;
+	public var textboxArrows:Bool = true;
 
 	public dynamic function onChange(v:Dynamic) {}
 
@@ -566,10 +570,12 @@ class Option {
 
 		switch (type) {
 			case BoolOption:
+				hasEnter = true;
 				formatText = function(_) {
 					return _t(value ? "on" : "off").toUpperCase();
 				};
 			case KeyOption:
+				hasEnter = true;
 				formatText = function(selected) {
 				    if(controllerMode) {
 						final buttons:Array<FlxGamepadInputID> = cast value;
@@ -579,13 +585,16 @@ class Option {
 					return selected ? (curKey == keys.length ? 'New Key' : '#${curKey + 1} (${formatKey(keys[curKey])})') : [for (key in keys) formatKey(key)].join(", ");
 				};
 			case ButtonOption | Unselectable:
+				textboxArrows = false;
+				hasMove = false;
+				hasEnter = true;
 				formatText = function(_) {return "";};
 			case ListOption(options, translateItems):
 				if (translateItems == true) // == true to account for null
 					formatText = function(_) {return _t(id + "_" + value);};
 				else
 					formatText = function(_) {return value.toLowerCase() == "off" ? "OFF" : value;};
-			case FloatOption(min, max, inc, wrap):
+			case FloatOption(min, max, inc, wrap, slider):
 				// add some increment specific rounding to prevent .599999999999999999999
 				inc ??= 0.05;
 				// my desmos graph idea of 10 ^ floor(log(x)) did not work so now i need this
@@ -603,7 +612,7 @@ class Option {
 
 	public function change(left:Bool) {
 		switch (type) {
-			case IntOption(min, max, inc, wrap):
+			case IntOption(min, max, inc, wrap, slider):
 				inc ??= 1;
 				inc *= left ? -1 : 1;
 				wrap ??= false;
@@ -612,7 +621,7 @@ class Option {
 				var curVal:Float = value;
 				curVal = wrap ? (((curVal - min) + inc + range) % range) + min : FlxMath.bound(curVal + inc, min, max);
 				value = Std.int(curVal);
-			case FloatOption(min, max, inc, wrap):
+			case FloatOption(min, max, inc, wrap, slider):
 				inc ??= 0.05;
 				inc *= left ? -1 : 1;
 				wrap ??= false;
