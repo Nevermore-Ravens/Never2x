@@ -7,7 +7,6 @@ class TextList extends FunkinSprite {
 	var lastMouseY:Float = 0;
 	public var mouseMoved:Bool = false;
 	
-	public var autoColor:Bool = true;
 	public var texts:FlxTypedGroup<FlxText>;
 	public var subTexts:FlxTypedGroup<FlxText>;
 	var hasSubTexts:Bool = false;
@@ -39,6 +38,7 @@ class TextList extends FunkinSprite {
 
 		hover = new FunkinSprite(x, y);
 		hover.makeGraphic(1, 1, 0xFFFFFFFF);
+		hover.blend = INVERT;
 		hover.scale.set(width, 30);
 		hover.origin.set();
 
@@ -65,13 +65,13 @@ class TextList extends FunkinSprite {
 		var y = y + 15;
 		for (i in 0...txts.length) {
 			var txt = new FlxText(x + 15, y, width - 30, txts[i]);
-			txt.setFormat(Paths.font("cafeSquare.ttf"), 24, (i != current ?0xFFFFFFFF : 0xFF101010), LEFT);
+			txt.setFormat(Paths.font("cafeSquare.ttf"), 24, 0xFFFFFFFF, LEFT);
 			txt.antialiasing = Settings.data.antialiasing;
 			texts.add(txt);
 
 			if (hasSubTexts) {
 				var sub = new FlxText(txt.x, txt.y, width - 30, subs[i]);
-				sub.setFormat(Paths.font("vcr.ttf"), 24, (i != current ?0xFFFFFFFF : 0xFF101010), RIGHT);
+				sub.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, RIGHT);
 				sub.antialiasing = Settings.data.antialiasing;
 				subTexts.add(sub);
 			}
@@ -147,15 +147,11 @@ class TextList extends FunkinSprite {
 			final txt = texts.members[i];
 			txt.setPosition(x + 15, y + 15 + curScroll + 30 * i);
 			txt.alpha = alpha;
-			if (autoColor)
-				txt.color = FlxColor.interpolate(txt.color, (i == current) ? 0xFF101010 : 0xFFFFFFFF, elapsed * 25);
-			
+
 			if (hasSubTexts) {
 				final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y);
 				sub.alpha = alpha;
-				if (autoColor)
-					sub.color = txt.color;
 			}
 		}
 	}
@@ -176,8 +172,13 @@ class TextList extends FunkinSprite {
 
 	override function draw() {
 		super.draw();
+		// i'm sorry -Nebula
+		hover.draw();
+		hover.blend = INVERT;
 		hover.draw();
 		texts.draw();
 		subTexts.draw();
+		hover.draw();
+		hover.blend = NORMAL;
 	}
 }
