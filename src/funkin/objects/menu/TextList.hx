@@ -107,51 +107,63 @@ class TextList extends FunkinSprite {
 		hoverTmr -= elapsed;
 		if (allowMouse && FlxG.mouse.x >= x && FlxG.mouse.x <= x + width) {
 			hoverTmr = mouseMoved ? 2 : hoverTmr;
-
-			for (i in 0...texts.length) {
-				var top = y + 15 + 30 * i;
-	
-				if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30 && canSelect(i)) {
-					retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
-	
-					if (FlxG.mouse.justPressed && onClick != null)
-						onClick(i);
-					break;
-				}
-			}
+			mouseControl();
 		} else
 			hoverTmr = 0;
 
-		if (allowKeys) {
-			final downJustPressed:Bool = Controls.justPressed('ui_down');
-	
-			if (downJustPressed || Controls.justPressed('ui_up')) {
-				final firstNew = FlxMath.wrap(current + (downJustPressed ? 1 : -1), 0, texts.length - 1);
-				var target = firstNew;
-				while (!canSelect(target)) {
-					target = FlxMath.wrap(target + (downJustPressed ? 1 : -1), 0, texts.length - 1);
-					if (target == firstNew)
-						break; // safety
-				}
-				retarget(target);
-			}
+		if (allowKeys)
+			keyControl();
 
-			if (Controls.justPressed('accept') && onAccept != null)
-				onAccept(current);
+		position(elapsed);
+	}
+
+	function keyControl() {
+		final downJustPressed:Bool = Controls.justPressed('ui_down');
+	
+		if (downJustPressed || Controls.justPressed('ui_up')) {
+			final firstNew = FlxMath.wrap(current + (downJustPressed ? 1 : -1), 0, texts.length - 1);
+			var target = firstNew;
+			while (!canSelect(target)) {
+				target = FlxMath.wrap(target + (downJustPressed ? 1 : -1), 0, texts.length - 1);
+				if (target == firstNew)
+					break; // safety
+			}
+			retarget(target);
 		}
 
+		if (Controls.justPressed('accept') && onAccept != null)
+			onAccept(current);
+	}
+
+	function mouseControl() {
+		for (i in 0...texts.length) {
+			var top = y + 15 - curScroll + 30 * i;
+
+			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30 && canSelect(i)) {
+				retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
+
+				if (FlxG.mouse.justPressed && onClick != null)
+					onClick(i);
+				break;
+			}
+		}
+	}
+
+	function position(elapsed:Float) {
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
-		hover.y = FlxMath.lerp(hover.y, y + 15 + curScroll + 30 * current, elapsed * 15);
+		hover.y = FlxMath.lerp(hover.y, y + 15 - curScroll + 30 * current, elapsed * 15);
 		hover.alpha = alpha;
 		for (i in 0...texts.length) {
 			final txt = texts.members[i];
-			txt.setPosition(x + 15, y + 15 + curScroll + 30 * i);
+			txt.setPosition(x + 15, y + 15 - curScroll + 30 * i);
 			txt.alpha = alpha;
+			Util.clipByCoords(txt, null, null, y, y + height);
 
 			if (hasSubTexts) {
 				final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y);
 				sub.alpha = alpha;
+				Util.clipByCoords(sub, null, null, y, y + height);
 			}
 		}
 	}
@@ -170,8 +182,35 @@ class TextList extends FunkinSprite {
 		return height = to;
 	}
 
+	// almost used cut
+	function superDraw() {
+		if (!isAnimate) {
+			super.draw();
+			return;
+		}
+
+		if (alpha <= 0.0 || Math.abs(scale.x) <= 0.0 || Math.abs(scale.y) <= 0.0)
+			return;
+
+		for (camera in this.cameras) {
+			if (!camera.visible || !camera.exists || !isOnScreen(camera))
+				continue;
+
+			drawAnimate(camera);
+
+			#if FLX_DEBUG
+			FlxBasic.visibleCount++;
+			#end
+		}
+
+		#if FLX_DEBUG
+		if (FlxG.debugger.drawDebug)
+			drawDebug();
+		#end
+	}
+
 	override function draw() {
-		super.draw();
+		superDraw();
 		// i'm sorry -Nebula
 		hover.draw();
 		hover.blend = INVERT;

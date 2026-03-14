@@ -83,6 +83,9 @@ class Util {
 	}
 
 	public static function clipByCoords(obj:FlxSprite, ?left:Float, ?right:Float, ?top:Float, ?bottom:Float) {
+		if (obj is FlxText)
+			@:privateAccess cast(obj, FlxText).regenGraphic();
+
 		var leftClip:Float = 0;
 		var widClip:Float = obj.graphic.width;
 		if (left != null || right != null) {

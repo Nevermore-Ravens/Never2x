@@ -61,7 +61,7 @@ lane_underlay_desc,Displays a black line below the strums to make it easier to r
 customize_notes,Customize Notes,Customize Notes,Customize Notes
 customize_notes_desc,Edit the note textures and colors to your liking.,Edit the note textures and colors to your liking.,Edit the note textures and colors to your liking.
 note_offset,Note Offset,Offset das Notas,ノートオフセット
-note_offset_desc,How offset the notes are from the chart. \n\n(Higher = Later),Aplica um offset para o chart. \n\n(Número maior = Mais tarde),音符が譜面からどれだけずれてます（より高い＝より後）
+note_offset_desc,How offset the notes are from the chart. (Higher = Later),Aplica um offset para o chart. (Número maior = Mais tarde),音符が譜面からどれだけずれてます（より高い＝より後）
 ghost_t,Ghost Tapping,Ghost Tapping,ゴーストタップ
 ghost_t_desc,Whether or not you avoid a penalty for pressing a key without hitting notes.,Se você deve sofrer uma penalidade por pressionar uma tecla sem acerta uma nota.,音符無しにボタンが当たる時に罰するべきの場合
 can_reset,Can Reset,Permitido Reiniciar,やり直せる
@@ -105,7 +105,7 @@ popup_cent_desc,Where the judgements and combo are positioned. (WILL BE FORCED T
 hide_acc,Hide Accuracy,Esconder Precisão,Hide Accuracy
 hide_acc_desc,Hides the accuracy % in the HUD.,Esconde a porcentagem de precisão na HUD.,HUDに精度を隠す
 hide_hud,Hide HUD,Esconder a HUD,HUD隠す
-hide_hud_desc,Makes the entire HUD disappear{0} if you want just the notes. Or if you're showcasing something.,Esconde toda a HUD{0} caso você queria ver apenas as notas.,Makes the entire HUD disappear{0} if you want just the notes. Or if you're showcasing something.
+hide_hud_desc,Makes the entire HUD disappear{C} if you want just the notes. Or if you're showcasing something.,Esconde toda a HUD{C} caso você queria ver apenas as notas.,Makes the entire HUD disappear{C} if you want just the notes. Or if you're showcasing something.
 hide_highest,Hide Highest Judgement,Hide Highest Judgement,Hide Highest Judgement
 hide_highest_desc,Whether or not the game will display the highest possible judgement when it is hit.,Whether or not the game will display the highest possible judgement when it is hit.,Whether or not the game will display the highest possible judgement when it is hit.
 judge_alpha,Judgement Alpha,Opacidade dos Julgamentos,判定透明度
@@ -121,7 +121,7 @@ language_desc,Changes the language of the game. (This feature is not fully imple
 flashing_lights,Flashing Lights,Modo de Fotossensibilidade,明滅光
 flashing_lights_desc,If the game is allowed to risk seizures for fast colored effects.,Liga/Desliga alguns efeitos que podem conter riscos de epilepsia.,If the game is allowed to risk seizures for fast colored effects.
 game_alpha,Game Visibility,Visibilidade do Jogo,ゲーム視認性
-game_alpha_desc,How much you can see the visuals behind the HUD. (If this is set to 0%{0} visuals will be disabled entirely. That could help with performance!),Altera a opacidade dos visuais por trás da HUD. (Se essa opção estiver em 0%{0} os visuais serão desativados inteiramente. Isso pode ajudar com performance!),How much you can see the visuals behind the HUD. (If this is set to 0%{0} visuals will be disabled entirely. That could help with performance!)
+game_alpha_desc,How much you can see the visuals behind the HUD. (If this is set to 0%{C} visuals will be disabled entirely. That could help with performance!),Altera a opacidade dos visuais por trás da HUD. (Se essa opção estiver em 0%{C} os visuais serão desativados inteiramente. Isso pode ajudar com performance!),How much you can see the visuals behind the HUD. (If this is set to 0%{C} visuals will be disabled entirely. That could help with performance!)
 strum_size,Strumline Size,Strumline Size,Strumline Size
 strum_size_desc,How much scaling gets applied to your playfield.,How much scaling gets applied to your playfield.,How much scaling gets applied to your playfield.
 center_notes,Centered Notes,Coluna Centralizada,画面中心音符

@@ -2,6 +2,7 @@ package funkin.states;
 
 import haxe.io.Path;
 import funkin.objects.menu.TextList;
+import funkin.objects.menu.OptionList;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.FunkinSprite;
@@ -77,29 +78,10 @@ class OptionsState extends FunkinState {
 		"Gameplay" => [
 			{
 				var opt = new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"]));
-				opt.onChange = function(val) {
-					var endPercent = val == "Down" ? 1 : 0;
-					var percent = 1.0 - endPercent;
-					var time = 0.5;
-					if (self.scrollTwn != null && !self.scrollTwn.finished) {
-						@:privateAccess time = self.scrollTwn._secondsSinceStart;
-						percent = Math.abs(endPercent - self.scrollTwn.scale);
-						self.scrollTwn.cancel();
-					}
-					self.scrollTwn = FlxTween.num(percent, endPercent, time, {ease: FlxEase.cubeInOut}, function(num) {
-						self.playfield.downscroll = num >= 0.5;
-						self.strumline.overrideScrollSpeed = Math.abs(num - endPercent) <= 0.01 ? 0 : Math.max(self.playfield.scrollSpeed * Math.abs(num - 0.5) * 2, 0.001);
-						self.strumline.y = FlxMath.lerp(50, FlxG.height - 50 - Strumline.swagWidth, num);
-						//self.text.y = FlxMath.lerp(600, 50, num);
-					});
-				};
 				opt;
 			},
 			{
 				var opt = new Option('scroll_speed', 'scroll_speed_desc', "scrollSpeed", FloatOption(0.5, 7, 0.05));
-				opt.onChange = function(val) {
-					FlxTween.tween(self.playfield, {scrollSpeed: val}, 0.25, {ease: FlxEase.cubeOut});
-				};
 				opt;
 			},
 			{
@@ -115,13 +97,6 @@ class OptionsState extends FunkinState {
 					}
 	
 				var opt = new Option("note_skin", "note_skin_desc", "noteSkin", ListOption(possible));
-				opt.onChange = function(val) {
-					self.strumline.skin = val;
-					@:privateAccess for (note in self.playfield.notes.members) {
-						if (note.exists)
-							note.skin = val;
-					}
-				}
 				opt.formatText = function(_) {
 					return names[opt.value];
 				};
@@ -140,13 +115,6 @@ class OptionsState extends FunkinState {
 					}
 
 				var opt = new Option("splash_skin", "splash_skin_desc", "noteSplashSkin", ListOption(possibleNotesplashes));
-				opt.onChange = function(val) {
-					self.strumline.style = val;
-					@:privateAccess for (note in self.playfield.notes.members) {
-						if (note.exists)
-							note.style = val;
-					}
-				}
 				opt.formatText = function(_) {
 					return notesplashNames.get(opt.value) ?? 'Fallback (${opt.value})'; // Display the name so you can figure out what the splash WAS
 				};
@@ -218,11 +186,9 @@ class OptionsState extends FunkinState {
 					for (i => opt in self.curOptList) {
 						final opt = self.curOptList[i];
 						self.optText.setText(i, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase());
-						self.optText.setSubText(i, opt.formatText(i == self.optText.current));
+						self.optText.setSubText(i, OptionList.getDesc(opt));
+						// self.optText.setSubText(i, opt.formatText(i == self.optText.current));
 					}
-
-					self.lastDescHeight = self.descBG.scale.y;
-					self.descTxt.text = self.getDesc(self.curOptList[self.optText.current]);
 				}
 				opt;
 			},
@@ -231,33 +197,6 @@ class OptionsState extends FunkinState {
 				var opt = new Option('strum_size', 'strum_size_desc', 'strumSize', FloatOption(0.05, 3, 0.05, false));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
-				};
-				opt.onChange = function(val) {
-					if (self.sizeTwn != null && !self.sizeTwn.finished)
-						self.sizeTwn.cancel();
-
-					self.sizeTwn = FlxTween.num(Strumline.size, val, 0.5, {ease: FlxEase.quadOut}, function(num) {
-						Strumline.size = num;
-						if (self.playfield.downscroll)
-							self.strumline.y = FlxG.height - 50 - Strumline.swagWidth;
-
-						for (i => strum in self.strumline.members) {
-							final skinScale = self.strumline.styleData.getScale(strum);
-							strum.scale.set(skinScale * num, skinScale * num);
-							strum.updateHitbox();
-							strum.setPosition(
-								self.strumline.x + Strumline.swagWidth * i,
-								self.strumline.y + (Strumline.swagWidth - strum.height) * 0.5
-							);
-						}
-						@:privateAccess for (note in self.playfield.notes.members) {
-							if (!note.exists) continue;
-							final skinScale = note.styleData.getScale(note);
-							note.scale.set(skinScale * num, skinScale * num);
-							note.updateHitbox();
-						}
-						self.strumline.x = (FlxG.width - self.strumline.width) * 0.5 + 400;
-					});
 				};
 				opt;
 			},
@@ -354,23 +293,6 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("calc_offset", "calc_offset_desc", "", ButtonOption);
 				//opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
-				opt.onChange = function(_) {
-					self.wasInOpts = self.optText.allowKeys;
-					self.cateText.allowMouse = false;
-					self.cateText.allowKeys = false;
-					self.optText.allowMouse = false;
-					self.optText.allowKeys = false;
-
-					self.playfield.botplay = false;
-					self.totalNoteDifference = 0;
-					self.notesHit = 0;
-					self.finalOffset = Settings.data.noteOffset;
-
-					self.selOptScale = 0;
-					self.descTxt.text = _formatT("offset_cali_result", [Std.string(self.finalOffset), self.finalOffset > 0 ? _t("late") : _t("early")]);
-					self.descTxt.alignment = CENTER;
-					self.lastDescHeight = self.descBG.scale.y;
-				};
 				opt;
 			}
 		]
@@ -383,39 +305,19 @@ class OptionsState extends FunkinState {
 	var curHolding:Int = 0;
 	var holdWait:Float = 0.5;
 
-	var wasInOpts:Bool = false;
 	var waitingForKey:Bool = false;
 	var controllerMode:Bool = false;
 
 	// applied on openCategory, basically optionsList[categoryList[selCategory]] with some filtering
 	var curOptList:Array<Option> = [];
 
-	var scrollTime:Float = 0;
 	var bg:FunkinSprite;
 	var cateText:TextList;
-	var optText:TextList;
-	var selOptScale:Float = 0;
-
-	var lastDescHeight:Float = 0;
-	var descBG:FunkinSprite;
-	var descTxt:FlxText;
-
-	// Calibration Stuff
-	var nextNote:Note;
-	var playfield:PlayField;
-	var strumline:Strumline;
-	var musicBeatLen:Float = 2;
-	var aboutToLoop:Bool = false;
-	var totalNoteDifference:Float = 0;
-	var notesHit:Int = 0;
-	var finalOffset:Float = 0;
-	var scrollTwn:FlxTween;
-	var sizeTwn:FlxTween;
+	var optText:OptionList;
 
 	override function create() {
 		super.create();
 		self = this;
-		musicBeatLen = Conductor.inst.length / Conductor.crotchet;
 
 		bg = new FunkinSprite().loadGraphic(Paths.image('menus/magentaBG'));
 		bg.scale.scale(1.175);
@@ -424,8 +326,6 @@ class OptionsState extends FunkinState {
 		bg.wrapMode = REPEAT;
 		add(bg);
 
-		initCalibrationField();
-
 		add(cateText = new TextList(10, 10, 300, 700, [for (cate in categoryList) _t(cate)]));
 		cateText.onAccept = openCategory;
 		cateText.onClick = openCategory;
@@ -433,21 +333,10 @@ class OptionsState extends FunkinState {
 			FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 		};
 
-		add(optText = new TextList(cateText.x + cateText.width + 10, cateText.y, 500, 700, []));
+		add(optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700));
 		optText.onClick = optClick;
 		optText.onSelect = retargetOpt;
 		optText.canSelect = (target) -> curOptList[target].type != Unselectable;
-		
-		add(descBG = new FunkinSprite(optText.x + optText.width + 10, 0).makeGraphic(1, 1, 0x70000000));
-		descBG.scale.set(FlxG.width - descBG.x - 10, 120);
-		descBG.updateHitbox();
-		descBG.scale.y = 0;
-		descBG.offset.set();
-		descBG.origin.set();
-
-		add(descTxt = new FlxText(descBG.x + 10, descBG.y + 10, descBG.width - 20, ""));
-		descTxt.setFormat(Paths.font("vcr.ttf"), 20, 0xFFFFFFFF, LEFT, OUTLINE, 0xFF000000);
-		descTxt.borderSize = 1.5;
 
 		openCategory(0);
 		cateText.allowKeys = true;
@@ -457,30 +346,14 @@ class OptionsState extends FunkinState {
 	override function update(delta:Float) {
 		super.update(delta);
 
-		scrollTime += delta * 25;
-		bg.clipGraphic(scrollTime, 0, bg.frameWidth, bg.frameHeight);
-
-		// Calibration looping
-		final time = Conductor.rawTime - Conductor.offset;
-		if (aboutToLoop && time <= Conductor.crotchet * 2) {
-			aboutToLoop = false;
-			trace("looped!");
-			Conductor.offset += Math.ceil(musicBeatLen * 0.5) * 2 * Conductor.crotchet; // snap it to the next even beat
-		}
-		aboutToLoop = time >= Conductor.crotchet * (musicBeatLen - 2);
-
-		var listAlpha = 0.3;
-		var optAlpha = 0.3;
 		if (waitingForKey) {
-			optAlpha = 1;
 			final opt = curOptList[optText.current];
 			final keys:Array<FlxKey> = cast opt.value;
 			if (FlxG.keys.justPressed.ESCAPE) {
 				waitingForKey = false;
 				FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
-				optText.setSubText(optText.current, opt.formatText(true));
-				descTxt.text = getDesc(curOptList[optText.current]);
+				// optText.setSubText(optText.current, opt.formatText(true));
 				return;
 			} else if (opt.curKey < keys.length && FlxG.keys.justPressed.DELETE) {
 				waitingForKey = false;
@@ -489,8 +362,7 @@ class OptionsState extends FunkinState {
 				keys.splice(opt.curKey, 1);
 				opt.value = keys;
 
-				optText.setSubText(optText.current, opt.formatText(true));
-				descTxt.text = getDesc(curOptList[optText.current]);
+				// optText.setSubText(optText.current, opt.formatText(true));
 				return;
 			}
 
@@ -506,41 +378,11 @@ class OptionsState extends FunkinState {
 
 				opt.value = binds;
 
-				optText.setSubText(optText.current, opt.formatText(true));
-				descTxt.text = getDesc(opt);
+				// optText.setSubText(optText.current, opt.formatText(true));
 				FlxG.sound.play(Paths.audio("confirm", "sfx"));
 			}
-		} else if (playfield.botplay) {
-			if (optText.hovered || optText.allowKeys)
-				optAlpha = 1;
-			if (cateText.hovered || cateText.allowKeys)
-				listAlpha = 1;
-
+		} else
 			(optText.allowKeys ? optInputs : cateInputs)(delta);
-		} else {
-			final acceptJustPressed = Controls.justPressed("accept");
-			if (acceptJustPressed || Controls.justPressed("back") || FlxG.mouse.justPressedRight) {
-				if (acceptJustPressed) {
-					Settings.data.noteOffset = finalOffset;
-					FlxG.sound.play(Paths.audio("scroll", "sfx"));
-				} else
-					FlxG.sound.play(Paths.audio("cancel", "sfx"));
-
-				playfield.botplay = true;
-				cateText.allowMouse = true;
-				cateText.allowKeys = !wasInOpts;
-				optText.allowMouse = true;
-				optText.allowKeys = wasInOpts;
-
-				selOptScale = 0;
-				descTxt.text = getDesc(curOptList[optText.current]);
-				self.descTxt.alignment = LEFT;
-				lastDescHeight = descBG.scale.y;
-			}
-		}
-		cateText.alpha = FlxMath.lerp(cateText.alpha, listAlpha, delta * 15);
-		optText.alpha = FlxMath.lerp(optText.alpha, optAlpha, delta * 15);
-		strumline.alpha = FlxMath.lerp(strumline.alpha, (playfield.botplay ? 0.3 : 1), delta * 15);
 
 		/*final topMargin = optBG.y;
 		final botMargin = (optBG.y + optBG.frameHeight * optBG.scale.y);
@@ -560,45 +402,11 @@ class OptionsState extends FunkinState {
 			final bMargin = (idx == curSelected) ? Math.min(optSel.y + (optSel.height + optSel.scale.y) * 0.5, botMargin) : botMargin;
 			Util.clipByCoords(val, optSel.x, null, tMargin, bMargin);
 		});*/
-
-		selOptScale = Math.min(Math.max(selOptScale + delta * 4, 0.0), 1.0);
-		descBG.scale.y = FlxMath.lerp(lastDescHeight, descTxt.height + 30, FlxEase.backOut(selOptScale));
-		Util.clipByCoords(descTxt, null, null, null, descBG.y + descBG.scale.y);
-
-		var targetDescY = Math.min(optText.texts.members[optText.current].y - 15, FlxG.height - 10 - (descTxt.height + 30));
-		descBG.y = FlxMath.lerp(descBG.y, ((playfield.botplay && !waitingForKey) ? targetDescY : (FlxG.height - descTxt.height) * 0.5 - 15), delta * 20);
-		descTxt.y = descBG.y + 15;
-	}
-
-	function initCalibrationField() {
-		strumline = new Strumline(0, 0, true);
-		strumline.screenCenter(X);
-		strumline.x += 400;
-		strumline.alpha = 0.3;
-		strumline.directAlpha = true;
-
-		add(playfield = new PlayField([strumline]));
-		playfield.downscroll = Settings.data.downscroll;
-		playfield.scrollSpeed = Settings.data.scrollSpeed;
-		playfield.playAssistClaps = false;
-		playfield.botplay = true;
-		playfield.playerID = 0;
-		playfield.noteHit = noteHit;
-		playfield.noteMiss = recoverNote;
-		strumline.y = playfield.downscroll ? FlxG.height - 50 - Strumline.swagWidth : 50;
-
-		playfield.load([
-			{time: Conductor.crotchet * Math.ceil(Conductor.floatBeat * 0.5) * 2, lane: 0, type: ""},
-			{time: Conductor.crotchet * (Math.ceil(Conductor.floatBeat * 0.5) * 2 + 2), lane: 3, type: ""}
-		]);
-		nextNote = new Note();
-		nextNote.kill();
-		@:privateAccess playfield.notes.add(nextNote);
 	}
 
 	function openCategory(cate:Int) {
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
-		if (cate == selCategory)
+		if (optText.allowKeys && cate == selCategory)
 			return;
 
 		selCategory = cate;
@@ -613,18 +421,11 @@ class OptionsState extends FunkinState {
 				curOptList.push(opt);
 		}
 
-		var txts = [for (opt in curOptList) (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name))];
-		var subs = [for (i => opt in curOptList) opt.formatText(i == 0)];
-		optText.regenerate(txts, subs);
-
-		selOptScale = 0;
-		descTxt.text = getDesc(curOptList[optText.current]);
-		lastDescHeight = descBG.scale.y;
+		optText.setOptions(curOptList);
 	}
 
 	function cateInputs(delta:Float) {
 		if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
-			descTxt.text = "";
 			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
 			if (inPlayState) FunkinState.switchState(new PlayState());
@@ -632,17 +433,9 @@ class OptionsState extends FunkinState {
 		}
 	}
 
-	function getDesc(opt:Option) {
-		return (opt.desc.startsWith("<NO-LANG>") ? opt.desc.substring(9, opt.desc.length) : _formatT(opt.desc, [_t("accept").toUpperCase()])) + (opt.type == KeyOption ? "\n\n" + _formatT("key_opt_desc", [_t("accept").toUpperCase()]) : "");
-	}
-
 	function retargetOpt(cur:Int, last:Int) {
-		optText.setSubText(last, curOptList[last].formatText(false));
-		optText.setSubText(cur, curOptList[cur].formatText(false));
-
-		selOptScale = 0;
-		descTxt.text = getDesc(curOptList[cur]);
-		lastDescHeight = descBG.scale.y;
+		// optText.setSubText(last, curOptList[last].formatText(false));
+		// optText.setSubText(cur, curOptList[cur].formatText(false));
 
 		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
 	}
@@ -652,12 +445,12 @@ class OptionsState extends FunkinState {
 			curOptList[current].change(false);
 		} else if (curOptList[current].type == BoolOption) {
 			curOptList[current].change(false);
+			optText.components[optText.current].change(curOptList[optText.current]);
 			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
-			optText.setSubText(current, curOptList[current].formatText(true));
+			// optText.setSubText(current, curOptList[current].formatText(true));
 		} else if (curOptList[current].type == KeyOption) {
 			waitingForKey = true;
-			descTxt.text = _formatT("sel_key_desc", [","]);
-			optText.setSubText(current, "Setting...");
+			// optText.setSubText(current, "Setting...");
 			FlxG.sound.play(Paths.audio("scroll", "sfx"));
 		} else if (Math.abs(FlxG.mouse.screenX - (optText.x + optText.width * 0.5)) >= optText.width * 0.5 - 25) {
 			final isLeft = FlxG.mouse.screenX <= optText.x + 25;
@@ -666,7 +459,8 @@ class OptionsState extends FunkinState {
 
 			curOptList[current].change(isLeft);
 			FlxG.sound.play(Paths.audio(curOptList[current].sound, 'sfx'));
-			optText.setSubText(current, curOptList[current].formatText(true));
+			optText.components[optText.current].change(curOptList[optText.current]);
+			// optText.setSubText(current, curOptList[current].formatText(true));
 		}
 	}
 
@@ -676,11 +470,11 @@ class OptionsState extends FunkinState {
 		if (curOption.type == BoolOption) {
 			curOption.change(false);
 			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-			optText.setSubText(current, curOption.formatText(true));
+			optText.components[optText.current].change(curOptList[optText.current]);
+			// optText.setSubText(current, curOption.formatText(true));
 		} else if (curOption.type == KeyOption) {
 			waitingForKey = true;
-			descTxt.text = _formatT("sel_key_desc", [","]);
-			optText.setSubText(current, "Setting...");
+			// optText.setSubText(current, "Setting...");
 			FlxG.sound.play(Paths.audio("scroll", "sfx"));
 		} else if (curOption.type == ButtonOption)
 			curOption.change(false);
@@ -696,7 +490,8 @@ class OptionsState extends FunkinState {
 
 			curOption.change(leftJustPressed);
 			FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
-			optText.setSubText(optText.current, curOption.formatText(true));
+			optText.components[optText.current].change(curOptList[optText.current]);
+			// optText.setSubText(optText.current, curOption.formatText(true));
 		}
 		
 		curHolding = switch (curHolding) {
@@ -710,7 +505,7 @@ class OptionsState extends FunkinState {
 			if (holdWait <= 0) {
 				holdWait = 0.035; // make the changing more consistent
 				curOption.change(curHolding % 2 == 1);
-				optText.setSubText(optText.current, curOption.formatText(true));
+				// optText.setSubText(optText.current, curOption.formatText(true));
 			}
 		}
 
@@ -721,32 +516,10 @@ class OptionsState extends FunkinState {
 		}
 	}
 
-	function recoverNote(_, note:Note):Void {
-		note.data.time += Conductor.crotchet * 4;
-		nextNote.revive();
-		nextNote.setup(note.data);
-		nextNote = note;
-	}
-	function noteHit(_, note:Note):Void {
-		if (playfield.botplay) {
-			recoverNote(_, note);
-			return;
-		}
-
-		totalNoteDifference += note.hitTime;
-		notesHit++;
-
-		finalOffset = Math.round(totalNoteDifference / notesHit) + Settings.data.noteOffset; // don't want the base offset screwing this up.
-		descTxt.text = _formatT("offset_cali_result", [Std.string(finalOffset), finalOffset > 0 ? _t("late") : _t("early")]);
-		recoverNote(_, note);
-	}
-
 	override function destroy() {
 		super.destroy();
 		Controls.save();
 		Settings.save();
-		if (sizeTwn != null && !sizeTwn.finished)
-			sizeTwn.cancel();
 		Strumline.size = Settings.data.strumSize;
 		self = null;
 	}
