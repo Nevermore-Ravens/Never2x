@@ -15,7 +15,8 @@ class OptionList extends TextList {
 	var invertCompons:FlxTypedGroup<FlxSprite>;
 	public var components:Array<OptionComponent<FlxSprite>> = [];
 
-	public var onRequestKey:Void->Void;
+	public var onOptMove:(current:Int, left:Bool)->Void;
+	public var onOptEnter:(current:Int)->Void;
 
 	public function new(x:Float, y:Float, width:Float, height:Float) {
 		super(x, y, width, height, []);
@@ -71,8 +72,11 @@ class OptionList extends TextList {
 
 				dragging = false;
 				curHolding = 0;
-				curOption.enter(onRequestKey);
+				curOption.enter();
 				components[current].change(curOption);
+
+				if (onOptEnter != null)
+					onOptEnter(current);
 			}
 
 			if (onAccept != null)
@@ -97,7 +101,7 @@ class OptionList extends TextList {
 
     override function mouseControl() {
 		if (dragging) {
-			components[current].hovering(list[current], this);
+			components[current].hovering(current, list[current], this);
 			return;
 		}
 
@@ -106,9 +110,9 @@ class OptionList extends TextList {
 			var top = texts.members[i].y - 5;
 
 			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + height && canSelect(i)) {
-					retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
+				retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
 
-				components[i].hovering(list[i], this);
+				components[i].hovering(i ,list[i], this);
 				if (FlxG.mouse.justPressed && onClick != null)
 					onClick(i);
 				break;
@@ -255,7 +259,7 @@ interface OptionComponent<T:FlxSprite> {
 	public var obj:T;
 	public var canInvert:Bool;
 
-	public function hovering(opt:Option, list:OptionList):Void;
+	public function hovering(idx:Int, opt:Option, list:OptionList):Void;
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float):Void;
 	public function clip(top:Float, bottom:Float):Void;
 	public function change(opt:Option):Void;
@@ -266,12 +270,16 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 	public var obj:Checkbox;
 	public var canInvert:Bool;
 
-	public function hovering(opt:Option, list:OptionList) {
-		if (!FlxG.mouse.justPressed) return;
+	public function hovering(idx:Int, opt:Option, list:OptionList) {
+		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
 
-		FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
-		opt.enter(list.onRequestKey);
+		if (opt.hasSound)
+			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+		opt.enter();
 		change(opt);
+
+		if (list.onOptEnter != null)
+			list.onOptEnter(idx);
 	}
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float) {
 		var y = txt.y - 5;
@@ -316,36 +324,46 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 	public var obj:Textbox;
 	public var canInvert:Bool;
 
-	public function hovering(opt:Option, list:OptionList) {
+	public function hovering(idx:Int, opt:Option, list:OptionList) {
 		if (!FlxG.mouse.justPressed) return;
 
 		if (opt.hasSound)
 			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
 
+		var action:Int = -1; // -1 - None, 0 - Enter, 1 - Left, 2 - Right
 		if (opt.textboxArrows && opt.hasEnter && opt.hasMove) {
 			final leftRect = textField.getCharBoundaries(2);
 			final rightRect = textField.getCharBoundaries(text.length - 2);
 
 			var x = x - graphic.width * scale.x;
-			if (FlxG.mouse.x >= x + leftRect.x * scale.x && FlxG.mouse.x <= x + rightRect.x * scale.x)
-				opt.enter(list.onRequestKey)
-			else {
+			if (FlxG.mouse.x >= x + leftRect.x * scale.x && FlxG.mouse.x <= x + rightRect.x * scale.x) {
+				opt.enter();
+				action = 0;
+			} else {
 				final isLeft = FlxG.mouse.x <= x + leftRect.x * scale.x;
 				list.curHolding = isLeft ? 3 : 4;
 				list.holdWait = 0.5;
 	
 				opt.change(isLeft);
+				action = isLeft ? 1 : 2;
 			}
 		} else if (opt.hasEnter && !opt.hasMove) {
-			opt.enter(list.onRequestKey);
+			opt.enter();
+			action = 0;
 		} else if (!opt.hasEnter && opt.hasMove) {
 			final isLeft = FlxG.mouse.x <= x - graphic.width * scale.x * 0.5;
 			list.curHolding = isLeft ? 3 : 4;
 			list.holdWait = 0.5;
 
 			opt.change(isLeft);
+			action = isLeft ? 1 : 2;
 		}
 		change(opt);
+
+		if (action == 0 && list.onOptEnter != null)
+			list.onOptEnter(idx);
+		else if (action > 0 && list.onOptMove != null)
+			list.onOptMove(idx, action == 1);
 	}
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float) {
 		var y = txt.y - 5;
@@ -395,7 +413,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 	var max:Float;
 	var snap:Float;
 
-	public function hovering(opt:Option, list:OptionList) {
+	public function hovering(idx:Int, opt:Option, list:OptionList) {
 		if (!list.dragging && (
 			!FlxG.mouse.pressed ||
 			FlxG.mouse.x < x + BAR_PADDING * sliderScale ||

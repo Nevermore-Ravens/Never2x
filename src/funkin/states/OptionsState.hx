@@ -335,16 +335,7 @@ class OptionsState extends FunkinState {
 
 		add(optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700));
 		optText.canSelect = (target) -> curOptList[target].type != Unselectable;
-		optText.onRequestKey = function() {
-			wasInOpts = optText.allowKeys;
-			cateText.allowKeys = false;
-			cateText.allowMouse = false;
-			optText.allowKeys = false;
-			optText.allowMouse = false;
-
-			waitingForKey = true;
-			optText.setSubText(optText.current, _t("sel_key_desc"));
-		};
+		optText.onOptEnter = optEnter;
 		add(cateText); // not have onAccept call on both
 
 		openCategory(0);
@@ -355,7 +346,6 @@ class OptionsState extends FunkinState {
 	override function update(delta:Float) {
 		if (waitingForKey) {
 			super.update(delta);
-			cast (optText.components[optText.current], Textbox).text = "Setting...";
 
 			final opt = curOptList[optText.current];
 			inline function restore(sound:String) {
@@ -424,6 +414,22 @@ class OptionsState extends FunkinState {
 			final bMargin = (idx == curSelected) ? Math.min(optSel.y + (optSel.height + optSel.scale.y) * 0.5, botMargin) : botMargin;
 			Util.clipByCoords(val, optSel.x, null, tMargin, bMargin);
 		});*/
+	}
+
+	function optEnter(current:Int) {
+		switch (curOptList[current].type) {
+			case KeyOption:
+				wasInOpts = optText.allowKeys;
+				cateText.allowKeys = false;
+				cateText.allowMouse = false;
+				optText.allowKeys = false;
+				optText.allowMouse = false;
+	
+				waitingForKey = true;
+				optText.setSubText(optText.current, _t("sel_key_desc"));
+				cast (optText.components[optText.current], Textbox).text = "Setting...";
+			default: // nothin
+		}
 	}
 
 	function openCategory(cate:Int) {
@@ -540,13 +546,10 @@ class Option {
 		}
 	}
 
-	public function enter(?keySignal:Void->Void) {
+	public function enter() {
 		switch (type) {
 			case BoolOption:
 				value = !value;
-			case KeyOption:
-				if (keySignal != null)
-					keySignal();
 			case ButtonOption:
 				onChange(null);
 			default: // nothin
