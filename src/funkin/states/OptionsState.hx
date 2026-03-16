@@ -99,9 +99,9 @@ class OptionsState extends FunkinState {
 						names.set(name, data.displayName);
 					}
 	
-				var opt = new Option("note_skin", "note_skin_desc", "noteSkin", ListOption(possible));
-				opt.formatText = function(_) {
-					return names[opt.value];
+				var opt = new Option("note_skin", "note_skin_desc", "noteSkin", ListOption(possible, true));
+				opt.formatListOption = function(val, _) {
+					return names[val];
 				};
 				opt;
 			},
@@ -117,9 +117,9 @@ class OptionsState extends FunkinState {
 						notesplashNames.set(splashName, data.name);
 					}
 
-				var opt = new Option("splash_skin", "splash_skin_desc", "noteSplashSkin", ListOption(possibleNotesplashes));
-				opt.formatText = function(_) {
-					return notesplashNames.get(opt.value) ?? 'Fallback (${opt.value})'; // Display the name so you can figure out what the splash WAS
+				var opt = new Option("splash_skin", "splash_skin_desc", "noteSplashSkin", ListOption(possibleNotesplashes, true));
+				opt.formatListOption = function(val, _) {
+					return notesplashNames.get(val) ?? 'Fallback (${val})'; // Display the name so you can figure out what the splash WAS
 				};
 				opt;
 			},
@@ -130,7 +130,7 @@ class OptionsState extends FunkinState {
 
 				quantPalettes.unshift('None');
 
-				var opt = new Option('quant_col', 'quant_col_desc', "quantColouring", ListOption(quantPalettes));
+				var opt = new Option('quant_col', 'quant_col_desc', "quantColouring", ListOption(quantPalettes, true));
 				opt;
 			},
 			{
@@ -151,8 +151,8 @@ class OptionsState extends FunkinState {
 		"HUD" => [
 			new Option("judge_counter", "judge_counter_desc", "judgementCounter", BoolOption),
 			new Option('hit_error_bar', 'hit_error_bar_desc', "hitErrorBar", BoolOption),
-			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"])),
-			new Option("popup_cent", "popup_cent_desc", "popupCenter", ListOption(["FNF", "Field", "Center"])),
+			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"], true)),
+			new Option("popup_cent", "popup_cent_desc", "popupCenter", ListOption(["FNF", "Field", "Center"], true)),
 			new Option("time_text", "time_text_desc", "timeText", BoolOption),
 			new Option("hide_acc", "hide_acc_desc", "hideAcc", BoolOption),
 			new Option("hide_hud", "hide_hud_desc", "hideHUD", BoolOption),
@@ -180,7 +180,7 @@ class OptionsState extends FunkinState {
 		],
 		"Visuals" => [
 			{
-				var opt = new Option('language', 'language_desc', "language", ListOption(LanguageHandler.getLanguages()));
+				var opt = new Option('language', 'language_desc', "language", ListOption(LanguageHandler.getLanguages(), true));
 				opt.onChange = function(v) {
 					LanguageHandler.setLanguage(v);
 					for (i => cate in self.categoryList)
@@ -206,9 +206,9 @@ class OptionsState extends FunkinState {
 			new Option('center_notes', 'center_notes_desc', "centeredNotes", BoolOption),
 			new Option('opp_notes', 'opp_notes_desc', "opponentNotes", BoolOption),
 			//and this is where i would put lane underlay ^_^...........IF I HAD ONE!!
-			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"])),
+			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"], true)),
 			new Option("cam_movement", "cam_movement_desc", "notesMoveCamera", BoolOption),
-			new Option('strum_glow', 'strum_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Per-Note'])),
+			new Option('strum_glow', 'strum_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Per-Note'], true)),
 			new Option("can_unglow", "can_unglow_desc", "unglowOnAnimFinish", BoolOption),
 		],
 		"Performance" => [
@@ -428,6 +428,23 @@ class OptionsState extends FunkinState {
 				waitingForKey = true;
 				optText.setSubText(optText.current, _t("sel_key_desc"));
 				cast (optText.components[optText.current], Textbox).text = "Setting...";
+			case ListOption(options, true, translateItems):
+				var opts:Array<String> = [for (value in options) curOptList[current].formatListOption(value, translateItems == true)];
+				var x:Float = FlxG.mouse.x;
+				var y:Float = FlxG.mouse.y;
+				if (Controls.justPressed("accept")) { // not by mouse
+					@:privateAccess var hover = optText.hover;
+					x = hover.x + hover.scale.x;
+					y = hover.y + hover.scale.y;
+				}
+
+				persistentUpdate = false;
+				openSubState(new DropdownPrompt(x, y, 300, opts, function(idx) {
+					FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+					curOptList[current].value = options[idx];
+					optText.components[current].change(curOptList[current]);
+					@:privateAccess optText.position(0);
+				}));
 			default: // nothin
 		}
 	}
@@ -461,11 +478,55 @@ class OptionsState extends FunkinState {
 	}
 }
 
+class DropdownPrompt extends FlxSubState {
+	var list:TextList;
+	var twnVars:Dynamic;
+
+	public function new(x:Float, y:Float, width:Float, options:Array<String>, onClick:Int->Void) {
+		super();
+		add(list = new TextList(x, y, width, 0, options));
+		list.height = Math.min(list.scrollInc * options.length, 600);
+		list.scrollInc = Math.max(list.scrollInc * options.length - list.height, 0) / options.length;
+
+		if (list.x + list.width >= FlxG.width - 10) {
+			list.x = FlxG.width - 10 - list.width;
+			@:privateAccess list.hover.x = list.x;
+		}
+
+		list.scale.y = 0;
+		twnVars = {"scale.y": list.height};
+		if (list.y + list.height >= FlxG.height - 10)
+			twnVars.y = FlxG.height - 10 - list.height;
+
+		FlxTween.tween(list, twnVars, 0.25, {ease: FlxEase.cubeOut});
+
+		list.onAccept = list.onClick = function(current) {
+			onClick(current);
+			exit();
+		}
+	}
+
+	override function update(elapsed:Float) {
+		super.update(elapsed);
+		if (Controls.justPressed("back") || FlxG.mouse.justPressedRight || (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(list)))
+			exit();
+	}
+
+	function exit() {
+		if (twnVars.y != null)
+			twnVars.y = twnVars.y + list.height;
+		Reflect.setField(twnVars, "scale.y", 0);
+		FlxTween.tween(list, twnVars, 0.15, {ease: FlxEase.cubeOut, onComplete: function(twn) {
+			close();
+		}});
+	}
+}
+
 enum OptionType {
 	IntOption(min:Int, max:Int, ?inc:Int, ?wrap:Bool, ?slider:Bool);
 	FloatOption(min:Float, max:Float, ?inc:Float, ?wrap:Bool, ?slider:Bool);
 	BoolOption;
-	ListOption(options:Array<String>, ?translateItems:Bool);
+	ListOption(options:Array<String>, ?dropdown:Bool, ?translateItems:Bool);
 	KeyOption;
 	ButtonOption;
 	Unselectable;
@@ -494,6 +555,12 @@ class Option {
 
 	public dynamic function formatText(selected:Bool):String {
 		return '$value';
+	}
+
+	public dynamic function formatListOption(item:String, translated:Bool) {
+		if (translated)
+			return _t(id + "_" + item);
+		return item.toLowerCase() == "off" ? "OFF" : item;
 	}
 
 	public function new(name:String, desc:String, settingsVar:String, type:OptionType) {
@@ -525,11 +592,9 @@ class Option {
 				hasEnter = true;
 				hasSound = false;
 				formatText = function(_) {return "";};
-			case ListOption(options, translateItems):
-				if (translateItems == true) // == true to account for null
-					formatText = function(_) {return _t(id + "_" + value);};
-				else
-					formatText = function(_) {return value.toLowerCase() == "off" ? "OFF" : value;};
+			case ListOption(options, dropdown, translateItems):
+				hasEnter = true;
+				formatText = function(_) {return formatListOption(value, translateItems == true);};
 			case FloatOption(min, max, inc, wrap, slider):
 				// add some increment specific rounding to prevent .599999999999999999999
 				inc ??= 0.05;
@@ -578,7 +643,7 @@ class Option {
 				value = Math.round(curVal * powMult) / powMult;
 			case BoolOption:
 				value = !value;
-			case ListOption(list, translateItems):
+			case ListOption(list, dropdown, translateItems):
 				final inc = left ? -1 : 1;
 				value = list[FlxMath.wrap(list.indexOf(value) + inc, 0, list.length - 1)];
 			case KeyOption:

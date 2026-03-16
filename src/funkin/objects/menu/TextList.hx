@@ -13,7 +13,7 @@ class TextList extends FunkinSprite {
 	var hover:FunkinSprite;
 
 	var curScroll:Float = 0;
-	var scrollInc:Float = 0;
+	public var scrollInc:Float = 0;
 
 	public var current:Int = 0;
 
@@ -79,6 +79,7 @@ class TextList extends FunkinSprite {
 			y += 30;
 		}
 		scrollInc = Math.max(txts.length * 30 + 30 - height, 0) / txts.length;
+		position(0);
 	}
 
 	public function setText(target:Int, text:String)
@@ -157,15 +158,22 @@ class TextList extends FunkinSprite {
 			final txt = texts.members[i];
 			txt.setPosition(x + 15, y + 15 - curScroll + 30 * i);
 			txt.alpha = alpha;
-			Util.clipByCoords(txt, null, null, y, y + height);
+			Util.clipByCoords(txt, null, null, y, y + scale.y);
 
 			if (hasSubTexts) {
 				final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y);
 				sub.alpha = alpha;
-				Util.clipByCoords(sub, null, null, y, y + height);
+				Util.clipByCoords(sub, null, null, y, y + scale.y);
 			}
 		}
+
+		hover.scale.y = 30;
+		hover.scale.y -= Math.max((hover.y + hover.scale.y) - (y + scale.y), 0);
+		var topClip = Math.max(y - hover.y, 0);
+		hover.y += topClip;
+		hover.scale.y -= topClip;
+		hover.scale.y = Math.max(hover.scale.y, 0);
 	}
 
 	function get_hovered()

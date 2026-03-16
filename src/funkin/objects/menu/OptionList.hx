@@ -9,6 +9,7 @@ class OptionList extends TextList {
 	public var holdWait:Float = 0.5;
 	public var dragging:Bool = false;
 
+	var hoverHeight:Float = 30;
 	var list:Array<Option>;
     var selPercentages:Array<Float> = [];
 	var componGrp:FlxTypedGroup<FlxSprite>;
@@ -123,6 +124,7 @@ class OptionList extends TextList {
     override function position(elapsed:Float) {
 		// shhhhh
 		componGrp.update(elapsed);
+		invertCompons.update(elapsed);
 
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
         var y = y + 15 - curScroll;
@@ -130,18 +132,18 @@ class OptionList extends TextList {
             final txt = texts.members[i];
 			txt.setPosition(x + 15, y);
 			txt.alpha = alpha;
-            Util.clipByCoords(txt, null, null, y, y + height);
+            Util.clipByCoords(txt, null, null, y, y + scale.y);
             
             selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current ? 1 : 0), elapsed * 15);
 			if (hasSubTexts) {
                 final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
 				sub.alpha = alpha * selPercentages[i];
-                Util.clipByCoords(sub, null, null, y, y + height);
+                Util.clipByCoords(sub, null, null, y, y + scale.y);
                 
                 y += (sub.height + 5) * selPercentages[i];
 				components[i].position(txt, sub, selPercentages[i]);
-				components[i].clip(y, y + height);
+				components[i].clip(y, y + scale.y);
 			}
 
             y += txt.height;
@@ -149,8 +151,15 @@ class OptionList extends TextList {
         scrollInc = Math.max((y + curScroll - this.y - 15 + 60) - height, 0) / texts.length;
         var targetHeight = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height - 5) * selPercentages[current] : 0)) + 10;
         hover.y = FlxMath.lerp(hover.y, texts.members[current].y - 5, elapsed * 15);
-        hover.scale.y = FlxMath.lerp(hover.scale.y, targetHeight, elapsed * 15);
+        hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
         hover.alpha = alpha;
+
+		hover.scale.y = hoverHeight;
+		hover.scale.y -= Math.max((hover.y + hoverHeight) - (y + scale.y), 0);
+		var topClip = Math.max(this.y - hover.y, 0);
+		hover.y += topClip;
+		hover.scale.y -= topClip;
+		hover.scale.y = Math.max(hover.scale.y, 0);
 	}
 
     override function regenerate(txts:Array<String>, ?subs:Array<String>) {
@@ -223,6 +232,9 @@ class OptionList extends TextList {
 				case FloatOption(min, max, inc, wrap, true): // case ors were being a BITCH
 					subTexts.members[i].fieldWidth -= 300;
 					new Slider(opt, i == current);
+				case ListOption(options, true, translateItems):
+					subTexts.members[i].fieldWidth -= 200;
+					new DropdownText(opt, i == current);
 				default:
 					subTexts.members[i].fieldWidth -= 150;
 					new Textbox(opt, i == current);
@@ -233,6 +245,7 @@ class OptionList extends TextList {
 			(compon.canInvert ? invertCompons : componGrp).add(compon.obj);
 			components[i] = compon;
 		}
+		position(0);
 	}
 
 	public static function getDesc(opt:Option) {
@@ -399,6 +412,61 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 	}
 }
 
+class DropdownText extends FunkinSprite implements OptionComponent<DropdownText> {
+	public var obj:DropdownText;
+	public var canInvert:Bool;
+	var label:FlxText;
+
+	public function hovering(idx:Int, opt:Option, list:OptionList) {
+		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
+
+		if (opt.hasSound)
+			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+		opt.enter();
+		change(opt);
+
+		if (list.onOptEnter != null)
+			list.onOptEnter(idx);
+	}
+	public function position(txt:FlxText, sub:FlxText, selPercent:Float) {
+		var y = txt.y - 5;
+		var height = txt.height + (sub.height + 5) * selPercent;
+
+		this.scale.set(selPercent, selPercent);
+		this.setPosition(txt.x + txt.width, y + (height - this.frameHeight) * 0.5);
+
+		@:privateAccess label.regenGraphic();
+		label.offset.x = label.origin.x = label.graphic.width;
+		label.scale.x = label.scale.y = 0.5 + 0.5 * selPercent;
+		label.setPosition(x - frameWidth * this.scale.x, this.y + (this.frameHeight - label.height) * 0.5);
+	}
+	public function clip(top:Float, bottom:Float) {
+		//Util.clipByCoords(this, null, null, top, bottom);
+	}
+	public function change(opt:Option):Void {
+		label.text = opt.formatText(true);
+	}
+	public function selectionChanged(opt:Option, selected:Bool) {
+		label.text = opt.formatText(selected);
+	}
+
+	public function new(opt:Option, selected:Bool) {
+		super(0, 0, Paths.image("menus/options/optionsdropdowngay"));
+		obj = this;
+		canInvert = true;
+
+		origin.x = offset.x = frameWidth;
+
+		label = new FlxText(0, 0, 0, opt.formatText(selected));
+		label.setFormat(Paths.font("cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
+	}
+
+	override function draw() {
+		super.draw();
+		label.draw();
+	}
+}
+
 class Slider extends FunkinSprite implements OptionComponent<Slider> {
 	static inline final BAR_PADDING:Float = 4;
 
@@ -447,7 +515,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 
 		@:privateAccess label.regenGraphic();
 		label.offset.x = label.origin.x = label.graphic.width;
-		label.scale.x = label.scale.y = 0.5 + 0.5 * selPercent;
+		label.scale.x = label.scale.y = 0.65 + 0.35 * selPercent;
 		label.setPosition(x, this.y + (this.scale.y - label.height) * 0.5);
 	}
 	public function clip(top:Float, bottom:Float) {
