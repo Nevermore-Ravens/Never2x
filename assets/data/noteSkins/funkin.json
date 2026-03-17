@@ -21,8 +21,8 @@
 
 			"staticFramerate": 24,
 			"noteFramerate": 24,
-			"pressFramerate": 48,
-			"glowFramerate": 48,
+			"pressFramerate": 24,
+			"glowFramerate": 24,
 			"holdFramerate": 24,
 			"rollFramerate": 24
         },

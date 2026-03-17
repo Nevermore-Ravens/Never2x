@@ -253,7 +253,8 @@ class PlayState extends FunkinState {
 		if (simpleJudges) {
 			comboNumbers.x -= comboNumbers.width * 0.5;
 			comboNumbers.simple = true;
-		}
+		} else
+			comboNumbers.x += comboNumbers.width * 0.5;
 
 		if (simpleJudges && Settings.data.centeredNotes) {
 			judgeSprite.screenCenter();
@@ -746,18 +747,20 @@ class PlayState extends FunkinState {
 		if (hud == null) return;
 		hud.clear();
 
-		hud.add(hitErrorBar = new HitErrorBar(Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? 20 : FlxG.width - 25, 0));
+		final isEnemy = Settings.data.gameplayModifiers['playingSide'] == 'Opponent';
+
+		hud.add(hitErrorBar = new HitErrorBar(isEnemy ? 20 : FlxG.width - 25, 0));
 		hitErrorBar.screenCenter(Y);
 		hitErrorBar.visible = Settings.data.hitErrorBar;
 
-		hud.add(timingIndicator = new FlxText((hitErrorBar.x + (Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? 25 : -25)) - 150, 0, 300, '0 ms', 16));
+		hud.add(timingIndicator = new FlxText((hitErrorBar.x + (isEnemy ? 25 : -25)) - 150, 0, 300, '0 ms', 16));
 		timingIndicator.alignment = 'center';
 		timingIndicator.alpha = 0;
 		timingIndicator.font = Paths.font('LineSeed.ttf');
 		timingIndicator.borderSize = 1.25;
 		timingIndicator.borderStyle = OUTLINE;
 		timingIndicator.borderColor = 0xFF000000;
-		timingIndicator.angle = Settings.data.gameplayModifiers['playingSide'] == 'Opponent' ? -90 : 90;
+		timingIndicator.angle = isEnemy ? -90 : 90;
 		timingIndicator.screenCenter(Y);
 
 		hud.add(healthBar = new Bar(0, downscroll ? 55 : 640, function() return health, 0, 100));
@@ -777,7 +780,7 @@ class PlayState extends FunkinState {
 		updateIconPositions();
 
 		// fuck it im pulling a forever engine
-		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songName (0:00 / 0:00)', 18));
+		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songName (Starting....)', 18));
 		timeText.screenCenter(X);
 		timeText.alignment = 'center';
 		timeText.font = Paths.font('LineSeed.ttf');
@@ -800,6 +803,8 @@ class PlayState extends FunkinState {
 		judgeNames.visible = Settings.data.judgementCounter;
 		generateJudgeColors();
 		judgeNames.screenCenter(Y);
+		if (isEnemy)
+			judgeNames.x = FlxG.width - ((judgeNames.x + judgeNames.width) + 50) - 75;
 
 		hud.add(judgeCounters = new FlxText((judgeNames.x + judgeNames.width) + 50, judgeNames.y, 75, '', judgeNames.size));
 		judgeCounters.font = judgeNames.font;
@@ -815,7 +820,7 @@ class PlayState extends FunkinState {
 			clearTypePos.x = judgeNames.x + 45;
 			clearTypePos.y = (judgeNames.y + judgeNames.height);
 		} else {
-			clearTypePos.x = 10;
+			clearTypePos.x = isEnemy ? FlxG.width - 10 - judgeCounters.fieldWidth : 10;
 			clearTypePos.y = FlxG.height - 30;
 		}
 
@@ -836,17 +841,12 @@ class PlayState extends FunkinState {
 
 		updateInfo();
 		infoText.screenCenter(X);
-
-		new FlxTimer().start(1, function(_) {
-			updateTimeText();
-		}, 0);
 	}
 
-	var judgeFormats:Array<FlxTextFormat> = [];
 	public function generateJudgeColors() {
 		if (!Settings.data.judgementCounter) return;
 
-		judgeFormats.resize(Judgement.list.length);
+		judgeNames.clearFormats();
 		judgeNames.text = "";
 		var lastNameEnd = 0;
 		for (i in 0...Judgement.list.length) {

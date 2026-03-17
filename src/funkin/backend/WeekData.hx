@@ -74,12 +74,13 @@ class WeekData {
 		}
 
 		// god i hate haxe sometimes
-		var songs:Array<{id:String, color:FlxColor, icon:String}> = data.songs;
+		var songs:Array<{id:String, color:FlxColor, icon:String, difficulties:Array<String>}> = data.songs;
 		for (song in songs) {
 			file.songs.push({
 				id: song.id,
 				color: song.color,
 				icon: song.icon,
+				difficulties: song.difficulties
 			});
 		}
 

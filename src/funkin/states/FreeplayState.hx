@@ -142,7 +142,7 @@ class FreeplayState extends FunkinState {
 		modsMenu.allowMouse = false;
 		modsMenu.allowKeys = false;
 
-		add(modsText = new FlxText(modsMenu.x, modsMenu.y + modsMenu.height * 0.5, modsMenu.height, "v Edit Modifiers v"));
+		add(modsText = new FlxText(modsMenu.x, modsMenu.y + modsMenu.height * 0.5, modsMenu.height, "v [CTRL] - Edit Modifiers v"));
 		modsText.setFormat(Paths.font("cafeSquare.ttf"), 24, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
 		modsText.angle = -90;
 		modsText.x -= (modsText.width + modsText.height) * 0.5;
@@ -197,12 +197,12 @@ class FreeplayState extends FunkinState {
 				actionPressed = true;
 			}
 
-			if (FlxG.mouse.justPressed && FlxG.mouse.x >= modsMenu.x && FlxG.mouse.y >= modsMenu.y && FlxG.mouse.y <= modsMenu.y + modsMenu.height) {
+			if (FlxG.keys.justPressed.CONTROL || (FlxG.mouse.justPressed && FlxG.mouse.x >= modsMenu.x && FlxG.mouse.y >= modsMenu.y && FlxG.mouse.y <= modsMenu.y + modsMenu.height)) {
 				FlxG.sound.play(Paths.audio("scroll", "sfx"));
 				modsMenu.allowMouse = true;
 				modsMenu.allowKeys = true;
 			}
-		} else if (Controls.justPressed("back") || FlxG.mouse.justPressedRight || (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(modsMenu))) {
+		} else if (Controls.justPressed("back") || FlxG.keys.justPressed.CONTROL || FlxG.mouse.justPressedRight || (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(modsMenu))) {
 			FlxG.sound.play(Paths.audio("cancel", "sfx"));
 			modsMenu.allowMouse = false;
 			modsMenu.allowKeys = false;

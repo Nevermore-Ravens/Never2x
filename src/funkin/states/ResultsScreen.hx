@@ -29,7 +29,7 @@ class ResultsScreen extends FunkinState {
 		},
 		{
 			condition: () -> Settings.data.gameplayModifiers["playingSide"] != "Default",
-			make: () -> "Playing as" + Settings.data.gameplayModifiers["playingSide"]
+			make: () -> "Playing as " + Settings.data.gameplayModifiers["playingSide"]
 		},
 		{
 			condition: () -> PlayState.song.meta.hasModchart && Settings.data.gameplayModifiers["modcharts"],

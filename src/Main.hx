@@ -14,6 +14,10 @@ import openfl.events.UncaughtErrorEvent;
 @:cppInclude('../../_external/gamemode_client.h')
 @:cppFileCode('#define GAMEMODE_AUTO')
 #end
+#if (cpp && windows)
+// Fix cyrillic characters in terminal output
+@:cppInclude("windows.h")
+#end
 class Main extends Sprite {
 	public static var fpsCounter:FPSCounter;
 
@@ -25,6 +29,11 @@ class Main extends Sprite {
 
 	public function new() {
 		super();
+
+		#if (cpp && windows)
+		// Fix cyrillic characters in terminal output
+		untyped __cpp__('SetConsoleOutputCP(CP_UTF8)');
+		#end
 
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 
