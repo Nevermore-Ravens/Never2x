@@ -150,7 +150,7 @@ class OptionList extends TextList {
 		}
         scrollInc = Math.max((y + curScroll - this.y - 15 + 60) - height, 0) / texts.length;
         var targetHeight = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height - 5) * selPercentages[current] : 0)) + 10;
-        hover.y = FlxMath.lerp(hover.y, texts.members[current].y - 5, elapsed * 15);
+        hover.setPosition(x, FlxMath.lerp(hover.y, texts.members[current].y - 5, elapsed * 15));
         hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
         hover.alpha = alpha;
 

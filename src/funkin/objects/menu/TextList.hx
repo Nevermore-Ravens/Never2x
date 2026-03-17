@@ -152,7 +152,7 @@ class TextList extends FunkinSprite {
 
 	function position(elapsed:Float) {
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
-		hover.y = FlxMath.lerp(hover.y, y + 15 - curScroll + 30 * current, elapsed * 15);
+		hover.setPosition(x, FlxMath.lerp(hover.y, y + 15 - curScroll + 30 * current, elapsed * 15));
 		hover.alpha = alpha;
 		for (i in 0...texts.length) {
 			final txt = texts.members[i];

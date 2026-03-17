@@ -488,10 +488,8 @@ class DropdownPrompt extends FlxSubState {
 		list.height = Math.min(list.scrollInc * options.length, 600);
 		list.scrollInc = Math.max(list.scrollInc * options.length - list.height, 0) / options.length;
 
-		if (list.x + list.width >= FlxG.width - 10) {
+		if (list.x + list.width >= FlxG.width - 10)
 			list.x = FlxG.width - 10 - list.width;
-			@:privateAccess list.hover.x = list.x;
-		}
 
 		list.scale.y = 0;
 		twnVars = {"scale.y": list.height};

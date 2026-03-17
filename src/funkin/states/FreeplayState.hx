@@ -1,8 +1,36 @@
 package funkin.states;
 
+import funkin.states.OptionsState;
+import funkin.objects.menu.OptionList;
 import funkin.objects.CharIcon;
 
 import flixel.util.FlxDestroyUtil;
+
+class Modifier extends Option {
+	public static final list:Array<Modifier> = [
+		new Modifier("Playback Rate", "How fast the game will go.", "playbackRate", FloatOption(0.35, 5.0, 0.05)),
+		new Modifier('Playing Side', 'Which side you\'re playing on for the song.', 'playingSide', ListOption(['Default', 'Opponent'])),
+		new Modifier("No Fail", "If you'll live even when out of health.", "noFail", BoolOption),
+		new Modifier("FC Only", "If you'll fail the moment you combo break.", "instakill", BoolOption),
+		new Modifier("Sicks Only", "If you'll fail the moment you don't hit a sick.", "onlySicks", BoolOption),
+		new Modifier("Mirrored Notes", "If the chart will flip its notes around.", "mirroredNotes", BoolOption),
+		new Modifier("Randomized Notes", "If the game will swap the lanes around.", "randomizedNotes", BoolOption),
+		#if MODCHARTS_ALLOWED new Modifier("Modcharts", "If the game will do some wacky stuff with the notes to make it\nlook cooler.", "modcharts", BoolOption), #end
+		new Modifier("Sustains", "If the game will add holds or not.", "sustains", BoolOption),
+		new Modifier("Botplay", "If the game will play the chart for you.", "botplay", BoolOption),
+		new Modifier('Blind', 'How much of the chart do you remember?', 'blind', BoolOption),
+	];
+
+	override function get_value():Dynamic {
+		return Settings.data.gameplayModifiers[id];
+	}
+
+	override function set_value(v:Dynamic):Dynamic {
+		Settings.data.gameplayModifiers[id] = v; // sorry KeyOption no support for u
+		onChange(v);
+		return v;
+	}
+}
 
 class FreeplayState extends FunkinState {
 	var songList:Array<SongMeta> = [];
@@ -15,6 +43,9 @@ class FreeplayState extends FunkinState {
 
 	var grpSongs:FlxTypedSpriteGroup<Alphabet>;
 	var grpIcons:FlxTypedSpriteGroup<CharIcon>;
+
+	var modsMenu:OptionList;
+	var modsText:FlxText;
 
 	var bg:FlxSprite;
 	var intendedColour:Int;
@@ -100,6 +131,23 @@ class FreeplayState extends FunkinState {
 		add(difficultyText = new FlxText(scoreText.x, scoreText.y + 36, 0, '', 24));
 		difficultyText.font = scoreText.font;
 
+		add(modsMenu = new OptionList(FlxG.width - 15, FlxG.height * 0.5 - 275, 650, 550));
+		modsMenu.setOptions(cast Modifier.list);
+		modsMenu.onOptMove = (cur, left) -> {
+			var play:PlayData = Scores.getPlay(songList[curSelected].id, curDiffName);
+			intendedScore = play.score;
+			intendedAccuracy = play.accuracy;
+		};
+		modsMenu.onOptEnter = modsMenu.onOptMove.bind(_, true);
+		modsMenu.allowMouse = false;
+		modsMenu.allowKeys = false;
+
+		add(modsText = new FlxText(modsMenu.x, modsMenu.y + modsMenu.height * 0.5, modsMenu.height, "v Edit Modifiers v"));
+		modsText.setFormat(Paths.font("cafeSquare.ttf"), 24, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
+		modsText.angle = -90;
+		modsText.x -= (modsText.width + modsText.height) * 0.5;
+		modsText.y -= modsText.height * 0.5;
+
 		changeSelection();
 		updateTexts();
 	}
@@ -107,10 +155,9 @@ class FreeplayState extends FunkinState {
 	var holdTime:Float;
 	var actionPressed:Bool = false;
 	override function update(elapsed:Float) {
-		if (actionPressed) {
-			super.update(elapsed);
+		super.update(elapsed);
+		if (actionPressed)
 			return;
-		}
 
 		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
 		lerpAccuracy = FlxMath.lerp(intendedAccuracy, lerpAccuracy, Math.exp(-elapsed * 12));
@@ -126,30 +173,43 @@ class FreeplayState extends FunkinState {
 
 		positionStats();
 
-		songControls(elapsed);
-		difficultyControls();
+		if (!modsMenu.allowKeys) {
+			songControls(elapsed);
+			difficultyControls();
+
+			if (Controls.justPressed('accept')) {
+				actionPressed = true;
+				if (songList[curSelected].id == 'random') {
+					var oldSelected:Int = curSelected;
+					curSelected = FlxG.random.int(1, songList.length - 1);
+					changeSelection();
+					curDiffName = curDiffs[FlxG.random.int(0, curDiffs.length - 1)];
+					enterSong();
+	
+					// so that the user doesn't have to scroll all the way back up
+					// just to hit "random" again
+					curSelected = oldSelected;
+				} else enterSong();
+			}
+	
+			if (Controls.justPressed('back')) {
+				FunkinState.switchState(new MainMenuState());
+				actionPressed = true;
+			}
+
+			if (FlxG.mouse.justPressed && FlxG.mouse.x >= modsMenu.x && FlxG.mouse.y >= modsMenu.y && FlxG.mouse.y <= modsMenu.y + modsMenu.height) {
+				FlxG.sound.play(Paths.audio("scroll", "sfx"));
+				modsMenu.allowMouse = true;
+				modsMenu.allowKeys = true;
+			}
+		} else if (Controls.justPressed("back") || FlxG.mouse.justPressedRight || (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(modsMenu))) {
+			FlxG.sound.play(Paths.audio("cancel", "sfx"));
+			modsMenu.allowMouse = false;
+			modsMenu.allowKeys = false;
+		}
+		modsMenu.x = FlxMath.lerp(modsMenu.x, (modsMenu.allowKeys ? FlxG.width - 10 - modsMenu.width : FlxG.width - 15), elapsed * 20);
+		modsText.setPosition(modsMenu.x - (modsText.width + modsText.height) * 0.5, modsMenu.y + (modsMenu.height - modsText.height) * 0.5);
 		updateTexts(elapsed);
-		super.update(elapsed);
-
-		if (Controls.justPressed('accept')) {
-			actionPressed = true;
-			if (songList[curSelected].id == 'random') {
-				var oldSelected:Int = curSelected;
-				curSelected = FlxG.random.int(1, songList.length - 1);
-				changeSelection();
-				curDiffName = curDiffs[FlxG.random.int(0, curDiffs.length - 1)];
-				enterSong();
-
-				// so that the user doesn't have to scroll all the way back up
-				// just to hit "random" again
-				curSelected = oldSelected;
-			} else enterSong();
-		}
-
-		if (Controls.justPressed('back')) {
-			FunkinState.switchState(new MainMenuState());
-			actionPressed = true;
-		}
 	}
 
 	function enterSong() {
