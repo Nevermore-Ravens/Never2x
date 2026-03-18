@@ -21,6 +21,7 @@ class TextList extends FunkinSprite {
 	public var hovered(get, never):Bool;
 	public var allowKeys:Bool = true;
 	public var allowMouse:Bool = true;
+	public var displayHover:Bool = true;
 
 	public var onClick:(current:Int)->Void;
 	public var onSelect:(current:Int, last:Int)->Void;
@@ -153,7 +154,7 @@ class TextList extends FunkinSprite {
 	function position(elapsed:Float) {
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
 		hover.setPosition(x, FlxMath.lerp(hover.y, y + 15 - curScroll + 30 * current, elapsed * 15));
-		hover.alpha = alpha;
+		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
 		for (i in 0...texts.length) {
 			final txt = texts.members[i];
 			txt.setPosition(x + 15, y + 15 - curScroll + 30 * i);

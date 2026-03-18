@@ -10,10 +10,8 @@ class OptionList extends TextList {
 	public var dragging:Bool = false;
 
 	var hoverHeight:Float = 30;
-	var list:Array<Option>;
     var selPercentages:Array<Float> = [];
-	var componGrp:FlxTypedGroup<FlxSprite>;
-	var invertCompons:FlxTypedGroup<FlxSprite>;
+	public var list:Array<Option>;
 	public var components:Array<OptionComponent<FlxSprite>> = [];
 
 	public var onOptMove:(current:Int, left:Bool)->Void;
@@ -21,8 +19,6 @@ class OptionList extends TextList {
 
 	public function new(x:Float, y:Float, width:Float, height:Float) {
 		super(x, y, width, height, []);
-		componGrp = new FlxTypedGroup();
-		invertCompons = new FlxTypedGroup();
 	}
 
 	override function retarget(target:Int) {
@@ -123,8 +119,10 @@ class OptionList extends TextList {
 
     override function position(elapsed:Float) {
 		// shhhhh
-		componGrp.update(elapsed);
-		invertCompons.update(elapsed);
+		for (compon in components) {
+			if (compon != null && compon.obj.active)
+				compon.update(elapsed);
+		}
 
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
         var y = y + 15 - curScroll;
@@ -152,7 +150,7 @@ class OptionList extends TextList {
         var targetHeight = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height - 5) * selPercentages[current] : 0)) + 10;
         hover.setPosition(x, FlxMath.lerp(hover.y, texts.members[current].y - 5, elapsed * 15));
         hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
-        hover.alpha = alpha;
+		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
 
 		hover.scale.y = hoverHeight;
 		hover.scale.y -= Math.max((hover.y + hoverHeight) - (y + scale.y), 0);
@@ -209,17 +207,8 @@ class OptionList extends TextList {
 		regenerate(txts, subs);
 		this.list = list;
 
-		while (componGrp.length > 0) {
-			final compon = componGrp.members[0];
-			componGrp.remove(compon, true);
-			compon.destroy();
-		}
-		while (invertCompons.length > 0) {
-			final compon = invertCompons.members[0];
-			invertCompons.remove(compon, true);
-			compon.destroy();
-		}
-		components.resize(list.length);
+		while (components.length > 0)
+			components.shift().destroy();
 
 		for (i => opt in list) {
 			var compon:OptionComponent<FlxSprite> = cast switch (opt.type) {
@@ -241,9 +230,7 @@ class OptionList extends TextList {
 			}
 			compon.position(texts.members[i], subTexts.members[i], selPercentages[i]);
 			compon.clip(y, y + height);
-
-			(compon.canInvert ? invertCompons : componGrp).add(compon.obj);
-			components[i] = compon;
+			components.push(compon);
 		}
 		position(0);
 	}
@@ -260,28 +247,46 @@ class OptionList extends TextList {
 		hover.draw();
 		texts.draw();
 		subTexts.draw();
-		invertCompons.draw();
+
+		for (compon in components) {
+			if (compon != null && compon.obj.visible)
+				compon.drawInvertableCompon();
+		}
+
 		hover.draw();
 		hover.blend = NORMAL;
 
-		componGrp.draw();
+		for (compon in components) {
+			if (compon != null && compon.obj.visible)
+				compon.drawRegularCompon();
+		}
+	}
+
+	override function destroy() {
+		super.destroy();
+		while (components.length > 0)
+			components.shift().destroy();
 	}
 }
 
 interface OptionComponent<T:FlxSprite> {
 	public var obj:T;
-	public var canInvert:Bool;
 
 	public function hovering(idx:Int, opt:Option, list:OptionList):Void;
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float):Void;
 	public function clip(top:Float, bottom:Float):Void;
 	public function change(opt:Option):Void;
 	public function selectionChanged(opt:Option, selected:Bool):Void;
+
+	public function drawRegularCompon():Void;
+	public function drawInvertableCompon():Void;
+
+	public function update(elapsed:Float):Void;
+	public function destroy():Void;
 }
 
 class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 	public var obj:Checkbox;
-	public var canInvert:Bool;
 
 	public function hovering(idx:Int, opt:Option, list:OptionList) {
 		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
@@ -317,7 +322,6 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 	public function new(opt:Option) {
 		super();
 		obj = this;
-		canInvert = false;
 		frames = Paths.sparrowAtlas("menus/options/optionsbuttongay");
 		animation.addByPrefix("true", "ON", 12, false);
 		animation.addByPrefix("totrue", "TURN", 12, false);
@@ -331,11 +335,13 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 		};
 		clipRect = FlxRect.get(0, 0, frameWidth, frameHeight);
 	}
+
+	public function drawRegularCompon() {draw();}
+	public function drawInvertableCompon() {}
 }
 
 class Textbox extends FlxText implements OptionComponent<Textbox> {
 	public var obj:Textbox;
-	public var canInvert:Bool;
 
 	public function hovering(idx:Int, opt:Option, list:OptionList) {
 		if (!FlxG.mouse.justPressed) return;
@@ -407,14 +413,15 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 			text = "< " + text + " >";
 
 		obj = this;
-		canInvert = true;
 		setFormat(Paths.font("cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
 	}
+
+	public function drawRegularCompon() {}
+	public function drawInvertableCompon() {draw();}
 }
 
 class DropdownText extends FunkinSprite implements OptionComponent<DropdownText> {
 	public var obj:DropdownText;
-	public var canInvert:Bool;
 	var label:FlxText;
 
 	public function hovering(idx:Int, opt:Option, list:OptionList) {
@@ -453,7 +460,6 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 	public function new(opt:Option, selected:Bool) {
 		super(0, 0, Paths.image("menus/options/optionsdropdowngay"));
 		obj = this;
-		canInvert = true;
 
 		origin.x = offset.x = frameWidth;
 
@@ -464,6 +470,17 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 	override function draw() {
 		super.draw();
 		label.draw();
+	}
+
+	public function drawRegularCompon() {}
+	public function drawInvertableCompon() {
+		draw();
+		label.draw();
+	}
+
+	override function destroy() {
+		super.destroy();
+		label.destroy();
 	}
 }
 
@@ -540,6 +557,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 		updateHitbox();
 		origin.set();
 		offset.set();
+		color = 0xFF000000;
 
 		final params = opt.type.getParameters();
 		min = params[0];
@@ -549,7 +567,6 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 		fill = new FunkinSprite();
 		fill.makeGraphic(1, 1);
 		fill.scale.set((width - BAR_PADDING * 2) * fillPercent, height - BAR_PADDING * 2);
-		fill.color = 0xFF000000;
 		fill.updateHitbox();
 		fill.origin.set();
 		fill.offset.set();
@@ -558,9 +575,17 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 		label.setFormat(Paths.font("cafeSquare.ttf"), 32, 0xFFFFFFFF, RIGHT);
 	}
 
-	override function draw() {
-		super.draw();
+	public function drawRegularCompon() {
+		draw();
 		fill.draw();
+	}
+	public function drawInvertableCompon() {
 		label.draw();
+	}
+
+	override function destroy() {
+		super.destroy();
+		fill.destroy();
+		label.destroy();
 	}
 }
