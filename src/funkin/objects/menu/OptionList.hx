@@ -19,6 +19,7 @@ class OptionList extends TextList {
 
 	public function new(x:Float, y:Float, width:Float, height:Float) {
 		super(x, y, width, height, []);
+		canSelect = (target) -> list[target].type != Unselectable;
 	}
 
 	override function retarget(target:Int) {
@@ -61,6 +62,9 @@ class OptionList extends TextList {
 				FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
 			curOption.change(leftJustPressed);
 			components[current].change(curOption);
+
+			if (onOptMove != null)
+				onOptMove(current, leftJustPressed);
 		}
 		if (Controls.justPressed('accept')) {
 			if (curOption.hasEnter) {
@@ -92,6 +96,9 @@ class OptionList extends TextList {
 				holdWait = 0.035; // make the changing more consistent
 				curOption.change(curHolding % 2 == 1);
 				components[current].change(curOption);
+
+				if (onOptMove != null)
+					onOptMove(current, curHolding % 2 == 1);
 			}
 		}
 	}

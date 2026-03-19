@@ -229,4 +229,11 @@ class TextList extends FunkinSprite {
 		hover.draw();
 		hover.blend = NORMAL;
 	}
+
+	override function destroy() {
+		super.destroy();
+		hover.destroy();
+		texts.destroy();
+		subTexts.destroy();
+	}
 }

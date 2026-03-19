@@ -3,6 +3,7 @@ package funkin.states;
 import haxe.io.Path;
 import funkin.objects.menu.TextList;
 import funkin.objects.menu.OptionList;
+import funkin.objects.menu.NoteCustomization;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.FunkinSprite;
@@ -98,8 +99,7 @@ class OptionsState extends FunkinState {
 					self.optText.allowKeys = false;
 					self.optText.allowMouse = false;
 
-					self.noteText.allowMouse = true;
-					self.noteText.allowKeys = true;
+					self.noteEdit.active = true;
 				};
 				opt;
 			},
@@ -270,154 +270,6 @@ class OptionsState extends FunkinState {
 			}
 		]
 	];
-	final noteOpts:Array<Option> = [
-		{
-			final possible: Array<String> = [];
-			final names: Map<String, String> = [];
-			for (path in Paths.readDirectory("data/noteSkins"))
-				if (path.endsWith(".json5") || path.endsWith(".json")) {
-					var name:String = Path.withoutDirectory(Path.withoutExtension(path));
-					if(name == "default" || possible.contains(name)) continue;
-					var data = funkin.backend.NoteSkin.get(name);
-					possible.push(name);
-					names.set(name, data.displayName);
-				}
-
-			var opt = new Option("note_skin", "note_skin_desc", "noteSkin", ListOption(possible, true));
-			opt.formatListOption = function(val, _) {
-				return names[val];
-			};
-			opt.onChange = function(v) {
-				var newStyle = null;
-				for (i => opt in self.noteOpts) {
-					if (opt.id != "noteSkinStyle") continue;
-
-					final data = funkin.backend.NoteSkin.get(v);
-					final possible: Array<String> = [];
-					final names: Map<String, String> = [];
-					for (name in data.styleOrder) {
-						if (name == "default" || possible.contains(name)) continue;
-						possible.push(name);
-						names.set(name, data.styles[name].displayName);
-					}
-					possible.unshift("default");
-					names.set("default", "Default (By Context)");
-
-					opt.type = ListOption(possible, true);
-					opt.formatListOption = function(item, _) {
-						return names[item];
-					};
-
-					if (!possible.contains(Settings.data.noteSkinStyle)) {
-						Settings.data.noteSkinStyle = "default";
-						newStyle = "normal";
-						self.noteText.components[i].change(opt);
-					}
-				}
-
-				final lumin = Settings.data.quantColouring != "None";
-				for (note in self.notes) {
-					@:bypassAccessor note.style = (newStyle == null ? note.style : newStyle);
-					note.skin = '';
-					self.scaleNote(note, 0.55);
-					note.updateHitbox();
-					note.y = self.noteOptHeight + ((160 * 0.55) - note.height) * 0.5;
-
-					if (!lumin && note.luminColors) {
-						note.luminColors = false;
-						note.color = 0xFFFFFFFF;
-					}
-				}
-			}
-			opt;
-		},
-		{
-			final data = funkin.backend.NoteSkin.get(Settings.data.noteSkin);
-			final possible: Array<String> = [];
-			final names: Map<String, String> = [];
-			for (name in data.styleOrder) {
-				if (name == "default" || possible.contains(name)) continue;
-				possible.push(name);
-				names.set(name, data.styles[name].displayName);
-			}
-			possible.unshift("default");
-			names.set("default", "Default (By Context)");
-
-			var opt = new Option("note_skin_style", "note_skin_style_desc", "noteSkinStyle", ListOption(possible, true));
-			opt.formatListOption = function(item, _) {
-				return names[item];
-			};
-			opt.onChange = function(v) {
-				final style = v == "default" ? "normal" : v;
-				final lumin = Settings.data.quantColouring != "None";
-				for (note in self.notes) {
-					note.style = style;
-					self.scaleNote(note, 0.55);
-					note.updateHitbox();
-					note.y = self.noteOptHeight + ((160 * 0.55) - note.height) * 0.5;
-
-					if (!lumin && note.luminColors) {
-						note.luminColors = false;
-						note.color = 0xFFFFFFFF;
-					}
-				}
-			}
-			opt;
-		},
-		{
-			final possibleNotesplashes: Array<String> = ['none'];
-			final notesplashNames: Map<String, String> = ['none' => 'None'];
-			for (splashPath in Paths.readDirectory("data/noteSplashes"))
-				if (splashPath.endsWith(".json5") || splashPath.endsWith(".json")) {
-					var splashName:String = Path.withoutDirectory(Path.withoutExtension(splashPath));
-					if(possibleNotesplashes.contains(splashName)) continue;
-					var data = NoteSplashData.get(splashName);
-					possibleNotesplashes.insert(0, splashName);
-					notesplashNames.set(splashName, data.name);
-				}
-
-			var opt = new Option("splash_skin", "splash_skin_desc", "noteSplashSkin", ListOption(possibleNotesplashes, true));
-			opt.formatListOption = function(val, _) {
-				return notesplashNames.get(val) ?? 'Fallback (${val})'; // Display the name so you can figure out what the splash WAS
-			};
-			opt;
-		},
-		{ // this can be reverted if the order of the quants matter
-			var quantPalettes: Array<String> = [];
-			for(name in funkin.objects.Note.quantPalettes.keys())
-				quantPalettes.push(name);
-
-			quantPalettes.unshift('Custom (Columns)');
-			quantPalettes.unshift('Custom');
-			quantPalettes.unshift('None');
-
-			var opt = new Option('quant_col', 'quant_col_desc', "quantColouring", ListOption(quantPalettes, true));
-			opt.onChange = function(v) {
-				final lumin = v != "None";
-				if (v.startsWith("Custom")) {
-					Note.byQuant = v == "Custom";
-					Note.curPalette = Note.byQuant ? Settings.data.customQuants : Settings.data.customColumns;
-				} else {
-					Note.byQuant = lumin;
-					Note.curPalette = Note.byQuant && Note.quantPalettes.exists(v) ? Note.quantPalettes[v].copy() : getDefaultColumns();
-				}
-				
-				for (i => note in self.notes) {
-					if (!lumin || i < Note.curPalette.length)
-						note.color = lumin ? Note.curPalette[i] : 0xFFFFFFFF;
-					if (note.luminColors != lumin) {
-						note.luminColors = lumin;
-						note.skin = '';
-						self.scaleNote(note, 0.55);
-						note.updateHitbox();
-					}
-				}
-				
-			}
-			opt;
-		}
-	];
-
 	public static var inPlayState:Bool = false;
 	
 	var wasInOpts:Bool = false;
@@ -432,9 +284,7 @@ class OptionsState extends FunkinState {
 	var cateText:TextList;
 	var optText:OptionList;
 
-	var noteText:OptionList;
-	var noteOptHeight:Float;
-	var notes:FlxTypedGroup<Note>;
+	var noteEdit:NoteCustomization;
 
 	override function create() {
 		super.create();
@@ -456,17 +306,15 @@ class OptionsState extends FunkinState {
 		};
 
 		optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700);
-		optText.canSelect = (target) -> curOptList[target].type != Unselectable;
 		optText.onOptEnter = optEnter.bind(optText);
 
-		initCustomizeNotes();
+		noteEdit = new NoteCustomization(FlxG.width + 10, 10, FlxG.width - 20, FlxG.height - 20);
+		noteEdit.onOptEnter = optEnter.bind(noteEdit);
+		noteEdit.active = false;
 
-		add(noteText); // dont want a chain reaction with onAccept
+		add(noteEdit); // dont want a chain reaction with onAccept
 		add(optText);
 		add(cateText);
-
-		// then add the note customization stuff
-		add(notes);
 
 		openCategory(0);
 		cateText.allowKeys = true;
@@ -516,9 +364,8 @@ class OptionsState extends FunkinState {
 		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
 			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
-			if (noteText.allowMouse) {
-				noteText.allowMouse = false;
-				noteText.allowKeys = false;
+			if (noteEdit.active) {
+				noteEdit.active = false;
 
 				cateText.allowMouse = true;
 				cateText.allowKeys = !wasInOpts;
@@ -532,10 +379,8 @@ class OptionsState extends FunkinState {
 				else FunkinState.switchState(new MainMenuState());
 			}
 		}
-		if (noteText.allowMouse)
-			updateCustomizeNotes(delta);
 		super.update(delta);
-		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, noteText.allowMouse ? FlxG.width : 0, delta * 20);
+		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, noteEdit.active ? FlxG.width : 0, delta * 20);
 		cateText.displayHover = cateText.allowKeys || cateText.hovered;
 		optText.displayHover = optText.allowKeys || optText.hovered;
 
@@ -610,65 +455,6 @@ class OptionsState extends FunkinState {
 		}
 
 		optText.setOptions(curOptList);
-	}
-
-	function initCustomizeNotes() {
-		noteText = new OptionList(FlxG.width + 10, 10, FlxG.width - 20, 0);
-		noteText.setOptions(noteOpts);
-		noteText.allowMouse = false;
-		noteText.allowKeys = false;
-		noteText.onOptEnter = optEnter.bind(noteText);
-		noteOptHeight =	noteText.scrollInc * noteOpts.length - 30;
-		noteText.scrollInc = 0;
-		noteText.height = FlxG.height - 20;
-
-		notes = new FlxTypedGroup();
-		final lumin = Settings.data.quantColouring != "None";
-		if (Settings.data.quantColouring.startsWith("Custom")) {
-			Note.byQuant = Settings.data.quantColouring == "Custom";
-			Note.curPalette = Note.byQuant ? Settings.data.customQuants : Settings.data.customColumns;
-		} else {
-			Note.byQuant = lumin;
-			Note.curPalette = Note.byQuant && Note.quantPalettes.exists(Settings.data.quantColouring) ? Note.quantPalettes[Settings.data.quantColouring].copy() : getDefaultColumns();
-		}
-		final centerIdx:Float = Note.byQuant ? 5.5 : 2;
-		for (i in 0...Settings.data.customQuants.length) {
-			var note = new Note();
-			note.data.lane = i % 4;
-			note.luminColors = lumin;
-			note.skin = '';
-			note.setPosition(FlxG.width * 1.5 + 160 * 0.55 * (i - centerIdx), noteOptHeight);
-			scaleNote(note, 0.55);
-			note.updateHitbox();
-			note.y += ((160 * 0.55) - note.height) * 0.5;
-			note.color = lumin ? Note.curPalette[Std.int(Math.min(i, Note.curPalette.length - 1))] : 0xFFFFFFFF;
-			note.alpha = (Note.byQuant || i < 4) ? 1 : 0;
-			notes.add(note);
-		}
-	}
-
-	function updateCustomizeNotes(delta:Float) {
-		final centerIdx:Float = Note.byQuant ? 5.5 : 2;
-		for (i => note in notes.members) {
-			note.x = FlxMath.lerp(note.x, FlxG.width * 1.5 + 160 * 0.55 * (i - centerIdx), delta * 15);
-			//scaleNote(note, FlxMath.lerp(note.scale.x / note.styleData.getScale(note) * 0.65, (hoverNote == i) ? 0.65 : 0.55, delta * 15));
-			// if (curRow == 0)
-				note.alpha = FlxMath.lerp(note.alpha, (Note.byQuant || i < 4) ? 1 : 0, delta * (7.5 + 7.5 * ((i - 4) / 7)));
-			// else
-			// 	note.alpha = FlxMath.lerp(note.alpha, (Note.byQuant || i < 4) ? 0.5 : 0, delta * 10);
-		}
-	}
-
-	static function getDefaultColumns():Array<FlxColor> {
-		return switch (Settings.data.noteSkin) {
-			case 'camv2': [0xFFE5307F, 0xFF1BC8F1, 0xFF32D844, 0xFFF32931];
-			case 'circle': [0xFFDB41B8, 0xFF24D4F7, 0xFF31EB40, 0xFFF32931];
-			default: [0xFFC24C99, 0xFF02FFFF, 0xFF13FA06, 0xFFF93A40];
-		}
-	}
-
-	function scaleNote(note:Note, by:Float) {
-		@:privateAccess note.scale.x = note.scale.y = note.styleData.getScale(note) * (by / 0.65);
 	}
 
 	override function destroy() {
