@@ -26,7 +26,7 @@
 			"holdFramerate": 24,
 			"rollFramerate": 24
         },
-		{
+		/*{
 			"type": "grid",
             "name": "pixel",
             "displayName": "Pixel",
@@ -60,6 +60,6 @@
 			"glowFramerate": 12,
 			"holdFramerate": 12
 			//"rollFramerate": 12
-		}
+		}*/
     ]
 }
