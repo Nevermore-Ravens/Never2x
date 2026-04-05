@@ -90,8 +90,6 @@ class Strumline extends FlxTypedSpriteGroup<StrumNote> {
 class StrumNote extends FunkinSprite {
 	public var queueStatic:Bool = false;
 	public var luminColors:Bool = false;
-	public var modchartPos:Vector3 = new Vector3();
-	public var stealth:Float = 0;
 	public var parent:Strumline;
 	public var isHolding:Bool = false;
 
@@ -129,6 +127,34 @@ class StrumNote extends FunkinSprite {
 	}
 
 	#if MODCHARTS_ALLOWED
+	public var modchartPos:Vector3 = new Vector3();
+	public var modchartDist:Float = 0;
+	public var oldScaleX:Float = 1;
+	public var oldScaleY:Float = 1;
+	public var scrollMult:Float = 1;
+	public var stealth:Float = 0;
+	public var stealthColor:Vector3 = new Vector3();
+
+	public function preDrawCrazy(modchart:ModchartManager, strumline:Int, downscroll:Bool, field:Strumline) {
+		modchart.curLane = ID;
+		modchart.curField = strumline;
+
+		oldScaleX = scale.x;
+		oldScaleY = scale.y;
+		final mult: Float = downscroll ? -1 : 1;
+		modchart.stealthColor.set(1.0, 1.0, 1.0);
+		modchart.scrollMult = mult;
+
+		modchartDist = modchart.adjustDistance(this, 0, ID, strumline, field, STRUM);
+		modchartPos.set(x + width * 0.5, y + height * 0.5 + (modchartDist * mult), 0);
+		modchart.adjustPos(this, modchartPos, modchartDist, 0, ID, strumline, field, STRUM);
+		modchart.adjustScale(this, scale, modchartDist, ID, strumline, field, STRUM);
+		stealth = modchart.getStealth(this, modchartDist, 0, modchartPos, ID, strumline, field, STRUM);
+
+		scrollMult = modchart.scrollMult;
+		stealthColor.copyFrom(modchart.stealthColor);
+	}
+
 	public function drawCrazy(modchart:ModchartManager, strumline:Int, downscroll:Bool, field:Strumline) {
 		modchart.curLane = ID;
 		modchart.curField = strumline;
@@ -137,17 +163,8 @@ class StrumNote extends FunkinSprite {
 
 		final oldX = x;
 		final oldY = y;
-		final oldScaleX = scale.x;
-		final oldScaleY = scale.y;
-		final mult: Float = downscroll ? -1 : 1;
-		modchart.stealthColor.set(1.0, 1.0, 1.0);
-		modchart.scrollMult = mult;
-
-		final distance: Float = modchart.adjustDistance(this, 0, ID, strumline, field, STRUM);
-		modchartPos.set(x + width * 0.5, y + height * 0.5 + (distance * mult), 0);
-		modchart.adjustPos(this, modchartPos, distance, 0, ID, strumline, field, STRUM);
-		modchart.adjustScale(this, scale, distance, ID, strumline, field, STRUM);
-		stealth = modchart.getStealth(this, distance, 0, modchartPos, ID, strumline, field, STRUM);
+		modchart.stealthColor.copyFrom(stealthColor);
+		modchart.scrollMult = scrollMult;
 
 		x = modchartPos.x - width * 0.5;
 		y = modchartPos.y - height * 0.5;
@@ -170,8 +187,9 @@ class StrumNote extends FunkinSprite {
 			final cacheX:Float = modchartPos.x;
 			final cacheY:Float = modchartPos.y;
 			final cacheZ:Float = modchartPos.z;
-			modchartPos.set(x + width * 0.5, y + (height * 0.5) + ((distance + 2) * mult), 0);
-			modchart.adjustPos(this, modchartPos, distance + 2, 2, ID, strumline, field, STRUM);
+			final mult: Float = downscroll ? -1 : 1;
+			modchartPos.set(x + width * 0.5, y + (height * 0.5) + ((modchartDist + 2) * mult), 0);
+			modchart.adjustPos(this, modchartPos, modchartDist + 2, 2, ID, strumline, field, STRUM);
 
 			Note.cachePoint.set(modchartPos.x - cacheX, modchartPos.y - cacheY);
 			Note.cachePoint.rotateByDegrees(orientOffset);
@@ -192,7 +210,7 @@ class StrumNote extends FunkinSprite {
 		}
 
 		for (vert in Note.modchartVertices) {
-			modchart.adjustVertex(this, vert, modchartPos, distance, 0, ID, strumline, field, STRUM);
+			modchart.adjustVertex(this, vert, modchartPos, modchartDist, 0, ID, strumline, field, STRUM);
 			vert.project();
 		}
 

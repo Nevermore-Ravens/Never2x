@@ -551,6 +551,15 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 				FlxCamera._defaultCameras = cameras;
 		}
 
+		for (i => strumline in strumlines.members) {
+			if (!strumline.visible) continue;
+
+			for (strum in strumline.members) {
+				if (!strum.visible) continue;
+				strum.preDrawCrazy(modchart, i, downscroll, strumline);
+			}
+		}
+
 		for (sustain in sustains.members) {
 			if (!sustain.exists || !sustain.visible) continue;
 

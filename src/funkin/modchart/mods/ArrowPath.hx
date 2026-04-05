@@ -6,6 +6,7 @@ import funkin.objects.Note;
 
 class ArrowPath extends BaseModifier {
 	static var pathColor:ColorTransform = new ColorTransform();
+	static var modchartPos:Vector3 = new Vector3();
 	static var modchartPosLow:Vector3 = new Vector3();
 	static var curStealthColor:Vector3 = new Vector3();
 	static var nextStealthColor:Vector3 = new Vector3();
@@ -42,7 +43,6 @@ class ArrowPath extends BaseModifier {
 		if (!active[strumline]) return;
 
 		final spiral = arrowPathSpiral == 1;
-		final modchartPos = strum.modchartPos;
 		final distInc = Math.max(20 * (arrowPathGrain + Settings.data.holdGrain), 3);
 		final mult = downscroll ? -1 : 1;
 		final start = -65 * (arrowPathDrawSizeBack + 1) - Strumline.swagWidth * 0.5;
