@@ -340,7 +340,11 @@ class Note extends FunkinSprite {
 
 	@:noDebug public function followStrum(strum:StrumNote, downscroll:Bool, scrollSpeed:Float) {
 		visible = strum.visible && strum.parent.visible;
-		distance = (data.visualPosition - Conductor.visualPosition) * scrollSpeed; //hitTime * 0.45 * scrollSpeed;
+		#if SV_ALLOWED
+		distance = (data.visualPosition - Conductor.visualPosition) * scrollSpeed;
+		#else
+		distance = hitTime * 0.45 * scrollSpeed;
+		#end
 		distance *= downscroll ? -1 : 1;
 
 		if (copyAngle) angle = strum.angle;

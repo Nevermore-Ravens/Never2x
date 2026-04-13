@@ -1,5 +1,6 @@
 package funkin.backend;
 
+import moonchart.formats.Quaver;
 import haxe.io.Path;
 import moonchart.formats.fnf.FNFVSlice;
 import funkin.backend.Meta;
@@ -36,6 +37,16 @@ class Song {
 		file.meta = meta;
 
 		if (!FileSystem.exists(path)) return file;
+
+		#if SV_ALLOWED
+		Conductor.scrollVelocities = [
+			{
+				time: 0, visualPos: 0, multiplier: 1
+			}
+		];
+
+		Conductor.setupSVs();
+		#end
 
 		inline function tryBpmChanges(basic:DynamicFormat, offsetMult:Float) {
 			if (meta == null) return;
@@ -161,7 +172,30 @@ class Song {
 				file.format = ssc;
 				tryBpmChanges(ssc, 1);
 				cast fnf.fromFormat(ssc).data.song;
+			case 'qua':
+				var fnf:CamelliaChart = new CamelliaChart();
+				fnf.bakedOffset = false;
+				fnf.offsetHolds = false;
+				var quav:Quaver = new Quaver().fromFile(path);
+				file.format = quav;
+				#if SV_ALLOWED
+				Conductor.scrollVelocities[0].multiplier = quav.data.InitialScrollVelocity;
+				if(quav.data.SliderVelocities.length > 0){
+					for(sv in quav.data.SliderVelocities){
+						Conductor.scrollVelocities.push(
+							{
+								time: sv.StartTime,
+								multiplier: sv.Multiplier
+							}
+						);
+					}
+				}
 
+				Conductor.setupSVs();
+				#end
+
+				tryBpmChanges(quav, 1);
+				cast fnf.fromFormat(quav).data.song;
 			case 'osu':
 				var fnf:CamelliaChart = new CamelliaChart();
 				fnf.bakedOffset = false;
@@ -196,7 +230,7 @@ class Song {
 		return loadFromPath(Paths.get('songs/$song/${getFile(song, diff)}'), Meta.load(song));
 	}
 
-	static var formats:Array<String> = ['json', 'sm', 'ssc', 'osu'];
+	static var formats:Array<String> = ['json', 'sm', 'ssc', 'qua', 'osu'];
 	public static function getFile(song:String, diff:String) {
 		diff = Difficulty.format(diff);
 		var path:String = '$diff.${formats[0]}';

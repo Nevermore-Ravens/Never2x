@@ -165,32 +165,21 @@ class Conductor extends flixel.FlxBasic {
 		time = 0.0;
         _time = 0.0;
 
+
+		#if SV_ALLOWED
 		scrollVelocities = [
 			{
 				time: 0,
 				visualPos: 0,
 				multiplier: 1
-			},
-			{
-				time: 2000,
-				multiplier: 0
-			},
-			{
-				time: 5000,
-				multiplier: 0.5
-			},
-			{
-				time: 10000,
-				multiplier: 1
 			}
 		];
-
-		for (i in 1...scrollVelocities.length) {
-			scrollVelocities[i].visualPos = scrollVelocities[i - 1].getPosition(scrollVelocities[i].time);
-		}
-
+		
+		setupSVs();
+		
 		svIndex = 0;
 		currentSv = {};
+		#end
 
         floatStep = step = 0;
         floatBeat = beat = 0;
@@ -209,6 +198,21 @@ class Conductor extends flixel.FlxBasic {
 		onBeat.removeAll();
 		onMeasure.removeAll();
 	}
+
+	#if SV_ALLOWED
+	public static function setupSVs(){
+		if (!Settings.data.gameplayModifiers["svs"])
+			scrollVelocities = [{}];
+		
+		if (scrollVelocities.length > 1){
+			scrollVelocities.sort((a, b) -> return Std.int(a.time - b.time));
+
+			for (i in 1...scrollVelocities.length) 
+				scrollVelocities[i].visualPos = scrollVelocities[i - 1].getPosition(scrollVelocities[i].time);
+		}
+		
+	}
+	#end
 
 	override function update(elapsed:Float) {
 		if (!playing) return;
@@ -306,24 +310,25 @@ class Conductor extends flixel.FlxBasic {
 	public static function getPositionFromTime(time: Float){
 		return getSVFromTime(time).getPosition(time);
 	}
-	#end
-
+	
 	static var svIndex: Int = 0;
 	static var currentSv:ScrollVelocity = {};
+	#end
 
     public static dynamic function syncBeats() {
 		#if SV_ALLOWED
-		// this is here to prevent repeated code
+		if (Settings.data.gameplayModifiers["svs"]){
+			for (i in svIndex + 1...scrollVelocities.length) {
+				var nextEvent = scrollVelocities[i];
+				if (nextEvent.offsettedTime > time)
+					break;
 
-		for (i in svIndex + 1...scrollVelocities.length) {
-			var nextEvent = scrollVelocities[i];
-			if (nextEvent.offsettedTime > time)
-				break;
-
-			svIndex = i;
-			currentSv = nextEvent;
-		}
-		visualPosition = currentSv.getPosition(time);
+				svIndex = i;
+				currentSv = nextEvent;
+			}
+			visualPosition = currentSv.getPosition(time);
+		}else
+			visualPosition = time * 0.45;
 		#end
 
 		

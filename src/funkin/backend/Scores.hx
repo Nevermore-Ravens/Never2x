@@ -166,7 +166,7 @@ class Scores {
 		return plays.filter(function(play:PlayData) {
 			if (hasModchart && (!play.modifiers.exists("modcharts") || play.modifiers["modcharts"] != modifiers["modcharts"])) return false;
 
-			for (m in ['playbackRate', 'onlySicks', 'mirroredNotes', 'playingSide']) {
+			for (m in ['playbackRate', 'onlySicks', 'mirroredNotes', 'playingSide', 'svs']) {
 				if (!play.modifiers.exists(m) || play.modifiers[m] != modifiers[m]) return false;
 			}
 
