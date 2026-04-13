@@ -171,6 +171,12 @@ class PlayState extends FunkinState {
 		Conductor.stop();
 		FlxG.timeScale = Settings.data.gameplayModifiers["playbackRate"];
 
+		@:privateAccess {
+			// WHY DO WE NOT CALL CONDUCTOR.RESET??????????
+			Conductor.svIndex = 0;
+			Conductor.currentSv = {};
+		}
+		
 		self = this;
 /*		if (storyMode) {
 			songID = songList[currentLevel];

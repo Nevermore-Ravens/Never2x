@@ -12,12 +12,16 @@ import flixel.graphics.frames.FlxFramesCollection;
 
 @:structInit
 class NoteData {
+	#if SV_ALLOWED
+	public var visualPosition: Float = 0; // MAYBE gets renamed to just "position"? idk
+	#end
+	
 	public var time:Float = 0;
 	public var lane:Int = 0;
 	public var speed:Single = 1;
 	public var player:Int = 0;
 	public var type:String;
-	public var length:Single = 0;
+	public var length:Float = 0;
 
 	public var quant:Int = -1;
 	public var beat:Float = 0;
@@ -336,7 +340,7 @@ class Note extends FunkinSprite {
 
 	@:noDebug public function followStrum(strum:StrumNote, downscroll:Bool, scrollSpeed:Float) {
 		visible = strum.visible && strum.parent.visible;
-		distance = hitTime * 0.45 * scrollSpeed;
+		distance = (data.visualPosition - Conductor.visualPosition) * scrollSpeed; //hitTime * 0.45 * scrollSpeed;
 		distance *= downscroll ? -1 : 1;
 
 		if (copyAngle) angle = strum.angle;

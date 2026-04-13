@@ -28,6 +28,7 @@ class Sustain extends Note {
 	public var coyoteHitMult:Float = 1.0;
 	public var coyoteTimer:Float = 0.175;
 	public var timeOffset:Float = 0;
+	public var visualEnd:Float = 0;
 	public var untilTick:Float = 0;
 
 	var modchartPosLow:Vector3 = new Vector3();
@@ -98,12 +99,13 @@ class Sustain extends Note {
 		coyoteTimer = 0.175 * coyoteHitMult * FlxG.timeScale;
 		timeOffset = 0;
 		untilTick = 0;
+		visualEnd = Conductor.getPositionFromTime(data.time + data.length);
 		return this;
 	}
 
 	@:noDebug override public function followStrum(strum:StrumNote, downscroll:Bool, scrollSpeed:Float) {
 		visible = strum.visible && strum.parent.visible;
-		distance = (hitTime + timeOffset) * 0.45 * scrollSpeed;
+		distance = ((data.visualPosition - Conductor.visualPosition) + timeOffset) * scrollSpeed;//(hitTime + timeOffset) * 0.45 * scrollSpeed;
 		distance *= downscroll ? -1 : 1;
 
  		if (copyAlpha) alpha = strum.alpha * multAlpha;
@@ -119,7 +121,7 @@ class Sustain extends Note {
 			forceHeightRecalc = false;
 			lastScaleY = scale.y;
 			lastSustainScale = holdScale;
-			height = (data.length - timeOffset) * 0.45 * holdScale;
+			height = ((visualEnd - data.visualPosition) - timeOffset) * holdScale;
 		}
 	}
 

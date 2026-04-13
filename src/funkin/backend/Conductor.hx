@@ -19,7 +19,47 @@ class TimingPoint {
 	}
 }
 
+#if SV_ALLOWED
+@:structInit class ScrollVelocity {
+	public var offsettedTime(get, never):Float;
+
+	function get_offsettedTime():Float
+		return time + Conductor.offset;
+
+	public var time:Float = 0;
+	public var visualPos:Float = 0;
+	public var multiplier:Float = 1;
+
+	public function toString(): String {
+		return 'Time: $time | Visual Position: $visualPos | Multiplier: $multiplier';
+	}
+
+	public function getPosition(noteTime: Float){
+		return visualPos + ((noteTime - time) * 0.45 * multiplier);
+	}
+}
+#end
+
 class Conductor extends flixel.FlxBasic {
+	#if SV_ALLOWED
+	public static var scrollVelocities(default, set):Array<ScrollVelocity> = [];
+
+	static function set_scrollVelocities(value:Array<ScrollVelocity>):Array<ScrollVelocity> {
+		if (value == null || value.length == 0) {
+			scrollVelocities.resize(1);
+			scrollVelocities[0] = {};
+			return scrollVelocities;
+		}
+
+		scrollVelocities.resize(0);
+		scrollVelocities = value.copy();
+
+		scrollVelocities.sort((a, b) -> return Std.int(a.time - b.time));
+
+		return value;
+	}
+	#end
+
 	public static var quants:Array<Int> = [
 		4,
 		8,
@@ -51,7 +91,9 @@ class Conductor extends flixel.FlxBasic {
 
 	public static var time:Float = 0.0;
     public static var rawTime:Float = 0.0;
-
+	#if SV_ALLOWED
+	public static var visualPosition:Float = 0.0;
+	#end
 	static var _lastTime:Float = 0.0;
 
     public static var timingPoints(default, set):Array<TimingPoint> = [];
@@ -122,6 +164,33 @@ class Conductor extends flixel.FlxBasic {
 		rawTime = 0.0;
 		time = 0.0;
         _time = 0.0;
+
+		scrollVelocities = [
+			{
+				time: 0,
+				visualPos: 0,
+				multiplier: 1
+			},
+			{
+				time: 2000,
+				multiplier: 0
+			},
+			{
+				time: 5000,
+				multiplier: 0.5
+			},
+			{
+				time: 10000,
+				multiplier: 1
+			}
+		];
+
+		for (i in 1...scrollVelocities.length) {
+			scrollVelocities[i].visualPos = scrollVelocities[i - 1].getPosition(scrollVelocities[i].time);
+		}
+
+		svIndex = 0;
+		currentSv = {};
 
         floatStep = step = 0;
         floatBeat = beat = 0;
@@ -215,7 +284,49 @@ class Conductor extends flixel.FlxBasic {
 		inst.play();
 	}
 
+	#if SV_ALLOWED
+	// stealing from getPointFromTime
+	public static function getSVFromTime(timeAt:Float, ?useOffset:Bool = true):ScrollVelocity {
+		var lastPoint:ScrollVelocity = {};
+		if (scrollVelocities.length == 0)
+			return lastPoint;
+		lastPoint = scrollVelocities[0];
+
+		for (i => point in scrollVelocities) {
+			if (timeAt >= (useOffset ? point.offsettedTime : point.time))
+				lastPoint = point;
+			else
+				break;
+		}
+
+		return lastPoint;
+	}
+
+
+	public static function getPositionFromTime(time: Float){
+		return getSVFromTime(time).getPosition(time);
+	}
+	#end
+
+	static var svIndex: Int = 0;
+	static var currentSv:ScrollVelocity = {};
+
     public static dynamic function syncBeats() {
+		#if SV_ALLOWED
+		// this is here to prevent repeated code
+
+		for (i in svIndex + 1...scrollVelocities.length) {
+			var nextEvent = scrollVelocities[i];
+			if (nextEvent.offsettedTime > time)
+				break;
+
+			svIndex = i;
+			currentSv = nextEvent;
+		}
+		visualPosition = currentSv.getPosition(time);
+		#end
+
+		
         var point:TimingPoint = getPointFromTime(rawTime);
 		var visPoint:TimingPoint = getPointFromTime(time);
 		

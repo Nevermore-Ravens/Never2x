@@ -168,7 +168,11 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			return;
 		}
 
+		#if SV_ALLOWED
+		note.timeOffset = -Math.min(note.data.visualPosition - Conductor.visualPosition, 0);
+		#else
 		note.timeOffset = -Math.min(note.hitTime, 0);
+		#end
 		note.forceHeightRecalc = true;
 		strum.isHolding = true;
 
@@ -491,6 +495,9 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			note.player = Std.int(Math.min(note.player, strumlines.length - 1));
 
 			note.beat = Conductor.getBeatFromTime(note.time) + ((note.time - point.time) / Conductor.calculateCrotchet(point.bpm));
+			#if SV_ALLOWED
+			note.visualPosition = Conductor.getPositionFromTime(note.time);
+			#end
 			unspawnedNotes.push(note);
 		}
 

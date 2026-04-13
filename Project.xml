@@ -19,6 +19,7 @@
 	<define name="AWARDS_ALLOWED"/>
 	<define name="WATERMARKS_ALLOWED"/>
 	<define name="MODCHARTS_ALLOWED"/>
+	<define name="SV_ALLOWED"/>
 
 	<!-- makes errors show exactly what the issue is instead of being vague -->
 	<haxedef name="message.reporting" value="pretty" />
