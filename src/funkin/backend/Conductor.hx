@@ -312,7 +312,7 @@ class Conductor extends flixel.FlxBasic {
 	}
 	
 	static var svIndex: Int = 0;
-	static var currentSv:ScrollVelocity = {};
+	public static var currentSv:ScrollVelocity = {};
 	#end
 
     public static dynamic function syncBeats() {

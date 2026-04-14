@@ -1036,8 +1036,11 @@ class PlayState extends FunkinState {
 			Sys.println('Vocals failed to load: ${e.details()}');
 		}
 
+		
+		
 		ScriptHandler.loadFromDir('songs/$songID');
 		ScriptHandler.call('loadSong', [song]);
+		Conductor.setupSVs();
 
 		playfield.load(song.notes);
 		playfield.scrollSpeed /= FlxG.timeScale;
