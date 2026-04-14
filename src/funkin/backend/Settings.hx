@@ -90,8 +90,7 @@ class SaveVariables {
 
 	var gameplayModifiers:Map<String, Dynamic> = [
 		'playbackRate' => 1.0,
-		'instakill' => false,
-		'onlySicks' => false,
+		'minClearType' => "Clear",
 		'noFail' => false,
 		'botplay' => false,
 		'mirroredNotes' => false,
@@ -125,7 +124,7 @@ class Settings {
 
 		final fields:Array<String> = Type.getInstanceFields(SaveVariables);
 		for (i in Reflect.fields(FlxG.save.data)) {
-			if (!fields.contains(i)) continue;
+			if (!fields.contains(i) || i == "gameplayModifiers") continue;
 
 			if (Reflect.hasField(data, 'set_$i')) Reflect.setProperty(data, i, Reflect.field(FlxG.save.data, i));
 			else Reflect.setField(data, i, Reflect.field(FlxG.save.data, i));
