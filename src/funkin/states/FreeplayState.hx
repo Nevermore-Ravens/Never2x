@@ -67,6 +67,10 @@ class FreeplayState extends FunkinState {
 	var bottomBG:FlxSprite;
 	var bottomText:FlxText;
 
+	var draggedOnce:Bool = false;
+	var dragging:Bool = false;
+	var dragY:Float = -1;
+
 	override function create() {
 		super.create();
 		persistentUpdate = true;
@@ -180,27 +184,15 @@ class FreeplayState extends FunkinState {
 			songControls(elapsed);
 			difficultyControls();
 
-			if (Controls.justPressed('accept')) {
-				actionPressed = true;
-				if (songList[curSelected].id == 'random') {
-					var oldSelected:Int = curSelected;
-					curSelected = FlxG.random.int(1, songList.length - 1);
-					changeSelection();
-					curDiffName = curDiffs[FlxG.random.int(0, curDiffs.length - 1)];
-					enterSong();
+			if (Controls.justPressed('accept'))
+				enterSong();
 	
-					// so that the user doesn't have to scroll all the way back up
-					// just to hit "random" again
-					curSelected = oldSelected;
-				} else enterSong();
-			}
-	
-			if (Controls.justPressed('back')) {
+			if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
 				FunkinState.switchState(new MainMenuState());
 				actionPressed = true;
 			}
 
-			if (FlxG.keys.justPressed.CONTROL || (FlxG.mouse.justPressed && FlxG.mouse.x >= modsMenu.x && FlxG.mouse.y >= modsMenu.y && FlxG.mouse.y <= modsMenu.y + modsMenu.height)) {
+			if (FlxG.keys.justPressed.CONTROL || (FlxG.mouse.justPressed && FlxG.mouse.x >= modsText.x + (modsText.width - modsText.height) * 0.5 && FlxG.mouse.y >= modsMenu.y && FlxG.mouse.y <= modsMenu.y + modsMenu.height)) {
 				FlxG.sound.play(Paths.audio("scroll", "sfx"));
 				modsMenu.allowMouse = true;
 				modsMenu.allowKeys = true;
@@ -216,6 +208,14 @@ class FreeplayState extends FunkinState {
 	}
 
 	function enterSong() {
+		actionPressed = true;
+		final oldSelected:Int = curSelected;
+		if (songList[curSelected].id == 'random') {
+			curSelected = FlxG.random.int(1, songList.length - 1);
+			changeSelection();
+			curDiffName = curDiffs[FlxG.random.int(0, curDiffs.length - 1)];
+		}
+
 		final songID:String = songList[curSelected].id;
 		final diff:String = Difficulty.format(curDiffName);
 		final path:String = 'songs/$songID/${Song.getFile(songID, diff)}';
@@ -225,10 +225,14 @@ class FreeplayState extends FunkinState {
 			Difficulty.list = curDiffs;
 			Difficulty.current = curDiffName;
 			FunkinState.switchState(new PlayState());
+			// so that the user doesn't have to scroll all the way back up
+			// just to hit "random" again
+			curSelected = oldSelected;
 		} else {
 			persistentUpdate = false;
 			trace('Song/Difficulty doesn\'t exist: "$path"');
 			actionPressed = false;
+			curSelected = oldSelected;
 			return;
 		}
 	}
@@ -264,14 +268,45 @@ class FreeplayState extends FunkinState {
 				changeSelection((checkNewHold - checkLastHold) * (downPressed ? shiftMult : -shiftMult));
 		}
 
+		if (FlxG.mouse.justReleased && !draggedOnce) {for (i => song in grpSongs.members) {
+			final icon = grpIcons.members[i];
+			if (FlxG.mouse.x < song.x || FlxG.mouse.x > icon.x + icon.width || FlxG.mouse.y < icon.y || FlxG.mouse.y > icon.y + icon.height)
+				continue;
+
+			if (i == curSelected)
+				enterSong();
+			else
+				changeSelection(i - curSelected);
+		}}
+		if (FlxG.mouse.justPressed) {
+			dragging = true;
+			dragY = FlxG.mouse.screenY;
+		} else if (dragging) {
+			final dist = Math.round((FlxG.mouse.screenY - dragY) / 75);
+
+			if (dist != 0) {
+				draggedOnce = true;
+				dragY += 75 * dist;
+				changeSelection(-dist);
+			}
+
+			if (FlxG.mouse.justReleased) {
+				dragging = false;
+				draggedOnce = false;
+				dragY = -1;
+			}
+		}
+
 		if (FlxG.mouse.wheel != 0) changeSelection(-shiftMult * FlxG.mouse.wheel, 0.2);
 	}
 
 	function difficultyControls() {
 		if (curDiffs.length == 1) return;
 
-		final leftPressed:Bool = Controls.justPressed('ui_left');
-		if (leftPressed || Controls.justPressed('ui_right')) changeDifficulty(leftPressed ? -1 : 1);
+		final clickDiff = FlxG.mouse.justPressed && FlxG.mouse.x >= scoreBG.x - scoreBG.scale.x * 0.5 && FlxG.mouse.x <= scoreBG.x + scoreBG.scale.x * 0.5 && FlxG.mouse.y >= difficultyText.y && FlxG.mouse.y <= scoreBG.y + scoreBG.height;
+
+		final leftPressed:Bool = Controls.justPressed('ui_left') || (clickDiff && FlxG.mouse.x <= scoreBG.x);
+		if (clickDiff || leftPressed || Controls.justPressed('ui_right')) changeDifficulty(leftPressed ? -1 : 1);
 	}
 
 	function positionStats() {
