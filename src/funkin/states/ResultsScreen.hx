@@ -40,12 +40,8 @@ class ResultsScreen extends FunkinState {
 			make: () -> Settings.data.gameplayModifiers["playbackRate"] + "x SPEED"
 		},
 		{
-			condition: () -> Settings.data.gameplayModifiers["instakill"] && !Settings.data.gameplayModifiers["onlySicks"],
-			make: () -> "FC Only"
-		},
-		{
-			condition: () -> Settings.data.gameplayModifiers["onlySicks"],
-			make: () -> "Sicks Only"
+			condition: () -> Settings.data.gameplayModifiers["minClearType"] != "Clear",
+			make: () -> "Minimum Clear Type: " + Settings.data.gameplayModifiers["minClearType"]
 		},
 		{
 			condition: () -> Settings.data.gameplayModifiers["noFail"],

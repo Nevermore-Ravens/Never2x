@@ -11,8 +11,11 @@ class Modifier extends Option {
 		new Modifier("Playback Rate", "How fast the game will go.", "playbackRate", FloatOption(0.35, 5.0, 0.05)),
 		new Modifier('Playing Side', 'Which side you\'re playing on for the song.', 'playingSide', ListOption(['Default', 'Opponent'])),
 		new Modifier("No Fail", "If you'll live even when out of health.", "noFail", BoolOption),
-		new Modifier("FC Only", "If you'll fail the moment you combo break.", "instakill", BoolOption),
-		new Modifier("Sicks Only", "If you'll fail the moment you don't hit a sick.", "onlySicks", BoolOption),
+		new Modifier("Min. Clear Type", "The lowest clear type you can have without failing.", "minClearType", ListOption({
+			var copy = Ranking.clearTypeList.copy();
+			copy.remove("N/A");
+			copy;
+		})),
 		new Modifier("Mirrored Notes", "If the chart will flip its notes around.", "mirroredNotes", BoolOption),
 		new Modifier("Randomized Notes", "If the game will swap the lanes around.", "randomizedNotes", BoolOption),
 		#if MODCHARTS_ALLOWED new Modifier("Modcharts", "If the game will do some wacky stuff with the notes to make it\nlook cooler.", "modcharts", BoolOption), #end

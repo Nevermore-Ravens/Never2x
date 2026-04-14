@@ -120,6 +120,7 @@ class PlayState extends FunkinState {
 	var judgeSprite:JudgementSpr;
 	var comboNumbers:ComboNums;
 
+	var minClearType:Int = -1;
 	var clearType:FlxText;
 	var judgeNames:FlxText;
 	var judgeCounters:FlxText;
@@ -169,6 +170,7 @@ class PlayState extends FunkinState {
 	override function create():Void {
 		super.create();
 		Conductor.stop();
+		minClearType = Ranking.clearTypeList.indexOf(Settings.data.gameplayModifiers["minClearType"]);
 		FlxG.timeScale = Settings.data.gameplayModifiers["playbackRate"];
 
 
@@ -707,13 +709,8 @@ class PlayState extends FunkinState {
 
 			combo = 0;
 			comboBreaks++;
-			if (Settings.data.gameplayModifiers["instakill"])
-				death();
 		}
-
-		if (!judge.splashes && Settings.data.gameplayModifiers["onlySicks"])
-			death();
-
+		
 		updateInfo();
 		judgeSprite.display(note.hitTime);
 		switch (Settings.data.comboTinting){
@@ -923,9 +920,6 @@ class PlayState extends FunkinState {
 		if (Settings.data.hitErrorBar)
 			hitErrorBar.registerMiss();
 
-		if (Settings.data.gameplayModifiers["instakill"] || Settings.data.gameplayModifiers["onlySicks"])
-			death();
-
 		updateInfo();
 
 		var curCharacter:Character = strumline.character();
@@ -972,6 +966,11 @@ class PlayState extends FunkinState {
 
 		clearType.text = updateClearType();
 		clearType.color = rank.color;
+		if (clearType.text != "N/A" && minClearType > 1) { // 1 should theoretically be Clear
+			var clearIdx = Ranking.clearTypeList.indexOf(clearType.text);
+			if (clearIdx > 0 && clearIdx < minClearType)
+				death();
+		}
 
 		infoText.text = 'Score: ${Util.moneyString(score)} | Combo Breaks: $comboBreaks';
 		if (!Settings.data.hideAcc)
