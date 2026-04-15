@@ -1,5 +1,7 @@
 package funkin.backend;
 
+import moonchart.parsers.QuaverParser.QuaverHitObject;
+import funkin.backend.Conductor.ScrollVelocity;
 import moonchart.formats.Quaver;
 import haxe.io.Path;
 import moonchart.formats.fnf.FNFVSlice;
@@ -22,6 +24,10 @@ typedef Chart = {
 	var speed:Float;
 	var ?format:DynamicFormat;
 	var ?meta:MetaFile;
+}
+
+interface ChartWithSVs {
+	public function getScrollVelocities(): Array<ScrollVelocity>;
 }
 
 class Song {
@@ -62,6 +68,15 @@ class Song {
 					beatsPerMeasure: Std.int(bpm.beatsPerMeasure)
 				});
 			}
+		}
+
+		inline function trySVs(chart: ChartWithSVs){
+			#if SV_ALLOWED
+			Conductor.scrollVelocities = chart.getScrollVelocities();
+			if (Conductor.scrollVelocities.length == 0)
+				Conductor.scrollVelocities = [{}];
+			Conductor.setupSVs();
+			#end
 		}
 
 		var rawChart:JsonChart = switch haxe.io.Path.extension(path) {
@@ -176,25 +191,10 @@ class Song {
 				var fnf:CamelliaChart = new CamelliaChart();
 				fnf.bakedOffset = false;
 				fnf.offsetHolds = false;
-				var quav:Quaver = new Quaver().fromFile(path);
+				var quav:CamQuaver = cast new CamQuaver().fromFile(path);
 				file.format = quav;
-				#if SV_ALLOWED
-				Conductor.scrollVelocities[0].multiplier = quav.data.InitialScrollVelocity;
-				if(quav.data.SliderVelocities.length > 0){
-					for(sv in quav.data.SliderVelocities){
-						Conductor.scrollVelocities.push(
-							{
-								time: sv.StartTime,
-								multiplier: sv.Multiplier
-							}
-						);
-					}
-				}
-
-				Conductor.setupSVs();
-				#end
-
 				tryBpmChanges(quav, 1);
+				trySVs(quav);
 				cast fnf.fromFormat(quav).data.song;
 			case 'osu':
 				var fnf:CamelliaChart = new CamelliaChart();
@@ -250,6 +250,185 @@ class Song {
 		return Paths.exists('songs/$song/${getFile(song, difficulty)}');
 	}
 }
+
+// Code from https://github.com/Quaver/Quaver.API/blob/master/Quaver.API/Maps/Qua.cs
+// Not sure if this works as intended but oh well!
+class CamQuaver extends Quaver implements ChartWithSVs {
+	inline function getCommonBPM(){
+		if(data.TimingPoints.length == 0)
+			return 0.0;
+		
+		if(data.HitObjects.length == 0)
+			return 0.0;
+
+		var lastObject: QuaverHitObject = data.HitObjects[data.HitObjects.length - 1];
+		var lastTime: Float =  lastObject.EndTime > 0 ? lastObject.EndTime : lastObject.StartTime;
+		var durations: Map<String, Int> = []; // can't do float for some reason lol!!
+
+		for(i in data.TimingPoints.length - 1 ... 0){
+			var point = data.TimingPoints[i];
+			
+			if(point.StartTime > lastTime)
+				continue;
+
+			var duration: Int = cast lastTime - (i == 0 ? 0 : point.StartTime);
+			lastTime = point.StartTime;
+
+			var bpmString:String = Std.string(point.Bpm);
+
+			if (!durations.exists(bpmString))
+				durations.set(bpmString, duration);
+			else
+				durations.set(bpmString, durations.get(bpmString) + duration);
+		}
+
+		var durationsArray: Array<Array<Float>> = [];
+		for(i => v in durations)
+			durationsArray.push([Std.parseFloat(i), v]);
+
+		durationsArray.sort((a, b) -> Std.int(b[1] - a[1]));
+
+		return durationsArray.length == 0 ? data.TimingPoints[0].Bpm : durationsArray[0][0];
+	}
+
+	public function getScrollVelocities(): Array<ScrollVelocity>{
+		#if !SV_ALLOWED
+		return [{}];
+		#else
+		var vels: Array<ScrollVelocity> = [];
+		trace(Type.typeof(data.BPMDoesNotAffectScrollVelocity));
+		if (data.BPMDoesNotAffectScrollVelocity == true){
+			vels.push({
+				time: 0,
+				multiplier: data.InitialScrollVelocity
+			});
+			if (data.SliderVelocities.length > 0) {
+				for (sv in data.SliderVelocities) {
+					vels.push({
+						time: sv.StartTime,
+						multiplier: sv.Multiplier
+					});
+				}
+			}
+		}else{
+			var baseBpm: Float = getCommonBPM();
+			
+			var currentBpm: Float = data.TimingPoints[0].Bpm;
+			var currentSv:Int = 0;
+			var currentSvStartTime:Float = Math.NaN;
+			var currentSvMult:Float = 1;
+			var currentAdjustedSV:Float = Math.NaN;
+			var initialSVMult:Float = Math.NaN;
+
+			for(i in 0...data.TimingPoints.length){
+				var timingPoint = data.TimingPoints[i];
+
+				var nextHasSameStamp = i + 1 < data.TimingPoints.length && data.TimingPoints[i + 1].StartTime == timingPoint.StartTime;
+
+				while(true){
+					if (currentSv >= data.SliderVelocities.length)
+						break;
+
+					var sv = data.SliderVelocities[currentSv];
+
+					if (sv.StartTime > timingPoint.StartTime)
+						break;
+
+					if (nextHasSameStamp && sv.StartTime == timingPoint.StartTime)
+						break;
+
+					if (sv.StartTime < timingPoint.StartTime) {
+						// The way that osu! handles infinite BPM is more akin to "arbitrarily large SV".
+						// We chose the smallest power of two greater than `MAX_MULTIPLIER`
+						// from `SVFactor` to make `DenormalizeSVs` more accurate.
+						var multiplier = !Math.isFinite(currentBpm) ? 128 : sv.Multiplier * (currentBpm / baseBpm);
+
+						if (Math.isNaN(currentAdjustedSV)) {
+							currentAdjustedSV = multiplier;
+							initialSVMult = multiplier;
+						}
+
+						// ReSharper disable once CompareOfFloatsByEqualityOperator
+						if (multiplier != currentAdjustedSV) {
+							vels.push({
+								time: sv.StartTime,
+								multiplier: multiplier
+							});
+							//normalizedScrollVelocities.Add(new SliderVelocityInfo {StartTime = sv.StartTime, Multiplier = multiplier});
+
+							currentAdjustedSV = multiplier;
+						}
+					}
+
+					currentSvStartTime = sv.StartTime;
+					currentSvMult = sv.Multiplier;
+					currentSv += 1;
+				}
+
+				if (Math.isNaN(currentSvStartTime) || currentSvStartTime < timingPoint.StartTime)
+					currentSvMult = 1;
+
+				currentBpm = timingPoint.Bpm;
+
+				var multToo = !Math.isFinite(currentBpm) ? 128 : currentSvMult * (currentBpm / baseBpm);
+
+				if (Math.isNaN(currentAdjustedSV)) {
+					currentAdjustedSV = multToo;
+					initialSVMult = multToo;
+				}
+
+				if (multToo == currentAdjustedSV)
+					continue;
+
+				vels.push({
+					time: timingPoint.StartTime,
+					multiplier: multToo
+				});
+
+				currentAdjustedSV = multToo;
+			}
+
+			for(i in 0...data.SliderVelocities.length){
+				currentSv = i;
+				var sv = data.SliderVelocities[currentSv];
+				var multiplier = !Math.isFinite(currentBpm) ? 128 : sv.Multiplier * (currentBpm / baseBpm);
+
+//				Debug.Assert(currentAdjustedSV != null, nameof(currentAdjustedSV) + " != null");
+
+				// ReSharper disable once CompareOfFloatsByEqualityOperator
+				if (multiplier == currentAdjustedSV)
+					continue;
+
+				vels.push({
+					time: sv.StartTime,
+					multiplier: multiplier
+				});
+
+				//normalizedScrollVelocities.Add(new SliderVelocityInfo {StartTime = sv.StartTime, Multiplier = multiplier});
+
+				currentAdjustedSV = multiplier;
+			}
+
+			if (!Math.isNaN(initialSVMult)){
+				vels.push({
+					time: 0,
+					multiplier: initialSVMult
+				});
+
+			}
+
+		}
+
+		vels.sort((a, b) -> Std.int(a.time - b.time));
+		trace(vels[0]);
+
+		return vels;
+		#end
+	}
+	
+}
+
+
 
 class CamOsuChart extends OsuMania {
 	public static function encodeType(hitsound:ByteInt) {

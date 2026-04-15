@@ -56,7 +56,7 @@ class Conductor extends flixel.FlxBasic {
 
 		scrollVelocities.sort((a, b) -> return Std.int(a.time - b.time));
 
-		return value;
+		return scrollVelocities;
 	}
 	#end
 
