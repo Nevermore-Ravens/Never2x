@@ -471,6 +471,12 @@ class PlayState extends FunkinState {
 		camFollow.y += character.cameraOffset.y;
 	}
 
+	inline function parseFloat(s:String, ?def:Float = 1){
+		var fuck: Float = Std.parseFloat(s);
+		return Math.isNaN(fuck) ? def : fuck;
+	}
+
+
 	var eventList:Array<String> = [];
 	function eventPushed(event:Event):Void {
 		eventPushedUnique(event);
@@ -486,6 +492,16 @@ class PlayState extends FunkinState {
 		switch event.name {
 			case 'Change Character':
 				cacheCharacter(event.args[1]);
+			case 'Mult SV': // troll engine, if that even parses
+				Conductor.scrollVelocities.push({
+					time: event.time,
+					multiplier: parseFloat(event.args[0])
+				});
+			case 'Constant SV':
+				Conductor.scrollVelocities.push({
+					time: event.time,
+					multiplier: parseFloat(event.args[0]) / Settings.data.scrollSpeed
+				});
 		}
 	}
 
