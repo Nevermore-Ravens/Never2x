@@ -97,14 +97,16 @@ class ModchartManager {
 	function getRedirect(name:String, ?silent:Bool = false) {
 		if (!redirects.exists(name)) {
 			var grabName = name;
-			if (digitRegex.match(grabName)) {
-				var matchedOne = false;
-				function digitMap(e) {
-					final result = matchedOne ? "" : "LANE";
-					matchedOne = true;
-					return result;
+			if (!defaultRedirects.exists(grabName)) {
+				if (digitRegex.match(grabName)) {
+					var matchedOne = false;
+					function digitMap(e) {
+						final result = matchedOne ? "" : "LANE";
+						matchedOne = true;
+						return result;
+					}
+					grabName = digitRegex.map(grabName, digitMap);
 				}
-				grabName = digitRegex.map(grabName, digitMap);
 			}
 			if (!defaultRedirects.exists(grabName)) {
 				if (!silent)

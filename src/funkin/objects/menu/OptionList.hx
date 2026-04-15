@@ -330,10 +330,10 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 		super();
 		obj = this;
 		frames = Paths.sparrowAtlas("menus/options/optionsbuttongay");
-		animation.addByPrefix("true", "ON", 12, false);
-		animation.addByPrefix("totrue", "TURN", 12, false);
-		animation.addByPrefix("false", "OFF", 12, false);
-		animation.addByPrefix("tofalse", "RTURN", 12, false);
+		animation.addByPrefix("true", "on", 24, false);
+		animation.addByPrefix("totrue", "transition0", 24, false);
+		animation.addByPrefix("false", "off", 24, false);
+		animation.addByPrefix("tofalse", "transitionoff", 24, false);
 		playAnim(Std.string(opt.value == true));
 		
 		animation.finishCallback = function(name) {
@@ -343,8 +343,8 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 		clipRect = FlxRect.get(0, 0, frameWidth, frameHeight);
 	}
 
-	public function drawRegularCompon() {draw();}
-	public function drawInvertableCompon() {}
+	public function drawRegularCompon() {}
+	public function drawInvertableCompon() {draw();}
 }
 
 class Textbox extends FlxText implements OptionComponent<Textbox> {
