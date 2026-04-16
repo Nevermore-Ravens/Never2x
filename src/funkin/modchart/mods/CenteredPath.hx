@@ -27,12 +27,13 @@ class CenteredPath extends BaseModifier {
 		#end
 		final mainOff = FlxMath.lerp(Strumline.swagWidth, Conductor.crotchet * svMult * 0.45 * noteSpeed, centeredPathType) * (centeredPath + centeredPathLANE);
 		var distanceOffset:Float = mainOff + (transformPath + transformPathLANE);
+		#if SV_ALLOWED
 		if(type == SUSTAIN){
 			var sus: Sustain = cast spr;
 			if(sus.visualEnd < sus.data.visualPosition)
 				distanceOffset *= -1;
-			
 		}
+		#end
 		return distance + distanceOffset;
 	}
 }
