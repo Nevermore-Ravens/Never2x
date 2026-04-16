@@ -382,7 +382,8 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			obj.update(delta);
 
 			final strum:StrumNote = getStrumline(obj.player).members[obj.lane];
-			final noteSpeed:Float = strum.parent.overrideScrollSpeed <= 0 ? scrollSpeed : strum.parent.overrideScrollSpeed;
+			final noteSpeed:Float = (strum.parent.overrideScrollSpeed <= 0 ? scrollSpeed : strum.parent.overrideScrollSpeed) * Strumline.size;
+
 			final longHolds:Float = 
 			#if MODCHARTS_ALLOWED 
 			modchart == null ? 1 : (modchart.get("longholds", obj.player) + 1);
@@ -404,7 +405,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			obj.update(delta);
 
 			final strum:StrumNote = getStrumline(obj.player).members[obj.lane];
-			final noteSpeed:Float = strum.parent.overrideScrollSpeed <= 0 ? scrollSpeed : strum.parent.overrideScrollSpeed;
+			final noteSpeed:Float = (strum.parent.overrideScrollSpeed <= 0 ? scrollSpeed : strum.parent.overrideScrollSpeed) * Strumline.size;
 
 			obj.followStrum(strum, downscroll, noteSpeed);
 

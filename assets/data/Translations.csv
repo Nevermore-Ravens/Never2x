@@ -122,7 +122,7 @@ flashing_lights,Flashing Lights,Modo de Fotossensibilidade,明滅光
 flashing_lights_desc,If the game is allowed to risk seizures for fast colored effects.,Liga/Desliga alguns efeitos que podem conter riscos de epilepsia.,If the game is allowed to risk seizures for fast colored effects.
 game_alpha,Game Visibility,Visibilidade do Jogo,ゲーム視認性
 game_alpha_desc,How much you can see the visuals behind the HUD. (If this is set to 0%{C} visuals will be disabled entirely. That could help with performance!),Altera a opacidade dos visuais por trás da HUD. (Se essa opção estiver em 0%{C} os visuais serão desativados inteiramente. Isso pode ajudar com performance!),How much you can see the visuals behind the HUD. (If this is set to 0%{C} visuals will be disabled entirely. That could help with performance!)
-strum_size,Strumline Size,Strumline Size,Strumline Size
+strum_size,Strumline Zoom,Strumline Zoom,Strumline Zoom
 strum_size_desc,How much scaling gets applied to your playfield.,How much scaling gets applied to your playfield.,How much scaling gets applied to your playfield.
 center_notes,Centered Notes,Coluna Centralizada,画面中心音符
 center_notes_desc,If your field should be in the middle of the game instead of the side.,Permite que suas notas sejam centralizadas no meio da tela,プレイフィールドが側面ではなく中央を占めるべきの場合
