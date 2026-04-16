@@ -317,18 +317,19 @@ class Conductor extends flixel.FlxBasic {
 
     public static dynamic function syncBeats() {
 		#if SV_ALLOWED
+		var noteOffsettedTime = time + Settings.data.noteOffset;
 		if (Settings.data.gameplayModifiers["svs"]){
 			for (i in svIndex + 1...scrollVelocities.length) {
 				var nextEvent = scrollVelocities[i];
-				if (nextEvent.offsettedTime > time)
+				if (nextEvent.offsettedTime > noteOffsettedTime)
 					break;
 
 				svIndex = i;
 				currentSv = nextEvent;
 			}
-			visualPosition = currentSv.getPosition(time);
+			visualPosition = currentSv.getPosition(noteOffsettedTime);
 		}else
-			visualPosition = time * 0.45;
+			visualPosition = noteOffsettedTime * 0.45;
 		#end
 
 		
