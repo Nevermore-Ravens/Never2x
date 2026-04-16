@@ -62,6 +62,7 @@ class Song {
 			final basicMeta = basic.getChartMeta();
 			meta.offset = basicMeta.offset * offsetMult;
 			for (bpm in basicMeta.bpmChanges) {
+				trace(bpm.time, bpm.bpm);
 				meta.timingPoints.push({
 					time: bpm.time,
 					bpm: bpm.bpm,
@@ -78,6 +79,8 @@ class Song {
 			Conductor.setupSVs();
 			#end
 		}
+
+		Conductor.timingPointsResetQuants = false;
 
 		var rawChart:JsonChart = switch haxe.io.Path.extension(path) {
 			case 'json':
@@ -193,8 +196,9 @@ class Song {
 				fnf.offsetHolds = false;
 				var quav:CamQuaver = cast new CamQuaver().fromFile(path);
 				file.format = quav;
-				tryBpmChanges(quav, 1);
+				tryBpmChanges(quav, 0);
 				trySVs(quav);
+				Conductor.timingPointsResetQuants = true;
 				cast fnf.fromFormat(quav).data.song;
 			case 'osu':
 				var fnf:CamelliaChart = new CamelliaChart();

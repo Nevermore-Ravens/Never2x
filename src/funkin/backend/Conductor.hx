@@ -44,6 +44,8 @@ class Conductor extends flixel.FlxBasic {
 	#if SV_ALLOWED
 	public static var scrollVelocities(default, set):Array<ScrollVelocity> = [];
 
+	public static var timingPointsResetQuants:Bool = false;
+
 	static function set_scrollVelocities(value:Array<ScrollVelocity>):Array<ScrollVelocity> {
 		if (value == null || value.length == 0) {
 			scrollVelocities.resize(1);
@@ -494,12 +496,21 @@ class Conductor extends flixel.FlxBasic {
     }
 
 	// got this method from troll engine, apperently it's stepmania's quantization method.
+	// also quaver now -neb
 	public static function getQuantFromTime(timeAt:Float):Int {
 		final point:TimingPoint = getPointFromTime(timeAt, false);
-		var beat:Float = getBeatFromTime(timeAt, false);
-		beat += (timeAt - point.time) / calculateCrotchet(point.bpm);
+		var row:Int = 0;
 
-		final row:Int = Math.round(beat * 48); // 48 rows per beat
+		if(!timingPointsResetQuants){
+			var beat:Float = getBeatFromTime(timeAt, false);
+			beat += (timeAt - point.time) / calculateCrotchet(point.bpm);
+			row = Math.round(beat * 48);
+		}else{
+			final pos:Float = timeAt - point.time;
+
+			row = Math.round(48 * (pos / calculateCrotchet(point.bpm)));
+		}
+
 		for (quant in quants) {
 			if (row % (192 / quant) == 0) // 192 rows per measure (48 * 4)
 				return quant;
