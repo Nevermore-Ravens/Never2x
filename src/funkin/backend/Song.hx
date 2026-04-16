@@ -1,7 +1,9 @@
 package funkin.backend;
 
 import moonchart.parsers.QuaverParser.QuaverHitObject;
+#if SV_ALLOWED
 import funkin.backend.Conductor.ScrollVelocity;
+#end
 import moonchart.formats.Quaver;
 import haxe.io.Path;
 import moonchart.formats.fnf.FNFVSlice;
@@ -27,7 +29,9 @@ typedef Chart = {
 }
 
 interface ChartWithSVs {
+	#if SV_ALLOWED
 	public function getScrollVelocities(): Array<ScrollVelocity>;
+	#end
 }
 
 class Song {
@@ -62,7 +66,6 @@ class Song {
 			final basicMeta = basic.getChartMeta();
 			meta.offset = basicMeta.offset * offsetMult;
 			for (bpm in basicMeta.bpmChanges) {
-				trace(bpm.time, bpm.bpm);
 				meta.timingPoints.push({
 					time: bpm.time,
 					bpm: bpm.bpm,
@@ -295,12 +298,9 @@ class CamQuaver extends Quaver implements ChartWithSVs {
 		return durationsArray.length == 0 ? data.TimingPoints[0].Bpm : durationsArray[0][0];
 	}
 
+	#if SV_ALLOWED
 	public function getScrollVelocities(): Array<ScrollVelocity>{
-		#if !SV_ALLOWED
-		return [{}];
-		#else
 		var vels: Array<ScrollVelocity> = [];
-		trace(Type.typeof(data.BPMDoesNotAffectScrollVelocity));
 		if (data.BPMDoesNotAffectScrollVelocity == true){
 			vels.push({
 				time: 0,
@@ -419,11 +419,10 @@ class CamQuaver extends Quaver implements ChartWithSVs {
 		}
 
 		vels.sort((a, b) -> Std.int(a.time - b.time));
-		trace(vels[0]);
 
 		return vels;
-		#end
 	}
+	#end
 	
 }
 

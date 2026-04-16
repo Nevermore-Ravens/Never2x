@@ -41,11 +41,10 @@ class TimingPoint {
 #end
 
 class Conductor extends flixel.FlxBasic {
+	public static var timingPointsResetQuants:Bool = false;
+	
 	#if SV_ALLOWED
 	public static var scrollVelocities(default, set):Array<ScrollVelocity> = [];
-
-	public static var timingPointsResetQuants:Bool = false;
-
 	static function set_scrollVelocities(value:Array<ScrollVelocity>):Array<ScrollVelocity> {
 		if (value == null || value.length == 0) {
 			scrollVelocities.resize(1);
