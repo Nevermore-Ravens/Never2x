@@ -1,5 +1,7 @@
 package funkin.modchart.mods;
 
+import funkin.objects.Sustain;
+
 class CenteredPath extends BaseModifier {
 	@:alias(movepath, centered2) var centeredPath:ModifierValue = 0;
 	@:alias(movepathLANE) var centeredPathLANE:ModifierValue = 0;
@@ -24,7 +26,13 @@ class CenteredPath extends BaseModifier {
 		final svMult:Float = 1;
 		#end
 		final mainOff = FlxMath.lerp(Strumline.swagWidth, Conductor.crotchet * svMult * 0.45 * noteSpeed, centeredPathType) * (centeredPath + centeredPathLANE);
-		final newDistance:Float = distance + mainOff + (transformPath + transformPathLANE);
-		return newDistance;
+		var distanceOffset:Float = mainOff + (transformPath + transformPathLANE);
+		if(type == SUSTAIN){
+			var sus: Sustain = cast spr;
+			if(sus.visualEnd < sus.data.visualPosition)
+				distanceOffset *= -1;
+			
+		}
+		return distance + distanceOffset;
 	}
 }

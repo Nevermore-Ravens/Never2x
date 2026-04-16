@@ -108,7 +108,7 @@ class Sustain extends Note {
 	@:noDebug override public function followStrum(strum:StrumNote, downscroll:Bool, scrollSpeed:Float) {
 		visible = strum.visible && strum.parent.visible;
 		#if SV_ALLOWED
-		distance = ((data.visualPosition - Conductor.visualPosition) + timeOffset ) * scrollSpeed;
+		distance = ((data.visualPosition - Conductor.visualPosition) + timeOffset) * scrollSpeed;
 		#else
 		distance = (hitTime + timeOffset) * 0.45 * scrollSpeed;
 		#end

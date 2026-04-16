@@ -170,7 +170,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 		#if SV_ALLOWED
 		// this should be improved sinc eim sure this has alot of bad edge-cases -neb
-		if (note.data.visualPosition > Conductor.visualPosition) 
+		if (note.data.visualPosition > note.visualEnd) 
 			note.timeOffset = -Math.max(note.data.visualPosition - Conductor.visualPosition, 0);
 		else
 			note.timeOffset = -Math.min(note.data.visualPosition - Conductor.visualPosition, 0);
