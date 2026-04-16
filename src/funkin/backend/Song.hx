@@ -393,9 +393,6 @@ class CamQuaver extends Quaver implements ChartWithSVs {
 				var sv = data.SliderVelocities[currentSv];
 				var multiplier = !Math.isFinite(currentBpm) ? 128 : sv.Multiplier * (currentBpm / baseBpm);
 
-//				Debug.Assert(currentAdjustedSV != null, nameof(currentAdjustedSV) + " != null");
-
-				// ReSharper disable once CompareOfFloatsByEqualityOperator
 				if (multiplier == currentAdjustedSV)
 					continue;
 
@@ -403,8 +400,6 @@ class CamQuaver extends Quaver implements ChartWithSVs {
 					time: sv.StartTime,
 					multiplier: multiplier
 				});
-
-				//normalizedScrollVelocities.Add(new SliderVelocityInfo {StartTime = sv.StartTime, Multiplier = multiplier});
 
 				currentAdjustedSV = multiplier;
 			}
