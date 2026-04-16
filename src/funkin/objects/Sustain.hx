@@ -28,6 +28,7 @@ class Sustain extends Note {
 	public var coyoteHitMult:Float = 1.0;
 	public var coyoteTimer:Float = 0.175;
 	public var timeOffset:Float = 0;
+	public var visualEnd:Float = 0;
 	public var untilTick:Float = 0;
 
 	var modchartPosLow:Vector3 = new Vector3();
@@ -98,13 +99,21 @@ class Sustain extends Note {
 		coyoteTimer = 0.175 * coyoteHitMult * FlxG.timeScale;
 		timeOffset = 0;
 		untilTick = 0;
+		#if SV_ALLOWED
+		visualEnd = Conductor.getPositionFromTime(data.time + data.length);
+		#end
 		return this;
 	}
 
 	@:noDebug override public function followStrum(strum:StrumNote, downscroll:Bool, scrollSpeed:Float) {
 		visible = strum.visible && strum.parent.visible;
+		#if SV_ALLOWED
+		distance = ((data.visualPosition - Conductor.visualPosition) + timeOffset) * scrollSpeed;
+		#else
 		distance = (hitTime + timeOffset) * 0.45 * scrollSpeed;
+		#end
 		distance *= downscroll ? -1 : 1;
+
 
  		if (copyAlpha) alpha = strum.alpha * multAlpha;
 
@@ -119,12 +128,16 @@ class Sustain extends Note {
 			forceHeightRecalc = false;
 			lastScaleY = scale.y;
 			lastSustainScale = holdScale;
+			#if SV_ALLOWED
+			height = ((visualEnd - data.visualPosition) - timeOffset) * holdScale;
+			#else
 			height = (data.length - timeOffset) * 0.45 * holdScale;
+			#end
 		}
 	}
 
 	override public function draw() {
-		if (alpha == 0 || coyoteAlpha <= 0 || height <= 0)
+		if (alpha == 0 || coyoteAlpha <= 0 || height == 0)
 			return;
 
 		holdFrame = frames.frames[holdAnim.frames[Math.floor(Math.abs(Conductor.time * 0.001 * holdAnim.frameRate) % holdAnim.frames.length)]];
@@ -148,6 +161,11 @@ class Sustain extends Note {
 	
 	override public function drawComplex(camera:FlxCamera) {
 		final camX = camera.scroll.x * scrollFactor.x;
+		final yFlip:Bool = flipY;
+
+		if(height < 0)
+			flipY = !flipY;
+
 		final yMult = flipY ? -1 : 1;
 		var curY = -camera.scroll.y * scrollFactor.y;
 
@@ -184,17 +202,23 @@ class Sustain extends Note {
 
 		tailFrame.frame.y = backupTailY;
 		tailFrame.frame.height = backupTailHeight;
+		flipY = yFlip;
 	}
 
 	#if MODCHARTS_ALLOWED
 	override public function drawCrazy(modchart:ModchartManager, downscroll:Bool, field:Strumline) {
-		if (alpha == 0 || coyoteAlpha  <= 0 || height <= 0)
+		if (alpha == 0 || coyoteAlpha  <= 0 || height == 0)
 			return;
 
 		final ogAlpha = colorTransform.alphaMultiplier;
 		colorTransform.alphaMultiplier *= coyoteAlpha;
 		final strumline = data.player;
+		if(height < 0)
+			downscroll = !downscroll;
+
 		final yMult = downscroll ? -1 : 1;
+		
+
 		final oldScaleX = scale.x;
 		final oldScaleY = scale.y;
 		final spiral:Bool = modchart.get("spiralholds", strumline) == 1;
@@ -240,7 +264,7 @@ class Sustain extends Note {
 			stealth = modchart.getStealth(this, newDist, curDist, modchartPos, data.lane, strumline, field, SUSTAIN);
 			nextStealthColor.copyFrom(modchart.stealthColor);
 
-			final height:Float = (rects == 0) ? Math.min(height, backupTailHeight) : ((rects == sustainDivisions) ? backupHoldHeight - sustainTopY : backupHoldHeight) * Settings.data.holdGrain;
+			final height:Float = (rects == 0) ? Math.min(Math.abs(height), backupTailHeight) : ((rects == sustainDivisions) ? backupHoldHeight - sustainTopY : backupHoldHeight) * Settings.data.holdGrain;
 			curY += height * oldScaleY * yMult;
 			curDist = (distance + curY) * yMult;
 
@@ -336,7 +360,7 @@ class Sustain extends Note {
 		holdFrame.frame.y = backupHoldY;
 		holdFrame.frame.height = backupHoldHeight;
 
-		tailFrame.frame.height = Math.min(height, backupTailHeight);
+		tailFrame.frame.height = Math.min(Math.abs(height), backupTailHeight);
 		tailFrame.frame.y = backupTailY + (backupTailHeight - tailFrame.frame.height);
 		final halfTailWidth = tailFrame.frame.width * scale.x * 0.5;
 		final offsetX = spiral ? halfTailWidth * Math.sin(angleUp) : halfTailWidth;
@@ -370,7 +394,7 @@ class Sustain extends Note {
 	override function set_height(value:Float) {
 		if (height == value) return height;
 
-		final divisionsFloat:Float = ((value - tailHeight * scale.y) / (holdHeight * scale.y)) / Settings.data.holdGrain;
+		final divisionsFloat:Float = ((Math.abs(value) - tailHeight * scale.y) / (holdHeight * scale.y)) / Settings.data.holdGrain;
 		sustainDivisions = Math.ceil(divisionsFloat);
 		sustainTopY = holdHeight * (sustainDivisions - divisionsFloat);
 		return height = value;

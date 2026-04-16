@@ -173,6 +173,15 @@ class PlayState extends FunkinState {
 		minClearType = Ranking.clearTypeList.indexOf(Settings.data.gameplayModifiers["minClearType"]);
 		FlxG.timeScale = Settings.data.gameplayModifiers["playbackRate"];
 
+
+		#if SV_ALLOWED
+		@:privateAccess {
+			// WHY DO WE NOT CALL CONDUCTOR.RESET??????????
+			Conductor.svIndex = 0;
+			Conductor.currentSv = {};
+		}
+		#end
+		
 		self = this;
 /*		if (storyMode) {
 			songID = songList[currentLevel];
@@ -462,6 +471,12 @@ class PlayState extends FunkinState {
 		camFollow.y += character.cameraOffset.y;
 	}
 
+	inline function parseFloat(s:String, ?def:Float = 1){
+		var fuck: Float = Std.parseFloat(s);
+		return Math.isNaN(fuck) ? def : fuck;
+	}
+
+
 	var eventList:Array<String> = [];
 	function eventPushed(event:Event):Void {
 		eventPushedUnique(event);
@@ -477,6 +492,18 @@ class PlayState extends FunkinState {
 		switch event.name {
 			case 'Change Character':
 				cacheCharacter(event.args[1]);
+			#if SV_ALLOWED
+			case 'Mult SV': // troll engine, if that even parses
+				Conductor.scrollVelocities.push({
+					time: event.time,
+					multiplier: parseFloat(event.args[0])
+				});
+			case 'Constant SV':
+				Conductor.scrollVelocities.push({
+					time: event.time,
+					multiplier: parseFloat(event.args[0]) / Settings.data.scrollSpeed
+				});
+			#end
 		}
 	}
 
@@ -1027,8 +1054,13 @@ class PlayState extends FunkinState {
 			Sys.println('Vocals failed to load: ${e.details()}');
 		}
 
+		
+		
 		ScriptHandler.loadFromDir('songs/$songID');
 		ScriptHandler.call('loadSong', [song]);
+		#if SV_ALLOWED
+		Conductor.setupSVs();
+		#end
 
 		playfield.load(song.notes);
 		playfield.scrollSpeed /= FlxG.timeScale;
@@ -1044,7 +1076,12 @@ class PlayState extends FunkinState {
 	@:unreflective
 	function songCompleted() {
 		if (disqualified) {endSong(); return;}
-	
+
+		var modifiers = Settings.data.gameplayModifiers.copy();
+		#if !SV_ALLOWED
+		modifiers["svs"] = false;
+		#end
+
 		Scores.setPlay({
 			songID: songID,
 			difficulty: Difficulty.current,
@@ -1052,7 +1089,7 @@ class PlayState extends FunkinState {
 			score: score,
 			accuracy: accuracy,
 
-			modifiers: Settings.data.gameplayModifiers.copy()
+			modifiers: modifiers.copy()
 		});
 
 		if (storyMode) {
@@ -1062,7 +1099,7 @@ class PlayState extends FunkinState {
 					weekID: weekData.fileName,
 					difficulty: Difficulty.current,
 					score: storyScore,
-					modifiers: Settings.data.gameplayModifiers.copy()
+					modifiers: modifiers.copy()
 				});
 				weekData = null;
 				storyScore = 0;

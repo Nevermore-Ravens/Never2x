@@ -95,7 +95,8 @@ class SaveVariables {
 		'botplay' => false,
 		'mirroredNotes' => false,
 		'randomizedNotes' => false,
-		'modcharts' => false,
+		'modcharts' => true, // for cam we can have this false default but i think on base n2x this should be true -neb
+		'svs' => true,
 		'sustains' => true,
 		'blind' => false,
 		'playingSide' => 'Default'

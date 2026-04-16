@@ -19,7 +19,48 @@ class TimingPoint {
 	}
 }
 
+#if SV_ALLOWED
+@:structInit class ScrollVelocity {
+	public var offsettedTime(get, never):Float;
+
+	function get_offsettedTime():Float
+		return time + Conductor.offset;
+
+	public var time:Float = 0;
+	public var visualPos:Float = 0;
+	public var multiplier:Float = 1;
+
+	public function toString(): String {
+		return 'Time: $time | Visual Position: $visualPos | Multiplier: $multiplier';
+	}
+
+	public function getPosition(noteTime: Float){
+		return visualPos + ((noteTime - time) * 0.45 * multiplier);
+	}
+}
+#end
+
 class Conductor extends flixel.FlxBasic {
+	public static var timingPointsResetQuants:Bool = false;
+	
+	#if SV_ALLOWED
+	public static var scrollVelocities(default, set):Array<ScrollVelocity> = [];
+	static function set_scrollVelocities(value:Array<ScrollVelocity>):Array<ScrollVelocity> {
+		if (value == null || value.length == 0) {
+			scrollVelocities.resize(1);
+			scrollVelocities[0] = {};
+			return scrollVelocities;
+		}
+
+		scrollVelocities.resize(0);
+		scrollVelocities = value.copy();
+
+		scrollVelocities.sort((a, b) -> return Std.int(a.time - b.time));
+
+		return scrollVelocities;
+	}
+	#end
+
 	public static var quants:Array<Int> = [
 		4,
 		8,
@@ -51,7 +92,9 @@ class Conductor extends flixel.FlxBasic {
 
 	public static var time:Float = 0.0;
     public static var rawTime:Float = 0.0;
-
+	#if SV_ALLOWED
+	public static var visualPosition:Float = 0.0;
+	#end
 	static var _lastTime:Float = 0.0;
 
     public static var timingPoints(default, set):Array<TimingPoint> = [];
@@ -123,6 +166,22 @@ class Conductor extends flixel.FlxBasic {
 		time = 0.0;
         _time = 0.0;
 
+
+		#if SV_ALLOWED
+		scrollVelocities = [
+			{
+				time: 0,
+				visualPos: 0,
+				multiplier: 1
+			}
+		];
+		
+		setupSVs();
+		
+		svIndex = 0;
+		currentSv = {};
+		#end
+
         floatStep = step = 0;
         floatBeat = beat = 0;
         floatMeasure = measure = 0;
@@ -140,6 +199,21 @@ class Conductor extends flixel.FlxBasic {
 		onBeat.removeAll();
 		onMeasure.removeAll();
 	}
+
+	#if SV_ALLOWED
+	public static function setupSVs(){
+		if (!Settings.data.gameplayModifiers["svs"])
+			scrollVelocities = [{}];
+		
+		if (scrollVelocities.length > 1){
+			scrollVelocities.sort((a, b) -> return Std.int(a.time - b.time));
+
+			for (i in 1...scrollVelocities.length) 
+				scrollVelocities[i].visualPos = scrollVelocities[i - 1].getPosition(scrollVelocities[i].time);
+		}
+		
+	}
+	#end
 
 	override function update(elapsed:Float) {
 		if (!playing) return;
@@ -215,7 +289,51 @@ class Conductor extends flixel.FlxBasic {
 		inst.play();
 	}
 
+	#if SV_ALLOWED
+	// stealing from getPointFromTime
+	public static function getSVFromTime(timeAt:Float, ?useOffset:Bool = true):ScrollVelocity {
+		var lastPoint:ScrollVelocity = {};
+		if (scrollVelocities.length == 0)
+			return lastPoint;
+		lastPoint = scrollVelocities[0];
+
+		for (i => point in scrollVelocities) {
+			if (timeAt >= (useOffset ? point.offsettedTime : point.time))
+				lastPoint = point;
+			else
+				break;
+		}
+
+		return lastPoint;
+	}
+
+
+	public static function getPositionFromTime(time: Float){
+		return getSVFromTime(time).getPosition(time);
+	}
+	
+	static var svIndex: Int = 0;
+	public static var currentSv:ScrollVelocity = {};
+	#end
+
     public static dynamic function syncBeats() {
+		#if SV_ALLOWED
+		var noteOffsettedTime = time + Settings.data.noteOffset;
+		if (Settings.data.gameplayModifiers["svs"]){
+			for (i in svIndex + 1...scrollVelocities.length) {
+				var nextEvent = scrollVelocities[i];
+				if (nextEvent.offsettedTime > noteOffsettedTime)
+					break;
+
+				svIndex = i;
+				currentSv = nextEvent;
+			}
+			visualPosition = currentSv.getPosition(noteOffsettedTime);
+		}else
+			visualPosition = noteOffsettedTime * 0.45;
+		#end
+
+		
         var point:TimingPoint = getPointFromTime(rawTime);
 		var visPoint:TimingPoint = getPointFromTime(time);
 		
@@ -377,12 +495,21 @@ class Conductor extends flixel.FlxBasic {
     }
 
 	// got this method from troll engine, apperently it's stepmania's quantization method.
+	// also quaver now -neb
 	public static function getQuantFromTime(timeAt:Float):Int {
 		final point:TimingPoint = getPointFromTime(timeAt, false);
-		var beat:Float = getBeatFromTime(timeAt, false);
-		beat += (timeAt - point.time) / calculateCrotchet(point.bpm);
+		var row:Int = 0;
 
-		final row:Int = Math.round(beat * 48); // 48 rows per beat
+		if(!timingPointsResetQuants){
+			var beat:Float = getBeatFromTime(timeAt, false);
+			beat += (timeAt - point.time) / calculateCrotchet(point.bpm);
+			row = Math.round(beat * 48);
+		}else{
+			final pos:Float = timeAt - point.time;
+
+			row = Math.round(48 * (pos / calculateCrotchet(point.bpm)));
+		}
+
 		for (quant in quants) {
 			if (row % (192 / quant) == 0) // 192 rows per measure (48 * 4)
 				return quant;

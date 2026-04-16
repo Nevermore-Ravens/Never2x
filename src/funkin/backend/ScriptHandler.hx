@@ -170,6 +170,19 @@ class Script extends Iris {
 		set('makeNode', function(inputs:Array<String>, func:funkin.modchart.ModchartManager.NodeFunc, ?outputs:Array<String>) {
 			getModchartManager().makeNode(inputs, func, outputs);
 		});
+		#if SV_ALLOWED
+		set("addSV", function(time: Float, mult: Float){
+			Conductor.scrollVelocities.push({
+				time: time,
+				multiplier: mult
+			});
+		});
+		#else
+		set("addSV", function(time:Float, mult:Float) {
+			trace("SVs aren't supported on this build!");
+		});
+		#end
+		set("SpriteFrameBuffer", funkin.objects.SpriteFrameBuffer);
 		set('ProxyField', funkin.modchart.drawing.ProxyField);
 		set('FlxEase', flixel.tweens.FlxEase);
 

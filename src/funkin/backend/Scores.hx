@@ -166,9 +166,12 @@ class Scores {
 		return plays.filter(function(play:PlayData) {
 			if (hasModchart && (!play.modifiers.exists("modcharts") || play.modifiers["modcharts"] != modifiers["modcharts"])) return false;
 
-			for (m in ['playbackRate', 'onlySicks', 'mirroredNotes', 'playingSide']) {
+			for (m in ['playbackRate', 'onlySicks', 'mirroredNotes', 'playingSide' #if SV_ALLOWED , 'svs' #end]) {
 				if (!play.modifiers.exists(m) || play.modifiers[m] != modifiers[m]) return false;
 			}
+			#if !SV_ALLOWED 
+			if(!play.modifiers.exists("svs") || play.modifiers["svs"] == true)return false;
+			#end
 
 			return play.songID == songID && play.difficulty == difficulty;
 		});

@@ -71,17 +71,15 @@ class Meta {
 		// otherwise haxe shits itself and starts printing insane numbers
 		// and that's no good /ref
 		var timingPoints:Array<MetaTimingPoint> = data.timingPoints;
-		if (timingPoints == null) file.timingPoints.push({});
-		else {
+		if (timingPoints != null) {
 			for (point in timingPoints) {
 				file.timingPoints.push({
 					time: point.time,
-					bpm: point.bpm,
-					beatsPerMeasure: point.beatsPerMeasure
+					bpm: point.bpm ?? 0,
+					beatsPerMeasure: point.beatsPerMeasure ?? 0
 				});
 			}
 		}
-
 		_cache.set(song, file);
 		return file;
 	}

@@ -1,13 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TextureAtlas imagePath="optionsbuttongay.png">
-  <!-- Generated using Aseprite .json to FNF .xml: https://github.com/Lethrial/Aseprite-.json-to-FNF-.xml -->
-  <SubTexture name="OFF instance 0" x="0" y="0" width="56" height="56"/>
-  <SubTexture name="TURN instance 0" x="56" y="0" width="56" height="56"/>
-  <SubTexture name="TURN instance 1" x="112" y="0" width="56" height="56"/>
-  <SubTexture name="TURN instance 2" x="0" y="56" width="56" height="56"/>
-
-  <SubTexture name="RTURN instance 0" x="0" y="56" width="56" height="56"/>
-  <SubTexture name="RTURN instance 1" x="112" y="0" width="56" height="56"/>
-  <SubTexture name="RTURN instance 2" x="56" y="0" width="56" height="56"/>
-  <SubTexture name="ON instance 0" x="56" y="56" width="56" height="56"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<TextureAtlas imagePath="spritesheet.png">
+	<SubTexture name="on0000" x="0" y="0" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	
+	<SubTexture name="transition0000" x="34" y="0" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	<SubTexture name="transition0001" x="0" y="34" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	<SubTexture name="transition0002" x="34" y="34" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	<SubTexture name="transition0003" x="0" y="0" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	
+	<SubTexture name="transitionoff0003" x="34" y="0" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	<SubTexture name="transitionoff0002" x="0" y="34" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	<SubTexture name="transitionoff0001" x="34" y="34" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	<SubTexture name="transitionoff0000" x="0" y="0" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
+	<SubTexture name="off0000" x="34" y="0" width="34" height="34" frameX="0" frameY="0" frameWidth="34" frameHeight="34" />
 </TextureAtlas>

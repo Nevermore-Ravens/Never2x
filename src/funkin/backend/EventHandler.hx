@@ -99,6 +99,8 @@ class EventHandler {
         if (index >= list.length) return;
 
         final nextEvent:Event = list[index];
+		if (nextEvent == null)return; // had a NOR where nextEvent was null, so
+
         if (nextEvent.time > Conductor.rawTime - Conductor.offset) return;
         triggered(nextEvent);
         index++;

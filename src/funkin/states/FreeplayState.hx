@@ -19,6 +19,7 @@ class Modifier extends Option {
 		new Modifier("Mirrored Notes", "If the chart will flip its notes around.", "mirroredNotes", BoolOption),
 		new Modifier("Randomized Notes", "If the game will swap the lanes around.", "randomizedNotes", BoolOption),
 		#if MODCHARTS_ALLOWED new Modifier("Modcharts", "If the game will do some wacky stuff with the notes to make it\nlook cooler.", "modcharts", BoolOption), #end
+		#if SV_ALLOWED new Modifier("Scroll Velocities", "If the game will allow scroll velocities to be used.", "svs", BoolOption),#end
 		new Modifier("Sustains", "If the game will add holds or not.", "sustains", BoolOption),
 		new Modifier("Botplay", "If the game will play the chart for you.", "botplay", BoolOption),
 		new Modifier('Blind', 'How much of the chart do you remember?', 'blind', BoolOption),

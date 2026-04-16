@@ -10,6 +10,8 @@ class Stealth extends BaseModifier {
 	
 	var stealthLANE:ModifierValue = 0;
 	var darkLANE:ModifierValue = 0;
+	var hiddenLANE:ModifierValue = 0;
+	var suddenLANE:ModifierValue = 0;
 
 	@:alias(stealthgr) var stealthGlowRed:ModifierValue = 1;
 	@:alias(stealthgg) var stealthGlowGreen:ModifierValue = 1;
@@ -28,9 +30,9 @@ class Stealth extends BaseModifier {
 
 	override public function modifiesStealth(strumline:Int):Bool {return true;}
 	override public function getStealth(spr:FunkinSprite, stealth:Float, distance:Float, unadjustedDistance:Float, pos:Vector3, beat:Float, lane:Int, strumline:Int, field:Strumline, type:ObjectType) {
-		final hidden = hidden;
+		final hidden = hidden + hiddenLANE;
 		final hiddenOff = 160 * hiddenOffset; // i went to openitg to get this value what am i doing
-		final sudden = sudden;
+		final sudden = sudden + suddenLANE;
 		final suddenOff = 160 * suddenOffset;
 		final regionMult = Math.max((hidden + sudden) - 1.0, 0.0);
 
