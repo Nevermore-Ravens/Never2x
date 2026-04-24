@@ -262,9 +262,9 @@ class Shader
 				{
 					switch (extension.name)
 					{
-						case "GL_EXT_separate_shader_objects": hasSeparateShaderObjects = true;
-						case "GL_ARB_separate_shader_objects": hasSeparateShaderObjects = true;
-						case "GL_ARB_sample_shading": hasSampleShading = true;
+						case "GL_EXT_separate_shader_objects": hasSeparateShaderObjects = OpenGLRenderer.__seperateShaderObjsSupported;
+						case "GL_ARB_separate_shader_objects": hasSeparateShaderObjects = OpenGLRenderer.__seperateShaderObjsSupported;
+						case "GL_ARB_sample_shading": hasSampleShading = OpenGLRenderer.__sampleShadingSupported;
 					}
 				}
 
@@ -292,7 +292,7 @@ class Shader
 				{
 					switch (extension.name)
 					{
-						case "GL_ARB_sample_shading": hasSampleShading = true;
+						case "GL_ARB_sample_shading": hasSampleShading = OpenGLRenderer.__sampleShadingSupported;
 					}
 				}
 

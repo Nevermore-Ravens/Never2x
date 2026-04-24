@@ -57,6 +57,8 @@ class OpenGLRenderer extends DisplayObjectRenderer
 	@:noCompletion private static var __blendMinMaxSupported:Null<Bool>;
 	@:noCompletion private static var __complexBlendsSupported:Null<Bool>;
 	@:noCompletion private static var __coherentBlendsSupported:Null<Bool>;
+	@:noCompletion private static var __sampleShadingSupported:Null<Bool>;
+	@:noCompletion private static var __seperateShaderObjsSupported:Null<Bool>;
 
 	@:noCompletion private static var __alphaValue:Array<Float> = [1];
 	@:noCompletion private static var __colorMultipliersValue:Array<Float> = [0, 0, 0, 0];
@@ -146,17 +148,16 @@ class OpenGLRenderer extends DisplayObjectRenderer
 
 		final exts = __gl.getSupportedExtensions();
 		if (__blendMinMaxSupported == null)
-		{
 			__blendMinMaxSupported = exts.contains("EXT_blend_minmax");
-		}
 		if (__complexBlendsSupported == null)
-		{
 			__complexBlendsSupported = exts.contains("KHR_blend_equation_advanced");
-		}
 		if (__coherentBlendsSupported == null)
-		{
 			__coherentBlendsSupported = exts.contains("KHR_blend_equation_advanced_coherent");
-		}
+
+		if (__sampleShadingSupported == null)
+			__sampleShadingSupported = exts.contains("ARB_sample_shading");
+		if (__seperateShaderObjsSupported == null)
+			__seperateShaderObjsSupported = exts.contains("EXT_separate_shader_objects") || exts.contains("ARB_separate_shader_objects");
 
 		#if (js && html5)
 		__softwareRenderer = new CanvasRenderer(null);
