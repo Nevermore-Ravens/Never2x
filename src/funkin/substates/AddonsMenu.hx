@@ -138,7 +138,23 @@ class AddonsMenu extends FlxSubState {
 			curBox.displayHover = curBox.allowKeys = false;
 		}
 		
-		if (inActions && Controls.justPressed("accept")) {
+		var runAction = inActions && Controls.justPressed("accept");
+		if ((leftBox.mouseMoved || rightBox.mouseMoved) && !leftBox.dragging && !rightBox.dragging) {
+			for (i => act in actionTxt.members) {
+				if (FlxG.mouse.screenX >= act.x - 5 && FlxG.mouse.screenX <= act.x + act.width + 5 && FlxG.mouse.screenY >= act.y - 5 && FlxG.mouse.screenY <= act.y + act.height + 5) {
+					if (!inActions || curAction != i)
+						FlxG.sound.play(Paths.audio('scroll', 'sfx'));
+					curAction = i;
+					inActions = true;
+					leftBox.displayHover = leftBox.allowKeys = false;
+					rightBox.displayHover = rightBox.allowKeys = false;
+					runAction = runAction || FlxG.mouse.justPressed;
+					break;
+				}
+			}
+		}
+
+		if (runAction) {
 			switch (actions[curAction]) {
 				case "cancel":
 					close();
