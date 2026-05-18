@@ -103,6 +103,7 @@ class SaveVariables {
 	];
 
 	// for addons
+	var addonsOrder:Array<String> = [];
 	var addonsOff:Array<String> = [];
 }
 

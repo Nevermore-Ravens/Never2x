@@ -18,7 +18,24 @@ class Addons {
 
 	public static function load() {
 		#if ADDONS_ALLOWED
-		for (i => id in FileSystem.readDirectory(folder)) {
+		final folders = [for (id in FileSystem.readDirectory(folder)) if (FileSystem.isDirectory(folder + "/" + id)) id];
+
+		var i = 0;
+		while (i < Settings.data.addonsOrder.length) {
+			final id = Settings.data.addonsOrder[i];
+			if (!folders.contains(id)) {
+				Settings.data.addonsOrder.splice(i, 1);
+				continue;
+			}
+			folders.remove(id);
+			var addon:Addon = getFile(id);
+			list.push(addon);
+
+			Sys.println('Loaded addon: ${addon.name} ($id)');
+			++i;
+		}
+
+		for (id in folders) {
 			if (!FileSystem.isDirectory('$folder/$id')) continue;
 			var addon:Addon = getFile(id);
 			list.push(addon);
@@ -50,7 +67,9 @@ class Addons {
 
 	public static function getFile(name:String):Addon {
 		var file:Addon = {};
+		file.name += ' ($name)';
 		file.id = name;
+		file.disabled = Settings.data.addonsOff.contains(name);
 		var path:String = '$folder/$name/meta.json';
 
 		#if ADDONS_ALLOWED
@@ -59,13 +78,12 @@ class Addons {
 		var rawFile = Json5.parse(sys.io.File.getContent(path));
 		for (property in Reflect.fields(rawFile)) {
 			// ??????? ok i guess no `Reflect.hasField()` for you
-			if (!Reflect.fields(file).contains(property)) continue;
+			if (!Reflect.fields(file).contains(property) || property == "id" || property == "disabled") continue;
 
 			Reflect.setField(file, property, Reflect.field(rawFile, property));
 		}
 		#end
 
-		file.disabled = Settings.data.addonsOff.contains(name);
 		return file;
 	}
 }

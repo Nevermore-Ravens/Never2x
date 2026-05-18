@@ -105,7 +105,7 @@ class OptionList extends TextList {
 
     override function mouseControl() {
 		if (dragging) {
-			components[current].hovering(current, list[current], this);
+			components[current].hovering(current, list[current], this, mousePoint);
 			return;
 		}
 
@@ -113,10 +113,10 @@ class OptionList extends TextList {
             var height = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height + 5) * selPercentages[i] : 0));
 			var top = texts.members[i].y - 5;
 
-			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + height && canSelect(i)) {
+			if (mousePoint.y >= top && mousePoint.y <= top + height && canSelect(i)) {
 				retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
 
-				components[i].hovering(i ,list[i], this);
+				components[i].hovering(i ,list[i], this, mousePoint);
 				if (FlxG.mouse.justPressed && onClick != null)
 					onClick(i);
 				break;
@@ -137,30 +137,31 @@ class OptionList extends TextList {
             final txt = texts.members[i];
 			txt.setPosition(x + 15, y);
 			txt.alpha = alpha;
-            Util.clipByCoords(txt, null, null, y, y + scale.y);
+            Util.clipByCoords(txt, null, null, this.y, this.y + scale.y);
             
             selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current ? 1 : 0), elapsed * 15);
 			if (hasSubTexts) {
                 final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
 				sub.alpha = alpha * selPercentages[i];
-                Util.clipByCoords(sub, null, null, y, y + scale.y);
+                Util.clipByCoords(sub, null, null, this.y, this.y + scale.y);
                 
                 y += (sub.height + 5) * selPercentages[i];
 				components[i].position(txt, sub, selPercentages[i]);
-				components[i].clip(y, y + scale.y);
+				components[i].clip(this.y, this.y + scale.y);
 			}
 
             y += txt.height;
 		}
         scrollInc = Math.max((y + curScroll - this.y - 15 + 60) - height, 0) / texts.length;
         var targetHeight = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height - 5) * selPercentages[current] : 0)) + 10;
-        hover.setPosition(x, FlxMath.lerp(hover.y, texts.members[current].y - 5, elapsed * 15));
+		hoverY = FlxMath.lerp(hoverY, texts.members[current].y - 5, elapsed * 15);
+        hover.setPosition(x, hoverY);
         hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
 		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
 
 		hover.scale.y = hoverHeight;
-		hover.scale.y -= Math.max((hover.y + hoverHeight) - (y + scale.y), 0);
+		hover.scale.y -= Math.max((hover.y + hoverHeight) - (this.y + scale.y), 0);
 		var topClip = Math.max(this.y - hover.y, 0);
 		hover.y += topClip;
 		hover.scale.y -= topClip;
@@ -279,7 +280,7 @@ class OptionList extends TextList {
 interface OptionComponent<T:FlxSprite> {
 	public var obj:T;
 
-	public function hovering(idx:Int, opt:Option, list:OptionList):Void;
+	public function hovering(idx:Int, opt:Option, list:OptionList, mousePoint:FlxPoint):Void;
 	public function position(txt:FlxText, sub:FlxText, selPercent:Float):Void;
 	public function clip(top:Float, bottom:Float):Void;
 	public function change(opt:Option):Void;
@@ -295,7 +296,7 @@ interface OptionComponent<T:FlxSprite> {
 class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 	public var obj:Checkbox;
 
-	public function hovering(idx:Int, opt:Option, list:OptionList) {
+	public function hovering(idx:Int, opt:Option, list:OptionList, mousePoint:FlxPoint) {
 		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
 
 		if (opt.hasSound)
@@ -350,7 +351,7 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 class Textbox extends FlxText implements OptionComponent<Textbox> {
 	public var obj:Textbox;
 
-	public function hovering(idx:Int, opt:Option, list:OptionList) {
+	public function hovering(idx:Int, opt:Option, list:OptionList, mousePoint:FlxPoint) {
 		if (!FlxG.mouse.justPressed) return;
 
 		if (opt.hasSound)
@@ -362,11 +363,11 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 			final rightRect = textField.getCharBoundaries(text.length - 2);
 
 			var x = x - graphic.width * scale.x;
-			if (FlxG.mouse.x >= x + leftRect.x * scale.x && FlxG.mouse.x <= x + rightRect.x * scale.x) {
+			if (mousePoint.x >= x + leftRect.x * scale.x && mousePoint.x <= x + rightRect.x * scale.x) {
 				opt.enter();
 				action = 0;
 			} else {
-				final isLeft = FlxG.mouse.x <= x + leftRect.x * scale.x;
+				final isLeft = mousePoint.x <= x + leftRect.x * scale.x;
 				list.curHolding = isLeft ? 3 : 4;
 				list.holdWait = 0.5;
 	
@@ -377,7 +378,7 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 			opt.enter();
 			action = 0;
 		} else if (!opt.hasEnter && opt.hasMove) {
-			final isLeft = FlxG.mouse.x <= x - graphic.width * scale.x * 0.5;
+			final isLeft = mousePoint.x <= x - graphic.width * scale.x * 0.5;
 			list.curHolding = isLeft ? 3 : 4;
 			list.holdWait = 0.5;
 
@@ -431,7 +432,7 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 	public var obj:DropdownText;
 	var label:FlxText;
 
-	public function hovering(idx:Int, opt:Option, list:OptionList) {
+	public function hovering(idx:Int, opt:Option, list:OptionList, mousePoint:FlxPoint) {
 		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
 
 		if (opt.hasSound)
@@ -505,13 +506,13 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 	var max:Float;
 	var snap:Float;
 
-	public function hovering(idx:Int, opt:Option, list:OptionList) {
+	public function hovering(idx:Int, opt:Option, list:OptionList, mousePoint:FlxPoint) {
 		if (!list.dragging && (
 			!FlxG.mouse.pressed ||
-			FlxG.mouse.x < x + BAR_PADDING * sliderScale ||
-			FlxG.mouse.x > x + scale.x - BAR_PADDING * sliderScale ||
-			FlxG.mouse.y < y + BAR_PADDING * sliderScale ||
-			FlxG.mouse.y > y + scale.y - BAR_PADDING * sliderScale
+			mousePoint.x < x + BAR_PADDING * sliderScale ||
+			mousePoint.x > x + scale.x - BAR_PADDING * sliderScale ||
+			mousePoint.y < y + BAR_PADDING * sliderScale ||
+			mousePoint.y > y + scale.y - BAR_PADDING * sliderScale
 		)) return;
 
 		list.dragging = FlxG.mouse.pressed;
@@ -519,7 +520,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
 
 		// eh dont feel like Math.max(Math.min today
-		final remapped = FlxMath.remapToRange(FlxG.mouse.x, x + BAR_PADDING * label.scale.x, x + scale.x - BAR_PADDING * label.scale.x, min, max);
+		final remapped = FlxMath.remapToRange(mousePoint.x, x + BAR_PADDING * label.scale.x, x + scale.x - BAR_PADDING * label.scale.x, min, max);
 		opt.value = FlxMath.bound(Math.round(remapped * opt.powMult) / opt.powMult , min, max);
 		change(opt);
 	}

@@ -5,11 +5,13 @@ class TextList extends FunkinSprite {
 	final MOUSE_DEADZONE = 5; // technically 10, but goes in both directions.
 	var lastMouseX:Float = 0;
 	var lastMouseY:Float = 0;
+	var mousePoint:FlxPoint;
 	public var mouseMoved:Bool = false;
 	
 	public var texts:FlxTypedGroup<FlxText>;
 	public var subTexts:FlxTypedGroup<FlxText>;
 	var hasSubTexts:Bool = false;
+	var hoverY:Float = 0;
 	var hover:FunkinSprite;
 
 	var curScroll:Float = 0;
@@ -22,6 +24,7 @@ class TextList extends FunkinSprite {
 	public var allowKeys:Bool = true;
 	public var allowMouse:Bool = true;
 	public var displayHover:Bool = true;
+	public var mouseCamera:FlxCamera;
 
 	public var onClick:(current:Int)->Void;
 	public var onSelect:(current:Int, last:Int)->Void;
@@ -31,6 +34,7 @@ class TextList extends FunkinSprite {
 
 	public function new(x:Float, y:Float, width:Float, height:Float, txts:Array<String>, ?subs:Array<String>) {
 		super(x, y);
+		mouseCamera = FlxG.camera;
 		active = true;
 		makeGraphic(1, 1, 0x80000000);
 		this.width = width;
@@ -88,7 +92,7 @@ class TextList extends FunkinSprite {
 	public function setSubText(target:Int, text:String)
 		subTexts.members[target].text = text;
 
-	function retarget(target:Int) {
+	public function retarget(target:Int) {
 		if (current == target) return;
 
 		var last:Int = current;
@@ -99,6 +103,7 @@ class TextList extends FunkinSprite {
 	}
 
 	override function update(elapsed:Float) {
+		mousePoint = FlxG.mouse.getWorldPosition(mouseCamera, mousePoint);
 		mouseMoved = false;
 		if (Math.abs(FlxG.mouse.screenX - lastMouseX) >= MOUSE_DEADZONE || Math.abs(FlxG.mouse.screenY - lastMouseY) >= MOUSE_DEADZONE) {
 			lastMouseX = FlxG.mouse.screenX;
@@ -107,7 +112,7 @@ class TextList extends FunkinSprite {
 		}
 		
 		hoverTmr -= elapsed;
-		if (allowMouse && FlxG.mouse.x >= x && FlxG.mouse.x <= x + width) {
+		if (allowMouse && mousePoint.x >= x && mousePoint.x <= x + width) {
 			hoverTmr = mouseMoved ? 2 : hoverTmr;
 			mouseControl();
 		} else
@@ -141,7 +146,7 @@ class TextList extends FunkinSprite {
 		for (i in 0...texts.length) {
 			var top = y + 15 - curScroll + 30 * i;
 
-			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + 30 && canSelect(i)) {
+			if (mousePoint.y >= top && mousePoint.y <= top + 30 && canSelect(i)) {
 				retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
 
 				if (FlxG.mouse.justPressed && onClick != null)
@@ -153,7 +158,8 @@ class TextList extends FunkinSprite {
 
 	function position(elapsed:Float) {
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
-		hover.setPosition(x, FlxMath.lerp(hover.y, y + 15 - curScroll + 30 * current, elapsed * 15));
+		hoverY = FlxMath.lerp(hoverY, y + 15 - curScroll + 30 * current, elapsed * 15);
+		hover.setPosition(x, hoverY);
 		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
 		for (i in 0...texts.length) {
 			final txt = texts.members[i];

@@ -170,6 +170,7 @@ class InitState extends flixel.FlxState {
 			FlxG.save.close();
         }, true);
 
+		FlxG.plugins.add(new funkin.substates.AddonsMenu());
 		FlxG.plugins.add(new funkin.backend.Conductor());
 	}
 }

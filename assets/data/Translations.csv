@@ -223,3 +223,8 @@ danger_data,This action is irreversible! You won't be able to get back the data 
 danger_confirm1,I'M AWARE. GO FOR IT.,I'M AWARE. GO FOR IT.,I'M AWARE. GO FOR IT.
 danger_confirm2,I MEAN IT.,I MEAN IT.,I MEAN IT.
 danger_cancel,MISCLICKED! TAKE ME BACK!,MISCLICKED! TAKE ME BACK!,MISCLICKED! TAKE ME BACK!
+,,,
+cancel,Cancel,Cancel,Cancel
+open_folder,Open Folder,Open Folder,Open Folder
+refresh,Refresh,Refresh,Refresh
+apply,Apply,Apply,Apply

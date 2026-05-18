@@ -475,7 +475,7 @@ class NoteCustomization extends OptionList {
 
     override function mouseControl() {
 		if (dragging) {
-			components[current].hovering(current, list[current], this);
+			components[current].hovering(current, list[current], this, mousePoint);
 			return;
 		}
         if (holdingCol) {
@@ -486,7 +486,7 @@ class NoteCustomization extends OptionList {
 
             final curItem = current - noteColIdx;
 			final max = rgb ? 255 : (current == noteColIdx ? 360 : 100);
-			editColor(curItem, Std.int(FlxMath.bound((FlxG.mouse.x - wheels.members[curItem].x) / wheels.members[curItem].width, 0, 1) * max));
+			editColor(curItem, Std.int(FlxMath.bound((mousePoint.x - wheels.members[curItem].x) / wheels.members[curItem].width, 0, 1) * max));
 			return;
 		}
 
@@ -497,20 +497,20 @@ class NoteCustomization extends OptionList {
 
             var top = texts.members[i].y - 5;
 
-			if (FlxG.mouse.y >= top && FlxG.mouse.y <= top + height && canSelect(i)) {
+			if (mousePoint.y >= top && mousePoint.y <= top + height && canSelect(i)) {
 				retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
 
-				components[i].hovering(i ,list[i], this);
+				components[i].hovering(i, list[i], this, mousePoint);
 				if (FlxG.mouse.justPressed && onClick != null)
 					onClick(i);
 				break;
 			}
 		}
 
-        if (current == noteSelIdx && FlxG.mouse.y >= hover.y && FlxG.mouse.y <= hover.y + hover.scale.y) {
+        if (current == noteSelIdx && mousePoint.y >= hover.y && mousePoint.y <= hover.y + hover.scale.y) {
             var queueHover = -1;
             for (i => note in notes.members) {
-                if ((Note.byQuant || i < 4) && FlxG.mouse.x >= note.x && FlxG.mouse.x <= note.x + note.width) {
+                if ((Note.byQuant || i < 4) && mousePoint.x >= note.x && mousePoint.x <= note.x + note.width) {
                     queueHover = i;
 
                     if (FlxG.mouse.justReleased && curNote != i) {
@@ -527,7 +527,7 @@ class NoteCustomization extends OptionList {
             hoverNote = -1;
         
         for (i => wheel in wheels.members) {
-            if (FlxG.mouse.x >= wheel.x - 4 && FlxG.mouse.x <= wheel.x + wheel.width + 4 && FlxG.mouse.y >= colTxts.members[i].y && FlxG.mouse.y <= wheel.y + wheel.height) {
+            if (mousePoint.x >= wheel.x - 4 && mousePoint.x <= wheel.x + wheel.width + 4 && mousePoint.y >= colTxts.members[i].y && mousePoint.y <= wheel.y + wheel.height) {
                 if (mouseMoved && current != noteColIdx + i) {
                     current = noteColIdx + i;
                     FlxG.sound.play(Paths.audio("scroll", 'sfx'));
