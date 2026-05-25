@@ -366,7 +366,7 @@ class Paths {
 	public static dynamic function sparrowAtlas(path:String, ?subFolder:String = 'images'):FlxFramesCollection {
 		final cacheKey = getCacheKey(path, "SPR", subFolder);
 		if (cachedAssets.exists(cacheKey)) {
-			final imgKey = getCacheKey(path, "IMG", subFolder);
+			final imgKey = getCacheKey((path.lastIndexOf('.') < 0 ? path + "." + IMAGE_EXT : path), "IMG", subFolder);
 			if (!localTrackedAssets.contains(imgKey)) localTrackedAssets.push(imgKey);
 			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 			return cachedAssets.get(cacheKey);
@@ -384,7 +384,7 @@ class Paths {
 	public static dynamic function packerAtlas(path:String, ?subFolder:String = 'images'):FlxFramesCollection {
 		final cacheKey = getCacheKey(path, "PAK", subFolder);
 		if (cachedAssets.exists(cacheKey)) {
-			final imgKey = getCacheKey(path, "IMG", subFolder);
+			final imgKey = getCacheKey((path.lastIndexOf('.') < 0 ? path + "." + IMAGE_EXT : path), "IMG", subFolder);
 			if (!localTrackedAssets.contains(imgKey)) localTrackedAssets.push(imgKey);
 			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 			return cachedAssets.get(cacheKey);
@@ -402,7 +402,7 @@ class Paths {
 	public static dynamic function asepriteAtlas(path:String, ?subFolder:String = 'images'):FlxFramesCollection {
 		final cacheKey = getCacheKey(path, "ASE", subFolder);
 		if (cachedAssets.exists(cacheKey)) {
-			final imgKey = getCacheKey(path, "IMG", subFolder);
+			final imgKey = getCacheKey((path.lastIndexOf('.') < 0 ? path + "." + IMAGE_EXT : path), "IMG", subFolder);
 			if (!localTrackedAssets.contains(imgKey)) localTrackedAssets.push(imgKey);
 			if (!localTrackedAssets.contains(cacheKey)) localTrackedAssets.push(cacheKey);
 			return cachedAssets.get(cacheKey);

@@ -271,21 +271,13 @@ class Note extends FunkinSprite {
 		data.apply(this);
 	}
 
-	public static function getSkin(?name:String):FlxFramesCollection {
-		name ??= '';
-		if (name.length == 0) name = Settings.data.noteSkin;
-		name = Util.format(name);
+	public static function getTextureKey(name:String, luminColoring:Bool, ?ext:String = ".png"):String {
+		if (!luminColoring) return name;
 
-		function getTextureKey(name:String):String {
-			var key:String = name;
-			if (Settings.data.quantColouring.toLowerCase() == 'none') return key;
-
-			key = '$name-quant';
-			if (!Paths.exists('images/noteSkins/$key.xml')) key = name;
-			return key;
-		}
-
-		return Paths.sparrowAtlas('noteSkins/${getTextureKey(name)}');
+		var luminKey = name + '-quant';
+		if (Paths.exists('images/noteSkins/' + luminKey + ext))
+			return luminKey;
+		return name;
 	}
 
 	public function new() {

@@ -1,5 +1,7 @@
 package funkin.backend;
 
+import flixel.graphics.frames.FlxFramesCollection;
+import flixel.graphics.frames.FlxTileFrames;
 import funkin.objects.Strumline;
 import funkin.backend.ScriptHandler.Script;
 import funkin.objects.Strumline.StrumNote;
@@ -23,6 +25,7 @@ class NoteSkinStyle {
 	public function applySustain(hold:Sustain) {}
 	public function applyStrum(strum:StrumNote, lane:Int) {}
 
+	public function recache() {}
 	public function destroy() {}
 
 	public function getScale(obj:FunkinSprite) {return 1.0;}
@@ -54,6 +57,9 @@ class NoteSkinCustomData extends NoteSkinStyle {
 	override public function applySustain(hold:Sustain) {script.call("applySustain", [hold]);}
 	override public function applyStrum(strum:StrumNote, lane:Int) {script.call("applyStrum", [strum, lane]);}
 
+	override public function recache() {
+		script.call("recache");
+	}
 	override public function destroy() {
 		script.call("destroy");
 		script.destroy();
@@ -66,6 +72,13 @@ class NoteSkinCustomData extends NoteSkinStyle {
 
 @:structInit
 class NoteSkinGridData extends NoteSkinStyle {
+	var frames(get, default):FlxFramesCollection = null;
+	var luminFrames(get, default):FlxFramesCollection = null;
+	var holdFrames(get, default):FlxFramesCollection = null;
+	var luminHoldFrames(get, default):FlxFramesCollection = null;
+	var rollFrames(get, default):FlxFramesCollection = null;
+	var luminRollFrames(get, default):FlxFramesCollection = null;
+
 	var image: String;
 	var holdImage: String;
 	@:optional var hasRolls:Bool;
@@ -147,24 +160,9 @@ class NoteSkinGridData extends NoteSkinStyle {
 		};
 	}
 
-	static function getImg(?name:String) {
-		function getTextureKey(name:String):String {
-			var key:String = name;
-			if (Settings.data.quantColouring.toLowerCase() == 'none') return key;
-
-			key = '$name-quant';
-			if (!Paths.exists('images/noteSkins/$key.png')) key = name;
-			return key;
-		}
-
-		return Paths.image('noteSkins/${getTextureKey(name)}');
-	}
-
 	override public function apply(note:Note) {
 		note.antialiasing = antialiasing;
-		final img = getImg(image);
-		note.loadGraphic(img, true, Math.floor(img.width / noteRows), Math.floor(img.height / noteColumns));
-
+		note.frames = note.luminColors ? luminFrames : frames;
 		note.animation.add('default', noteIndices[note.data.lane], noteFramerate);
 		note.playAnim('default');
 
@@ -174,15 +172,11 @@ class NoteSkinGridData extends NoteSkinStyle {
 	override public function applySustain(hold:Sustain) {
 		hold.antialiasing = antialiasing;
 		if (hasRolls && hold.type == "Roll") {
-			final img = getImg(rollImage);
-			hold.loadGraphic(img, true, Math.floor(img.width / rollRows), Math.floor(img.height / rollColumns));
-	
+			hold.frames = hold.luminColors ? luminRollFrames : rollFrames;
 			hold.animation.add('hold', rollIndices[hold.data.lane], rollFramerate);
 			hold.animation.add('holdend', rollEndIndices[hold.data.lane], rollFramerate);
 		} else {
-			final img = getImg(holdImage);
-			hold.loadGraphic(img, true, Math.floor(img.width / holdRows), Math.floor(img.height / holdColumns));
-	
+			hold.frames = hold.luminColors ? luminHoldFrames : holdFrames;
 			hold.animation.add('hold', holdIndices[hold.data.lane], holdFramerate);
 			hold.animation.add('holdend', holdEndIndices[hold.data.lane], holdFramerate);
 		}
@@ -190,8 +184,7 @@ class NoteSkinGridData extends NoteSkinStyle {
 	}
 	override public function applyStrum(strum:StrumNote, lane:Int) {
 		strum.antialiasing = antialiasing;
-		final img = getImg(image);
-		strum.loadGraphic(img, true, Math.floor(img.width / noteRows), Math.floor(img.height / noteColumns));
+		strum.frames = (Note.curPalette != null || Settings.data.strumGlow == "Judgement") ? luminFrames : frames;
 
 		strum.animation.add('default', staticIndices[lane], staticFramerate);
 		strum.animation.add('pressed', pressIndices[lane], pressFramerate, false);
@@ -203,10 +196,79 @@ class NoteSkinGridData extends NoteSkinStyle {
 	}
 
 	override public function getScale(obj:FunkinSprite) {return scale;}
+	
+	override function recache() {
+		if (frames != null) {
+			frames = null;
+			get_frames();
+		}
+		if (luminFrames != null) {
+			luminFrames = null;
+			get_luminFrames();
+		}
+		if (holdFrames != null) {
+			holdFrames = null;
+			get_holdFrames();
+		}
+		if (luminHoldFrames != null) {
+			luminHoldFrames = null;
+			get_luminHoldFrames();
+		}
+		if (rollFrames != null) {
+			rollFrames = null;
+			get_rollFrames();
+		}
+		if (luminRollFrames != null) {
+			luminRollFrames = null;
+			get_luminRollFrames();
+		}
+	}
+
+	function get_frames() {
+		if (frames != null)
+			return frames;
+		final img = Paths.image("noteSkins/" + Note.getTextureKey(image, false, ".png"));
+		return frames = FlxTileFrames.fromGraphic(img, FlxPoint.weak(Math.floor(img.width / noteRows), Math.floor(img.height / noteColumns)));
+	}
+	function get_luminFrames() {
+		if (luminFrames != null)
+			return luminFrames;
+		final img = Paths.image("noteSkins/" + Note.getTextureKey(image, true, ".png"));
+		return luminFrames = FlxTileFrames.fromGraphic(img, FlxPoint.weak(Math.floor(img.width / noteRows), Math.floor(img.height / noteColumns)));
+	}
+	
+	function get_holdFrames() {
+		if (holdFrames != null)
+			return holdFrames;
+		final img = Paths.image("noteSkins/" + Note.getTextureKey(holdImage, false, ".png"));
+		return holdFrames = FlxTileFrames.fromGraphic(img, FlxPoint.weak(Math.floor(img.width / holdRows), Math.floor(img.height / holdColumns)));
+	}
+	function get_luminHoldFrames() {
+		if (luminHoldFrames != null)
+			return luminHoldFrames;
+		final img = Paths.image("noteSkins/" + Note.getTextureKey(holdImage, true, ".png"));
+		return luminHoldFrames = FlxTileFrames.fromGraphic(img, FlxPoint.weak(Math.floor(img.width / holdRows), Math.floor(img.height / holdColumns)));
+	}
+
+	function get_rollFrames() {
+		if (rollFrames != null)
+			return rollFrames;
+		final img = Paths.image("noteSkins/" + Note.getTextureKey(rollImage, false, ".png"));
+		return rollFrames = FlxTileFrames.fromGraphic(img, FlxPoint.weak(Math.floor(img.width / rollRows), Math.floor(img.height / rollColumns)));
+	}
+	function get_luminRollFrames() {
+		if (luminRollFrames != null)
+			return luminRollFrames;
+		final img = Paths.image("noteSkins/" + Note.getTextureKey(rollImage, true, ".png"));
+		return luminRollFrames = FlxTileFrames.fromGraphic(img, FlxPoint.weak(Math.floor(img.width / rollRows), Math.floor(img.height / rollColumns)));
+	}
 }
 
 @:structInit
 class NoteSkinSparrowData extends NoteSkinStyle {
+	var frames(get, default):FlxFramesCollection = null;
+	var luminFrames(get, default):FlxFramesCollection = null;
+
 	var image: String;
 	var scale:Float = 0.65;
 	var antialiasing:Bool = true;
@@ -261,7 +323,7 @@ class NoteSkinSparrowData extends NoteSkinStyle {
 
 	override public function apply(note:Note) {
 		note.antialiasing = antialiasing;
-		note.frames = Note.getSkin(image);
+		note.frames = (note.luminColors) ? luminFrames : frames;
 
 		note.animation.addByPrefix('default', noteAnims[note.data.lane], noteFramerate);
 		note.playAnim('default');
@@ -276,7 +338,7 @@ class NoteSkinSparrowData extends NoteSkinStyle {
 		final endAnims = isRoll ? rollEndAnims : holdEndAnims;
 		final fps = isRoll ? rollFramerate : holdFramerate;
 
-		hold.frames = Note.getSkin(image);
+		hold.frames = (hold.luminColors) ? luminFrames : frames;
 
 		hold.animation.addByPrefix('hold', anims[hold.data.lane], fps);
 		hold.animation.addByPrefix('holdend', endAnims[hold.data.lane], fps);
@@ -284,7 +346,7 @@ class NoteSkinSparrowData extends NoteSkinStyle {
 	}
 	override public function applyStrum(strum:StrumNote, lane:Int) {
 		strum.antialiasing = antialiasing;
-		strum.frames = Note.getSkin(image);
+		strum.frames = (Note.curPalette != null || Settings.data.strumGlow == "Judgement") ? luminFrames : frames;
 
 		strum.animation.addByPrefix('default', staticPrefixes[lane], staticFramerate);
 		strum.animation.addByPrefix('pressed', pressPrefixes[lane], pressFramerate, false);
@@ -294,8 +356,30 @@ class NoteSkinSparrowData extends NoteSkinStyle {
 		strum.scale.set(scale * Strumline.size, scale * Strumline.size);
 		strum.updateHitbox();
 	}
-
+	
 	override public function getScale(obj:FunkinSprite) {return scale;}
+	
+	override function recache() {
+		if (frames != null) {
+			frames = null;
+			get_frames();
+		}
+		if (luminFrames != null) {
+			luminFrames = null;
+			get_luminFrames();
+		}
+	}
+
+	function get_frames() {
+		if (frames != null)
+			return frames;
+		return frames = Paths.sparrowAtlas("noteSkins/" + Note.getTextureKey(image, false, ".xml"));
+	}
+	function get_luminFrames() {
+		if (luminFrames != null)
+			return luminFrames;
+		return luminFrames = Paths.sparrowAtlas("noteSkins/" + Note.getTextureKey(image, true, ".xml"));
+	}
 }
 
 class NoteSkin {
@@ -364,6 +448,12 @@ class NoteSkin {
 		return file;
 	}
 
+	public static function recache() {
+		for (file in _cache) {
+			for (style in file.styles)
+				style.recache();
+		}
+	}
 	public static function clear() {
 		for (file in _cache) {
 			for (style in file.styles)

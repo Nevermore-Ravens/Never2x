@@ -146,7 +146,8 @@ class InitState extends flixel.FlxState {
 		FlxG.signals.preStateSwitch.add(()->{
 			// this if is duct tape in case we get crashes again but hopefully we're getting a better asset system
 			// @:privateAccess if (Type.getClass(FlxG.game._requestedState) != Type.getClass(FlxG.state))
-			 	// Paths.clearTracking();
+			 	Paths.clearTracking();
+			NoteSkin.recache();
 			FlxAudioHandler.checkStoredSounds();
 		});
 		FlxG.signals.postStateSwitch.add(()->{
