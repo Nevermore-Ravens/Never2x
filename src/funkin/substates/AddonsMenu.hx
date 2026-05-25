@@ -139,7 +139,7 @@ class AddonsMenu extends FlxSubState {
 		}
 		
 		var runAction = inActions && Controls.justPressed("accept");
-		if ((leftBox.mouseMoved || rightBox.mouseMoved) && !leftBox.dragging && !rightBox.dragging) {
+		if ((leftBox.mouseMoved || rightBox.mouseMoved || FlxG.mouse.justPressed) && !leftBox.dragging && !rightBox.dragging) {
 			for (i => act in actionTxt.members) {
 				if (FlxG.mouse.screenX >= act.x - 5 && FlxG.mouse.screenX <= act.x + act.width + 5 && FlxG.mouse.screenY >= act.y - 5 && FlxG.mouse.screenY <= act.y + act.height + 5) {
 					if (!inActions || curAction != i)
