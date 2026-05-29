@@ -16,7 +16,7 @@ It's (currently) available on Windows, MacOS (through Wine), and Linux.<br>Mobil
 
 To start compiling, refer to [COMPILING.md](COMPILING.md).
 
-> [!IMPORTANT]
+> [!NOTE]
 > Due to this project originating from Vs. Camellia and this still being a W.I.P., there may be parity issues between Never2x and Vs. Camellia.
 > Please keep this in mind when considering contributing or using the engine in your projects.
 
