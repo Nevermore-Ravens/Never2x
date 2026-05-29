@@ -63,6 +63,10 @@ class PlayState extends FunkinState {
 
 	@:unreflective var disqualified:Bool = false;
 
+	// if you wanna do it all manual
+	// or set the speed of lyrics
+	public var lyrics:Lyrics;
+
 	@:isVar public var botplay(get, set):Bool = false;
 	function get_botplay():Bool {
 		if (playfield == null) return false;
@@ -341,6 +345,13 @@ class PlayState extends FunkinState {
 		opponentStrums.healthMult = -1.0;
 
 		makeHUD();
+
+		add(lyrics = new Lyrics());
+		lyrics.cameras = [camHUD];
+		if (Settings.data.lyrics)
+			lyrics.load(Paths.get('songs/$songID/lyrics.json'));
+		else
+			lyrics.active = lyrics.visible = false;
 
 		if (canMoveCamera)
 			moveCamera(dad);

@@ -158,7 +158,7 @@ class OptionsState extends FunkinState {
 
 					for (i => opt in self.curOptList) {
 						final opt = self.curOptList[i];
-						self.optText.setText(i, (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name)).toUpperCase());
+						self.optText.setText(i, opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name));
 						self.optText.setSubText(i, OptionList.getDesc(opt));
 						// self.optText.setSubText(i, opt.formatText(i == self.optText.current));
 					}
