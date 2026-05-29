@@ -1,3 +1,9 @@
+> [!IMPORTANT]  
+> Due to this project originating from Vs. Camellia and this still being a W.I.P.,  
+> there may be parity issues between Never2x and Vs. Camellia.
+> 
+> Please keep this in mind when considering contributing or using the engine in your projects.
+
 # <div align="center">Friday Night Funkin': Never2x</div>
 <div align="center">
   
@@ -15,10 +21,6 @@ https://github.com/user-attachments/assets/79adf453-1c0c-4fdb-b706-f796007e1dbf
 It's (currently) available on Windows, MacOS (through Wine), and Linux.<br>Mobile support is not planned, and most likely will never be.
 
 To start compiling, refer to [COMPILING.md](COMPILING.md).
-
-> [!NOTE]
-> Due to this project originating from Vs. Camellia and this still being a W.I.P., there may be parity issues between Never2x and Vs. Camellia.
-> Please keep this in mind when considering contributing or using the engine in your projects.
 
 </div>
 
