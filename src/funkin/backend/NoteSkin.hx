@@ -198,27 +198,27 @@ class NoteSkinGridData extends NoteSkinStyle {
 	override public function getScale(obj:FunkinSprite) {return scale;}
 	
 	override function recache() {
-		if (frames != null) {
+		@:bypassAccessor if (frames != null) {
 			frames = null;
 			get_frames();
 		}
-		if (luminFrames != null) {
+		@:bypassAccessor if (luminFrames != null) {
 			luminFrames = null;
 			get_luminFrames();
 		}
-		if (holdFrames != null) {
+		@:bypassAccessor if (holdFrames != null) {
 			holdFrames = null;
 			get_holdFrames();
 		}
-		if (luminHoldFrames != null) {
+		@:bypassAccessor if (luminHoldFrames != null) {
 			luminHoldFrames = null;
 			get_luminHoldFrames();
 		}
-		if (rollFrames != null) {
+		@:bypassAccessor if (rollFrames != null) {
 			rollFrames = null;
 			get_rollFrames();
 		}
-		if (luminRollFrames != null) {
+		@:bypassAccessor if (luminRollFrames != null) {
 			luminRollFrames = null;
 			get_luminRollFrames();
 		}
@@ -360,11 +360,11 @@ class NoteSkinSparrowData extends NoteSkinStyle {
 	override public function getScale(obj:FunkinSprite) {return scale;}
 	
 	override function recache() {
-		if (frames != null) {
+		@:bypassAccessor if (frames != null) {
 			frames = null;
 			get_frames();
 		}
-		if (luminFrames != null) {
+		@:bypassAccessor if (luminFrames != null) {
 			luminFrames = null;
 			get_luminFrames();
 		}
