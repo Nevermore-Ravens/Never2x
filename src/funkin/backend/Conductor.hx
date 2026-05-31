@@ -309,7 +309,7 @@ class Conductor extends flixel.FlxBasic {
 
 
 	public static function getPositionFromTime(time: Float){
-		return getSVFromTime(time).getPosition(time);
+		return getSVFromTime(time, false).getPosition(time);
 	}
 	
 	static var svIndex: Int = 0;
@@ -322,7 +322,7 @@ class Conductor extends flixel.FlxBasic {
 		if (Settings.data.gameplayModifiers["svs"]){
 			for (i in svIndex + 1...scrollVelocities.length) {
 				var nextEvent = scrollVelocities[i];
-				if (nextEvent.offsettedTime > noteOffsettedTime)
+				if (nextEvent.time > noteOffsettedTime)
 					break;
 
 				svIndex = i;
