@@ -167,7 +167,7 @@ class AddonList extends TextList {
 				bitmapO.dispose();
 				bitmapO = newBitmap;
 			}
-			if (Settings.data.gpuCache) openfl.utils.BitmapDataUtil.toHardware(bitmapO);
+			//if (Settings.data.gpuCache) openfl.utils.BitmapDataUtil.toHardware(bitmapO);
 			graphic = FlxGraphic.fromBitmapData(bitmapO, false, 'addons/${addon.id}/icon.png');
 			graphic.persist = true;
 			graphic.destroyOnNoUse = false;

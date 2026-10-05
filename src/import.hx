@@ -1,5 +1,6 @@
 #if !macro
 // project specific
+import nevermore.backend.Vector3;
 import funkin.backend.*;
 import funkin.backend.WeekData.WeekFile;
 import funkin.backend.EventHandler.Event;

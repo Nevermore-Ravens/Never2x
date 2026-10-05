@@ -182,7 +182,7 @@ class Script extends Iris {
 			trace("SVs aren't supported on this build!");
 		});
 		#end
-		set("SpriteFrameBuffer", funkin.objects.SpriteFrameBuffer);
+		//set("SpriteFrameBuffer", funkin.objects.SpriteFrameBuffer);
 		set('ProxyField', funkin.modchart.drawing.ProxyField);
 		set('FlxEase', flixel.tweens.FlxEase);
 

@@ -213,9 +213,6 @@ class Paths {
 
 		future.onComplete((graphic:FlxGraphic)->{
 				// At this point we are on the main thread context again.
-				if (pushToGPU)
-					openfl.utils.BitmapDataUtil.toHardware(graphic.bitmap);
-
 				graphicPromise.complete(graphic);
 			}
 		);
@@ -227,7 +224,7 @@ class Paths {
 		//bitmap.disposeImage();
 
 		final bitmapO = openfl.display.BitmapData.fromFile(key);
-		if (pushToGPU) openfl.utils.BitmapDataUtil.toHardware(bitmapO);
+		//if (pushToGPU) openfl.utils.BitmapDataUtil.toHardware(bitmapO);
 		final graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmapO, false, cacheKey);
 		graph.persist = true;
 		graph.destroyOnNoUse = false;
