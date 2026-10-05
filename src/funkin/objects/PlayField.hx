@@ -171,9 +171,9 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		#if SV_ALLOWED
 		// this should be improved sinc eim sure this has alot of bad edge-cases -neb
 		if (note.data.visualPosition > note.visualEnd) 
-			note.timeOffset = -Math.max(note.data.visualPosition - Conductor.visualPosition, 0);
+			note.timeOffset = -Math.max(note.data.visualPosition - Conductor.time, 0);
 		else
-			note.timeOffset = -Math.min(note.data.visualPosition - Conductor.visualPosition, 0);
+			note.timeOffset = -Math.min(note.data.visualPosition - Conductor.time, 0);
 		#else
 		note.timeOffset = -Math.min(note.hitTime, 0);
 		#end
@@ -321,7 +321,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 
 		while (noteSpawnIndex < unspawnedNotes.length) {
 			final noteData:NoteData = unspawnedNotes[noteSpawnIndex];
-			final hitTime:Float = (noteData.time - Settings.data.noteOffset) - Conductor.rawTime;
+			final hitTime:Float = (noteData.time - Settings.data.noteOffset) - Conductor.songTime;
 			if (hitTime > noteSpawnDelay) break;
 
 			var note = addNote(noteData, notes, Note);
@@ -343,7 +343,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 		}
 
 		var nextNote:NoteData = unspawnedNotes[notePassedIndex];
-		if (nextNote != null && nextNote.time - Conductor.rawTime <= 0) {
+		if (nextNote != null && nextNote.time - Conductor.songTime <= 0) {
 			if (playAssistClaps && !mineTypes.contains(nextNote.type) && nextNote.player == playerID) {
 				FlxG.sound.play(Paths.audio('sfx/hitsound'));
 			}
@@ -395,7 +395,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			obj.followStrum(strum, downscroll, noteSpeed);
 			obj.calcHeight(noteSpeed * longHolds);
 
-			if (obj.time + obj.length + 300 * FlxG.timeScale < Conductor.rawTime)
+			if (obj.time + obj.length + 300 * FlxG.timeScale < Conductor.songTime)
 				obj.kill();
 		}
 
@@ -420,7 +420,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 				}
 			}
 
-			if (obj.time < Conductor.rawTime - 300 * FlxG.timeScale)
+			if (obj.time < Conductor.songTime - 300 * FlxG.timeScale)
 				obj.kill();
 		}
 	}
@@ -492,9 +492,9 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 				}
 			}
 
-			note.quant = Conductor.getQuantFromTime(note.time);
+/*			note.quant = Conductor.getQuantFromTime(note.time);
 			// weird conductor shit
-			var point:Conductor.TimingPoint = Conductor.getPointFromTime(note.time);
+			var point:TimingPoint = Conductor.getPointFromTime(note.time);
 
 			// fixes a crash when loading a chart with only one strumline in the playfield
 			note.player = Std.int(Math.min(note.player, strumlines.length - 1));
@@ -502,7 +502,7 @@ class PlayField extends flixel.group.FlxSpriteGroup {
 			note.beat = Conductor.getBeatFromTime(note.time) + ((note.time - point.time) / Conductor.calculateCrotchet(point.bpm));
 			#if SV_ALLOWED
 			note.visualPosition = Conductor.getPositionFromTime(note.time);
-			#end
+			#end*/
 			unspawnedNotes.push(note);
 		}
 

@@ -7,13 +7,7 @@ class Util {
 	/**
 		Resets the music to the menu music, addon, and travel to a state.
 	**/
-	public static function toMenu(target:FlxState) {
-		Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true);
-		Conductor.timingPoints = [{bpm: 102, beatsPerMeasure: 4}];
-		Conductor.play();
-		Addons.current = '';
-		FunkinState.switchState(target);
-	}
+	public static function toMenu(target:FlxState) {}
 
 	inline public static function quantize(f:Float, snap:Float):Float
 		return Math.fround(f * snap) / snap;

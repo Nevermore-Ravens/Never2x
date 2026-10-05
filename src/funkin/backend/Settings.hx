@@ -50,8 +50,8 @@ class SaveVariables {
 	];
 
 	// graphics (that affect performance)
-	var framerate:ShortUInt = 60;
-	var holdGrain:ByteUInt = 1;
+	var framerate:Int = 60;
+	var holdGrain:Int = 1;
 	var antialiasing:Bool = true;
 	var audioStreams:Bool = true;
 	var reducedQuality:Bool = false;
@@ -68,7 +68,7 @@ class SaveVariables {
 	var noteSkinStyle:String = 'default';
 	var noteSplashSkin:String = 'classic';
 	var unglowOnAnimFinish:Bool = true;
-	var gameVisibility:ByteUInt = 100;
+	var gameVisibility:Int = 100;
 	var cameraZooms:String = 'Default';
 	var popupCenter:String = "Top";
 	var judgementAlpha:Float = 1;
@@ -77,7 +77,7 @@ class SaveVariables {
 	var comboAlpha:Float = 1;
 	var healthBarAlpha:Float = 1;
 	var language:String = 'English';
-	var fpsCounter:Bool = true;
+	var infoCounter:Bool = true;
 	var transitions:Bool = true;
 	var timeText:Bool = true;
 	var hideHUD:Bool = false;
@@ -133,8 +133,8 @@ class Settings {
 		}
 
 		if (FlxG.save.data.framerate == null) {
-			final refreshRate:ShortUInt = FlxG.stage.application.window.displayMode.refreshRate;
-			data.framerate = Std.int(FlxMath.bound(refreshRate * 2, 60, 240));
+			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
+			data.framerate = Std.int(refreshRate * 2);
 		}
 	
 		if (FlxG.save.data.gameplayModifiers != null) {

@@ -171,12 +171,12 @@ class Script extends Iris {
 			getModchartManager().makeNode(inputs, func, outputs);
 		});
 		#if SV_ALLOWED
-		set("addSV", function(time: Float, mult: Float){
+/*		set("addSV", function(time: Float, mult: Float){
 			Conductor.scrollVelocities.push({
 				time: time,
 				multiplier: mult
 			});
-		});
+		});*/
 		#else
 		set("addSV", function(time:Float, mult:Float) {
 			trace("SVs aren't supported on this build!");

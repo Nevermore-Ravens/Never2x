@@ -3,12 +3,12 @@ package;
 import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
 import funkin.backend.LanguageHandler;
-import funkin.backend.FPSCounter;
 import haxe.CallStack;
 import haxe.io.Path;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.events.UncaughtErrorEvent;
+import funkin.FunkinCounter;
 
 #if (linux && !debug)
 @:cppInclude('../../_external/gamemode_client.h')
@@ -19,7 +19,7 @@ import openfl.events.UncaughtErrorEvent;
 @:cppInclude("windows.h")
 #end
 class Main extends Sprite {
-	public static var fpsCounter:FPSCounter;
+	public static var infoCounter:FunkinCounter;
 
 	public static var engineVersion:String = '1.0.0';
 	/**
@@ -38,15 +38,15 @@ class Main extends Sprite {
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 
 		addChild(new FlxGame(InitState, 0, 0, 120, true));
-		addChild(fpsCounter = new FPSCounter(10, 10, 12));
-		fpsCounter.visible = Settings.data.fpsCounter;
+		addChild(infoCounter = new FunkinCounter(10, 10, 12));
+		infoCounter.visible = Settings.data.infoCounter;
 
 		@:privateAccess FlxG.keys._nativeCorrection.set("0_43", FlxKey.PLUS);
 	}
 
 	override function __enterFrame(delta:Int) {
 		FlxG.game.__enterFrame(delta);
-		fpsCounter.__enterFrame(delta);
+		infoCounter.__enterFrame(delta);
 		
 		@:privateAccess
 		FlxG.mouse.enabled = !FlxG.game._lostFocus;
@@ -95,6 +95,9 @@ class InitState extends flixel.FlxState {
 	}
 
 	private function setDefines() {
+		nevermore.Nevermore.init();
+		moonchart.Moonchart.init();
+
 		Main.tweenManager = new FlxTweenManager();
 		Controls.load();
 		Settings.load();
@@ -111,8 +114,6 @@ class InitState extends flixel.FlxState {
 
 		Judgement.reset();
 
-		funkin.objects.Strumline.size = Settings.data.strumSize;
-
 		FlxG.fullscreen = Settings.data.fullscreen;
 		FlxG.fixedTimestep = false;
 		FlxG.drawFramerate = FlxG.updateFramerate = Settings.data.framerate;
@@ -120,35 +121,20 @@ class InitState extends flixel.FlxState {
 		FlxG.keys.preventDefaultKeys = [TAB];
 		FlxG.cameras.useBufferLocking = true;
 		FlxG.autoPause = Settings.data.autoPause;
-		FlxAudioHandler.init();
 
-		FlxG.sound.volumeHandler = (v:Float) -> {
-			FlxG.save.data.volume = v;
-			FlxAudioHandler.volume = v;
-
-			@:privateAccess
-			FlxAudioHandler.music._audioBackend.updateVolume();
-
-			for (al in FlxAudioHandler.audioList){
-				if (!al.exists) continue;
-				@:privateAccess
-				al._audioBackend.updateVolume();
-			}
-		}
 		FlxG.sound.volumeUpKeys = Controls.binds["volume_up"];
 		FlxG.sound.volumeDownKeys = Controls.binds["volume_down"];
 		FlxG.sound.muteKeys = Controls.binds["volume_mute"];
 
-		FlxG.signals.preUpdate.add(()->{
-			Main.tweenManager.update(FlxG.elapsed/FlxG.timeScale);
+		FlxG.signals.preUpdate.add(() -> {
+			Main.tweenManager.update(FlxG.elapsed / FlxG.timeScale);
 		});
 
-		FlxG.signals.preStateSwitch.add(()->{
+		FlxG.signals.preStateSwitch.add(() -> {
 			// this if is duct tape in case we get crashes again but hopefully we're getting a better asset system
 			// @:privateAccess if (Type.getClass(FlxG.game._requestedState) != Type.getClass(FlxG.state))
 			 	Paths.clearTracking();
 			NoteSkin.recache();
-			FlxAudioHandler.checkStoredSounds();
 		});
 		FlxG.signals.postStateSwitch.add(()->{
 			Paths.clearUnusedMemory();
@@ -156,7 +142,7 @@ class InitState extends flixel.FlxState {
 
 		FlxG.sound.volume = FlxG.save.data.volume ?? 1.0;
 		FlxG.sound.muted = FlxG.save.data.muted ?? false;
-		FlxG.sound.volumeHandler(FlxG.sound.muted ? 0 : FlxG.sound.volume);
+		//FlxG.sound.volumeHandler(FlxG.sound.muted ? 0 : FlxG.sound.volume);
 		//FlxG.game.soundTray.updateWithSettings();
 
 		openfl.Lib.application.window.onClose.add(function () {
@@ -172,6 +158,5 @@ class InitState extends flixel.FlxState {
         }, true);
 
 		FlxG.plugins.add(new funkin.substates.AddonsMenu());
-		FlxG.plugins.add(new funkin.backend.Conductor());
 	}
 }

@@ -1,9 +1,6 @@
 package funkin.backend;
 
 import moonchart.parsers.QuaverParser.QuaverHitObject;
-#if SV_ALLOWED
-import funkin.backend.Conductor.ScrollVelocity;
-#end
 import moonchart.formats.Quaver;
 import haxe.io.Path;
 import moonchart.formats.fnf.FNFVSlice;
@@ -14,6 +11,7 @@ import moonchart.formats.OsuMania;
 import moonchart.formats.StepMania;
 import moonchart.formats.StepManiaShark;
 import moonchart.formats.BasicFormat;
+import nevermore.core.timing.ScrollVelocity;
 
 typedef JsonChart = {
 	var notes:Array<JsonSection>;
@@ -48,16 +46,6 @@ class Song {
 
 		if (!FileSystem.exists(path)) return file;
 
-		#if SV_ALLOWED
-		Conductor.scrollVelocities = [
-			{
-				time: 0, visualPos: 0, multiplier: 1
-			}
-		];
-
-		Conductor.setupSVs();
-		#end
-
 		inline function tryBpmChanges(basic:DynamicFormat, offsetMult:Float) {
 			if (meta == null) return;
 			if (meta.timingPoints != null && meta.timingPoints.length > 0) return;
@@ -68,22 +56,15 @@ class Song {
 			for (bpm in basicMeta.bpmChanges) {
 				meta.timingPoints.push({
 					time: bpm.time,
-					bpm: bpm.bpm,
+					tempo: bpm.bpm,
 					beatsPerMeasure: Std.int(bpm.beatsPerMeasure)
 				});
 			}
 		}
 
-		inline function trySVs(chart: ChartWithSVs){
-			#if SV_ALLOWED
-			Conductor.scrollVelocities = chart.getScrollVelocities();
-			if (Conductor.scrollVelocities.length == 0)
-				Conductor.scrollVelocities = [{}];
-			Conductor.setupSVs();
-			#end
-		}
+		inline function trySVs(chart: ChartWithSVs){}
 
-		Conductor.timingPointsResetQuants = false;
+		//Conductor.timingPointsResetQuants = false;
 
 		var rawChart:JsonChart = switch haxe.io.Path.extension(path) {
 			case 'json':
@@ -132,7 +113,7 @@ class Song {
 						},
 						timeChanges: [
 							for (bpm in meta.timingPoints)
-								{t: bpm.time, bpm: bpm.bpm, n: bpm.beatsPerMeasure, d: 4}
+								{t: bpm.time, bpm: bpm.tempo, n: bpm.beatsPerMeasure, d: 4}
 						]
 					});
 					vslice.diffs = [diff];
@@ -157,7 +138,7 @@ class Song {
 					var curBpm = json.bpm;
 					meta.timingPoints.push({
 						time: curTime,
-						bpm: curBpm,
+						tempo: curBpm,
 						beatsPerMeasure: 4
 					});
 					for (section in sects) {
@@ -165,13 +146,13 @@ class Song {
 							curBpm = section.bpm;
 							meta.timingPoints.push({
 								time: curTime,
-								bpm: curBpm,
+								tempo: curBpm,
 								beatsPerMeasure: 4
 							});
 						}
 
 						final len = section.sectionBeats ?? ((section.lengthInSteps ?? 16) * 0.25);
-						curTime += Conductor.calculateCrotchet(curBpm) * len;
+						curTime += nevermore.core.Util.crotchet(curBpm) * len;
 					}
 				}
 				cast result;
@@ -201,7 +182,7 @@ class Song {
 				file.format = quav;
 				tryBpmChanges(quav, 0);
 				trySVs(quav);
-				Conductor.timingPointsResetQuants = true;
+				//Conductor.timingPointsResetQuants = true;
 				cast fnf.fromFormat(quav).data.song;
 			case 'osu':
 				var fnf:CamelliaChart = new CamelliaChart();
@@ -429,7 +410,7 @@ class CamQuaver extends Quaver implements ChartWithSVs {
 
 
 class CamOsuChart extends OsuMania {
-	public static function encodeType(hitsound:ByteInt) {
+	public static function encodeType(hitsound:Int) {
 		return 'OSU__$hitsound';
 	}
 

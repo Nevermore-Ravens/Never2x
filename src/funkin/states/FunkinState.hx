@@ -11,20 +11,20 @@ class FunkinState extends FlxState {
 	
 	override function create() {
 		super.create();
-		FlxG.camera.bgColor.alpha = 0;
+		//FlxG.camera.bgColor.alpha = 0;
 		//Conductor.reset();
 		//Paths.clearUnusedMemory();
 
-		Conductor.onStep.add(stepHit);
+/*		Conductor.onStep.add(stepHit);
 		Conductor.onBeat.add(beatHit);
-		Conductor.onMeasure.add(measureHit);
+		Conductor.onMeasure.add(measureHit);*/
 	}
 
 	override function destroy() {
 		super.destroy();
-		Conductor.onStep.remove(stepHit);
+/*		Conductor.onStep.remove(stepHit);
 		Conductor.onBeat.remove(beatHit);
-		Conductor.onMeasure.remove(measureHit);
+		Conductor.onMeasure.remove(measureHit);*/
 	}
 
 	// i am so sorry (this is just taken directly from psych im not trying to bother with flixel's transition bs

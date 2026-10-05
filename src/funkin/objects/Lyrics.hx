@@ -81,7 +81,7 @@ class Lyrics extends FlxSpriteGroup {
 		if (index >= list.length) return;
 
         final next:LyricLine = list[index];
-        if (next.time > Conductor.rawTime - Conductor.offset) return;
+        if (next.time > Conductor.audioTime) return;
 		showLine(next);
 		index++;
 	}

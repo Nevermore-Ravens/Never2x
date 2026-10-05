@@ -99,16 +99,16 @@ class Sustain extends Note {
 		coyoteTimer = 0.175 * coyoteHitMult * FlxG.timeScale;
 		timeOffset = 0;
 		untilTick = 0;
-		#if SV_ALLOWED
+/*		#if SV_ALLOWED
 		visualEnd = Conductor.getPositionFromTime(data.time + data.length);
-		#end
+		#end*/
 		return this;
 	}
 
 	@:noDebug override public function followStrum(strum:StrumNote, downscroll:Bool, scrollSpeed:Float) {
 		visible = strum.visible && strum.parent.visible;
 		#if SV_ALLOWED
-		distance = ((data.visualPosition - Conductor.visualPosition) + timeOffset) * scrollSpeed;
+		distance = ((data.visualPosition - Conductor.time) + timeOffset) * scrollSpeed;
 		#else
 		distance = (hitTime + timeOffset) * 0.45 * scrollSpeed;
 		#end

@@ -238,9 +238,9 @@ class OptionsState extends FunkinState {
 		],
 		"Misc." => [
 			{
-				var opt = new Option("fps_counter", "fps_counter_desc", 'fpsCounter', BoolOption);
+				var opt = new Option("fps_counter", "fps_counter_desc", 'infoCounter', BoolOption);
 				opt.onChange = function(v) {
-						Main.fpsCounter.visible = v;
+						Main.infoCounter.visible = v;
 				};
 				opt;
 			},

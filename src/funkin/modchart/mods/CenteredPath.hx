@@ -20,11 +20,12 @@ class CenteredPath extends BaseModifier {
 	override function adjustDistance(spr:FunkinSprite, distance:Float, unadjustedDistance:Float, beat:Float, lane:Int, strumline:Int, field:Strumline, type:ObjectType):Float {
 		final noteSpeed:Float = field.overrideScrollSpeed <= 0 ? grandparent.scrollSpeed : field.overrideScrollSpeed;
 		
-		#if SV_ALLOWED
+/*		#if SV_ALLOWED
 		final svMult:Float = FlxMath.lerp(1, Conductor.currentSv.multiplier, centeredPathRespectSV);
 		#else
 		final svMult:Float = 1;
-		#end
+		#end*/
+		final svMult:Float = 1;
 		final mainOff = FlxMath.lerp(Strumline.swagWidth, Conductor.crotchet * svMult * 0.45 * noteSpeed, centeredPathType) * (centeredPath + centeredPathLANE);
 		var distanceOffset:Float = mainOff + (transformPath + transformPathLANE);
 		#if SV_ALLOWED

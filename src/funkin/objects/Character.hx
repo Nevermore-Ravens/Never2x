@@ -29,7 +29,7 @@ class Character extends FunkinSprite {
 	public static inline var default_name:String = 'bf';
 	public var name:String = default_name;
 	public var singDuration:Float = 4;
-	public var danceInterval:ByteInt = 2;
+	public var danceInterval:Int = 2;
 	public var healthColor:FlxColor = 0xFFA1A1A1;
 	public var sheets:Array<String> = [];
 	public var icon:String = '';
@@ -125,7 +125,7 @@ class Character extends FunkinSprite {
 		super.update(elapsed);
 		if (!autoIdle || specialAnim || dancing || dead) return;
 
-		_singTimer -= elapsed * (singDuration * (Conductor.stepCrotchet * 0.25));
+		_singTimer -= elapsed * (singDuration * (Conductor.semiquaver * 0.25));
 		if (_singTimer <= 0.0) dance(true);
 	}
 
@@ -162,7 +162,7 @@ class Character extends FunkinSprite {
 	override function playAnim(name:String, ?forced:Bool = true, ?suffix:String = "") {
 		super.playAnim(name, forced, suffix);
 		if (name.startsWith('sing') || name.startsWith('miss')) {
-			_singTimer = singDuration * (Conductor.stepCrotchet * 0.15);
+			_singTimer = singDuration * (Conductor.semiquaver * 0.15);
 		}
 	}
 

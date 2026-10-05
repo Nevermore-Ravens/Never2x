@@ -312,8 +312,8 @@ class Note extends FunkinSprite {
 		glowStrum = true;
 		type = data.type;
 		
-		if (!luminColors) color = 0xFFFFFFFF;
-		else color = curPalette[byQuant ? Conductor.quants.indexOf(data.quant) : data.lane];
+/*		if (!luminColors) color = 0xFFFFFFFF;
+		else color = curPalette[byQuant ? Conductor.quants.indexOf(data.quant) : data.lane];*/
 
 		return this;
 	}
@@ -333,7 +333,7 @@ class Note extends FunkinSprite {
 	@:noDebug public function followStrum(strum:StrumNote, downscroll:Bool, scrollSpeed:Float) {
 		visible = strum.visible && strum.parent.visible;
 		#if SV_ALLOWED
-		distance = (data.visualPosition - Conductor.visualPosition) * scrollSpeed;
+		distance = (data.visualPosition - Conductor.time) * scrollSpeed;
 		#else
 		distance = hitTime * 0.45 * scrollSpeed;
 		#end

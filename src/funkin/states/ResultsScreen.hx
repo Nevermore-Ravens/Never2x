@@ -96,9 +96,9 @@ class ResultsScreen extends FunkinState {
 		scrollObj = new FlxObject(640, 360, 2, 2);
 		FlxG.camera.follow(scrollObj, LOCKON, 0.15);
 
-		Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('results', 'music'), true);
+		Conductor.inst = FlxG.sound.load(Paths.audioPath('results', 'music'), true);
+		Conductor.clock.reset([{tempo: 140, beatsPerMeasure: 4}]);
 		Conductor.offset = -0.050;
-		Conductor.timingPoints = [{bpm: 140, beatsPerMeasure: 4}];
 		Conductor.play();
 
 		weekFile = WeekData.list[WeekData.current];

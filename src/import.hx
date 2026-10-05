@@ -1,9 +1,9 @@
 #if !macro
 // project specific
 import nevermore.backend.Vector3;
+import nevermore.core.Conductor;
 import funkin.backend.*;
 import funkin.backend.WeekData.WeekFile;
-import funkin.backend.EventHandler.Event;
 import funkin.backend.Scores.PlayData;
 import funkin.backend.Song.Chart;
 import funkin.objects.menu.Alphabet;
@@ -36,7 +36,6 @@ import sys.FileSystem;
 import sys.io.File;
 import hxjson5.Json5;
 import haxe.Json;
-import funkin.backend.CPPTypes;
 
 using StringTools;
 #end

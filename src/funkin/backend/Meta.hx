@@ -1,9 +1,11 @@
 package funkin.backend;
 
+import nevermore.core.timing.TimingPoint;
+
 @:structInit
 class MetaFile {
 	public var songName:String = 'Unknown';
-	public var timingPoints:Array<Conductor.TimingPoint> = [];
+	public var timingPoints:Array<TimingPoint> = [];
 	public var offset:Float = 0.0;
 	public var hasVocals:Bool = true;
 	public var hasModchart:Bool = false;
@@ -16,8 +18,8 @@ class MetaFile {
 
 typedef MetaTimingPoint = {
 	var time:Float;
-	var ?bpm:Float;
-	var ?beatsPerMeasure:ByteUInt;
+	var ?tempo:Float;
+	var ?beatsPerMeasure:Int;
 }
 
 class Meta {
@@ -75,8 +77,8 @@ class Meta {
 			for (point in timingPoints) {
 				file.timingPoints.push({
 					time: point.time,
-					bpm: point.bpm ?? 0,
-					beatsPerMeasure: point.beatsPerMeasure ?? 0
+					tempo: point.tempo ?? 0,
+					beatsPerMeasure: point.beatsPerMeasure ?? 4
 				});
 			}
 		}

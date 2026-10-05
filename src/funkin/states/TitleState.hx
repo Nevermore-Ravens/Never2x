@@ -114,8 +114,8 @@ class TitleState extends FunkinState {
 		DiscordClient.changePresence();
 		#end
 
-		Conductor.bpm = bpm;
-		Conductor.playing = true;
+		Conductor.tempo = 102;
+		Conductor.clock.active = true;
 		if (seenIntro) {
 			skipIntro();
 
@@ -124,7 +124,7 @@ class TitleState extends FunkinState {
 			return;
 		}
 
-		Conductor.inst = FlxAudioHandler.loadMusic(Paths.audioPath('freakyMenu', 'music'), true, 0);
+		Conductor.inst = FlxG.sound.load(Paths.audioPath('freakyMenu', 'music'), 0, true);
 		Conductor.play();
 
 		FlxTween.num(0, 0.7, 4, {ease: FlxEase.linear}, function(num) {

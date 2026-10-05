@@ -213,7 +213,7 @@ class ModchartManager {
 		var redirect = getRedirect(name);
 		if (redirect == null) return;
 		
-		var event = new ModEvent(Conductor.floatBeat, length, redirect, value, ease, strumline, startVal);
+		var event = new ModEvent(Conductor.beat, length, redirect, value, ease, strumline, startVal);
 		event.start();
 		timeline.running.push(event);
 	}
@@ -360,7 +360,7 @@ class ModchartManager {
 			curField = strumline;
 			for (mod in allMods) {
 				if (mod.active[strumline])
-					mod.prepare(strumline, Conductor.floatBeat);
+					mod.prepare(strumline, Conductor.beat);
 			}
 		}
 	}
@@ -369,7 +369,7 @@ class ModchartManager {
 		var newDistance:Float = distance;
 		for (mod in allMods) {
 			if (mod.active[strumline] && mod.modifiesDistance(strumline))
-				newDistance = mod.adjustDistance(sprite, newDistance, distance, Conductor.floatBeat, lane, strumline, field, type);
+				newDistance = mod.adjustDistance(sprite, newDistance, distance, Conductor.beat, lane, strumline, field, type);
 		}
 		return newDistance;
 	}
@@ -377,26 +377,26 @@ class ModchartManager {
 	public function adjustPos(sprite:FunkinSprite, pos:Vector3, distance:Float, unadjustedDistance:Float, lane:Int, strumline:Int, field:Strumline, type:ObjectType) {
 		for (mod in allMods) {
 			if (mod.active[strumline] && mod.modifiesPosition(strumline))
-				mod.adjustPos(sprite, pos, distance, unadjustedDistance, Conductor.floatBeat, lane, strumline, field, type);
+				mod.adjustPos(sprite, pos, distance, unadjustedDistance, Conductor.beat, lane, strumline, field, type);
 		}
 	}
 	public function adjustScale(sprite:FunkinSprite, scale:FlxPoint, distance:Float, lane:Int, strumline:Int, field:Strumline, type:ObjectType) {
 		for (mod in allMods) {
 			if (mod.active[strumline] && mod.modifiesScale(strumline))
-				mod.adjustScale(sprite, scale, distance, Conductor.floatBeat, lane, strumline, field, type);
+				mod.adjustScale(sprite, scale, distance, Conductor.beat, lane, strumline, field, type);
 		}
 	}
 	public function adjustVertex(sprite:FunkinSprite, vertex:Vector3, pos:Vector3, distance:Float, unadjustedDistance:Float, lane:Int, strumline:Int, field:Strumline, type:ObjectType) {
 		for (mod in allMods) {
 			if (mod.active[strumline] && mod.modifiesVertex(strumline))
-				mod.adjustVertex(sprite, vertex, pos, distance, unadjustedDistance, Conductor.floatBeat, lane, strumline, field, type);
+				mod.adjustVertex(sprite, vertex, pos, distance, unadjustedDistance, Conductor.beat, lane, strumline, field, type);
 		}
 	}
 	public function getStealth(sprite:FunkinSprite, distance:Float, unadjustedDistance:Float, pos:Vector3, lane:Int, strumline:Int, field:Strumline, type:ObjectType) {
 		var stealth:Float = 0;
 		for (mod in allMods) {
 			if (mod.active[strumline] && mod.modifiesStealth(strumline))
-				stealth = mod.getStealth(sprite, stealth, distance, unadjustedDistance, pos, Conductor.floatBeat, lane, strumline, field, type);
+				stealth = mod.getStealth(sprite, stealth, distance, unadjustedDistance, pos, Conductor.beat, lane, strumline, field, type);
 		}
 		return stealth;
 	}

@@ -12,9 +12,9 @@ class BlueBalledState extends flixel.FlxSubState {
 
     var confirm:Bool = false;
 
-    var charID:ByteInt;
+    var charID:Int;
 
-    public function new(cam:FlxCamera, charID:ByteInt = 0) {
+    public function new(cam:FlxCamera, charID:Int = 0) {
         this.charID = charID;
         this.camera = cam;
         super();
@@ -41,7 +41,7 @@ class BlueBalledState extends flixel.FlxSubState {
 
         FlxG.sound.play(Paths.audio("menu_deletedata", "sfx"));
         new FlxTimer().start(1.2, _ -> {
-            Conductor.inst = FlxAudioHandler.loadAudio(Paths.audioPath("zenith", "music"), true, 0.5, true);
+            Conductor.inst = FlxG.sound.load(Paths.audioPath("zenith", "music"), 0.5, true);
             Conductor.inst.pitch = 1;
 			Conductor.inst.play();
             char.playAnim('death-loop');

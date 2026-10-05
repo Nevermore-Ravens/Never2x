@@ -22,7 +22,7 @@ class ModchartTimeline {
     }
 
     public function update() {
-        while (curEvent < events.length && events[curEvent].beat <= Conductor.visualBeat) {
+        while (curEvent < events.length && events[curEvent].beat <= Conductor.beat) {
             final event = events[curEvent];
             event.start();
             if (!event.instant)
@@ -33,13 +33,13 @@ class ModchartTimeline {
         var i = 0;
         while (i < running.length) {
 			try{
-            	running[i].tick(Conductor.visualBeat);
+            	running[i].tick(Conductor.beat);
 			}catch(e:haxe.Exception){
 				trace('error in an event ${e.message}');
 				running.splice(i, 1);
 				continue;
 			}
-            if (running[i].canFinish(Conductor.visualBeat))
+            if (running[i].canFinish(Conductor.beat))
                 running.splice(i, 1);
             else
                 ++i;

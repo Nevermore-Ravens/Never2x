@@ -4,7 +4,6 @@ import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 import funkin.backend.Song.Chart;
 import funkin.objects.*;
-import funkin.backend.EventHandler;
 import funkin.objects.Strumline.StrumNote;
 import funkin.substates.PauseMenu;
 import funkin.substates.Dialogue;
@@ -119,8 +118,6 @@ class PlayState extends FunkinState {
 
 	var noteSplashes:FlxTypedSpriteGroup<NoteSplash>;
 
-	var eventHandler:EventHandler;
-
 	var judgeSprite:JudgementSpr;
 	var comboNumbers:ComboNums;
 
@@ -175,16 +172,6 @@ class PlayState extends FunkinState {
 		super.create();
 		Conductor.stop();
 		minClearType = Ranking.clearTypeList.indexOf(Settings.data.gameplayModifiers["minClearType"]);
-		FlxG.timeScale = Settings.data.gameplayModifiers["playbackRate"];
-
-
-		#if SV_ALLOWED
-		@:privateAccess {
-			// WHY DO WE NOT CALL CONDUCTOR.RESET??????????
-			Conductor.svIndex = 0;
-			Conductor.currentSv = {};
-		}
-		#end
 		
 		self = this;
 /*		if (storyMode) {
@@ -222,8 +209,8 @@ class PlayState extends FunkinState {
 
 		ScriptHandler.loadFromDir('scripts');
 
-		Conductor._time = -(extraTime * FlxG.timeScale);
-		Conductor.rawTime = Conductor.time = Conductor._time + Conductor.offset;
+/*		Conductor._time = -(extraTime * FlxG.timeScale);
+		Conductor.rawTime = Conductor.time = Conductor._time + Conductor.offset;*/
 
 		playerStrums = new Strumline(960, strumlineYPos - 10, true, noteSkin);
 		opponentStrums = new Strumline(320, strumlineYPos - 10, false, noteSkin);
@@ -319,11 +306,6 @@ class PlayState extends FunkinState {
 
 		loadSong();
 
-		eventHandler = new EventHandler();
-		eventHandler.triggered = eventTriggered;
-		eventHandler.pushed = eventPushed;
-		eventHandler.load(songID, song);
-
 		stage = new Stage(stageName);
 		ScriptHandler.loadFile(Paths.get('stages/$stageName.hx'));
 		camGame.zoom = defaultCamZoom = stage.zoom;
@@ -359,7 +341,6 @@ class PlayState extends FunkinState {
 			camFollow.setPosition(stage.camera.x, stage.camera.y);
 		camGame.snapToTarget();
 
-		Conductor.syncBeats();
 		ScriptHandler.call('create');
 
 		if (#if MODCHARTS_ALLOWED playfield.modchart == null && #end Settings.data.laneUnderlay > 0) {
@@ -411,7 +392,7 @@ class PlayState extends FunkinState {
 			return;
 		}
 		
-		Conductor.playing = true;
+		Conductor.clock.active = true;
 		new FlxTimer().start((extraTime * FlxG.timeScale) / 1000, _ -> {
 			Conductor.play();
 			ScriptHandler.call('songStarted');
@@ -434,7 +415,7 @@ class PlayState extends FunkinState {
 		}
 	}
 
-	function eventTriggered(event:Event):Void {
+/*	function eventTriggered(event:Event):Void {
 		ScriptHandler.call('eventTriggered', [event.name, event.args, event.time]);
 
 		switch event.name {
@@ -471,7 +452,7 @@ class PlayState extends FunkinState {
 				var who:Int = event.args[0];
 				moveCamera(playfield.getStrumline(who).character());
 		}
-	}
+	}*/
 
 	// stealing from myself Lol Lmao -rudy
 	function moveCamera(character:Character) {
@@ -489,7 +470,7 @@ class PlayState extends FunkinState {
 
 
 	var eventList:Array<String> = [];
-	function eventPushed(event:Event):Void {
+	/*function eventPushed(event:Event):Void {
 		eventPushedUnique(event);
 		if (eventList.contains(event.name)) return;
 
@@ -503,7 +484,7 @@ class PlayState extends FunkinState {
 		switch event.name {
 			case 'Change Character':
 				cacheCharacter(event.args[1]);
-			#if SV_ALLOWED
+/*			#if SV_ALLOWED
 			case 'Mult SV': // troll engine, if that even parses
 				Conductor.scrollVelocities.push({
 					time: event.time,
@@ -516,7 +497,7 @@ class PlayState extends FunkinState {
 				});
 			#end
 		}
-	}
+	}*/
 
 	function cacheCharacter(name:String):Character {
 		var character:Character = new Character(0, 0, name);
@@ -581,15 +562,13 @@ class PlayState extends FunkinState {
 		updateCameraScale(delta);
 		updateIconScales(delta);
 		updateIconPositions();
-		if (Conductor.rawTime > 0)
+		if (Conductor.audioTime > 0)
 			updateTimeText();
 
 		if (Settings.data.notesMoveCamera) {
 			if (noteCamDelay > 0) noteCamDelay -= delta;
 			else camGame.targetOffset.set();
 		}
-
-		if (Conductor.rawTime >= 0) eventHandler.update();
 
 		if (FlxG.keys.justPressed.F8) botplay = !botplay;
 
@@ -1025,9 +1004,8 @@ class PlayState extends FunkinState {
 			}
 		}
 
-		Conductor.offset = song.meta.offset;
-		Conductor.timingPoints = song.meta.timingPoints;
-		Conductor.bpm = Conductor.timingPoints[0].bpm;
+		Conductor.clock.reset([]);
+		Conductor.clock.offset = 0;
 
 		stageName = song.meta.stage;
 		songName = song.meta.songName;
@@ -1035,7 +1013,7 @@ class PlayState extends FunkinState {
 		// load inst
 		try {
 			if (Conductor.inst != null) Conductor.inst.stop();
-			Conductor.inst = FlxAudioHandler.loadAudio(Paths.audioPath('songs/$songID/Inst'));
+			Conductor.inst = FlxG.sound.load(Paths.audioPath('songs/$songID/Inst'));
 			Conductor.inst.pitch = FlxG.timeScale;
 			Conductor.inst.onComplete = function() songCompleted();
 
@@ -1044,7 +1022,7 @@ class PlayState extends FunkinState {
 		}
 
 		// load vocals
-		try {
+/*		try {
 			if (song.meta.hasVocals) {
 				var folder:String = 'songs/$songID';
 				var mainFilePath:String = '$folder/Vocals-Player';
@@ -1063,25 +1041,12 @@ class PlayState extends FunkinState {
 			}
 		} catch (e) {
 			Sys.println('Vocals failed to load: ${e.details()}');
-		}
+		}*/
 
-		
-		
 		ScriptHandler.loadFromDir('songs/$songID');
 		ScriptHandler.call('loadSong', [song]);
-		#if SV_ALLOWED
-		Conductor.setupSVs();
-		#end
 
-		playfield.load(song.notes);
-		playfield.scrollSpeed /= FlxG.timeScale;
-
-		for (noteData in playfield.unspawnedNotes) {
-			if (noteData.player != playerID || playfield.mineTypes.contains(noteData.type)) continue;
-			totalNotes++;
-		}
-
-		trace('total amount of hittable notes: $totalNotes');
+		//playfield.load(song.notes);
 	}
 
 	@:unreflective
@@ -1220,7 +1185,7 @@ class PlayState extends FunkinState {
 	dynamic function updateTimeText() {
 		if (!Settings.data.timeText) return;
 
-		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.time * 0.001, false);
+		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.audioTime * 0.001, false);
 		var duration:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.length * 0.001, false);
 
 		timeText.text = '$songName ($current / $duration)';
@@ -1241,7 +1206,7 @@ class PlayState extends FunkinState {
 
 		ScriptHandler.call('beatHit', [beat]);
 
-		if (metronome && Conductor.rawTime >= 0) {
+		if (metronome && Conductor.songTime >= 0) {
 			FlxG.sound.play(Paths.audio('metronome', 'sfx'));
 		}
 	}
@@ -1299,7 +1264,7 @@ class PlayState extends FunkinState {
 		camHUD.fade(0x42FF0000, 5);
 		FlxTween.tween(camGame, {zoom: camGame.zoom + 0.5, angle: (FlxG.random.bool() ? -10 : 10)}, 5, {ease: FlxEase.linear});
 
-		FlxTween.tween(Conductor.vocals, {pitch: 0.1}, 5, {ease: FlxEase.linear});
+		//FlxTween.tween(Conductor.vocals, {pitch: 0.1}, 5, {ease: FlxEase.linear});
 		FlxTween.tween(Conductor.inst, {pitch: 0.1}, 5, {ease: FlxEase.linear, 
 			onComplete: t -> {
 				Conductor.stop();
