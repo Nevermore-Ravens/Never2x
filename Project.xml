@@ -47,6 +47,7 @@
 	</section>
 
 	<!-- libraries -->
+	<haxelib name="nevermore" />
 	<haxelib name="openfl" version="9.5.0" />
 	<haxelib name="flixel" version="git" />
 	<haxelib name="flixel-addons" version="3.0.2"/>
@@ -81,9 +82,6 @@
 
 	<!-- Fix compiling issues -->
     <setenv name="HAXEPATH" value="./"/>
-	
-	<assets path="alsoft.txt" rename="alsoft.ini" type="text" if="windows"/>
-	<assets path="alsoft.txt" rename="alsoft.conf" type="text" unless="windows"/>
 
 	<icon path="icons/icon16.png" size='16' />
 	<icon path="icons/icon32.png" size='32' />
