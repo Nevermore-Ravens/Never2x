@@ -14,8 +14,8 @@ class ScriptHandler {
 
 		#if ADDONS_ALLOWED
 		for (addon in Addons.list) {
-			if (!addon.disabled)
-				directories.push('addons/${addon.id}');
+			if (addon.enabled)
+				directories.push('addons/${addon.directory}');
 		}
 		#end
 
@@ -167,7 +167,7 @@ class Script extends Iris {
 		set('makeAux', function(name:String, ?defaultValue:Int = 0) {
 			getModchartManager().makeAux(name, defaultValue);
 		});
-		set('makeNode', function(inputs:Array<String>, func:funkin.modchart.ModchartManager.NodeFunc, ?outputs:Array<String>) {
+		set('makeNode', function(inputs:Array<String>, func:nevermore.modchart.ModchartManager.NodeFunc, ?outputs:Array<String>) {
 			getModchartManager().makeNode(inputs, func, outputs);
 		});
 		#if SV_ALLOWED
@@ -183,7 +183,7 @@ class Script extends Iris {
 		});
 		#end
 		//set("SpriteFrameBuffer", funkin.objects.SpriteFrameBuffer);
-		set('ProxyField', funkin.modchart.drawing.ProxyField);
+		set('ProxyField', nevermore.modchart.drawing.ProxyField);
 		set('FlxEase', flixel.tweens.FlxEase);
 
 		//set('FlxSprite', FlxSprite);
@@ -195,7 +195,7 @@ class Script extends Iris {
 
 	static function getModchartManager() {
 		if (PlayState.self.playfield.modchart == null)
-			PlayState.self.playfield.modchart = new funkin.modchart.ModchartManager();
+			PlayState.self.playfield.modchart = new nevermore.modchart.ModchartManager();
 		return PlayState.self.playfield.modchart;
 	}
 }

@@ -42,8 +42,8 @@ class WeekData {
 		
 		#if ADDONS_ALLOWED
 		for (addon in Addons.list) {
-			if (!addon.disabled)
-				directories.push('addons/${addon.id}');
+			if (addon.enabled)
+				directories.push('addons/${addon.directory}');
 		}
 		#end
 

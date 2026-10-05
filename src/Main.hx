@@ -9,6 +9,7 @@ import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.events.UncaughtErrorEvent;
 import funkin.FunkinCounter;
+import funkin.backend.chart.*;
 
 #if (linux && !debug)
 @:cppInclude('../../_external/gamemode_client.h')
@@ -98,15 +99,19 @@ class InitState extends flixel.FlxState {
 		nevermore.Nevermore.init();
 		moonchart.Moonchart.init();
 
+		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomQuaver;
+		moonchart.backend.FormatDetector.getFormatData(STEPMANIA).handler = CustomStepMania;
+		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomSSC;
+		nevermore.core.Song.parser = new SongParser();
+
 		Main.tweenManager = new FlxTweenManager();
 		Controls.load();
 		Settings.load();
 		Scores.load();
 		DiscordClient.start();
-		Addons.load();
+		Addons.init();
 		Meta.cacheFiles();
 		Alphabet.loadData();
-		#if MODCHARTS_ALLOWED funkin.modchart.ModchartManager.setupRedirects(); #end
 		LanguageHandler.loadTranslations();
 
 		Settings.validate();
@@ -134,7 +139,6 @@ class InitState extends flixel.FlxState {
 			// this if is duct tape in case we get crashes again but hopefully we're getting a better asset system
 			// @:privateAccess if (Type.getClass(FlxG.game._requestedState) != Type.getClass(FlxG.state))
 			 	Paths.clearTracking();
-			NoteSkin.recache();
 		});
 		FlxG.signals.postStateSwitch.add(()->{
 			Paths.clearUnusedMemory();

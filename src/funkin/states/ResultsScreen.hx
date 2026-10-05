@@ -241,7 +241,7 @@ class ResultsScreen extends FunkinState {
 			}
 
 			for (judge in result.judges)
-				makeJudgeBar(judge.name.charAt(0).toUpperCase() + judge.name.substr(1), judge.color, judge.hits);
+				makeJudgeBar(judge.name.charAt(0).toUpperCase() + judge.name.substr(1), /*judge.color*/0xFFFFFFFF, judge.hits);
 
 			FlxTween.tween(song, {alpha: 1, y: song.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3});
 			FlxTween.tween(songDifficulty, {alpha: 1, y: songDifficulty.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.5});
@@ -281,7 +281,7 @@ class ResultsScreen extends FunkinState {
 		var idx:Array<Int> = [for (res in data) 0];
 		FlxTween.num(0, 1, 1.5, {startDelay: 0.8, ease: FlxEase.cubeOut}, function(num) {
 			for (i => result in data) {
-				final highestTiming = result.judges[result.judges.length - 1].timing;
+				final highestTiming = HitWindows.max;//result.judges[result.judges.length - 1].timing;
 				while (idx[i] < result.notesHit.length && num * result.songLength >= result.notesHit[idx[i]].time) {
 					final hit = result.notesHit[idx[i]];
 					final xPercent = hit.time / result.songLength;

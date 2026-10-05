@@ -1,5 +1,6 @@
 package funkin.states;
 
+/*
 import lime.ui.KeyCode;
 import lime.app.Application;
 
@@ -90,7 +91,7 @@ class CalibrateOffsetState extends FunkinState {
 			beat += 2;
 		}
 
-		Conductor.inst = FlxAudioHandler.loadAudio(Paths.audioPath('songs/$songID/Inst'));
+		Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
 		Conductor.inst.onComplete = finish;
 
 		playfield.load(song.notes);
@@ -143,4 +144,4 @@ class CalibrateOffsetState extends FunkinState {
 		totalNoteDifference += note.hitTime;
 		notesHit++;
 	}
-}
+}*/

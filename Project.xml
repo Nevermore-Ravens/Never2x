@@ -60,10 +60,6 @@
 	<haxelib name="hscript-iris" if="SCRIPTS_ALLOWED"/>
 	<haxelib name="hscript" if="debug" /> <!-- for debugging -->
 
-	<!-- miscellaneous -->
-	<!-- let the macro run on the modifiers (TODO: look more on genericBuild, it may help with my issue which this fixes)-->
-	<haxeflag name="--macro" value="haxe.macro.Compiler.include('funkin.modchart.mods')" if="MODCHARTS_ALLOWED"/>
-
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN"/>
 	<haxedef name="FLX_NO_TOUCH"/>
 	<!--<haxedef name="FLX_NO_GAMEPAD"/>-->

@@ -7,7 +7,6 @@ import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxSpriteUtil;
 import openfl.display.BitmapData;
-import funkin.backend.Judgement;
 import funkin.backend.Util;
 import flixel.graphics.FlxGraphic;
 
@@ -50,15 +49,15 @@ class HitErrorBar extends FlxSpriteGroup
 		this.y = y;
 		this.alpha = 0.4;
 
-		for (i in 0...Judgement.list.length * 2)
+		for (i in 0...Judgement.current.length * 2)
 		{
 			var id = i;
-			if (id >= Judgement.list.length)
-				id -= Judgement.list.length;
+			if (id >= Judgement.current.length)
+				id -= Judgement.current.length;
             
-			widthArray[i] = i < Judgement.list.length ? Judgement.list[Judgement.list.length-id-1].timing
-				- (Judgement.list[Judgement.list.length-id-2] != null ? Judgement.list[Judgement.list.length-id-2].timing : 0) : Judgement.list[id].timing
-					- (Judgement.list[id-1] != null ? Judgement.list[id-1].timing: 0);
+			widthArray[i] = i < Judgement.current.length ? HitWindows.current[Judgement.current.length-id-1]
+				- (Judgement.current[Judgement.current.length-id-2] != null ? HitWindows.current[Judgement.current.length-id-2] : 0) : HitWindows.current[id]
+					- (Judgement.current[id-1] != null ? HitWindows.current[id-1]: 0);
 		}
 
 		var totalWidth = 0.0;
@@ -69,14 +68,14 @@ class HitErrorBar extends FlxSpriteGroup
 
 		var daOffset = 0.0;
 
-		for (i in 0...Judgement.list.length * 2) 
+		for (i in 0...Judgement.current.length * 2) 
 		{
 			var id = i;
-			if (id >= Judgement.list.length)
-				id -= Judgement.list.length;
+			if (id >= Judgement.current.length)
+				id -= Judgement.current.length;
 
 			final shitWidth = widthArray[i];
-            final curColor:FlxColor = i < Judgement.list.length ? Judgement.list[Judgement.list.length-id-1].color : Judgement.list[id].color;
+            final curColor:FlxColor = 0xFFFFFFFF;//i < Judgement.current.length ? Judgement.current[Judgement.current.length-id-1].color : Judgement.current[id].color;
 
 			judgeLine.fillRect(new openfl.geom.Rectangle(0, daOffset, 5, shitWidth),
 				curColor);
@@ -155,7 +154,7 @@ class HitErrorBar extends FlxSpriteGroup
 			var rawPos = FlxMath.remapToRange((timingBar.y + timingBar.height * 0.5)
 				+ currentMS, (timingBar.y + timingBar.height * 0.5),
 				(timingBar.y + timingBar.height * 0.5)
-				+ Judgement.max.timing, (timingBar.y + timingBar.height * 0.5), timingBar.y
+				+ HitWindows.max, (timingBar.y + timingBar.height * 0.5), timingBar.y
 				+ timingBar.height)
 				- 5;
 
@@ -182,7 +181,7 @@ class HitErrorBar extends FlxSpriteGroup
 		var barPos = FlxMath.remapToRange((timingBar.y + timingBar.height * 0.5)
 			+ currentMS, (timingBar.y + timingBar.height * 0.5),
 			(timingBar.y + timingBar.height * 0.5)
-			+ Judgement.max.timing, (timingBar.y + timingBar.height * 0.5), timingBar.y
+			+ HitWindows.max, (timingBar.y + timingBar.height * 0.5), timingBar.y
 			+ timingBar.height)
 			- 1.5;
 
@@ -204,7 +203,7 @@ class HitErrorBar extends FlxSpriteGroup
 		trianglePointer.alpha = 0.7;
 
         lastMS = currentMS;
-		currentMS = Judgement.max.timing;
+		currentMS = HitWindows.max;
 
 		triangleRawPosition = timingBar.y + timingBar.height - 1.5;
 		missHitNote.revive();

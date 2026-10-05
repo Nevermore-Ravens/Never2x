@@ -220,8 +220,9 @@ class FreeplayState extends FunkinState {
 
 		final songID:String = songList[curSelected].id;
 		final diff:String = Difficulty.format(curDiffName);
-		final path:String = 'songs/$songID/${Song.getFile(songID, diff)}';
-		if (Paths.exists(path)) {
+		// final path:String = 'songs/$songID/${Song.getFile(songID, diff)}';
+		// if (Paths.exists(path)) {
+		if (Song.exists("songs/" + songID, diff)) {
 			WeekData.current = songList[curSelected].weekIdx;
 			PlayState.songID = songID;
 			Difficulty.list = curDiffs;
@@ -232,7 +233,7 @@ class FreeplayState extends FunkinState {
 			curSelected = oldSelected;
 		} else {
 			persistentUpdate = false;
-			trace('Song/Difficulty doesn\'t exist: "$path"');
+			trace('Difficulty "$diff" doesn\'t exist for "$songID"');
 			actionPressed = false;
 			curSelected = oldSelected;
 			return;
@@ -328,7 +329,7 @@ class FreeplayState extends FunkinState {
 			grpIcons.members[num].alpha = num == curSelected ? 1 : 0.6;
 		}
 
-		Addons.current = songList[curSelected].folder; // sigh
+		Addons.current = Addons.get(songList[curSelected].folder); // sigh
 
 		var newColour:Int = songList[curSelected].colour;
 		if (newColour != intendedColour) {

@@ -25,7 +25,7 @@ class BlueBalledState extends flixel.FlxSubState {
 
         final ps = funkin.states.PlayState.self;
         final strums = ps.playfield.strumlines;
-        char = (charID < strums.length && strums.members[charID].character() != null) ? strums.members[charID].character() : ps.bf;
+        char = ps.bf;//(charID < strums.length && strums.members[charID].character() != null) ? strums.members[charID].character() : ps.bf;
         char.dead = true;
         char.screenCenter();
         add(char);

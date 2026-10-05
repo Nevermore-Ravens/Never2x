@@ -157,8 +157,8 @@ class AddonList extends TextList {
 		var y = (texts.length > 0) ? texts.members[texts.length - 1].height + (subTexts.members[texts.length - 1].height - 5) * selPercentages[texts.length - 1] : y + 15 - curScroll;
 		selPercentages.push(0);
 
-		if (graphic == null && FileSystem.exists('addons/${addon.id}/icon.png')) {
-			var bitmapO = BitmapData.fromFile('addons/${addon.id}/icon.png');
+		if (graphic == null && FileSystem.exists('addons/${addon.directory}/icon.png')) {
+			var bitmapO = BitmapData.fromFile('addons/${addon.directory}/icon.png');
 			if (bitmapO.width != bitmapO.height) {
 				var minSize = Std.int(Math.min(bitmapO.width, bitmapO.height));
 				var rect = new openfl.geom.Rectangle((bitmapO.width - minSize) * 0.5, (bitmapO.height - minSize) * 0.5, minSize, minSize);
@@ -168,7 +168,7 @@ class AddonList extends TextList {
 				bitmapO = newBitmap;
 			}
 			//if (Settings.data.gpuCache) openfl.utils.BitmapDataUtil.toHardware(bitmapO);
-			graphic = FlxGraphic.fromBitmapData(bitmapO, false, 'addons/${addon.id}/icon.png');
+			graphic = FlxGraphic.fromBitmapData(bitmapO, false, 'addons/${addon.directory}/icon.png');
 			graphic.persist = true;
 			graphic.destroyOnNoUse = false;
 		}

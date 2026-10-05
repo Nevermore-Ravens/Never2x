@@ -30,8 +30,8 @@ class AddonsMenu extends FlxSubState {
 		cameras = [new FlxCamera()];
 		FlxG.cameras.add(camera, false);
 
-		var addonsOff = [for (addon in Addons.list) if (addon.disabled) addon];
-		var addonsOn = [for (addon in Addons.list) if (!addon.disabled) addon];
+		var addonsOff = [for (addon in Addons.list) if (!addon.enabled) addon];
+		var addonsOn = [for (addon in Addons.list) if (addon.enabled) addon];
 
 		var bg = new FunkinSprite(0, FlxG.height * 0.5);
 		bg.makeGraphic(1, 1, 0x80000000);
@@ -163,8 +163,7 @@ class AddonsMenu extends FlxSubState {
 					Sys.command("start", ["addons"]);
 					#end
 				case "refresh":
-					Addons.list.resize(0);
-					Addons.load();
+					Addons.reload();
 					var lRemove = leftBox.onRemoveAddon;
 					var rRemove = rightBox.onRemoveAddon;
 					leftBox.onRemoveAddon = rightBox.onRemoveAddon = function(_, graphic) {Paths.destroyAsset("MODicon", graphic);};
@@ -174,14 +173,13 @@ class AddonsMenu extends FlxSubState {
 						rightBox.removeAddon(0);
 
 					for (addon in Addons.list)
-						(addon.disabled ? leftBox : rightBox).addAddon(addon);
+						(!addon.enabled ? leftBox : rightBox).addAddon(addon);
 					leftBox.onRemoveAddon = lRemove;
 					rightBox.onRemoveAddon = rRemove;
 				case "apply":
-					Settings.data.addonsOff = [for (addon in leftBox.list) addon.id];
-					Settings.data.addonsOrder = [for (addon in rightBox.list) addon.id];
-					Addons.list.resize(0);
-					Addons.load();
+					Settings.data.addonsOff = [for (addon in leftBox.list) addon.directory];
+					Settings.data.addonsOrder = [for (addon in rightBox.list) addon.directory];
+					Addons.reload();
 					Settings.save();
 					FlxG.resetState();
 			}

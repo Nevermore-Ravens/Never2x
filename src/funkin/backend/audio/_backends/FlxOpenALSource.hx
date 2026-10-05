@@ -9,6 +9,7 @@ import lime.media.openal.ALSource;
 import lime.media.vorbis.VorbisFile;
 import lime.media.vorbis.VorbisInfo;
 import lime.utils.UInt8Array;
+import funkin.backend.FlxAudioHandler;
 
 /**
  * Audio backend for Native that supports OpenAL

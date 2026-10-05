@@ -3,12 +3,8 @@ package funkin.states;
 import haxe.io.Path;
 import funkin.objects.menu.TextList;
 import funkin.objects.menu.OptionList;
-import funkin.objects.menu.NoteCustomization;
-import funkin.objects.Note;
-import funkin.objects.NoteSplash;
+// import funkin.objects.menu.NoteCustomization;
 import funkin.objects.FunkinSprite;
-import funkin.objects.PlayField;
-import funkin.objects.Strumline;
 import funkin.backend.Settings.SaveVariables;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
@@ -88,7 +84,7 @@ class OptionsState extends FunkinState {
 				var opt = new Option('scroll_speed', 'scroll_speed_desc', "scrollSpeed", FloatOption(0.5, 7, 0.05));
 				opt;
 			},
-			{
+			/*{
 				var opt = new Option('customize_notes', 'customize_notes_desc', "", ButtonOption);
 				opt.hasSound = true;
 				opt.onChange = function(_) {
@@ -102,7 +98,7 @@ class OptionsState extends FunkinState {
 					self.noteEdit.active = true;
 				};
 				opt;
-			},
+			},*/
 			{
 				var opt = new Option('note_offset', 'note_offset_desc', "noteOffset", FloatOption(-5000, 5000, 1));
 				opt.formatText = function(_) {
@@ -218,7 +214,7 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("game_alpha", "game_alpha_desc", "gameVisibility", IntOption(0, 100, 5, false, true));
 				opt.formatText = function(_) {
-						return opt.value + "%";
+					return opt.value + "%";
 				};
 				opt;
 			},
@@ -229,9 +225,9 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("gpu_cache", "gpu_cache_desc", "gpuCache", BoolOption);
 				opt.onChange = function(v) {
-						Controls.save();
-						Settings.save();
-						Sys.exit(1);
+					Controls.save();
+					Settings.save();
+					Sys.exit(1);
 				}
 				opt;
 			}
@@ -240,14 +236,14 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("fps_counter", "fps_counter_desc", 'infoCounter', BoolOption);
 				opt.onChange = function(v) {
-						Main.infoCounter.visible = v;
+					Main.infoCounter.visible = v;
 				};
 				opt;
 			},
 			{
 				var opt = new Option("fullscreen", "fullscreen_desc", "fullscreen", BoolOption);
 				opt.onChange = function(v) {
-						FlxG.fullscreen = v;
+					FlxG.fullscreen = v;
 				};
 				opt;
 			}, 
@@ -284,7 +280,7 @@ class OptionsState extends FunkinState {
 	var cateText:TextList;
 	var optText:OptionList;
 
-	var noteEdit:NoteCustomization;
+	// var noteEdit:NoteCustomization;
 
 	override function create() {
 		super.create();
@@ -308,11 +304,11 @@ class OptionsState extends FunkinState {
 		optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700);
 		optText.onOptEnter = optEnter.bind(optText);
 
-		noteEdit = new NoteCustomization(FlxG.width + 10, 10, FlxG.width - 20, FlxG.height - 20);
-		noteEdit.onOptEnter = optEnter.bind(noteEdit);
-		noteEdit.active = false;
+		// noteEdit = new NoteCustomization(FlxG.width + 10, 10, FlxG.width - 20, FlxG.height - 20);
+		// noteEdit.onOptEnter = optEnter.bind(noteEdit);
+		// noteEdit.active = false;
 
-		add(noteEdit); // dont want a chain reaction with onAccept
+		// add(noteEdit); // dont want a chain reaction with onAccept
 		add(optText);
 		add(cateText);
 
@@ -364,14 +360,14 @@ class OptionsState extends FunkinState {
 		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
 			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
 
-			if (noteEdit.active) {
+			/*if (noteEdit.active) {
 				noteEdit.active = false;
 
 				cateText.allowMouse = true;
 				cateText.allowKeys = !wasInOpts;
 				optText.allowMouse = true;
 				optText.allowKeys = wasInOpts;
-			} else if (optText.allowKeys) {
+			} else */if (optText.allowKeys) {
 				cateText.allowKeys = true;
 				optText.allowKeys = false;
 			} else {
@@ -380,7 +376,7 @@ class OptionsState extends FunkinState {
 			}
 		}
 		super.update(delta);
-		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, noteEdit.active ? FlxG.width : 0, delta * 20);
+		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, /*noteEdit.active ? FlxG.width : */0, delta * 20);
 		cateText.displayHover = cateText.allowKeys || cateText.hovered;
 		optText.displayHover = optText.allowKeys || optText.hovered;
 
@@ -461,7 +457,6 @@ class OptionsState extends FunkinState {
 		super.destroy();
 		Controls.save();
 		Settings.save();
-		Strumline.size = Settings.data.strumSize;
 		self = null;
 	}
 }

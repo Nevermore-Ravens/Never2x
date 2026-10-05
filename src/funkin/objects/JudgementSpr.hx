@@ -1,6 +1,5 @@
 package funkin.objects;
 
-import funkin.backend.Judgement;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
@@ -29,7 +28,7 @@ class JudgementSpr extends FunkinSprite {
 		ogX = x;
 		ogY = y;
 		final texture = Paths.image('ui/judgements');
-		loadGraphic(texture, true, texture.width, Math.floor(texture.height / Judgement.list.length));
+		loadGraphic(texture, true, texture.width, Math.floor(texture.height / Judgement.current.length));
 		
 		visibility = 0;
 
@@ -42,7 +41,7 @@ class JudgementSpr extends FunkinSprite {
 		if (Settings.data.judgementAlpha <= 0) return;
 
 		Main.tweenManager.cancelTweensOf(this);
-		animation.frameIndex = Judgement.getIDFromTiming(timing);
+		animation.frameIndex = HitWindows.getID(timing);
 		if (animation.frameIndex == 0 && Settings.data.hideHighest) {
 			visibility = 0;
 			return;

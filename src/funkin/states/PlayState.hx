@@ -2,11 +2,14 @@ package funkin.states;
 
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
-import funkin.backend.Song.Chart;
 import funkin.objects.*;
-import funkin.objects.Strumline.StrumNote;
 import funkin.substates.PauseMenu;
 import funkin.substates.Dialogue;
+
+import nevermore.play.note.*;
+import nevermore.play.NoteField;
+import nevermore.play.Strumline;
+import nevermore.skins.Noteskin;
 
 @:structInit class NoteHit {
 	public var time:Float;
@@ -41,7 +44,6 @@ class PlayState extends FunkinState {
 
 	public var noteHitList:Array<NoteHit> = [];
 	public var score:Int = 0;
-	var metronome:Bool = false;
 	public var comboBreaks:Int = 0;
 	var combo:Int = 0;
 	public var accuracy:Float = 0.0;
@@ -71,8 +73,8 @@ class PlayState extends FunkinState {
 		if (playfield == null) return false;
 		// preventing someone doing `game.playfield.botplay = true;`
 		// to get around disqualifying
-		if (playfield.botplay) disqualified = true;
-		return playfield.botplay;
+		if (playfield.autoplay) disqualified = true;
+		return playfield.autoplay;
 	}
 
 	function set_botplay(value:Bool):Bool {
@@ -81,7 +83,7 @@ class PlayState extends FunkinState {
 		// and saving the play
 		if (value) disqualified = true;
 
-		playfield.botplay = value;
+		playfield.autoplay = value;
 		botplayTxt.visible = value;
 		return botplay = value;
 	}
@@ -111,7 +113,7 @@ class PlayState extends FunkinState {
 	var gfSpeed:Int = 1;
 	var cameraSpeed:Float = 0.1;
 
-	public var playfield:PlayField;
+	public var playfield:NoteField;
 	public var playerStrums:Strumline;
 	public var opponentStrums:Strumline;
 	var characterCache:Map<String, Character> = [];
@@ -183,9 +185,11 @@ class PlayState extends FunkinState {
 
 		FlxG.mouse.visible = false;
 		downscroll = Settings.data.downscroll;
-		metronome = Settings.data.metronome;
+		Conductor.metronome = Settings.data.metronome;
 		noteSkin = Settings.data.noteSkin;
-		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - Strumline.swagWidth : 50; // i mean the new position is only 4 pixels off so
+		var skin = Noteskin.get("images/noteSkins/" + noteSkin);
+
+		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - skin.spacing * Settings.data.strumSize : 50; // i mean the new position is only 4 pixels off so
 
 		FlxG.cameras.reset(camGame = new FlxCamera());
 		camGame.bgColor.alpha = 0;
@@ -209,13 +213,12 @@ class PlayState extends FunkinState {
 
 		ScriptHandler.loadFromDir('scripts');
 
-/*		Conductor._time = -(extraTime * FlxG.timeScale);
-		Conductor.rawTime = Conductor.time = Conductor._time + Conductor.offset;*/
+		Conductor.clock.audioTime = -(extraTime * FlxG.timeScale);
 
-		playerStrums = new Strumline(960, strumlineYPos - 10, true, noteSkin);
-		opponentStrums = new Strumline(320, strumlineYPos - 10, false, noteSkin);
+		playerStrums = new Strumline(960, strumlineYPos - 10, skin);
+		opponentStrums = new Strumline(320, strumlineYPos - 10, skin);
 
-		var extraStrumline:Strumline = new Strumline(0, strumlineYPos - 10, false, Settings.data.noteSkin);
+		var extraStrumline:Strumline = new Strumline(0, strumlineYPos - 10, skin);
 		extraStrumline.screenCenter(X);
 		extraStrumline.visible = false;
 
@@ -229,7 +232,7 @@ class PlayState extends FunkinState {
 
 			case 'Dancer': // GF/WHATEVER THE FUCK
 				// if dancer doesn't have a chart for the song just default to the player side
-				if (!Song.exists(songID, 'gf')) {
+				if (!Song.exists("songs/" + songID, 'gf')) {
 					Settings.data.gameplayModifiers['playingSide'] = 'Default';
 					1;
 				} else 2;
@@ -239,7 +242,7 @@ class PlayState extends FunkinState {
 		}
 
 		var simpleJudges:Bool = Settings.data.popupCenter != 'FNF';
-		var popupX:Float = (!Settings.data.centeredNotes && Settings.data.popupCenter == "Field") ? strumlines[playerID].centerX : FlxG.width / 2;
+		var popupX:Float = (!Settings.data.centeredNotes && Settings.data.popupCenter == "Field") ? strumlines[playerID].x : FlxG.width / 2;
 
 		// 400, 300
 		add(judgeSprite = new JudgementSpr(simpleJudges ? popupX : 400, 300));
@@ -263,21 +266,21 @@ class PlayState extends FunkinState {
 			comboNumbers.y = judgeSprite.y + 110;
 		}
 
-		add(playfield = new PlayField(strumlines));
+		add(playfield = new NoteField(strumlines));
 		playfield.cameras = [camHUD]; // so you can still `game.hud.visible = false;` without hiding the strumlines too
 		playfield.scrollSpeed = Settings.data.scrollSpeed;
-		playfield.downscroll = downscroll;
+		// playfield.downscroll = downscroll;
 		playfield.playerID = playerID;
 
 		playfield.noteHit = noteHit;
 		playfield.sustainHit = sustainHit;
-		playfield.noteMiss = noteMiss;
+		playfield.noteMissed = noteMiss;
 		playfield.ghostTap = ghostTap;
-		playfield.noteSpawned = noteSpawned;
+		// playfield.noteSpawned = noteSpawned;
 
 		playfield.add(noteSplashes = new FlxTypedSpriteGroup<NoteSplash>());
-		playfield.noteSplashes = noteSplashes;
-		for (i in 0...Strumline.keyCount) noteSplashes.add(new NoteSplash(i));
+		// playfield.noteSplashes = noteSplashes;
+		for (i in 0...playfield.getStrumline(playfield.playerID).keyCount) noteSplashes.add(new NoteSplash(i));
 		noteSplashes.cameras = [camHUD];
 
 		add(hud = new FlxSpriteGroup());
@@ -291,12 +294,15 @@ class PlayState extends FunkinState {
 					continue;
 				}
 
+				line.size = Settings.data.strumSize;
 				line.visible = false;
 				line.alpha = 0;
 			}
 		} else if (!Settings.data.opponentNotes) {
-			for (i => line in playfield.strumlines.members)
+			for (i => line in playfield.strumlines.members) {
 				line.visible = i == playfield.playerID;
+				line.size = Settings.data.strumSize;
+			}
 		}
 
 		if (Settings.data.gameplayModifiers['blind']) {
@@ -311,20 +317,20 @@ class PlayState extends FunkinState {
 		camGame.zoom = defaultCamZoom = stage.zoom;
 		canMoveCamera = stage.canMoveCamera;
 
-		add(gf = new Character(stage.spectator.x, stage.spectator.y, song.meta.spectator, stage.reflective));
+		add(gf = new Character(stage.spectator.x, stage.spectator.y, /*song.meta.spectator*/ "gf", stage.reflective));
 		gf.visible = stage.isSpectatorVisible;
 		ScriptHandler.loadFile(Paths.get('characters/${gf.name}.hx'));
-		extraStrumline.character = function() return gf;
-
+		
 		//to-do add to the json the character positions and position of it's reflections
-		add(dad = new Character(stage.opponent.x, stage.opponent.y, song.meta.opponent, stage.reflective));
+		add(dad = new Character(stage.opponent.x, stage.opponent.y, /*song.meta.opponent*/ "dad", stage.reflective));
 		ScriptHandler.loadFile(Paths.get('characters/${dad.name}.hx'));
-		add(bf = new Character(stage.player.x, stage.player.y, song.meta.player, stage.reflective));
+		add(bf = new Character(stage.player.x, stage.player.y, /*song.meta.player*/ "bf", stage.reflective));
 		ScriptHandler.loadFile(Paths.get('characters/${bf.name}.hx'));
-
-		playerStrums.character = function() return bf;
-		opponentStrums.character = function() return dad;
-		opponentStrums.healthMult = -1.0;
+		
+		// playerStrums.character = function() return bf;
+		// extraStrumline.character = function() return gf;
+		// opponentStrums.character = function() return dad;
+		// opponentStrums.healthMult = -1.0;
 
 		makeHUD();
 
@@ -344,19 +350,17 @@ class PlayState extends FunkinState {
 		ScriptHandler.call('create');
 
 		if (#if MODCHARTS_ALLOWED playfield.modchart == null && #end Settings.data.laneUnderlay > 0) {
-			var playerLaneUnderlay = new FunkinSprite(playerStrums.x).makeGraphic(1, 1, FlxColor.BLACK);
+			var playerLaneUnderlay = new FunkinSprite(playerStrums.findMinX() - 10).makeGraphic(1, 1, FlxColor.BLACK);
 			playerLaneUnderlay.scale.set(playerStrums.width + 20, FlxG.height);
 			playerLaneUnderlay.updateHitbox();
-			playerLaneUnderlay.x += ((playerStrums.width - playerLaneUnderlay.scale.x) / 2);
 			playerLaneUnderlay.alpha = Settings.data.laneUnderlay;
 			playerLaneUnderlay.camera = camHUD;
 			playerLaneUnderlay.visible = playerStrums.visible;
 			insert(members.indexOf(playfield) - 2, playerLaneUnderlay);
 
-			var opponentLaneUnderlay = new FunkinSprite(opponentStrums.x).makeGraphic(1, 1, FlxColor.BLACK);
+			var opponentLaneUnderlay = new FunkinSprite(opponentStrums.findMinX() - 10).makeGraphic(1, 1, FlxColor.BLACK);
 			opponentLaneUnderlay.scale.set(opponentStrums.width + 20, FlxG.height);
 			opponentLaneUnderlay.updateHitbox();
-			opponentLaneUnderlay.x += ((opponentStrums.width - opponentLaneUnderlay.scale.x) / 2);
 			opponentLaneUnderlay.alpha = Settings.data.laneUnderlay;
 			opponentLaneUnderlay.camera = camHUD;
 			opponentLaneUnderlay.visible = opponentStrums.visible;
@@ -400,16 +404,15 @@ class PlayState extends FunkinState {
 	}
 
 	function fadeStrums() {
-		if (skipStrumFade) {
-			playfield.strumlines.alpha = 1;
+		if (skipStrumFade)
 			return;
-		}
 
 		var strumFadeTime:Float = 0.5;
 
 		for (strumline in playfield.strumlines) {
 			for (i => strum in strumline.members) {
 				strum.alpha = 0;
+				strum.y -= 1;
 				Main.tweenManager.tween(strum, {y: strum.y + 10, alpha: strumline.alpha}, strumFadeTime, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 			}
 		}
@@ -450,7 +453,7 @@ class PlayState extends FunkinState {
 				if (!canMoveCamera) return;
 
 				var who:Int = event.args[0];
-				moveCamera(playfield.getStrumline(who).character());
+				moveCamera(TEMPgetChar(playfield.getStrumline(who)));
 		}
 	}*/
 
@@ -484,7 +487,7 @@ class PlayState extends FunkinState {
 		switch event.name {
 			case 'Change Character':
 				cacheCharacter(event.args[1]);
-/*			#if SV_ALLOWED
+			#if SV_ALLOWED
 			case 'Mult SV': // troll engine, if that even parses
 				Conductor.scrollVelocities.push({
 					time: event.time,
@@ -573,8 +576,8 @@ class PlayState extends FunkinState {
 		if (FlxG.keys.justPressed.F8) botplay = !botplay;
 
 		if (botplayTxt.visible) {
-			botplayTxtSine += 180 * delta;
-			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplayTxtSine) / 180);
+			botplayTxtSine += Math.PI * delta;
+			botplayTxt.alpha = 1 - Math.sin(botplayTxtSine);
 		}
 
 		if (Controls.justPressed('reset') && Settings.data.canReset && !alreadyDying) {
@@ -593,10 +596,18 @@ class PlayState extends FunkinState {
 		ScriptHandler.call('update', [delta]);
 	}
 
+	function TEMPgetChar(strumline:Strumline) {
+		return switch (playfield.strumlines.members.indexOf(strumline)) {
+			case 0: bf;
+			case 1: dad;
+			default: gf;
+		};
+	}
+
 	inline function singCharacter(strumline:Strumline, note:Note) {
-		var curCharacter:Character = strumline.character();
+		var curCharacter:Character = TEMPgetChar(strumline);//strumline.character();
 		if (note.type == 'GF Sing') curCharacter = gf;
-		var dontAnimate:Bool = note.noAnimation && note.type != 'GF Sing';
+		var dontAnimate:Bool = /*note.noAnimation && */note.type != 'GF Sing';
 		if (curCharacter == null) return;
 
 		if (note.type == 'Cheer') {
@@ -606,20 +617,18 @@ class PlayState extends FunkinState {
 
 		if (dontAnimate) return;
 
-		curCharacter.playAnim('sing${Note.directions[note.lane].toUpperCase()}', true, note.animSuffix);
+		curCharacter.playAnim('sing${Note.directions[note.lane].toUpperCase()}', true, /*note.animSuffix*/"");
 	}
 
 	function noteHit(strumline:Strumline, note:Note) {
-		note.wasHit = true;
-
 		if(ScriptHandler.call('noteHit', [strumline, note]) == -1)return;
 
 		singCharacter(strumline, note);
 
 		if (note.player != playerID) {
-			note.hitJudgement = Judgement.list[1];
-			if (note.sustain != null)
-				note.sustain.hitJudgement = note.hitJudgement;
+			// note.hitJudgement = Judgement.list[1];
+			// if (note.sustain != null)
+			// 	note.sustain.hitJudgement = note.hitJudgement;
 			return;
 		} else if (botplay) {
 			if (Settings.data.notesMoveCamera) {
@@ -628,18 +637,18 @@ class PlayState extends FunkinState {
 				camGame.targetOffset.set(offsetToUse.x, offsetToUse.y);
 			}
 
-			final judge:Judgement = Judgement.list[1];
-			note.hitJudgement = judge;
-			if(note.sustain != null)
-				note.sustain.hitJudgement = judge;
+			final judge:Judgement = Judgement.current[1];
+			// note.hitJudgement = judge;
+			// if(note.sustain != null)
+			// 	note.sustain.hitJudgement = judge;
 			//health += judge.health * strumline.healthMult;
-			judgeSprite.display(judge.timing);
+			judgeSprite.display(HitWindows.current[1]);
 			//comboNumbers.display(++combo);
 
 			noteHitList.push({
-				time: note.rawTime,
-				diff: judge.timing,
-				color: judge.color,
+				time: note.time,
+				diff: HitWindows.current[1],
+				color: 0xFF808080,//judge.color,
 				countMean: false,
 				judge: judge.name
 			});
@@ -647,7 +656,7 @@ class PlayState extends FunkinState {
 			return;
 		}
 
-		if (note.sound.length > 0) FlxG.sound.play(Paths.audio(note.sound));
+		//if (note.sound.length > 0) FlxG.sound.play(Paths.audio(note.sound));
 
 		judgeHit(strumline, note);
 
@@ -669,36 +678,37 @@ class PlayState extends FunkinState {
 	}
 
 	function judgeHit(field:Strumline, note:Note) {
-		var judge:Judgement = Judgement.getFromTiming(note.hitTime);
-		final divHitTime = note.hitTime / FlxG.timeScale * -1;
+		var hitTime:Float = note.adjustedTime - playfield.clock.time;
+		var judge:Judgement = Judgement.get(hitTime);
+		final divHitTime = hitTime / FlxG.timeScale * -1;
 
-		if (!note.breakOnHit) {
+		if (!note.behavior.punishable) {
 			noteHitList.push({
-				time: note.rawTime,
+				time: note.time,
 				diff: divHitTime,
-				color: judge.color,
+				color: 0xFFFFFFFF,//judge.color,
 				judge: judge.name
 			});
 		}
 
 		judge = ScriptHandler.call("judgeHit", [field, note, judge], true) ?? judge; // So that scripts can override judgements if required i.e for mines
 
-		note.hitJudgement = judge;
-		if(note.sustain != null)
-			note.sustain.hitJudgement = judge;
+		// note.hitJudgement = judge;
+		// if(note.sustain != null)
+		// 	note.sustain.hitJudgement = judge;
 
-		if (note.breakOnHit) {
+		if (note.behavior.punishable) {
 			score -= 10;
-			health -= note.missHealth * field.healthMult;
+			health -= 6;//note.missHealth * field.healthMult;
 			combo = 0;
 			comboBreaks++;
 		} else {
-			notesPlayed += judge.accuracy;
+			notesPlayed += 1;//judge.accuracy;
 			notesHit++;
 			judge.hits++;
 			combo++;
-			health += judge.health * field.healthMult;
-			score += Math.floor(500 - (Math.pow(Math.abs(note.hitTime / judge.timing), 2.5) * 300));
+			health += 2.5;//judge.health * 1field.healthMult;
+			score += Math.floor(500 - (Math.pow(Math.abs(hitTime / HitWindows.get(hitTime)), 2.5) * 300)); // i thought thisd be HitWindows.max but it used judge.timing
 		}
 
 		timingIndicator.text = '${Util.truncateFloat(divHitTime, 2)} ms';
@@ -707,9 +717,9 @@ class PlayState extends FunkinState {
 		Main.tweenManager.tween(timingIndicator, {alpha: 0}, 0.35, {ease: FlxEase.cubeIn, startDelay: 0.75});
 
 		if (Settings.data.hitErrorBar)
-			hitErrorBar.registerHit(note.hitTime * -1);
+			hitErrorBar.registerHit(hitTime * -1);
 
-		if (judge.breakCombo) {
+		if (judge.causesMisses) {
 			if (combo >= 50 && gf.animation.exists('sad')) {
 				gf.playAnim('sad');
 				gf.specialAnim = true;
@@ -720,27 +730,27 @@ class PlayState extends FunkinState {
 		}
 		
 		updateInfo();
-		judgeSprite.display(note.hitTime);
+		judgeSprite.display(hitTime);
 		switch (Settings.data.comboTinting){
 			case 'Clear Flag':
 				var colour:FlxColor = FlxColor.WHITE;
-				if(comboBreaks == 0){
-					for(i in 0...Judgement.list.length){
-						if(Judgement.list[i].hits > 0)
-							colour = Judgement.list[i].color;
-					}
-				}
+				// if(comboBreaks == 0){
+				// 	for(i in 0...Judgement.list.length){
+				// 		if(Judgement.list[i].hits > 0)
+				// 			colour = Judgement.list[i].color;
+				// 	}
+				// }
 				comboNumbers.color = colour;
 			case 'Per-Note':
-				comboNumbers.color = judge.color;
+				// comboNumbers.color = judge.color;
 		}
 
-		if (!judge.breakCombo)
+		if (!judge.causesMisses)
 			comboNumbers.display(combo);
 		else
 			comboNumbers.clearNums();
 
-		if (Settings.data.noteSplashSkin != 'none' && judge.splashes) {
+		/*if (Settings.data.noteSplashSkin != 'none' && judge.splashes) {
 			final splash = noteSplashes.members[note.lane];
 			if(Settings.data.strumGlow == 'Judgement'){
 				splash.luminColors = true;
@@ -750,7 +760,7 @@ class PlayState extends FunkinState {
 				splash.color = note.color;
 			}
 			splash.hit(field.members[note.lane]);
-		}
+		}*/
 
 		ScriptHandler.call("postJudgeHit", [field, note, judge]); // i KNOW post functions are lame i KNOW but i NEED THIs so im not DOING SHIT EVERY FRAME FOR NO REASON FOR MY JUDGE SKIN SCRIPT -neb
 
@@ -863,11 +873,11 @@ class PlayState extends FunkinState {
 		judgeNames.clearFormats();
 		judgeNames.text = "";
 		var lastNameEnd = 0;
-		for (i in 0...Judgement.list.length) {
-			final judge = Judgement.list[i];
+		for (i in 0...Judgement.current.length) {
+			final judge = Judgement.current[i];
 
-			judgeNames.text += judge.shortName + "\n";
-			judgeNames.addFormat(new FlxTextFormat(judge.color), lastNameEnd, judgeNames.text.length);
+			judgeNames.text += judge.name + "\n";
+			judgeNames.addFormat(new FlxTextFormat(/*judge.color*/0xFFFFFFFF), lastNameEnd, judgeNames.text.length);
 			lastNameEnd = judgeNames.text.length;
 		}
 		judgeNames.text += "MS";
@@ -879,34 +889,34 @@ class PlayState extends FunkinState {
 
 		judgeCounters.text = '';
 		var judgeBreaks:Int = 0;
-		for (i in 0...Judgement.list.length) {
-			var judge = Judgement.list[i];
+		for (i in 0...Judgement.current.length) {
+			var judge = Judgement.current[i];
 			judgeCounters.text += Util.moneyString(judge.hits) + '\n';
-			if (judge.breakCombo) judgeBreaks += judge.hits;
+			if (judge.causesMisses) judgeBreaks += judge.hits;
 		}
 
 		judgeCounters.text += Math.max(comboBreaks - judgeBreaks, 0);
 	}
 
-	dynamic function ghostTap(strumline:Strumline, dir:Int, shouldMiss:Bool)
+	dynamic function ghostTap(strumline:Strumline, dir:Int)
 	{
-		if (shouldMiss)
+		if (!Settings.data.ghostTapping)
 		{
 			if (ScriptHandler.call('ghostTapMiss', [strumline, dir]) == -1) return;
 
-			onMiss(strumline, Note.defaultMissHealth, true, dir, '');
+			onMiss(strumline, /*Note.defaultMissHealth*/ 6, true, dir, '');
 		}
 	}
 
 	dynamic function noteMiss(strumline:Strumline, note:Note) {
 		if (ScriptHandler.call('noteMiss', [strumline, note]) == -1) return;
-		if (note.ignore || note.player != playerID) return;
+		if (note.behavior.ignore || note.player != playerID) return;
 
-		onMiss(strumline, note.missHealth, !note.noAnimation, note.lane, note.animSuffix);
+		onMiss(strumline, /*note.missHealth, !note.noAnimation*/6, true, note.lane, /*note.animSuffix*/"");
 
 		noteHitList.push({
-			time: note.rawTime,
-			diff: Judgement.max.timing,
+			time: note.time,
+			diff: HitWindows.max,
 			color: 0xFFFFFFFF,
 			countMean: false,
 			judge: "miss"
@@ -923,24 +933,24 @@ class PlayState extends FunkinState {
 		comboBreaks++;
 		combo = 0;
 
-		health -= missHealth * strumline.healthMult;
+		health -= missHealth * 1;//strumline.healthMult;
 
 		if (Settings.data.hitErrorBar)
 			hitErrorBar.registerMiss();
 
 		updateInfo();
 
-		var curCharacter:Character = strumline.character();
+		var curCharacter:Character = TEMPgetChar(strumline);//strumline.character();
 
 		if (curCharacter != null && animation)
 			curCharacter.playAnim('miss${Note.directions[dir].toUpperCase()}', true, animSuffix);
 	}
 
 	function updateClearType():String {
-		var sicks:Int = Judgement.list[0].hits;
-		var goods:Int = Judgement.list[1].hits;
-		var bads:Int = Judgement.list[2].hits;
-		var shits:Int = Judgement.list[3].hits;
+		var sicks:Int = Judgement.current[0].hits;
+		var goods:Int = Judgement.current[1].hits;
+		var bads:Int = Judgement.current[2].hits;
+		var shits:Int = Judgement.current[3].hits;
 
 		var type:String = 'N/A';
 
@@ -988,32 +998,22 @@ class PlayState extends FunkinState {
 	}
 
 	function loadSong():Void {
-		song = Song.load(songID, Difficulty.current);
+		song = Song.load("songs/" + songID, Difficulty.current);
 
-		if (Conductor.inst != null){
-			Conductor.inst.stop();
-			Conductor.inst = null;
-		}
-
-		if (Song.exists(songID, 'gf')) {
-
-			var middleNotes:Chart = Song.load(songID, 'gf');
+		if (Song.exists("songs/" + songID, 'gf')) {
+			var middleNotes:Chart = Song.load("songs/" + songID, 'gf');
 			for (note in middleNotes.notes) {
 				note.player = 2;
 				song.notes.push(note);
 			}
 		}
 
-		Conductor.clock.reset([]);
-		Conductor.clock.offset = 0;
-
-		stageName = song.meta.stage;
-		songName = song.meta.songName;
+		stageName = "stage";//song.meta.stage;
+		songName = songID;//song.meta.songName;
 
 		// load inst
 		try {
-			if (Conductor.inst != null) Conductor.inst.stop();
-			Conductor.inst = FlxG.sound.load(Paths.audioPath('songs/$songID/Inst'));
+			Conductor.inst = FlxG.sound.load(Paths.audio('songs/$songID/Inst'));
 			Conductor.inst.pitch = FlxG.timeScale;
 			Conductor.inst.onComplete = function() songCompleted();
 
@@ -1022,8 +1022,11 @@ class PlayState extends FunkinState {
 		}
 
 		// load vocals
-/*		try {
-			if (song.meta.hasVocals) {
+		try {
+			if (Assets.exists('songs/$songID/Vocals.ogg'))
+				Conductor.vocals = FlxG.sound.load(Assets.audio('songs/$songID/Vocals'));
+
+			/*if (song.meta.hasVocals) {
 				var folder:String = 'songs/$songID';
 				var mainFilePath:String = '$folder/Vocals-Player';
 				var opponentFilePath:String = '$folder/Vocals-Opponent';
@@ -1038,15 +1041,15 @@ class PlayState extends FunkinState {
 
 				Conductor.mainVocals = mainFile;
 				if (opponentFile != null) Conductor.opponentVocals = opponentFile;
-			}
+			}*/
 		} catch (e) {
 			Sys.println('Vocals failed to load: ${e.details()}');
-		}*/
+		}
 
 		ScriptHandler.loadFromDir('songs/$songID');
 		ScriptHandler.call('loadSong', [song]);
 
-		//playfield.load(song.notes);
+		playfield.load(song);
 	}
 
 	@:unreflective
@@ -1093,7 +1096,7 @@ class PlayState extends FunkinState {
 
 		FlxG.timeScale = 1;
 		Conductor.stop();
-		Conductor.vocals.destroy();
+		//Conductor.vocals.destroy(); maybe
 		deaths = 0;
 
 		Util.cancelAllTimers();
@@ -1105,13 +1108,14 @@ class PlayState extends FunkinState {
 			++currentLevel < songList.length ? FunkinState.resetState() : exitToMenu = true;
 		
 		var judgeBreaks = 0;
-		for (judge in Judgement.list)
-			judgeBreaks += judge.breakCombo ? judge.hits : 0;
-		Judgement.list.push({
+		for (judge in Judgement.current)
+			judgeBreaks += judge.causesMisses ? judge.hits : 0;
+		Judgement.current.push({
 			name: "miss",
-			shortName: "MS",
-			timing: Judgement.max.timing,
-			color: 0xFF808080,
+			//shortName: "MS",
+			//timing: Judgement.max.timing,
+			//color: 0xFF808080,
+			causesMisses: true, // lol
 			hits: comboBreaks - judgeBreaks
 		});
 
@@ -1120,7 +1124,7 @@ class PlayState extends FunkinState {
 			score: score,
 			accuracy: accuracy,
 			notesHit: noteHitList,
-			judges: Judgement.list,
+			judges: Judgement.current,
 			songLength: Conductor.inst.length
 		});
 
@@ -1205,10 +1209,6 @@ class PlayState extends FunkinState {
 		characterBopper(beat);
 
 		ScriptHandler.call('beatHit', [beat]);
-
-		if (metronome && Conductor.songTime >= 0) {
-			FlxG.sound.play(Paths.audio('metronome', 'sfx'));
-		}
 	}
 
 	// i added this check to prevent that ugly ahh jittering
@@ -1264,7 +1264,8 @@ class PlayState extends FunkinState {
 		camHUD.fade(0x42FF0000, 5);
 		FlxTween.tween(camGame, {zoom: camGame.zoom + 0.5, angle: (FlxG.random.bool() ? -10 : 10)}, 5, {ease: FlxEase.linear});
 
-		//FlxTween.tween(Conductor.vocals, {pitch: 0.1}, 5, {ease: FlxEase.linear});
+		if (Conductor.vocals != null)
+			FlxTween.tween(Conductor.vocals, {pitch: 0.1}, 5, {ease: FlxEase.linear});
 		FlxTween.tween(Conductor.inst, {pitch: 0.1}, 5, {ease: FlxEase.linear, 
 			onComplete: t -> {
 				Conductor.stop();

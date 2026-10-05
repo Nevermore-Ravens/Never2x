@@ -15,8 +15,8 @@ class LanguageHandler {
 		var translationFiles: Array<String> = ["assets/data/Translations.csv"];
 		#if ADDONS_ALLOWED
 		for(addon in Addons.list){
-			if(addon.disabled)continue;
-			var path = 'addons/${addon.id}/data/Translations.csv';
+			if(!addon.enabled)continue;
+			var path = 'addons/${addon.directory}/data/Translations.csv';
 			if(!FileSystem.exists(path))continue;
 			translationFiles.push(path);
 		}

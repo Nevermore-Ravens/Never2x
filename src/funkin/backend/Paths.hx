@@ -148,32 +148,7 @@ class Paths {
 	public static function get(path:String, ?subFolder:String, ?overrideAddons:Bool = false):String {
 		if (subFolder != null && subFolder.length != 0) path = '$subFolder/$path';
 
-		#if ADDONS_ALLOWED
-		// start by checking the current addon
-		var mainDirectory:String = Addons.current;
-		var finalPath:Void -> String = () -> return '$mainDirectory/$path';
-		
-		// will ignore addons entirely and just use the path given from assets instead if it exists
-		if (overrideAddons) {
-			if (FileSystem.exists('assets/$path')) return 'assets/$path';
-		}
-
-		// if the file doesn't exist in the current played addon
-		if (FileSystem.exists(finalPath())) return finalPath();
-
-		// run through the other addons
-		if (Addons.list.length > 0) {
-			for (addon in Addons.list) {
-				if (addon.disabled) continue;
-
-				mainDirectory = 'addons/${addon.id}';
-				if (FileSystem.exists(finalPath())) return finalPath();
-			}
-		}
-		#end
-
-		// if that doesn't exist there OneOfTwo just return assets
-		return 'assets/$path';
+		return Assets.getPath(path);
 	}
 
 	// images
@@ -247,8 +222,8 @@ class Paths {
 
 		var directories:Array<String> = ['assets'];
 		for (addon in Addons.list) {
-			if (!addon.disabled)
-				directories.push('addons/${addon.id}');
+			if (addon.enabled)
+				directories.push('addons/${addon.directory}');
 		}
 
 		for (directory in directories) {

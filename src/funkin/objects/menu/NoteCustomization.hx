@@ -1,5 +1,5 @@
 package funkin.objects.menu;
-
+/*
 import funkin.shaders.GradMask;
 import funkin.shaders.HueGrad;
 import funkin.states.OptionsState;
@@ -405,7 +405,8 @@ class NoteCustomization extends OptionList {
 				actionTxt.members[curAction].font = Paths.font('Rockford-NTLG Medium.ttf');
 			}
 		}*/
-	}
+    /*}
+
 	function editColor(idx:Int, to:Int) {
 		curCol[idx] = to;
 		colVals.members[idx].text = Std.string(curCol[idx]);
@@ -647,3 +648,4 @@ class NoteCustomization extends OptionList {
         colHover.blend = NORMAL;
     }
 }
+*/

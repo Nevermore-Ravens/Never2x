@@ -10,7 +10,7 @@ class PauseMenu extends flixel.FlxSubState {
 	var songName:String;
 	var deaths:Int;
 
-	var music:FlxAudio;
+	var music:FlxSound;
 	public static var musicPath:String = Settings.data.pauseMusic;
 	public static var openCount:Int = 0;
 
@@ -45,7 +45,7 @@ class PauseMenu extends flixel.FlxSubState {
 			/*if (musicPath == 'Song Instrumental') {
 				@:privateAccess
 				music = FlxG.sound.load(Conductor.inst._sound, 0, true);
-			} else */music = FlxAudioHandler.loadAudio(Paths.audioPath(musicPath, 'music'), true, 0);
+			} else */music = FlxG.sound.load(Paths.audio(musicPath, 'music'), 0);
 
 			music.time = FlxG.random.float(0, music.length * 0.75);
 			music.play();

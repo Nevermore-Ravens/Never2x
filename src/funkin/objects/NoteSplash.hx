@@ -1,7 +1,6 @@
 package funkin.objects;
 
-import funkin.objects.Strumline;
-import funkin.modchart.ModchartManager;
+import nevermore.play.note.Note;
 
 typedef NoteSplashDataFile = {
 	name: String,
@@ -46,7 +45,7 @@ class NoteSplashData {
 		splash.frames = Paths.sparrowAtlas('noteSplashes/$image');
 
 		if(animations.length == 0){
-			var colour:String = Note.colours[splash.lane];
+			var colour:String = Note.colors[splash.lane];
 			splash.animation.addByPrefix('hit1', 'note splash $colour 1', framerate, false);
 			splash.animation.addByPrefix('hit2', 'note splash $colour 2', framerate, false);
 			splash.animation.play('hit1');
@@ -63,7 +62,7 @@ class NoteSplashData {
 		}
 
 		splash.targetFramerate = framerate;
-		splash.scale.set((scale[0] ?? 0.7) * Strumline.size, (scale[1] ?? 0.7) * Strumline.size);
+		splash.scale.set((scale[0] ?? 0.7) * Settings.data.strumSize, (scale[1] ?? 0.7) * Settings.data.strumSize);
 		splash.updateHitbox();
 		splash.offset.set(offset[0] ?? 0.0, offset[1] ?? 0.0);
 		splash.visible = false;
@@ -108,7 +107,7 @@ class NoteSplash extends FunkinSprite {
 
 			frames = Paths.sparrowAtlas(name);
 
-			var colour:String = Note.colours[lane];
+			var colour:String = Note.colors[lane];
 			animation.addByPrefix('hit1', 'note splash $colour 1', 24, false);
 			animation.addByPrefix('hit2', 'note splash $colour 2', 24, false);
 			animation.play('hit1');
@@ -128,7 +127,7 @@ class NoteSplash extends FunkinSprite {
 
 	}
 
-	public function hit(strum:StrumNote) {
+	public function hit(strum:nevermore.play.Receptor) {
 		visible = true;
 		playAnim('hit${FlxG.random.int(1, animationCount)}');
 		updateHitbox();
@@ -152,7 +151,7 @@ class NoteSplash extends FunkinSprite {
 		camera.drawNote(_frame, _matrix, colorTransform, blend, antialiasing, luminColors);
 	}
 
-	#if MODCHARTS_ALLOWED
+	/*#if MODCHARTS_ALLOWED
 	// ive had to copy this func so many times dear lord i shoulda made a note object
 	public function drawCrazy(modchart:ModchartManager, strumline:Int, downscroll:Bool, field:Strumline) {
 		final oldX = x;
@@ -193,5 +192,5 @@ class NoteSplash extends FunkinSprite {
 
 		modchart.pushDraw(strumline, field, cameras, scrollFactor, _frame, Note.modchartVertices, colorTransform, blend, antialiasing, luminColors, stealth, layer, true);
 	}
-	#end
+	#end*/
 }
