@@ -8,12 +8,12 @@ import nevermore.Nevermore;
 @:structInit
 @:publicFields
 class SaveVariables {
-	// for readability/backwards compatability
+	// for readability
 	var downscroll(get, never):Bool;
-	function get_downscroll():Bool return scrollDirection.toLowerCase() == 'down';
+	function get_downscroll():Bool return scrollDirection == DOWN;
 
 	// gameplay
-	var scrollDirection:String = 'Up';
+	var scrollDirection:String = UP;
 	var quantColouring:String = "None";
 	var strumGlow:String = 'Per-Note';
 	var scrollSpeed:Float = 3;

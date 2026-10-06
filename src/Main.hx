@@ -117,8 +117,6 @@ class InitState extends flixel.FlxState {
 		Settings.validate();
 		LanguageHandler.setLanguage(Settings.data.language);
 
-		Judgement.reset();
-
 		FlxG.fullscreen = Settings.data.fullscreen;
 		FlxG.fixedTimestep = false;
 		FlxG.drawFramerate = FlxG.updateFramerate = Settings.data.framerate;

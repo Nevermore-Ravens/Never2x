@@ -108,7 +108,7 @@ class OptionsState extends FunkinState {
 			},
 			new Option('ghost_t', 'ghost_t_desc', "ghostTapping", BoolOption),
 			new Option('metronome', 'metronome_desc', "metronome", BoolOption),
-			new Option('assist_claps', 'assist_claps_desc', "assistClaps", BoolOption),
+			new Option('assist_claps', 'assist_claps_desc', "assistTicks", BoolOption),
 			new Option('can_reset', 'can_reset_desc', "canReset", BoolOption),
 			//new Option('acc_type', 'acc_type_desc', "accuracyType", ListOption(["Simple", "Complex"]))
 			//i'm gonna be honest, all complex acc does is make ranking inconsistent, given how we have
