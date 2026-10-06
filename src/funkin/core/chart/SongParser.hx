@@ -1,4 +1,4 @@
-package funkin.backend.chart;
+package funkin.core.chart;
 
 import sys.FileSystem;
 import sys.io.File;
@@ -15,7 +15,7 @@ import moonchart.formats.*;
 import moonchart.formats.fnf.*;
 import moonchart.formats.fnf.legacy.*;
 import moonchart.formats.BasicFormat;
-import funkin.backend.Addons;
+import funkin.core.Addons;
 
 // simple FormatDetector.instanceFromFiles() won't work here
 // because any simfile/osu files will just default to the first strumline

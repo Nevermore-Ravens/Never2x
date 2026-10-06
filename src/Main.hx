@@ -2,14 +2,14 @@ package;
 
 import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
-import funkin.backend.LanguageHandler;
+import funkin.core.LanguageHandler;
 import haxe.CallStack;
 import haxe.io.Path;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.events.UncaughtErrorEvent;
 import funkin.FunkinCounter;
-import funkin.backend.chart.*;
+import funkin.core.chart.*;
 
 #if (linux && !debug)
 @:cppInclude('../../_external/gamemode_client.h')

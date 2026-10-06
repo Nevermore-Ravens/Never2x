@@ -1,8 +1,8 @@
-package funkin.backend;
+package funkin.core;
 
 import openfl.geom.ColorTransform;
 import haxe.ds.Vector;
-import funkin.backend.Addons;
+import funkin.core.Addons;
 
 class Util {
 	/**

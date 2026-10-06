@@ -7,7 +7,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxSpriteUtil;
 import openfl.display.BitmapData;
-import funkin.backend.Util;
+import funkin.core.Util;
 import flixel.graphics.FlxGraphic;
 
 using StringTools;

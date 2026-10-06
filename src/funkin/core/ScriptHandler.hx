@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.core;
 
 #if SCRIPTS_ALLOWED
 import crowplexus.iris.Iris;

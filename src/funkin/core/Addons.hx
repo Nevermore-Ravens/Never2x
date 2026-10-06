@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.core;
 
 import hxjson5.Json5;
 import sys.FileSystem;

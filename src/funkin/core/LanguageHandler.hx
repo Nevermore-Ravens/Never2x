@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.core;
 
 import haxe.ds.StringMap;
 import sys.io.File;

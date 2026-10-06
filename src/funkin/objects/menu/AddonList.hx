@@ -2,7 +2,7 @@ package funkin.objects.menu;
 
 import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;
-import funkin.backend.Addons;
+import funkin.core.Addons;
 
 class AddonList extends TextList {
 	var icons:FlxTypedGroup<FunkinSprite>;

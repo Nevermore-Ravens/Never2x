@@ -5,7 +5,7 @@ import funkin.objects.menu.TextList;
 import funkin.objects.menu.OptionList;
 // import funkin.objects.menu.NoteCustomization;
 import funkin.objects.FunkinSprite;
-import funkin.backend.Settings.SaveVariables;
+import funkin.core.Settings.SaveVariables;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.input.gamepad.FlxGamepadInputID;

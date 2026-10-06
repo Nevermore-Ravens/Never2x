@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.core;
 
 class Difficulty {
 	public static final default_list:Array<String> = ['Easy', 'Normal', 'Hard'];

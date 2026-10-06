@@ -1,4 +1,4 @@
-package funkin.backend.chart;
+package funkin.core.chart;
 
 import nevermore.core.timing.ScrollVelocity;
 import moonchart.formats.Quaver;

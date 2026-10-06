@@ -1,6 +1,6 @@
 package openfl.utils;
 
-import funkin.backend.OptimizedBitmapData;
+import funkin.core.OptimizedBitmapData;
 
 import openfl.utils._internal.Log;
 import openfl.display.BitmapData;

@@ -1,21 +1,21 @@
 #if !macro
 // project specific
-import funkin.backend.*;
-import funkin.backend.WeekData.WeekFile;
-import funkin.backend.Scores.PlayData;
+import funkin.core.*;
+import funkin.core.WeekData.WeekFile;
+import funkin.core.Scores.PlayData;
 import funkin.objects.menu.Alphabet;
 import funkin.objects.FunkinSprite;
-import funkin.backend.ScriptHandler;
+import funkin.core.ScriptHandler;
 import funkin.states.*;
 
 //these are functions we use a lot, so make them generally available
-import funkin.backend.LanguageHandler._t;
-import funkin.backend.LanguageHandler._formatT;
+import funkin.core.LanguageHandler._t;
+import funkin.core.LanguageHandler._formatT;
 
 // nevermore specific
 import nevermore.backend.Vector3;
 import nevermore.core.*;
-import funkin.backend.Util; // override
+import funkin.core.Util; // override
 
 // flixel specific
 import flixel.*;

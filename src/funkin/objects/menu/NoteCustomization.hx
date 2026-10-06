@@ -3,7 +3,7 @@ package funkin.objects.menu;
 import funkin.shaders.GradMask;
 import funkin.shaders.HueGrad;
 import funkin.states.OptionsState;
-import funkin.backend.NoteSkin;
+import funkin.core.NoteSkin;
 import funkin.objects.NoteSplash;
 import haxe.io.Path;
 

@@ -1,4 +1,4 @@
-package funkin.backend.chart;
+package funkin.core.chart;
 
 import moonchart.formats.BasicFormat;
 import moonchart.formats.StepMania;

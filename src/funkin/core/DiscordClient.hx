@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.core;
 
 import sys.thread.Thread;
 import lime.app.Application;
@@ -116,7 +116,7 @@ class DiscordClient {
 	}
 }
 
-@:allow(funkin.backend.DiscordClient)
+@:allow(funkin.core.DiscordClient)
 private final class DiscordApp {
 	public var state(get, set):String;
 	public var details(get, set):String;
@@ -188,7 +188,7 @@ class DiscordClient {
 	static function set_gameID(newID:String):String return gameID = newID;
 }
 
-@:allow(funkin.backend.DiscordClient)
+@:allow(funkin.core.DiscordClient)
 private final class DiscordApp {
 	public var state:String = '';
 	public var details:String = '';

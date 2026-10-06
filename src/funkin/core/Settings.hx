@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.core;
 
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
@@ -162,7 +162,7 @@ class Settings {
 	}
 
 	public static function validate() {
-		if (!funkin.backend.LanguageHandler.getLanguages().contains(data.language)) {
+		if (!funkin.core.LanguageHandler.getLanguages().contains(data.language)) {
 			data.language = "English";
 			Sys.println("Invalid language! Resetting value in settings.");
 		}
