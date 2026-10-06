@@ -8,7 +8,7 @@ import haxe.io.Path;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.events.UncaughtErrorEvent;
-import funkin.FunkinCounter;
+import nevermore.InfoCounter;
 import funkin.core.chart.*;
 
 #if (linux && !debug)
@@ -20,7 +20,7 @@ import funkin.core.chart.*;
 @:cppInclude("windows.h")
 #end
 class Main extends Sprite {
-	public static var infoCounter:FunkinCounter;
+	public static var infoCounter:InfoCounter;
 
 	public static var engineVersion:String = '1.0.0';
 	/**
@@ -39,7 +39,7 @@ class Main extends Sprite {
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 
 		addChild(new FlxGame(InitState, 0, 0, 120, true));
-		addChild(infoCounter = new FunkinCounter(10, 10, 12));
+		addChild(infoCounter = new InfoCounter());
 		infoCounter.visible = Settings.data.infoCounter;
 
 		@:privateAccess FlxG.keys._nativeCorrection.set("0_43", FlxKey.PLUS);

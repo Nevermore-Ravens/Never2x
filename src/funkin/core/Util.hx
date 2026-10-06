@@ -40,19 +40,6 @@ class Util {
 	inline public static function listFromString(string:String):Array<String>
 		return string.trim().split('\n');
 
-	// FlxStringUtil.formatBytes() but it just adds a space between the size and the unit lol
-	public static function formatBytes(bytes:Float, ?precision:Int = 2):String {
-		static final units:Array<String> = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
-		var curUnit:Int = 0;
-		while (bytes >= 1024 && curUnit < units.length - 1)
-		{
-			bytes /= 1024;
-			curUnit++;
-		}
-
-		return '${FlxMath.roundDecimal(bytes, precision)} ${units[curUnit]}';
-	}
-
 	public static function moneyString(number:Float) {
 		final strNum = Std.string(number);
 		final decIdx = strNum.indexOf(".");
