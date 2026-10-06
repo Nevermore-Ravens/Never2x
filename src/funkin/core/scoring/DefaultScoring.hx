@@ -12,6 +12,6 @@ class DefaultScoring extends ScoreHandler {
 		deviation ??= note.getDeviation();
 		var window:Float = Judgement.get(deviation).window;
 
-		current += Math.floor(500 - (Math.pow(Math.abs(devation / window), 2.5) * 300));
+		current += Math.floor(500 - (Math.pow(Math.abs(deviation / window), 2.5) * 300));
 	}
 }

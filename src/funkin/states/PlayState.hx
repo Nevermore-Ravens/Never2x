@@ -5,6 +5,9 @@ import nevermore.play.*;
 import nevermore.play.note.*;
 import nevermore.skins.Noteskin;
 
+import funkin.core.scoring.*;
+import funkin.core.accuracy.*;
+
 class PlayState extends FunkinState {
 	public static var songID:String = '';
 	var chart:Chart;
@@ -16,6 +19,10 @@ class PlayState extends FunkinState {
 	var noteSkin:String = 'funkin';
 	var extraTime:Float = 2500; // 2.5 seconds
 	var downscroll:Bool = false;
+
+	var stats:Statistics = {};
+	var scoring:ScoreHandler = new DefaultScoring();
+	var accuracy:AccuracyHandler = new DefaultAccuracy();
 
 	var hud:FlxSpriteGroup;
 	var infoText:FlxText;
@@ -36,6 +43,10 @@ class PlayState extends FunkinState {
 		rightStrumline = new Strumline(960, strumlineYPos, skin);
 
 		add(notefield = new NoteField([leftStrumline, rightStrumline], 1));
+		notefield.noteHit = noteHit;
+		notefield.noteMissed = noteMissed;
+		notefield.sustainHit = sustainHit;
+		notefield.sustainDropped = sustainDropped;
 		notefield.assistTicks = Settings.data.assistTicks;
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
 
@@ -69,6 +80,51 @@ class PlayState extends FunkinState {
 		new FlxTimer().start(extraTime / 1000, function(_) {
 			Conductor.play();
 		});
+	}
+
+	function noteHit(strumline:Strumline, note:Note) {
+		if (note.player != notefield.playerID) return;
+
+		stats.notesHit++;
+
+		var deviation:Float = note.getDeviation(notefield.input.timestamp);
+
+		scoring.noteHit(note, deviation);
+		accuracy.noteHit(note, deviation);
+
+		stats.score = scoring.get(stats);
+		stats.accuracy = accuracy.get(stats);
+		updateInfo();
+	}
+
+	function noteMissed(strumline:Strumline, note:Note) {
+		stats.comboBreaks++;
+
+		scoring.noteMissed(note);
+		accuracy.noteMissed(note);
+
+		stats.score = scoring.get(stats);
+		stats.accuracy = accuracy.get(stats);
+		updateInfo();
+	}
+
+	function sustainHit(strumline:Strumline, sustain:Sustain, mostRecent:Bool) {
+		if (sustain.player != notefield.playerID) return;
+		scoring.sustainHit(sustain);
+		accuracy.sustainHit(sustain);
+
+		stats.score = scoring.get(stats);
+		stats.accuracy = accuracy.get(stats);
+		updateInfo();
+	}
+
+	function sustainDropped(strumline:Strumline, sustain:Sustain) {
+		scoring.sustainDropped(sustain);
+		accuracy.sustainDropped(sustain);
+
+		stats.score = scoring.get(stats);
+		stats.accuracy = accuracy.get(stats);
+		updateInfo();
 	}
 
 	function makeHUD() {
@@ -202,13 +258,10 @@ class PlayState extends FunkinState {
 		judgeCounters.text += Math.max(comboBreaks - judgeBreaks, 0);
 	}*/
 
-	var comboBreaks:Int = 0;
-	var accuracy:Float = 0.0;
-
 	function updateInfo():Void {
-		infoText.text = 'Score: ${Util.moneyString(0)} | Combo Breaks: $comboBreaks';
+		infoText.text = 'Score: ${Util.moneyString(stats.score)} | Combo Breaks: ${stats.comboBreaks}';
 		if (!Settings.data.hideAcc)
-			infoText.text += ' | Accuracy: ${Util.truncateFloat(accuracy)}%';
+			infoText.text += ' | Accuracy: ${Util.truncateFloat(stats.accuracy, 3)}%';
 	}
 
 	@:unreflective
