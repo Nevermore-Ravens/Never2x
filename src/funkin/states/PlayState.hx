@@ -7,6 +7,8 @@ import nevermore.skins.Noteskin;
 
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
+import funkin.objects.JudgementSpr;
+import funkin.objects.ComboNums;
 
 class PlayState extends FunkinState {
 	public static var songID:String = '';
@@ -26,6 +28,8 @@ class PlayState extends FunkinState {
 
 	var hud:FlxSpriteGroup;
 	var infoText:FlxText;
+	var judgeSprite:JudgementSpr;
+	var comboSprite:ComboNums;
 
 	override function create():Void {
 		super.create();
@@ -51,6 +55,10 @@ class PlayState extends FunkinState {
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
 
 		add(hud = new FlxSpriteGroup());
+		add(judgeSprite = new JudgementSpr(400, 300));
+
+		var judgeY:Float = judgeSprite.y + judgeSprite.height;
+		add(comboSprite = new ComboNums(judgeSprite.x + 50, judgeY + 20));
 
 		load();
 		makeHUD();
@@ -86,8 +94,12 @@ class PlayState extends FunkinState {
 		if (note.player != notefield.playerID) return;
 
 		stats.notesHit++;
+		stats.combo++;
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
+
+		judgeSprite.display(deviation);
+		comboSprite.display(stats.combo);
 
 		scoring.noteHit(note, deviation);
 		accuracy.noteHit(note, deviation);
@@ -99,6 +111,7 @@ class PlayState extends FunkinState {
 
 	function noteMissed(strumline:Strumline, note:Note) {
 		stats.comboBreaks++;
+		stats.combo = 0;
 
 		scoring.noteMissed(note);
 		accuracy.noteMissed(note);

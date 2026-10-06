@@ -41,7 +41,7 @@ class JudgementSpr extends FunkinSprite {
 		if (Settings.data.judgementAlpha <= 0) return;
 
 		Main.tweenManager.cancelTweensOf(this);
-		animation.frameIndex = HitWindows.getID(timing);
+		animation.frameIndex = Judgement.getID(timing);
 		if (animation.frameIndex == 0 && Settings.data.hideHighest) {
 			visibility = 0;
 			return;
