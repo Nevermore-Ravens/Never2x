@@ -40,7 +40,12 @@ class PlayState extends FunkinState {
 	function load() {
 		chart = Song.load('songs/$songID', Difficulty.current);
 
-		notefield.load(chart);
+		notefield.load(chart, {
+			scrollVelocities: Settings.data.gameplayModifiers['svs'],
+			sustains: Settings.data.gameplayModifiers['sustains'],
+			randomizedNotes: Settings.data.gameplayModifiers['randomizedNotes'],
+			mirroredNotes: Settings.data.gameplayModifiers['mirroredNotes']
+		});
 		Conductor.clock.reset(chart.timingPoints);
 		Conductor.clock.offset = chart.offset;
 
