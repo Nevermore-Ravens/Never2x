@@ -88,7 +88,7 @@ private class Number extends FunkinSprite {
 	public function new() {
 		super();
 
-		final texture = Paths.image('ui/comboNums');
+		final texture = Assets.image('images/ui/comboNums');
 		loadGraphic(texture, true, Math.floor(texture.width * 0.2), Math.floor(texture.height * 0.5));
 		visibility = 0;
 

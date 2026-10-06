@@ -126,12 +126,26 @@ class Script extends Iris {
 				FlxMath.lerp(from.blueFloat, to.blueFloat, ratio), FlxMath.lerp(from.alphaFloat, to.alphaFloat, ratio));
 		});
 
+		set("Assets", nevermore.core.Assets);
+		set("Conductor", nevermore.core.Conductor);
+		set("ProxyField", nevermore.modchart.drawing.ProxyField);
+
+		set("FlxG", FlxG);
+		set("FlxSprite", flixel.FlxSprite);
+		set("FlxCamera", flixel.FlxCamera);
+		set("FlxText", flixel.text.FlxText);
+		set("FlxTimer", flixel.util.FlxTimer);
+		set("FlxTween", flixel.tweens.FlxTween);
+		set("FlxEase", flixel.tweens.FlxEase);
+		set("FlxMath", flixel.math.FlxMath);
+		set("FlxGroup", flixel.group.FlxGroup);
+		set("FlxSpriteGroup", flixel.group.FlxSpriteGroup);
+		set("FlxPoint", flixel.math.FlxPoint.FlxBasePoint);
+
 		set('Settings', Settings);
-		set('FlxG', FlxG);
 		set('Controls', Controls);
 		set('Util', Util);
 		set('handler', ScriptHandler);
-		set('Paths', Paths);
 		set('FunkinSprite', funkin.objects.FunkinSprite);
 
 		//needed to get the song name inside the script
@@ -183,10 +197,6 @@ class Script extends Iris {
 		});
 		#end
 		//set("SpriteFrameBuffer", funkin.objects.SpriteFrameBuffer);
-		set('ProxyField', nevermore.modchart.drawing.ProxyField);
-		set('FlxEase', flixel.tweens.FlxEase);
-
-		//set('FlxSprite', FlxSprite);
 
 		//okay, shaders are coming in
 		set('FileShader', funkin.shaders.FileShader);

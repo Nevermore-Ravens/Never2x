@@ -106,10 +106,12 @@ class AddonList extends TextList {
 			txt.setPosition(x + 15 + offset, (dragging && i == current) ? mousePoint.y - dragY : FlxMath.lerp(txt.y, y, elapsed * 20));
 			txt.alpha = alpha;
 			Util.clipByCoords(txt, null, null, this.y, this.y + scale.y);
+			txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i]);
 			
 			sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
 			sub.alpha = alpha * selPercentages[i];
 			Util.clipByCoords(sub, null, null, this.y, this.y + scale.y);
+			sub.color = txt.color;
 
 			y += txt.height + (sub.height + 5) * selPercentages[i];
 		}
@@ -179,12 +181,12 @@ class AddonList extends TextList {
 		icons.add(icon);
 
 		var txt = new FlxText(x + 15, y, 0, "_");
-		txt.setFormat(Paths.font("cafeSquare.ttf"), 24, 0xFFFFFFFF, LEFT);
+		txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 24, 0xFFFFFFFF, LEFT);
 		txt.antialiasing = Settings.data.antialiasing;
 		texts.add(txt);
 
 		var sub = new FlxText(txt.x, txt.y, 0, "_");
-		sub.setFormat(Paths.font("cafeSquare.ttf"), 16, 0xFFFFFFFF, LEFT);
+		sub.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 16, 0xFFFFFFFF, LEFT);
 		sub.antialiasing = Settings.data.antialiasing;
 		subTexts.add(sub);
 		sub.alpha = 0;
@@ -247,7 +249,7 @@ class AddonList extends TextList {
 
 	override function destroy() {
 		for (graph in iconGraphics)
-			Paths.destroyAsset("MODicon", graph);
+			FlxG.bitmap.remove(graph);
 
 		super.destroy();
 		// while (components.length > 0)

@@ -51,27 +51,24 @@ class Character extends FunkinSprite {
 		name ??= default_name;
 		super(x, y);
 
-		var path:String = Paths.get('characters/$name.json');
-		if (!FileSystem.exists(path)) {
-			trace('character path "$path" doesn\'t exist');
+		if (!Assets.exists('characters/$name.json')) {
+			trace('character "$name" doesn\'t exist');
 			name = default_name;
 		}
-		path = Paths.get('characters/$name.json');
-
-		_file = getFile(path);
+		_file = getFile('characters/$name.json');
 
 		this.name = name;
 		this.reflective = Settings.data.reflections && hasReflection;
 		this.singDuration = _file.singDuration;
 		this.healthColor = _file.healthColor;
-		this.sheets = _file.sheets.split(',');
+		this.sheets = [for (img in _file.sheets.split(',')) "images/" + img];
 		this.icon = _file.icon;
 		this.danceInterval = _file.danceInterval;
 		this.reflectionY = _file.reflectionOffset;
 		flipX = _file.flipX;
 		antialiasing = _file.antialiasing;
 
-		frames = Paths.multiAtlas(this.sheets);
+		frames = Assets.multiAtlas(this.sheets);
 
 		for (fnfAnim in _file.animations) {
 			var indices:Array<Int> = fnfAnim.indices ?? [];
@@ -197,7 +194,7 @@ class Character extends FunkinSprite {
 		var file:CharacterFile = createDummyFile();
 		if (!FileSystem.exists(path)) return file;
 		
-		var data = Json5.parse(File.getContent(path));
+		var data = Json5.parse(Assets.text(path));
 		for (property in Reflect.fields(data)) {
 			if (!Reflect.hasField(file, property)) continue;
 			Reflect.setField(file, property, Reflect.field(data, property));

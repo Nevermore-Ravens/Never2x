@@ -20,8 +20,8 @@ class CharIcon extends FunkinSprite {
 	}
 
 	public function change(value:String):String {
-		if (!Paths.exists('images/icons/$value.png')) value = 'default';
-		var graphic:FlxGraphic = Paths.image('icons/$value');
+		if (!Assets.exists('images/icons/$value.png')) value = 'default';
+		var graphic:FlxGraphic = Assets.image('images/icons/$value');
 		var size:Float = Math.round(graphic.width / graphic.height);
 
 		loadGraphic(graphic, true, Std.int(graphic.width / count), graphic.height);

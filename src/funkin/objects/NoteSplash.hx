@@ -25,8 +25,9 @@ class NoteSplashData {
 
 	public static function get(name: String): NoteSplashData
 	{
-		var fileContent:String = Paths.getFileContent('data/noteSplashes/$name.json5');
-		if (fileContent == '') fileContent = Paths.getFileContent('data/noteSplashes/$name.json');
+		var path = 'data/noteSplashes/$name.';
+		var fileContent:String = Assets.exists(path + "json5") ? Assets.text(path + 'json5') : "";
+		if (fileContent == '') fileContent = Assets.exists(path + "json") ? Assets.text(path + 'json') : "";
 		if (fileContent == '') return {};
 		
 		var dataFile: NoteSplashDataFile = Json5.parse(fileContent);
@@ -42,7 +43,7 @@ class NoteSplashData {
 	}
 
 	public function modifySplash(splash: NoteSplash) {
-		splash.frames = Paths.sparrowAtlas('noteSplashes/$image');
+		splash.frames = Assets.sparrowAtlas('images/noteSplashes/$image');
 
 		if(animations.length == 0){
 			var colour:String = Note.colors[splash.lane];
@@ -103,9 +104,9 @@ class NoteSplash extends FunkinSprite {
 		name ??= ''; // thanks hl i guess ??? lmao
 		if (name.length == 0)
 			name = Util.format(Settings.data.noteSplashSkin);
-		else if (Paths.exists('images/$name.png')){ // just incase
+		else if (Assets.exists('images/$name.png')){ // just incase
 
-			frames = Paths.sparrowAtlas(name);
+			frames = Assets.sparrowAtlas("images/" + name);
 
 			var colour:String = Note.colors[lane];
 			animation.addByPrefix('hit1', 'note splash $colour 1', 24, false);

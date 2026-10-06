@@ -26,7 +26,7 @@ class TitleState extends FunkinState {
 
 		FunkinState.skipNextTransIn = FunkinState.skipNextTransOut = true;
 
-		Paths.clearStoredMemory();
+		//Paths.clearStoredMemory();
 		super.create();
 		persistentUpdate = true;
 
@@ -58,14 +58,14 @@ class TitleState extends FunkinState {
 		introGroup.visible = false;
 
 		logo = new FlxSprite(logoPosition.x, logoPosition.y);
-		logo.frames = Paths.sparrowAtlas('menus/title/logo');
+		logo.frames = Assets.sparrowAtlas('images/menus/title/logo');
 		logo.antialiasing = Settings.data.antialiasing;
 		logo.animation.addByPrefix('bump', 'logo bumpin', 24, false);
 		logo.animation.play('bump');
 		logo.updateHitbox();
 
 		gf = new FlxSprite(gfPosition.x, gfPosition.y);
-		gf.frames = Paths.sparrowAtlas('menus/title/gfTitle');
+		gf.frames = Assets.sparrowAtlas('images/menus/title/gfTitle');
 		gf.antialiasing = Settings.data.antialiasing;
 		if (!useIdle) 	{
 			gf.animation.addByIndices('danceLeft', animationName, danceLeftFrames, '', 24, false);
@@ -78,7 +78,7 @@ class TitleState extends FunkinState {
 
 		var animFrames:Array<FlxFrame> = [];
 		titleText = new FlxSprite(enterPosition.x, enterPosition.y);
-		titleText.frames = Paths.sparrowAtlas('menus/title/pressEnter');
+		titleText.frames = Assets.sparrowAtlas('images/menus/title/pressEnter');
 		@:privateAccess {
 			titleText.animation.findByPrefix(animFrames, "ENTER IDLE");
 			titleText.animation.findByPrefix(animFrames, "ENTER FREEZE");
@@ -94,7 +94,7 @@ class TitleState extends FunkinState {
 		titleText.animation.play('idle');
 		titleText.updateHitbox();
 
-		ngSpr = new FlxSprite(0, FlxG.height - 346).loadGraphic(Paths.image('newgrounds_logo'));
+		ngSpr = new FlxSprite(0, FlxG.height - 346).loadGraphic(Assets.image('images/newgrounds_logo'));
 		ngSpr.visible = false;
 		ngSpr.setGraphicSize(Math.floor(ngSpr.width * 0.8));
 		ngSpr.updateHitbox();
@@ -114,7 +114,7 @@ class TitleState extends FunkinState {
 		DiscordClient.changePresence();
 		#end
 
-		Conductor.tempo = 102;
+		Conductor.clock.timingMap.reset([{tempo: 102}]);
 		Conductor.clock.active = true;
 		if (seenIntro) {
 			skipIntro();
@@ -124,7 +124,7 @@ class TitleState extends FunkinState {
 			return;
 		}
 
-		Conductor.inst = FlxG.sound.load(Paths.audioPath('freakyMenu', 'music'), 0, true);
+		Conductor.inst = FlxG.sound.load(Assets.audio('music/freakyMenu'), 0, true);
 		Conductor.play();
 
 		FlxTween.num(0, 0.7, 4, {ease: FlxEase.linear}, function(num) {
@@ -144,12 +144,12 @@ class TitleState extends FunkinState {
 	var danceRightFrames:Array<Int> = [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];	
 
 	function loadJsonData() {
-		if (!Paths.exists('data/titleData.json')) {
+		if (!Assets.exists('data/titleData.json')) {
 			trace('No Title JSON detected, using default values.');
 			return;
 		}
 
-		var titleRaw:String = Paths.getFileContent('data/titleData.json');
+		var titleRaw:String = Assets.text('data/titleData.json');
 		if (titleRaw == null || titleRaw.length == 0) return;
 
 		try {
@@ -165,7 +165,7 @@ class TitleState extends FunkinState {
 			useIdle = data.idle;
 	
 			if (data.background != null && data.background.trim().length > 0) {
-				var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image(data.background));
+				var bg:FlxSprite = new FlxSprite().loadGraphic(Assets.image("images/" + data.background));
 				bg.antialiasing = Settings.data.antialiasing;
 				add(bg);
 			}
@@ -173,7 +173,7 @@ class TitleState extends FunkinState {
 	}
 
 	function getIntroTexts():Array<Array<String>> 
-		return [for (i in File.getContent(Paths.text('introText.txt')).split('\n')) i.split('--')];
+		return [for (i in Assets.text('data/introText.txt').split('\n')) i.split('--')];
 	
 	var newTitle:Bool = false;
 	var titleTimer:Float = 0;
@@ -212,7 +212,7 @@ class TitleState extends FunkinState {
 				titleText.animation.play('press');
 
 				FlxG.camera.flash(Settings.data.flashingLights ? FlxColor.WHITE : 0x4CFFFFFF, 1);
-				FlxG.sound.play(Paths.audio('confirm', 'sfx'), 0.7);
+				FlxG.sound.play(Assets.audio('sfx/confirm'), 0.7);
 				skipped = true;
 				transitionTmr = new FlxTimer().start(1.5, function(_) {
 					FunkinState.switchState(new MainMenuState());

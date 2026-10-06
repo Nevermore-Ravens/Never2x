@@ -135,15 +135,6 @@ class InitState extends flixel.FlxState {
 			Main.tweenManager.update(FlxG.elapsed / FlxG.timeScale);
 		});
 
-		FlxG.signals.preStateSwitch.add(() -> {
-			// this if is duct tape in case we get crashes again but hopefully we're getting a better asset system
-			// @:privateAccess if (Type.getClass(FlxG.game._requestedState) != Type.getClass(FlxG.state))
-			 	Paths.clearTracking();
-		});
-		FlxG.signals.postStateSwitch.add(()->{
-			Paths.clearUnusedMemory();
-		});
-
 		FlxG.sound.volume = FlxG.save.data.volume ?? 1.0;
 		FlxG.sound.muted = FlxG.save.data.muted ?? false;
 		//FlxG.sound.volumeHandler(FlxG.sound.muted ? 0 : FlxG.sound.volume);

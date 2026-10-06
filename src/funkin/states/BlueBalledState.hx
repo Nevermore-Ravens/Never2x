@@ -39,9 +39,9 @@ class BlueBalledState extends flixel.FlxSubState {
 
         char.playAnim('firstDeath');
 
-        FlxG.sound.play(Paths.audio("menu_deletedata", "sfx"));
+        FlxG.sound.play(Assets.audio("sfx/menu_deletedata"));
         new FlxTimer().start(1.2, _ -> {
-            Conductor.inst = FlxG.sound.load(Paths.audioPath("zenith", "music"), 0.5, true);
+            Conductor.inst = FlxG.sound.load(Assets.audio("music/zenith"), 0.5, true);
             Conductor.inst.pitch = 1;
 			Conductor.inst.play();
             char.playAnim('death-loop');
@@ -59,13 +59,13 @@ class BlueBalledState extends flixel.FlxSubState {
 
         if (Controls.justPressed('accept')){
             Conductor.stop();
-            FlxG.sound.play(Paths.audio("menu_confirm", "sfx"));
+            FlxG.sound.play(Assets.audio("sfx/menu_confirm"));
             char.playAnim('confirm');
             ending();
         }
         else if (Controls.justPressed('back')){
             Conductor.stop();
-            FlxG.sound.play(Paths.audio("byebye", "sfx"));
+            FlxG.sound.play(Assets.audio("sfx/byebye"));
             char.playAnim('missUP');
             backToMenu();
         }

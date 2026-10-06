@@ -45,7 +45,7 @@ class PauseMenu extends flixel.FlxSubState {
 			/*if (musicPath == 'Song Instrumental') {
 				@:privateAccess
 				music = FlxG.sound.load(Conductor.inst._sound, 0, true);
-			} else */music = FlxG.sound.load(Paths.audio(musicPath, 'music'), 0);
+			} else */music = FlxG.sound.load(Assets.audio("music/" + musicPath), 0);
 
 			music.time = FlxG.random.float(0, music.length * 0.75);
 			music.play();
@@ -61,19 +61,19 @@ class PauseMenu extends flixel.FlxSubState {
 		add(bg);
 
 		var song:FlxText = new FlxText(20, 15, 0, songName, 32);
-		song.font = Paths.font("vcr.ttf");
+		song.font = Assets.getPath("fonts/vcr.ttf");
 		song.x = FlxG.width - (song.width + 20);
 		song.alpha = 0;
 		add(song);
 
 		var songDifficulty:FlxText = new FlxText(20, 47, 0, difficulty.toUpperCase(), 32);
-		songDifficulty.font = Paths.font('vcr.ttf');
+		songDifficulty.font = Assets.getPath('fonts/vcr.ttf');
 		songDifficulty.x = FlxG.width - (songDifficulty.width + 20);
 		songDifficulty.alpha = 0;
 		add(songDifficulty);
 
 		var blueballed:FlxText = new FlxText(20, 15 + 64, 0, 'Blueballed: $deaths', 32);
-		blueballed.font = Paths.font('vcr.ttf');
+		blueballed.font = Assets.getPath('fonts/vcr.ttf');
 		blueballed.x = FlxG.width - (blueballed.width + 20);
 		blueballed.alpha = 0;
 		add(blueballed);
@@ -100,7 +100,7 @@ class PauseMenu extends flixel.FlxSubState {
 			obj.alpha = curSelected == index ? 1 : 0.5;
 		}
 
-		FlxG.sound.play(Paths.audio('scroll', 'sfx'));
+		FlxG.sound.play(Assets.audio('sfx/scroll'));
 	}
 
 	function regenerateOptions(list:Array<String>) {

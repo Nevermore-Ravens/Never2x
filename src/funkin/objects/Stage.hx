@@ -43,10 +43,9 @@ class Stage {
 
 	public static function getFile(path:String):StageFile {
 		var file:StageFile = createDummyFile();
-		path = Paths.get(path);
-		if (!FileSystem.exists(path)) return file;
+		if (!Assets.exists(path)) return file;
 		
-		var data = Json5.parse(File.getContent(path));
+		var data = Json5.parse(Assets.text(path));
 		for (property in Reflect.fields(data)) {
 			if (!Reflect.hasField(file, property)) continue;
 			Reflect.setField(file, property, Reflect.field(data, property));

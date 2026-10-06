@@ -286,7 +286,7 @@ class OptionsState extends FunkinState {
 		super.create();
 		self = this;
 
-		bg = new FunkinSprite().loadGraphic(Paths.image('menus/magentaBG'));
+		bg = new FunkinSprite(0, 0, Assets.image('images/menus/magentaBG'));
 		bg.scale.scale(1.175);
 		bg.updateHitbox();
 		bg.screenCenter();
@@ -298,7 +298,7 @@ class OptionsState extends FunkinState {
 		cateText.onAccept = openCategory;
 		cateText.onClick = openCategory;
 		cateText.onSelect = function(_, __) {
-			FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+			FlxG.sound.play(Assets.audio("sfx/scroll"));
 		};
 
 		optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700);
@@ -330,7 +330,7 @@ class OptionsState extends FunkinState {
 				optText.allowKeys = wasInOpts;
 				optText.allowMouse = true;
 
-				FlxG.sound.play(Paths.audio(sound, 'sfx'));
+				FlxG.sound.play(Assets.audio("sfx/" + sound));
 				waitingForKey = false;
 			}
 
@@ -358,7 +358,7 @@ class OptionsState extends FunkinState {
 			}
 			return;
 		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
-			FlxG.sound.play(Paths.audio("cancel", 'sfx'));
+			FlxG.sound.play(Assets.audio("sfx/cancel"));
 
 			/*if (noteEdit.active) {
 				noteEdit.active = false;
@@ -424,7 +424,7 @@ class OptionsState extends FunkinState {
 
 				persistentUpdate = false;
 				openSubState(new DropdownPrompt(x, y, 300, opts, function(idx) {
-					FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+					FlxG.sound.play(Assets.audio("sfx/scroll"));
 					list.list[current].value = options[idx];
 					list.components[current].change(list.list[current]);
 					@:privateAccess list.position(0);
@@ -434,7 +434,7 @@ class OptionsState extends FunkinState {
 	}
 
 	function openCategory(cate:Int) {
-		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+		FlxG.sound.play(Assets.audio("sfx/scroll"));
 		if (optText.allowKeys && cate == selCategory)
 			return;
 

@@ -30,7 +30,7 @@ class OptionList extends TextList {
 
 		components[last].selectionChanged(list[last], false);
 		components[current].selectionChanged(list[current], true);
-		FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+		FlxG.sound.play(Assets.audio("sfx/scroll"));
 
 		if (onSelect != null)
 			onSelect(current, last);
@@ -59,7 +59,7 @@ class OptionList extends TextList {
 			holdWait = 0.5;
 
 			if (curOption.hasSound)
-				FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
+				FlxG.sound.play(Assets.audio("sfx/" + curOption.sound));
 			curOption.change(leftJustPressed);
 			components[current].change(curOption);
 
@@ -69,7 +69,7 @@ class OptionList extends TextList {
 		if (Controls.justPressed('accept')) {
 			if (curOption.hasEnter) {
 				if (curOption.hasSound)
-					FlxG.sound.play(Paths.audio(curOption.sound, 'sfx'));
+					FlxG.sound.play(Assets.audio("sfx/" + curOption.sound));
 
 				dragging = false;
 				curHolding = 0;
@@ -140,10 +140,12 @@ class OptionList extends TextList {
             Util.clipByCoords(txt, null, null, this.y, this.y + scale.y);
             
             selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current ? 1 : 0), elapsed * 15);
+			txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i]);
 			if (hasSubTexts) {
                 final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
 				sub.alpha = alpha * selPercentages[i];
+				sub.color = txt.color;
                 Util.clipByCoords(sub, null, null, this.y, this.y + scale.y);
                 
                 y += (sub.height + 5) * selPercentages[i];
@@ -189,13 +191,13 @@ class OptionList extends TextList {
             selPercentages[i] = i == current ? 1 : 0;
 
 			var txt = new FlxText(x + 15, y, width - 30, txts[i]);
-			txt.setFormat(Paths.font("cafeSquare.ttf"), 24, 0xFFFFFFFF, LEFT);
+			txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 24, 0xFFFFFFFF, LEFT);
 			txt.antialiasing = Settings.data.antialiasing;
 			texts.add(txt);
 
 			if (hasSubTexts) {
 				var sub = new FlxText(txt.x, txt.y + (txt.height - 5) * selPercentages[i], width - 30, subs[i]);
-				sub.setFormat(Paths.font("cafeSquare.ttf"), 16, 0xFFFFFFFF, LEFT);
+				sub.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 16, 0xFFFFFFFF, LEFT);
 				sub.antialiasing = Settings.data.antialiasing;
 				subTexts.add(sub);
                 sub.alpha = selPercentages[i];
@@ -251,8 +253,8 @@ class OptionList extends TextList {
 		superDraw();
 		// i'm sorry -Nebula
 		hover.draw();
-		hover.blend = INVERT;
-		hover.draw();
+		//hover.blend = INVERT;
+		//hover.draw();
 		texts.draw();
 		subTexts.draw();
 
@@ -261,8 +263,8 @@ class OptionList extends TextList {
 				compon.drawInvertableCompon();
 		}
 
-		hover.draw();
-		hover.blend = NORMAL;
+		//hover.draw();
+		//hover.blend = NORMAL;
 
 		for (compon in components) {
 			if (compon != null && compon.obj.visible)
@@ -300,7 +302,7 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
 
 		if (opt.hasSound)
-			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
 		opt.enter();
 		change(opt);
 
@@ -313,6 +315,8 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 
 		setPosition(txt.x + txt.width - width, y + (height - this.height) * 0.5);
 		scale.x = scale.y = 0.65 + 0.35 * selPercent;
+
+		color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
 	}
 	public function clip(top:Float, bottom:Float) {
 		//var y =  Math.max(top - y, 0);
@@ -330,7 +334,7 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 	public function new(opt:Option) {
 		super();
 		obj = this;
-		frames = Paths.sparrowAtlas("menus/options/optionsbuttongay");
+		frames = Assets.sparrowAtlas("images/menus/options/optionsbuttongay");
 		animation.addByPrefix("true", "on", 24, false);
 		animation.addByPrefix("totrue", "transition0", 24, false);
 		animation.addByPrefix("false", "off", 24, false);
@@ -355,7 +359,7 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 		if (!FlxG.mouse.justPressed) return;
 
 		if (opt.hasSound)
-			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
 
 		var action:Int = -1; // -1 - None, 0 - Enter, 1 - Left, 2 - Right
 		if (opt.textboxArrows && opt.hasEnter && opt.hasMove) {
@@ -400,6 +404,8 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 		offset.x = origin.x = graphic.width;
 		scale.x = scale.y = 0.5 + 0.5 * selPercent;
 		setPosition(txt.x + txt.width, y + (height - this.height) * 0.5);
+
+		color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
 	}
 	public function clip(top:Float, bottom:Float) {
 		//Util.clipByCoords(this, null, null, top, bottom);
@@ -421,7 +427,7 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 			text = "< " + text + " >";
 
 		obj = this;
-		setFormat(Paths.font("cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
+		setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
 	}
 
 	public function drawRegularCompon() {}
@@ -436,7 +442,7 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
 
 		if (opt.hasSound)
-			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
 		opt.enter();
 		change(opt);
 
@@ -454,6 +460,9 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 		label.offset.x = label.origin.x = label.graphic.width;
 		label.scale.x = label.scale.y = 0.5 + 0.5 * selPercent;
 		label.setPosition(x - frameWidth * this.scale.x, this.y + (this.frameHeight - label.height) * 0.5);
+
+		color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
+		label.color = color;
 	}
 	public function clip(top:Float, bottom:Float) {
 		//Util.clipByCoords(this, null, null, top, bottom);
@@ -466,13 +475,13 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 	}
 
 	public function new(opt:Option, selected:Bool) {
-		super(0, 0, Paths.image("menus/options/optionsdropdowngay"));
+		super(0, 0, Assets.image("images/menus/options/optionsdropdowngay"));
 		obj = this;
 
 		origin.x = offset.x = frameWidth;
 
 		label = new FlxText(0, 0, 0, opt.formatText(selected));
-		label.setFormat(Paths.font("cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
+		label.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
 	}
 
 	override function draw() {
@@ -517,7 +526,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 
 		list.dragging = FlxG.mouse.pressed;
 		if (opt.hasSound && FlxG.mouse.justPressed)
-			FlxG.sound.play(Paths.audio(opt.sound, 'sfx'));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
 
 		// eh dont feel like Math.max(Math.min today
 		final remapped = FlxMath.remapToRange(mousePoint.x, x + BAR_PADDING * label.scale.x, x + scale.x - BAR_PADDING * label.scale.x, min, max);
@@ -542,6 +551,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 		label.offset.x = label.origin.x = label.graphic.width;
 		label.scale.x = label.scale.y = 0.65 + 0.35 * selPercent;
 		label.setPosition(x, this.y + (this.scale.y - label.height) * 0.5);
+		label.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
 	}
 	public function clip(top:Float, bottom:Float) {
 		//Util.clipByCoords(this, null, null, top, bottom);
@@ -580,7 +590,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 		fill.offset.set();
 
 		label = new FlxText(0, 0, 0, opt.formatText(selected));
-		label.setFormat(Paths.font("cafeSquare.ttf"), 32, 0xFFFFFFFF, RIGHT);
+		label.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 32, 0xFFFFFFFF, RIGHT);
 	}
 
 	public function drawRegularCompon() {

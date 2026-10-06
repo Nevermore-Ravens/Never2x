@@ -15,16 +15,16 @@ class FunkinState extends FlxState {
 		//Conductor.reset();
 		//Paths.clearUnusedMemory();
 
-/*		Conductor.onStep.add(stepHit);
-		Conductor.onBeat.add(beatHit);
-		Conductor.onMeasure.add(measureHit);*/
+		Conductor.clock.stepHit.add(stepHit);
+		Conductor.clock.beatHit.add(beatHit);
+		Conductor.clock.measureHit.add(measureHit);
 	}
 
 	override function destroy() {
 		super.destroy();
-/*		Conductor.onStep.remove(stepHit);
-		Conductor.onBeat.remove(beatHit);
-		Conductor.onMeasure.remove(measureHit);*/
+		Conductor.clock.stepHit.remove(stepHit);
+		Conductor.clock.beatHit.remove(beatHit);
+		Conductor.clock.measureHit.remove(measureHit);
 	}
 
 	// i am so sorry (this is just taken directly from psych im not trying to bother with flixel's transition bs

@@ -95,10 +95,10 @@ void main(void) {
 
 class FileShader extends FlxGraphicsShader {
 	public function new(frag:String, vert:String) {
-		glFragmentSource = Paths.exists("shaders/" + frag + ".frag") ? Paths.getFileContent("shaders/" + frag + ".frag") : FRAG_DEFAULT;
+		glFragmentSource = Assets.exists("shaders/" + frag + ".frag") ? Assets.text("shaders/" + frag + ".frag") : FRAG_DEFAULT;
 		glFragmentSource = glFragmentSource.replace("#pragma header", FRAG_HEADER).replace("#pragma body", FRAG_BODY);
 
-		glVertexSource = Paths.exists("shaders/" + vert + ".vert") ? Paths.getFileContent("shaders/" + vert + ".vert") : VERT_DEFAULT;
+		glVertexSource = Assets.exists("shaders/" + vert + ".vert") ? Assets.text("shaders/" + vert + ".vert") : VERT_DEFAULT;
 		glVertexSource = glVertexSource.replace("#pragma header", VERT_HEADER).replace("#pragma body", VERT_BODY);
 		super();
 	}

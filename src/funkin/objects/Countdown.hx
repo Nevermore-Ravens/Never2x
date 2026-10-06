@@ -17,16 +17,16 @@ class Countdown extends FunkinSprite {
 	public dynamic function onTick(tick:Int):Void {
 		switch (tick) {
 			case 4: 
-				FlxG.sound.play(Paths.audio('metronome', 'sfx'));
+				FlxG.sound.play(Assets.audio('sfx/metronome'));
 				animation.frameIndex = 0;
 			case 3: 
-				FlxG.sound.play(Paths.audio('metronome', 'sfx'));
+				FlxG.sound.play(Assets.audio('sfx/metronome'));
 				animation.frameIndex = 1;
 			case 2: 
-				FlxG.sound.play(Paths.audio('metronome', 'sfx'));
+				FlxG.sound.play(Assets.audio('sfx/metronome'));
 				animation.frameIndex = 2;
 			case 1: 
-				FlxG.sound.play(Paths.audio('menu_confirm', 'sfx'));
+				FlxG.sound.play(Assets.audio('sfx/menu_confirm'));
 				animation.frameIndex = 3;
 		}
 		for(handler in onTickHandlers){
@@ -44,7 +44,7 @@ class Countdown extends FunkinSprite {
 
 	public function new(?x:Float, ?y:Float) {
 		super(x, y);
-		final graphic:FlxGraphic = Paths.image('ui/countdown');
+		final graphic:FlxGraphic = Assets.image('images/ui/countdown');
 		loadGraphic(graphic, true, graphic.width, Std.int(graphic.height * (1 / ticks)));
 
 		animation.frameIndex = -1; // ????

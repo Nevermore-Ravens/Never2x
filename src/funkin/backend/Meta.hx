@@ -55,8 +55,8 @@ class Meta {
 		// still keeping this check here
 		// in case the file isn't in the cache
 		// but the user wants to parse it anyways
-		if (!Paths.exists(path)) return file;
-		var data:Dynamic = Json5.parse(Paths.getFileContent(path));
+		if (!Assets.exists(path)) return file;
+		var data:Dynamic = Json5.parse(Assets.text(path));
 
 		if (data.enemy != null)
 			file.opponent = data.enemy;

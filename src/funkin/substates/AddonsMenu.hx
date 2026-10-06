@@ -46,13 +46,13 @@ class AddonsMenu extends FlxSubState {
 		leftBox.allowDrag = false;
 		leftBox.onRemoveAddon = function(addon, graphic) {
 			rightBox.addAddon(addon, graphic);
-			FlxG.sound.play(Paths.audio('scroll', 'sfx'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'));
 			leftBox.displayHover = leftBox.allowKeys = leftBox.list.length > 1;
 			rightBox.displayHover = rightBox.allowKeys = !leftBox.displayHover;
 			curBox = leftBox.displayHover ? leftBox: rightBox;
 		};
 		leftBox.onSelect = function(cur, last) {
-			FlxG.sound.play(Paths.audio('scroll', 'sfx'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'));
 			leftBox.displayHover = leftBox.allowKeys = true;
 			rightBox.displayHover = rightBox.allowKeys = false;
 			curBox = leftBox;
@@ -62,13 +62,13 @@ class AddonsMenu extends FlxSubState {
 		rightBox.displayHover = rightBox.allowKeys = addonsOff.length <= 0 && addonsOn.length > 0;
 		rightBox.onRemoveAddon = function(addon, graphic) {
 			leftBox.addAddon(addon, graphic);
-			FlxG.sound.play(Paths.audio('scroll', 'sfx'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'));
 			rightBox.displayHover = rightBox.allowKeys = rightBox.list.length > 1;
 			leftBox.displayHover = leftBox.allowKeys = !rightBox.displayHover;
 			curBox = leftBox.displayHover ? leftBox: rightBox;
 		};
 		rightBox.onSelect = function(cur, last) {
-			FlxG.sound.play(Paths.audio('scroll', 'sfx'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'));
 			leftBox.displayHover = leftBox.allowKeys = false;
 			rightBox.displayHover = rightBox.allowKeys = true;
 			curBox = rightBox;
@@ -89,7 +89,7 @@ class AddonsMenu extends FlxSubState {
 		add(actionTxt = new FlxTypedGroup());
 		for (i => act in actions) {
 			var txt = new FlxText((FlxG.width / (actions.length + 1)) * (i + 1), 665, 0, _t(act));
-			txt.setFormat(Paths.font("cafeSquare.ttf"), 28, 0xFFFFFFFF, CENTER);
+			txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 28, 0xFFFFFFFF, CENTER);
 			txt.x -= txt.width * 0.5;
 			actionTxt.add(txt);
 		}
@@ -134,7 +134,7 @@ class AddonsMenu extends FlxSubState {
 		} else if (curBox.displayHover && !FlxG.keys.pressed.SHIFT && ((lastCurrent == 0 && upJustPressed) || (lastCurrent == curBox.list.length - 1 && Controls.justPressed("ui_down")))) {
 			curBox.current = lastCurrent;
 			inActions = true;
-			FlxG.sound.play(Paths.audio("scroll", "sfx"));
+			FlxG.sound.play(Assets.audio("sfx/scroll"));
 			curBox.displayHover = curBox.allowKeys = false;
 		}
 		
@@ -143,7 +143,7 @@ class AddonsMenu extends FlxSubState {
 			for (i => act in actionTxt.members) {
 				if (FlxG.mouse.screenX >= act.x - 5 && FlxG.mouse.screenX <= act.x + act.width + 5 && FlxG.mouse.screenY >= act.y - 5 && FlxG.mouse.screenY <= act.y + act.height + 5) {
 					if (!inActions || curAction != i)
-						FlxG.sound.play(Paths.audio('scroll', 'sfx'));
+						FlxG.sound.play(Assets.audio('sfx/scroll'));
 					curAction = i;
 					inActions = true;
 					leftBox.displayHover = leftBox.allowKeys = false;
@@ -166,7 +166,7 @@ class AddonsMenu extends FlxSubState {
 					Addons.reload();
 					var lRemove = leftBox.onRemoveAddon;
 					var rRemove = rightBox.onRemoveAddon;
-					leftBox.onRemoveAddon = rightBox.onRemoveAddon = function(_, graphic) {Paths.destroyAsset("MODicon", graphic);};
+					leftBox.onRemoveAddon = rightBox.onRemoveAddon = function(_, graphic) {FlxG.bitmap.remove(graphic);};
 					while (leftBox.list.length > 0)
 						leftBox.removeAddon(0);
 					while (rightBox.list.length > 0)
@@ -198,7 +198,7 @@ class AddonsMenu extends FlxSubState {
 				else
 					target.retarget(idx);
 			} else {
-				FlxG.sound.play(Paths.audio("scroll", "sfx"));
+				FlxG.sound.play(Assets.audio("sfx/scroll"));
 				curAction = (curAction + (leftJustPressed ? -1 : 1) + actions.length) % actions.length;
 			}
 		}

@@ -42,11 +42,11 @@ class Alphabet extends FlxTypedSpriteGroup<AlphabetLine> {
 	// and psych's json is good anyways :clueless:
 	public static function loadData(?request:String) {
 		var path:String = '$request.json';
-		if (!FileSystem.exists(path)) path = Paths.get('data/alphabet.json');
+		if (!Assets.exists(path)) path = 'data/alphabet.json';
 
 		AlphabetGlyph.allGlyphs = new Map<String, Glyph>();
 		try {
-			var data:Dynamic = Json.parse(File.getContent(path));
+			var data:Dynamic = Json.parse(Assets.text(path));
 
 			if (data.allowed != null && data.allowed.length > 0) {
 				for (i in 0...data.allowed.length) {
@@ -294,14 +294,14 @@ class AlphabetGlyph extends FunkinSprite {
 	@:noCompletion
 	function set_image(value:String):String {
 		if (frames == null) {
-			frames = Paths.sparrowAtlas(image = value);
+			frames = Assets.sparrowAtlas("images/" + (image = value));
 			return value;
 		}
 
 		var lastAnim:String = null;
 		if (animation != null) lastAnim = animation.name;
 
-		frames = Paths.sparrowAtlas(image = value);
+		frames = Assets.sparrowAtlas("images/" + (image = value));
 		
 		if (lastAnim != null) {
 			animation.addByPrefix(lastAnim, lastAnim, 24);
@@ -314,7 +314,7 @@ class AlphabetGlyph extends FunkinSprite {
 
 	@:noCompletion
 	inline function set_char(newChar:String):String {
-		frames = Paths.sparrowAtlas(image);
+		frames = Assets.sparrowAtlas("images/" + image);
 
 		var converted:String = newChar.toLowerCase();
 		final isLowerCase:Bool = converted == newChar;

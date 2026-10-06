@@ -96,7 +96,7 @@ class ResultsScreen extends FunkinState {
 		scrollObj = new FlxObject(640, 360, 2, 2);
 		FlxG.camera.follow(scrollObj, LOCKON, 0.15);
 
-		Conductor.inst = FlxG.sound.load(Paths.audioPath('results', 'music'), true);
+		Conductor.inst = FlxG.sound.load(Assets.audio('music/results'), true);
 		Conductor.clock.reset([{tempo: 140, beatsPerMeasure: 4}]);
 		Conductor.offset = -0.050;
 		Conductor.play();
@@ -105,7 +105,7 @@ class ResultsScreen extends FunkinState {
 		for (song in weekFile.songs)
 			songColor = (song.id == data[data.length - 1].song) ? song.color : songColor;
 
-		var swirlBG = new FunkinSprite(0, 0, Paths.image("menus/results/fluid"));
+		var swirlBG = new FunkinSprite(0, 0, Assets.image("images/menus/results/fluid"));
 		swirlBG.scrollFactor.set();
 		swirlBG.screenCenter();
 		swirlBG.shader = swirlShader = new SwirlBGShader();
@@ -134,7 +134,7 @@ class ResultsScreen extends FunkinState {
 		
 		// offset.
 		var clear:FlxText = new FlxText(20, 10, 0, (wasStory ? "Week" : "Song") + " Cleared!", 48);
-		clear.font = Paths.font("LineSeed.ttf");
+		clear.font = Assets.getPath("fonts/LineSeed.ttf");
 		clear.alpha = 0;
 		add(clear);
 		FlxTween.tween(clear, {alpha: 1, y: clear.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.1});
@@ -155,13 +155,13 @@ class ResultsScreen extends FunkinState {
 			mean /= result.notesHit.length;
 
 			var song:FlxText = new FlxText(FlxG.width - 20, 15 + FlxG.height * i, 0, meta.songName, 32);
-			song.font = Paths.font("vcr.ttf");
+			song.font = Assets.getPath("fonts/vcr.ttf");
 			song.x -= song.width;
 			song.alpha = 0;
 			add(song);
 	
 			var songDifficulty:FlxText = new FlxText(FlxG.width - 20, 15 + 32 + FlxG.height * i, 0, difficulty.toUpperCase(), 32);
-			songDifficulty.font = Paths.font('vcr.ttf');
+			songDifficulty.font = Assets.getPath('fonts/vcr.ttf');
 			songDifficulty.x -= songDifficulty.width;
 			songDifficulty.alpha = 0;
 			add(songDifficulty);
@@ -173,12 +173,12 @@ class ResultsScreen extends FunkinState {
 			timeBox.graphic.bitmap.fillRect(new openfl.geom.Rectangle(0, timeBox.graphic.height * 0.5 - 1, timeBox.graphic.width, 2), 0xFFFFFFFF);
 
 			var score = new FlxText(timeBox.x + 10, timeBox.y, 0, 'Score: ' + Util.moneyString(result.score));
-			score.setFormat(Paths.font("LineSeed.ttf"), 32, 0xFFFFFFFF, LEFT);
+			score.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 32, 0xFFFFFFFF, LEFT);
 			score.y -= score.height;
 			score.alpha = 0;
 			add(score);
 			var acc = new FlxText(timeBox.x + timeBox.width - 10, timeBox.y, 0, Util.truncateFloat(result.accuracy, 5) + "%");
-			acc.setFormat(Paths.font("LineSeed.ttf"), 32, 0xFFFFFFFF, RIGHT);
+			acc.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 32, 0xFFFFFFFF, RIGHT);
 			acc.x -= acc.width;
 			acc.y -= acc.height;
 			acc.alpha = 0;
@@ -191,7 +191,7 @@ class ResultsScreen extends FunkinState {
 			bars.add(barBox); // let it dream
 
 			var txt = new FlxText(barBox.x + 10, 0, 380, 'MA: ${Util.truncateFloat(result.judges[0].hits / result.judges[1].hits, 2)} | Mean: ${Util.truncateFloat(mean,  2)} ms');
-			txt.setFormat(Paths.font("LineSeed.ttf"), 20, 0xFFFFFFFF, LEFT);
+			txt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 20, 0xFFFFFFFF, LEFT);
 			texts.add(txt);
 			
 			barBox.scale.set(txt.fieldWidth + 20, 50 * result.judges.length + 5 + txt.height);
@@ -225,13 +225,13 @@ class ResultsScreen extends FunkinState {
 				bars.add(fill);
 
 				var title = new FlxText(empty.x + 10, empty.y + empty.height * 0.5, 0, name);
-				title.setFormat(Paths.font("LineSeedB.ttf"), 24, fill.color, LEFT, OUTLINE, empty.color);
+				title.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 24, fill.color, LEFT, OUTLINE, empty.color);
 				title.borderSize = 2;
 				title.y -= title.height * 0.5;
 				texts.add(title);
 
 				var count = new FlxText(empty.x + empty.width - 10, empty.y + empty.height * 0.5, 0, Std.string(count));
-				count.setFormat(Paths.font("LineSeed.ttf"), 24, fill.color, RIGHT, OUTLINE, empty.color);
+				count.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 24, fill.color, RIGHT, OUTLINE, empty.color);
 				count.borderSize = 2;
 				count.x -= count.width;
 				count.y -= count.height * 0.5;
@@ -264,7 +264,7 @@ class ResultsScreen extends FunkinState {
 		}
 		if (modsStr != "Active Mods:") {
 			var modsTxt = new FlxText(FlxG.width - 20, 15 + FlxG.height * data.length, 0, modsStr);
-			modsTxt.setFormat(Paths.font("LineSeed.ttf"), 32, 0xFFFFFFFF, RIGHT);
+			modsTxt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 32, 0xFFFFFFFF, RIGHT);
 			modsTxt.x -= modsTxt.width;
 			add(modsTxt);
 
@@ -274,7 +274,7 @@ class ResultsScreen extends FunkinState {
 
 		scrollEmpty.visible = scrollFill.visible = scrollMax > 360;
 
-		var timeDot = Paths.image("menus/results/noteHitDot", "images", false); // need gpu cache off cuz imma be fucking with bitmaps a bit
+		var timeDot = Assets.image("images/menus/results/noteHitDot");
 		var missLine = FlxG.bitmap.create(timeDot.width, Std.int(timeBoxes.members[0].height), 0xFF808080);
 		missLine.destroyOnNoUse = false;
 
@@ -335,7 +335,7 @@ class ResultsScreen extends FunkinState {
 			Conductor.stop();
 			Conductor.reset();
 			Util.toMenu(new FreeplayState());
-			Paths.clearUnusedMemory();
+			//Paths.clearUnusedMemory();
 		}
 
 		for (dot in timeDots.members) {

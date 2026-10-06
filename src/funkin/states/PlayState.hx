@@ -213,7 +213,7 @@ class PlayState extends FunkinState {
 
 		ScriptHandler.loadFromDir('scripts');
 
-		Conductor.clock.audioTime = -(extraTime * FlxG.timeScale);
+		// Conductor.clock.audioTime = -(extraTime * FlxG.timeScale);
 
 		playerStrums = new Strumline(960, strumlineYPos - 10, skin);
 		opponentStrums = new Strumline(320, strumlineYPos - 10, skin);
@@ -313,19 +313,19 @@ class PlayState extends FunkinState {
 		loadSong();
 
 		stage = new Stage(stageName);
-		ScriptHandler.loadFile(Paths.get('stages/$stageName.hx'));
+		ScriptHandler.loadFile(Assets.getPath('stages/$stageName.hx'));
 		camGame.zoom = defaultCamZoom = stage.zoom;
 		canMoveCamera = stage.canMoveCamera;
 
 		add(gf = new Character(stage.spectator.x, stage.spectator.y, /*song.meta.spectator*/ "gf", stage.reflective));
 		gf.visible = stage.isSpectatorVisible;
-		ScriptHandler.loadFile(Paths.get('characters/${gf.name}.hx'));
+		ScriptHandler.loadFile(Assets.getPath('characters/${gf.name}.hx'));
 		
 		//to-do add to the json the character positions and position of it's reflections
 		add(dad = new Character(stage.opponent.x, stage.opponent.y, /*song.meta.opponent*/ "dad", stage.reflective));
-		ScriptHandler.loadFile(Paths.get('characters/${dad.name}.hx'));
+		ScriptHandler.loadFile(Assets.getPath('characters/${dad.name}.hx'));
 		add(bf = new Character(stage.player.x, stage.player.y, /*song.meta.player*/ "bf", stage.reflective));
-		ScriptHandler.loadFile(Paths.get('characters/${bf.name}.hx'));
+		ScriptHandler.loadFile(Assets.getPath('characters/${bf.name}.hx'));
 		
 		// playerStrums.character = function() return bf;
 		// extraStrumline.character = function() return gf;
@@ -337,7 +337,7 @@ class PlayState extends FunkinState {
 		add(lyrics = new Lyrics());
 		lyrics.cameras = [camHUD];
 		if (Settings.data.lyrics)
-			lyrics.load(Paths.get('songs/$songID/lyrics.json'));
+			lyrics.load(Assets.getPath('songs/$songID/lyrics.json'));
 		else
 			lyrics.active = lyrics.visible = false;
 
@@ -375,12 +375,12 @@ class PlayState extends FunkinState {
 			dialogue.onClose = start.bind(false);
 		}
 
-		fadeStrums();
+		//fadeStrums();
 
 		botplay = Settings.data.gameplayModifiers["botplay"];
 		disqualified = disqualified || (Settings.data.gameplayModifiers["randomizedNotes"] || !Settings.data.gameplayModifiers["sustains"]);
 
-	 	if (!dontStart) start();
+	 	if (!dontStart) start(true);
 
 		DiscordClient.changePresence('Playing: $songName', '', '', true);
 
@@ -780,7 +780,7 @@ class PlayState extends FunkinState {
 		hud.add(timingIndicator = new FlxText((hitErrorBar.x + (isEnemy ? 25 : -25)) - 150, 0, 300, '0 ms', 16));
 		timingIndicator.alignment = 'center';
 		timingIndicator.alpha = 0;
-		timingIndicator.font = Paths.font('LineSeed.ttf');
+		timingIndicator.font = Assets.getPath('fonts/LineSeed.ttf');
 		timingIndicator.borderSize = 1.25;
 		timingIndicator.borderStyle = OUTLINE;
 		timingIndicator.borderColor = 0xFF000000;
@@ -807,7 +807,7 @@ class PlayState extends FunkinState {
 		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songName (Starting....)', 18));
 		timeText.screenCenter(X);
 		timeText.alignment = 'center';
-		timeText.font = Paths.font('LineSeed.ttf');
+		timeText.font = Assets.getPath('fonts/LineSeed.ttf');
 		timeText.borderStyle = FlxTextBorderStyle.OUTLINE;
 		timeText.borderSize = 1.5;
 		updateTimeText();
@@ -815,12 +815,12 @@ class PlayState extends FunkinState {
 
 		hud.add(infoText = new FlxText(0, downscroll ? 15 : 675, FlxG.width, '', 18));
 		infoText.alignment = 'center';
-		infoText.font = Paths.font('LineSeed.ttf');
+		infoText.font = Assets.getPath('fonts/LineSeed.ttf');
 		infoText.borderStyle = FlxTextBorderStyle.OUTLINE;
 		infoText.borderSize = 1.5;
 
 		hud.add(judgeNames = new FlxText(5, 0, 0, '', 18));
-		judgeNames.font = Paths.font('LineSeed.ttf');
+		judgeNames.font = Assets.getPath('fonts/LineSeed.ttf');
 		judgeNames.color = 0xFF999999; // sets the default format color to the miss color
 		judgeNames.borderStyle = FlxTextBorderStyle.OUTLINE;
 		judgeNames.borderSize = 1.5;
@@ -858,7 +858,7 @@ class PlayState extends FunkinState {
 		clearType.borderSize = 1.5;
 		clearType.alignment = Settings.data.judgementCounter ? 'center' : 'left';
 
-		hud.add(botplayTxt = new FunkinSprite().loadGraphic(Paths.image('ui/botplay')));
+		hud.add(botplayTxt = new FunkinSprite(0, 0, Assets.image('images/ui/botplay')));
 		botplayTxt.visible = false;
 		botplayTxt.screenCenter();
 		botplayTxt.camera = camHUD;
@@ -1013,7 +1013,7 @@ class PlayState extends FunkinState {
 
 		// load inst
 		try {
-			Conductor.inst = FlxG.sound.load(Paths.audio('songs/$songID/Inst'));
+			Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
 			Conductor.inst.pitch = FlxG.timeScale;
 			Conductor.inst.onComplete = function() songCompleted();
 
@@ -1110,7 +1110,8 @@ class PlayState extends FunkinState {
 		var judgeBreaks = 0;
 		for (judge in Judgement.current)
 			judgeBreaks += judge.causesMisses ? judge.hits : 0;
-		Judgement.current.push({
+		var judgeList = Judgement.current.copy();
+		judgeList.push({
 			name: "miss",
 			//shortName: "MS",
 			//timing: Judgement.max.timing,
@@ -1124,7 +1125,7 @@ class PlayState extends FunkinState {
 			score: score,
 			accuracy: accuracy,
 			notesHit: noteHitList,
-			judges: Judgement.current,
+			judges: judgeList,
 			songLength: Conductor.inst.length
 		});
 
@@ -1132,7 +1133,7 @@ class PlayState extends FunkinState {
 			persistentUpdate = false;
 			if (forceLeave) {
 				Util.toMenu(new FreeplayState());
-				Paths.clearUnusedMemory();
+				//Paths.clearUnusedMemory();
 			} else {
 				FunkinState.switchState(new ResultsScreen(
 					storyMode,
@@ -1232,7 +1233,7 @@ class PlayState extends FunkinState {
 
 	// have to make it a function instead because dce lol
 	function loadVideo(path:String):FunkinVideo {
-		return new FunkinVideo(Paths.video(path), true);
+		return new FunkinVideo(Assets.getPath("videos/" + path + ".mp4"), true);
 	}
 
 	var alreadyDying:Bool = false;

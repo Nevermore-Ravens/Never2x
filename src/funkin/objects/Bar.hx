@@ -25,12 +25,12 @@ class Bar extends FlxSpriteGroup {
 		this.valueFunction = valueFunction;
 		setBounds(boundX, boundY);
 		
-		bg = new FlxSprite().loadGraphic(Paths.image(bgImg));
+		bg = new FlxSprite().loadGraphic(Assets.image("images/" + bgImg));
 		barWidth = Math.floor(bg.width);
 		barHeight = Math.floor(bg.height);
 
-		leftBar = new FlxSprite().loadGraphic(Paths.image(fillImg));
-		rightBar = new FlxSprite().loadGraphic(Paths.image(fillImg));
+		leftBar = new FlxSprite().loadGraphic(Assets.image("images/" + fillImg));
+		rightBar = new FlxSprite().loadGraphic(Assets.image("images/" + fillImg));
 
 		if (bgBehind)
 			add(bg);

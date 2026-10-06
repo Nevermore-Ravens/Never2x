@@ -175,7 +175,7 @@ class Lyrics extends FlxSpriteGroup {
 		text = fuck.text;
 		if (fuck.italic) font += ' Italic';
 		
-		var fontToUse = Paths.font(font + '.ttf');
+		var fontToUse = Assets.getPath("fonts/" + font + '.ttf');
 
 		var label = pool.pop();
 		if (label != null) {
@@ -252,7 +252,7 @@ class Lyrics extends FlxSpriteGroup {
 	function getTextField(size:Int, font:String):TextField {
 		if (textFields.exists(size)) return textFields[size];
 
-		var fontToUse = Paths.font(font + '.ttf');
+		var fontToUse = Assets.getPath("fonts/" + font + '.ttf');
 
 		var textField = new TextField();
 		textField.selectable = false;

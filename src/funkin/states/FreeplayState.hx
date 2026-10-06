@@ -107,7 +107,7 @@ class FreeplayState extends FunkinState {
 		}
 		curSelected = Std.int(FlxMath.bound(curSelected, 0, songList.length - 1));
 
-		add(bg = new FlxSprite().loadGraphic(Paths.image('menus/desatBG')));
+		add(bg = new FlxSprite(0, 0, Assets.image('images/menus/desatBG')));
 		bg.antialiasing = Settings.data.antialiasing;
 		bg.screenCenter();
 		bg.color = intendedColour = songList[curSelected].colour;
@@ -129,7 +129,7 @@ class FreeplayState extends FunkinState {
 		}
 
 		scoreText = new FlxText(FlxG.width - 384, 5, 0, '', 32);
-		scoreText.font = Paths.font('vcr.ttf');
+		scoreText.font = Assets.getPath('fonts/vcr.ttf');
 		scoreText.alignment = 'right';
 
 		add(scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(1, 66, 0xFF000000));
@@ -152,7 +152,7 @@ class FreeplayState extends FunkinState {
 		modsMenu.allowKeys = false;
 
 		add(modsText = new FlxText(modsMenu.x, modsMenu.y + modsMenu.height * 0.5, modsMenu.height, "v [CTRL] - Edit Modifiers v"));
-		modsText.setFormat(Paths.font("cafeSquare.ttf"), 24, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
+		modsText.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 24, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
 		modsText.angle = -90;
 		modsText.x -= (modsText.width + modsText.height) * 0.5;
 		modsText.y -= modsText.height * 0.5;
@@ -195,12 +195,12 @@ class FreeplayState extends FunkinState {
 			}
 
 			if (FlxG.keys.justPressed.CONTROL || (FlxG.mouse.justPressed && FlxG.mouse.x >= modsText.x + (modsText.width - modsText.height) * 0.5 && FlxG.mouse.y >= modsMenu.y && FlxG.mouse.y <= modsMenu.y + modsMenu.height)) {
-				FlxG.sound.play(Paths.audio("scroll", "sfx"));
+				FlxG.sound.play(Assets.audio("sfx/scroll"));
 				modsMenu.allowMouse = true;
 				modsMenu.allowKeys = true;
 			}
 		} else if (Controls.justPressed("back") || FlxG.keys.justPressed.CONTROL || FlxG.mouse.justPressedRight || (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(modsMenu))) {
-			FlxG.sound.play(Paths.audio("cancel", "sfx"));
+			FlxG.sound.play(Assets.audio("sfx/cancel"));
 			modsMenu.allowMouse = false;
 			modsMenu.allowKeys = false;
 		}
@@ -322,7 +322,7 @@ class FreeplayState extends FunkinState {
 
 	function changeSelection(?change:Int = 0, ?volume:Float = 0.4) {
 		curSelected = FlxMath.wrap(curSelected + change, 0, songList.length - 1);
-		if (volume > 0.0) FlxG.sound.play(Paths.audio('scroll', 'sfx'), volume);
+		if (volume > 0.0) FlxG.sound.play(Assets.audio('sfx/scroll'), volume);
 
 		for (num => item in grpSongs.members) {
 			item.alpha = num == curSelected ? 1 : 0.6;

@@ -27,7 +27,7 @@ class JudgementSpr extends FunkinSprite {
 		super(x, y);
 		ogX = x;
 		ogY = y;
-		final texture = Paths.image('ui/judgements');
+		final texture = Assets.image('images/ui/judgements');
 		loadGraphic(texture, true, texture.width, Math.floor(texture.height / Judgement.current.length));
 		
 		visibility = 0;
