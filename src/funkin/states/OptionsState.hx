@@ -100,7 +100,7 @@ class OptionsState extends FunkinState {
 				opt;
 			},*/
 			{
-				var opt = new Option('note_offset', 'note_offset_desc', "noteOffset", FloatOption(-5000, 5000, 1));
+				var opt = new Option('note_offset', 'note_offset_desc', "inputOffset", FloatOption(-5000, 5000, 1));
 				opt.formatText = function(_) {
 					return opt.value + " MS";
 				};
@@ -457,6 +457,7 @@ class OptionsState extends FunkinState {
 		super.destroy();
 		Controls.save();
 		Settings.save();
+		Settings.updateNevermore();
 		self = null;
 	}
 }

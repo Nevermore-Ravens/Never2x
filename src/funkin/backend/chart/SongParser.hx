@@ -133,7 +133,6 @@ class SongParser extends BaseParser {
 		
 		result.keyCount = fnf.data.song.keyCount;
 		if (result.keyCount == 0) result.keyCount = 4;
-		trace(result.keyCount);
 
 		for (section in fnf.data.song.notes) {
 			for (note in section.sectionNotes) {

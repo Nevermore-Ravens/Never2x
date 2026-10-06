@@ -3,6 +3,7 @@ package funkin.backend;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
+import nevermore.Nevermore;
 
 @:structInit
 @:publicFields
@@ -25,8 +26,8 @@ class SaveVariables {
 	var ghostTapping:Bool = true;
 	var metronome:Bool = false;
 	var canReset:Bool = true;
-	var noteOffset:Float = 0;
-	var assistClaps:Bool = false;
+	var inputOffset:Float = 0;
+	var assistTicks:Bool = false;
 	var accuracyType:String = 'Simple';
 	var hitErrorBar:Bool = true;
 	var modcharts:Bool = true;
@@ -143,10 +144,20 @@ class Settings {
 		}
 
 		#if DISCORD_ALLOWED DiscordClient.check(); #end
+
+		updateNevermore();
+	}
+
+	public static function updateNevermore() {
+		Nevermore.settings.inputOffset = data.inputOffset;
+		Nevermore.settings.holdGrain = data.holdGrain;
+		//Nevermore.settings.quantization = data.quantization;
 	}
 
 	public static inline function reset(?saveToDisk:Bool = false) {
 		data = {};
+		updateNevermore();
+
 		if (saveToDisk) save();
 	}
 
@@ -173,11 +184,5 @@ class Settings {
 			data.noteSplashSkin = "classic";
 			Sys.println("Note splash doesn't exist! Resetting value in settings.");
 		}
-
-		/*final curDevices = FunkinAudioHandler.getPlaybackDeviceNames();
-		if (data.audioDevice != "Default" && !curDevices.contains(data.audioDevice)) {
-			data.audioDevice = "Default";
-			Sys.println("Cannot find the selected audio device! Resetting value in settings.");
-		}*/
 	}
 }

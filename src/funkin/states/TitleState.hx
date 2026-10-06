@@ -128,7 +128,7 @@ class TitleState extends FunkinState {
 		Conductor.play();
 
 		FlxTween.num(0, 0.7, 4, {ease: FlxEase.linear}, function(num) {
-			Conductor.inst.volume = num;
+			Conductor.volume = num;
 		});
 	}
 

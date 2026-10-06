@@ -1,6 +1,5 @@
 package funkin.backend;
 
-#if ADDONS_ALLOWED
 import hxjson5.Json5;
 import sys.FileSystem;
 import sys.io.File;
@@ -105,21 +104,29 @@ class Addons {
 
 	static function _getPath(key:String):String {
 		if (list.length > 0) {
-			var directory:String = (current?? list[0]).directory;
+			var currentAddon = (current ?? list[0]);
+			var directory:String = currentAddon.directory;
+			var path:String = '';
+
+			function getRedirect():String return 'addons/' + directory + '/' + key;
+			
+			path = getRedirect();
+			if (FileSystem.exists(path)) return path;
+
 			for (addon in list) {
 				if (!addon.enabled) continue;
+				if (addon.directory == currentAddon.directory) continue;
+
+				directory = addon.directory;
+				path = getRedirect();
 
 				// `FileSystem.exists()` can be really expensive
 				// if used too often, so make sure you don't have
 				// too many addons enabled at once
-				var path:String = 'addons/$directory/$key';
 				if (FileSystem.exists(path)) return path;
-
-				directory = addon.directory;
 			}
 		}
 
 		return 'assets/$key';
 	}
 }
-#end

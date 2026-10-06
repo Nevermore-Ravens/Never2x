@@ -1,6 +1,5 @@
 package funkin.states;
 
-import funkin.backend.FlxAudioHandler;
 import flixel.FlxState;
 
 class FunkinState extends FlxState {
@@ -11,6 +10,14 @@ class FunkinState extends FlxState {
 	
 	override function create() {
 		super.create();
+
+		Conductor.reset();
+		Conductor.clock.active = false;
+
+		Conductor.clock.stepHit.add(stepHit);
+		Conductor.clock.beatHit.add(beatHit);
+		Conductor.clock.measureHit.add(measureHit);
+
 		//FlxG.camera.bgColor.alpha = 0;
 		//Conductor.reset();
 		//Paths.clearUnusedMemory();

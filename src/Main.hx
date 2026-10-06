@@ -98,6 +98,7 @@ class InitState extends flixel.FlxState {
 	private function setDefines() {
 		nevermore.Nevermore.init();
 		moonchart.Moonchart.init();
+		Addons.init();
 
 		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomQuaver;
 		moonchart.backend.FormatDetector.getFormatData(STEPMANIA).handler = CustomStepMania;
@@ -109,7 +110,6 @@ class InitState extends flixel.FlxState {
 		Settings.load();
 		Scores.load();
 		DiscordClient.start();
-		Addons.init();
 		Meta.cacheFiles();
 		Alphabet.loadData();
 		LanguageHandler.loadTranslations();

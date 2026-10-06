@@ -37,7 +37,7 @@ class ScriptHandler {
 		if (!FileSystem.exists(dir)) return null;
 		
 		var script:Script = new Script(dir);
-		script.set('game', PlayState.self);
+		//script.set('game', PlayState.self);
 
 		list.push(script);
 		try{
@@ -149,7 +149,7 @@ class Script extends Iris {
 		set('FunkinSprite', funkin.objects.FunkinSprite);
 
 		//needed to get the song name inside the script
-		set('songID', PlayState.songID);
+		//set('songID', PlayState.songID);
 
 		//modifier system
 		set('range', range);
@@ -204,9 +204,11 @@ class Script extends Iris {
 	}
 
 	static function getModchartManager() {
-		if (PlayState.self.playfield.modchart == null)
+/*		if (PlayState.self.playfield.modchart == null)
 			PlayState.self.playfield.modchart = new nevermore.modchart.ModchartManager();
-		return PlayState.self.playfield.modchart;
+		return PlayState.self.playfield.modchart;*/
+
+		return new nevermore.modchart.ModchartManager();
 	}
 }
 #else
