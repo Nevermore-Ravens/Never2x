@@ -155,28 +155,29 @@ class InitState extends flixel.FlxState {
 		Judgement.register('Never2x', [
 			{
 				name: 'Killer',
-				window: HitWindows.current[0]
+				window: HitWindows.current[0],
+				color: 0xFF8ACDFF
 			},
 			{
 				name: 'Sick',
 				window: HitWindows.current[1],
-				color: 0xFF2CEDFF
+				color: 0xFFFFED5E
 			},
 			{
 				name: 'Good',
 				window: HitWindows.current[2],
-				color: 0xFF43FF2E
+				color: 0xFF5EF95E
 			},
 			{
 				name: 'Bad',
 				window: HitWindows.current[3],
-				color: 0xFFFF8F34
+				color: 0xFFBF7BE9
 			},
 			{
 				name: 'Shit',
 				breaksCombo: true,
 				window: HitWindows.current[4],
-				color: 0xFFFF2533
+				color: 0xFF5E3596
 			}
 		]);
 		Judgement.type = 'Never2x';

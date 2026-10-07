@@ -2,7 +2,7 @@ package funkin.core;
 
 enum abstract ClearType(String) from String to String {
 	var CLEARTYPE_DEFAULT = 'N/A';
-	var KILLER_FULL_COMBO = 'KFC'; // kentucky full combo
+	var KILLER_FULL_COMBO = 'KFC'; // kentucky fried combo
 	var WHITE_FLAG = 'WF';
 	var SINGLE_DIGIT_SICK = 'SDS';
 	var SICK_FULL_COMBO = 'SFC';
@@ -19,17 +19,16 @@ enum abstract ClearType(String) from String to String {
 		return switch this {
 			default: 0xFFFFFFFF;
 
-			case KILLER_FULL_COMBO: 0xFFDDFF00;
-			case WHITE_FLAG: 0xFFDDFF00;
-			case SINGLE_DIGIT_SICK: 0xFFDDFF00;
-			case SICK_FULL_COMBO: 0xFFDCAB24;
-			case BLACK_FLAG: 0xFF3EC53E;
-			case SINGLE_DIGIT_GOOD: 0xFF3EC53E;
-			case GOOD_FULL_COMBO: 0xFF3EC53E;
-			case FULL_COMBO: 0xFF0090FF;
-			case MISS_FLAG: 0xFF000000;
-			case SINGLE_DIGIT_COMBO_BREAK: 0xFF000000;
-			case CLEAR: 0xFF000000;
+			case KILLER_FULL_COMBO: 0xFF8ACCFF;
+			case WHITE_FLAG: 0xFF8ACCFF;
+			case SINGLE_DIGIT_SICK: 0xFFFFED5E;
+			case SICK_FULL_COMBO: 0xFFFFED5E;
+			case BLACK_FLAG: 0xFF5EF95E;
+			case SINGLE_DIGIT_GOOD: 0xFF5EF95E;
+			case GOOD_FULL_COMBO: 0xFF5EF95E;
+			case FULL_COMBO: 0xFFFFFFFF;
+			case MISS_FLAG: 0xFFFF0000;
+			case SINGLE_DIGIT_COMBO_BREAK: 0xFF990000;
 			case CLEARTYPE_DEFAULT: 0xFF808080;
 		}
 	}

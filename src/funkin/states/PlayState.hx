@@ -222,8 +222,6 @@ class PlayState extends FunkinState {
 		scoring.noteHit(note, deviation);
 		accuracy.noteHit(note, deviation);
 
-		stats.score = scoring.get(stats);
-		stats.accuracy = accuracy.get(stats);
 		updateInfo();
 		updateJudgeCounter();
 	}
@@ -235,8 +233,6 @@ class PlayState extends FunkinState {
 		scoring.noteMissed(note);
 		accuracy.noteMissed(note);
 
-		stats.score = scoring.get(stats);
-		stats.accuracy = accuracy.get(stats);
 		updateInfo();
 		updateJudgeCounter();
 
@@ -252,8 +248,6 @@ class PlayState extends FunkinState {
 		scoring.sustainHit(sustain);
 		accuracy.sustainHit(sustain);
 
-		stats.score = scoring.get(stats);
-		stats.accuracy = accuracy.get(stats);
 		updateInfo();
 	}
 
@@ -264,8 +258,6 @@ class PlayState extends FunkinState {
 		scoring.sustainDropped(sustain);
 		accuracy.sustainDropped(sustain);
 
-		stats.score = scoring.get(stats);
-		stats.accuracy = accuracy.get(stats);
 		updateInfo();
 		updateJudgeCounter();
 
@@ -320,7 +312,7 @@ class PlayState extends FunkinState {
 
 		hud.add(judgeNames = new FlxText(5, 0, 0, '', 18));
 		judgeNames.font = Assets.getPath('fonts/LineSeed.ttf');
-		judgeNames.color = 0xFF999999; // sets the default format color to the miss color
+		judgeNames.color = 0xFFFF0000; // sets the default format color to the miss color
 		judgeNames.borderStyle = FlxTextBorderStyle.OUTLINE;
 		judgeNames.borderSize = 1.5;
 		judgeNames.visible = Settings.data.judgementCounter;
@@ -404,7 +396,15 @@ class PlayState extends FunkinState {
 
 	function updateInfo():Void {
 		stats.clearType = stats.getClearType();
+
+		if (stats.clearType != CLEAR) {
+			clearTypeTxt.text = stats.clearType;
+			clearTypeTxt.color = stats.clearType.color;
+		} else clearTypeTxt.visible = false;
+
 		stats.grade = stats.getGrade();
+		stats.score = scoring.get(stats);
+		stats.accuracy = accuracy.get(stats);
 
 		infoText.text = 'Score: ${Util.moneyString(stats.score)}';
 
@@ -414,11 +414,6 @@ class PlayState extends FunkinState {
 
 		if (!Settings.data.hideAcc)
 			infoText.text += ' | Accuracy: ${Util.truncateFloat(stats.accuracy, 3)}%';
-		
-		if (stats.clearType != CLEAR) {
-			clearTypeTxt.text = stats.clearType;
-			clearTypeTxt.color = stats.clearType.color;
-		} else clearTypeTxt.visible = false;
 	}
 
 	dynamic function updateIconPositions():Void {
