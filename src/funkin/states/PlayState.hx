@@ -13,9 +13,11 @@ import funkin.objects.JudgeDisplay;
 import funkin.objects.ComboDisplay;
 import funkin.objects.Bar;
 import funkin.objects.CharIcon;
+import funkin.substates.PauseMenu;
 
 class PlayState extends FunkinState {
 	public static var songID:String = '';
+	public static var self:PlayState;
 	var chart:Chart;
 
 	var notefield:NoteField;
@@ -43,14 +45,28 @@ class PlayState extends FunkinState {
 	var spectator:Character;
 
 	var camHUD:FlxCamera;
+	var camOther:FlxCamera;
 
 	override function create():Void {
 		super.create();
 		Conductor.stop();
 
+		self = this;
+
 		stats = {};
 
 		camHUD = FlxG.cameras.add(new FlxCamera(), false);
+		camHUD.bgColor.alphaFloat = 1 - (Settings.data.gameVisibility / 100);
+
+		// to prevent more lag when you can't even see the game camera
+		if (Settings.data.gameVisibility <= 0) {
+			FlxG.camera.visible = false;
+			FlxG.camera.active = false;
+			camHUD.bgColor = 0x00;
+		}
+
+		camOther = FlxG.cameras.add(new FlxCamera(), false);
+		camOther.bgColor = 0x00;
 
 		add(spectator = new Character(0, 0, 'gf'));
 		spectator.screenCenter();
@@ -94,17 +110,30 @@ class PlayState extends FunkinState {
 		makeHUD();
 	}
 
+	function openPauseMenu() {
+		final substate:PauseMenu = new PauseMenu(songID, Difficulty.current, 0);
+		substate.cameras = [camOther];
+
+		openSubState(substate);
+	}
+
 	override function update(delta:Float) {
 		super.update(delta);
 
 		updateTimeText();
 		updateIconScales(delta);
 		updateIconPositions();
+
+		if (FlxG.keys.justPressed.ENTER) {
+			openPauseMenu();
+		}
 	}
 
 	override function destroy():Void {
 		Judgement.resetHits();
 		super.destroy();
+
+		self = null;
 	}
 
 	override function beatHit(beat:Int):Void {
@@ -137,6 +166,19 @@ class PlayState extends FunkinState {
 
 		if (Assets.exists('songs/$songID/Vocals.ogg')) {
 			Conductor.vocals = FlxG.sound.load(Assets.audio('songs/$songID/Vocals'));
+		}
+
+		// quickly plays the song and then stops it
+		// so that when the song actually starts playing later
+		// it doesn't stutter for a bit
+		//
+		// why does this actually work what the fuck
+		Conductor.inst.play();
+		Conductor.inst.stop();
+
+		if (Conductor.vocals != null) {
+			Conductor.vocals.play();
+			Conductor.vocals.stop();
 		}
 
 		Conductor.audioTime = -extraTime;

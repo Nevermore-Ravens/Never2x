@@ -142,12 +142,13 @@ class PauseMenu extends flixel.FlxSubState {
 				case 'Resume': resume();
 					
 				case 'Restart': 
-					destroyMusic();
+					music.stop();
 					FlxG.mouse.visible = false;
 					FunkinState.resetState();
 					FlxG.autoPause = Settings.data.autoPause;
 
 				case 'Options':
+					music.stop();
 					Conductor.stop();
 					Conductor.reset();
 					Util.toMenu(new FreeplayState());
@@ -161,23 +162,15 @@ class PauseMenu extends flixel.FlxSubState {
 					changeSelection();
 
 				case 'Exit to Menu':
-					destroyMusic();
+					music.stop();
 					PlayState.self.endSong(true);
 					FlxG.autoPause = Settings.data.autoPause;
 			}
 		}
 	}
 
-	function destroyMusic() {
-		if (music == null) return;
-
-		music.stop();
-		music.destroy();
-		music = null;
-	}
-
 	function resume() {
-		destroyMusic();
+		music.stop();
 		Conductor.resume();
 		FlxG.mouse.visible = false;
 		//parent.persistentUpdate = true;
@@ -187,13 +180,14 @@ class PauseMenu extends flixel.FlxSubState {
 
 	override function close() {
 		PauseMenu.wentToOptions = false; // reset
+
 		Main.tweenManager.forEach(function(twn:FlxTween) if (twn != null)
 			twn.active = true);
 		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null)
 			twn.active = true);
 		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
 			tmr.active = true);
-		PlayState.self.paused = false;
+
 		super.close();
 	}
 }
