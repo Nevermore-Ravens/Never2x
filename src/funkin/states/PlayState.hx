@@ -68,6 +68,12 @@ class PlayState extends FunkinState {
 		makeHUD();
 	}
 
+	override function update(delta:Float) {
+		super.update(delta);
+
+		updateTimeText();
+	}
+
 	override function destroy():Void {
 		Judgement.resetHits();
 		super.destroy();
@@ -96,6 +102,7 @@ class PlayState extends FunkinState {
 		Conductor.clock.active = true;
 		new FlxTimer().start(extraTime / 1000, function(_) {
 			Conductor.play();
+			updateTime = true;
 		});
 	}
 
@@ -106,8 +113,13 @@ class PlayState extends FunkinState {
 		stats.combo++;
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
+		var judge:Judgement = Judgement.get(deviation);
+		judge.hits++;
 
-		Judgement.get(deviation).hits++;
+		if (judge.breaksCombo) {
+			stats.comboBreaks++;
+			stats.combo = 0;
+		}
 
 		judgeSprite.display(deviation);
 		comboSprite.display(stats.combo);
@@ -160,6 +172,8 @@ class PlayState extends FunkinState {
 	var judgeNames:FlxText;
 	var judgeCounters:FlxText;
 	var clearTypeTxt:FlxText;
+	var timeText:FlxText;
+	var updateTime:Bool = false;
 	function makeHUD() {
 		if (hud == null) return;
 		hud.clear();
@@ -194,17 +208,17 @@ class PlayState extends FunkinState {
 		iconP2.y = healthBar.y - (iconP2.height * 0.5);
 		iconP2.alpha = Settings.data.healthBarAlpha;
 
-		updateIconPositions();
+		updateIconPositions();*/
 
 		// fuck it im pulling a forever engine
-		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songName (Starting....)', 18));
+		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songID (Starting....)', 18));
 		timeText.screenCenter(X);
 		timeText.alignment = 'center';
 		timeText.font = Assets.getPath('fonts/LineSeed.ttf');
 		timeText.borderStyle = FlxTextBorderStyle.OUTLINE;
 		timeText.borderSize = 1.5;
 		updateTimeText();
-		timeText.visible = Settings.data.timeText;*/
+		timeText.visible = Settings.data.timeText;
 
 		hud.add(infoText = new FlxText(0, downscroll ? 15 : 675, FlxG.width, '', 18));
 		infoText.alignment = 'center';
@@ -291,14 +305,32 @@ class PlayState extends FunkinState {
 		judgeCounters.text += Math.max(stats.comboBreaks - judgeBreaks, 0);
 	}
 
+	dynamic function updateTimeText() {
+		if (!Settings.data.timeText || !updateTime) return;
+
+		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.audioTime * 0.001, false);
+		var duration:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.length * 0.001, false);
+
+		timeText.text = '$songID ($current / $duration)';
+	}
+
 	function updateInfo():Void {
-		infoText.text = 'Score: ${Util.moneyString(stats.score)} | Combo Breaks: ${stats.comboBreaks}';
+		stats.clearType = stats.getClearType();
+		stats.grade = stats.getGrade();
+
+		infoText.text = 'Score: ${Util.moneyString(stats.score)}';
+
+		if (stats.clearType != CLEAR) {
+			infoText.text += ' | Combo Breaks: ${stats.comboBreaks}';
+		}
+
 		if (!Settings.data.hideAcc)
 			infoText.text += ' | Accuracy: ${Util.truncateFloat(stats.accuracy, 3)}%';
-
-		var clearType:ClearType = Statistics.getClearType(stats);
-		clearTypeTxt.text = clearType;
-		clearTypeTxt.color = clearType.color;
+		
+		if (stats.clearType != CLEAR) {
+			clearTypeTxt.text = stats.clearType;
+			clearTypeTxt.color = stats.clearType.color;
+		} else clearTypeTxt.visible = false;
 	}
 
 	@:unreflective

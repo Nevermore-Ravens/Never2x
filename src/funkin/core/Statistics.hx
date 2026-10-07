@@ -36,7 +36,24 @@ enum abstract ClearType(String) from String to String {
 }
 
 enum abstract GradeType(String) from String to String {
-	var GRADETYPE_DEFAULT = '?';
+	var GRADE_DEFAULT = '?';
+
+	var GRADE_X = 'X';
+	var GRADE_SPLUS = 'S+';
+	var GRADE_S = 'S';
+	var GRADE_A = 'A';
+	var GRADE_B = 'B';
+	var GRADE_C = 'C';
+	var GRADE_D = 'D';
+	var GRADE_F = 'F';
+}
+
+@:structInit
+@:publicFields
+class Grade {
+	var type:GradeType = GRADE_DEFAULT;
+	var accuracy:Float = 0.0;
+	var color:FlxColor = 0xFFFFFFFF;
 }
 
 @:structInit
@@ -50,6 +67,17 @@ class NoteHitData {
 @:structInit
 @:publicFields
 class Statistics {
+	static var grades:Array<Grade> = [
+		{type: GRADE_X, accuracy: 100, color: 0xFF8BE4FF},
+		{type: GRADE_SPLUS, accuracy: 99, color: 0xFFFFED49},
+		{type: GRADE_S, accuracy: 95, color: 0xFFFFC549},
+		{type: GRADE_A, accuracy: 90, color: 0xFF52FF52},
+		{type: GRADE_B, accuracy: 80, color: 0xFF6898FF},
+		{type: GRADE_C, accuracy: 70, color: 0xFFB373BB},
+		{type: GRADE_D, accuracy: 60, color: 0xFFFF3A3A},
+		{type: GRADE_F, accuracy: 0, color: 0xFF27060D},
+	];
+
 	var fails:Int = 0;
 
 	var judgements:Array<Judgement> = Judgement.current;
@@ -60,6 +88,8 @@ class Statistics {
 	var combo:Int = 0;
 	var highestCombo:Int = 0;
 	var notesHit:Int = 0;
+	var clearType:ClearType = CLEARTYPE_DEFAULT;
+	var grade:Grade = grades[grades.length - 1];
 
 	// not calculated until the song ends
 	var mean:Float = 0.0; 
@@ -67,16 +97,16 @@ class Statistics {
 	
 	var noteHits:Array<NoteHitData> = [];
 
-	static function getClearType(stats:Statistics):ClearType {
+	function getClearType():ClearType {
 		var type:ClearType = CLEARTYPE_DEFAULT;
 
-		var killers:Int = stats.judgements[0].hits;
-		var sicks:Int = stats.judgements[1].hits;
-		var goods:Int = stats.judgements[2].hits;
-		var bads:Int = stats.judgements[3].hits;
-		var shits:Int = stats.judgements[4].hits;
+		var killers:Int = judgements[0].hits;
+		var sicks:Int = judgements[1].hits;
+		var goods:Int = judgements[2].hits;
+		var bads:Int = judgements[3].hits;
+		var shits:Int = judgements[4].hits;
 
-		if (stats.comboBreaks == 0) {
+		if (comboBreaks == 0) {
 			if (bads > 0) type = FULL_COMBO;
 			else if (goods > 0) {
 				if (goods == 1) type = BLACK_FLAG;
@@ -88,16 +118,20 @@ class Statistics {
 				else type = SICK_FULL_COMBO;
 			} else if (killers > 0) type = KILLER_FULL_COMBO;
 		} else {
-			if (stats.comboBreaks == 1) type = MISS_FLAG;
-			else if (stats.comboBreaks <= 9) type = SINGLE_DIGIT_COMBO_BREAK;
+			if (comboBreaks == 1) type = MISS_FLAG;
+			else if (comboBreaks <= 9) type = SINGLE_DIGIT_COMBO_BREAK;
 			else type = CLEAR;
 		}
 
 		return type;
 	}
 
-	// TODO
-	static function getGrade(stats:Statistics):GradeType {
-		return GRADETYPE_DEFAULT;
+	function getGrade():Grade {
+		for (grade in grades) {
+			if (accuracy < grade.accuracy) continue;
+			return grade;
+		}
+
+		return grades[grades.length - 1];
 	}
 }
