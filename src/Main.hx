@@ -151,5 +151,35 @@ class InitState extends flixel.FlxState {
         }, true);
 
 		FlxG.plugins.add(new funkin.substates.AddonsMenu());
+
+
+		Judgement.register('Never2x', [
+			{
+				name: 'Killer',
+				window: HitWindows.current[0]
+			},
+			{
+				name: 'Sick',
+				window: HitWindows.current[1],
+				color: 0xFF2CEDFF
+			},
+			{
+				name: 'Good',
+				window: HitWindows.current[2],
+				color: 0xFF43FF2E
+			},
+			{
+				name: 'Bad',
+				window: HitWindows.current[3],
+				color: 0xFFFF8F34
+			},
+			{
+				name: 'Shit',
+				breaksCombo: true,
+				window: HitWindows.current[4],
+				color: 0xFFFF2533
+			}
+		]);
+		Judgement.type = 'Never2x';
 	}
 }

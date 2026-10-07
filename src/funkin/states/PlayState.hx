@@ -7,6 +7,7 @@ import nevermore.skins.Noteskin;
 
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
+import funkin.core.Statistics;
 import funkin.objects.JudgementSpr;
 import funkin.objects.ComboNums;
 
@@ -22,7 +23,7 @@ class PlayState extends FunkinState {
 	var extraTime:Float = 2500; // 2.5 seconds
 	var downscroll:Bool = false;
 
-	var stats:Statistics = {};
+	var stats:Statistics;
 	var scoring:ScoreHandler = new DefaultScoring();
 	var accuracy:AccuracyHandler = new DefaultAccuracy();
 
@@ -34,6 +35,9 @@ class PlayState extends FunkinState {
 	override function create():Void {
 		super.create();
 		Conductor.stop();
+
+		stats = {};
+		stats.judgements = Judgement.current;
 
 		Conductor.metronome = Settings.data.metronome;
 
@@ -62,6 +66,11 @@ class PlayState extends FunkinState {
 
 		load();
 		makeHUD();
+	}
+
+	override function destroy():Void {
+		Judgement.resetHits();
+		super.destroy();
 	}
 
 	function load() {
@@ -98,6 +107,8 @@ class PlayState extends FunkinState {
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
 
+		Judgement.get(deviation).hits++;
+
 		judgeSprite.display(deviation);
 		comboSprite.display(stats.combo);
 
@@ -107,6 +118,7 @@ class PlayState extends FunkinState {
 		stats.score = scoring.get(stats);
 		stats.accuracy = accuracy.get(stats);
 		updateInfo();
+		updateJudgeCounter();
 	}
 
 	function noteMissed(strumline:Strumline, note:Note) {
@@ -119,6 +131,7 @@ class PlayState extends FunkinState {
 		stats.score = scoring.get(stats);
 		stats.accuracy = accuracy.get(stats);
 		updateInfo();
+		updateJudgeCounter();
 	}
 
 	function sustainHit(strumline:Strumline, sustain:Sustain, mostRecent:Bool) {
@@ -132,14 +145,21 @@ class PlayState extends FunkinState {
 	}
 
 	function sustainDropped(strumline:Strumline, sustain:Sustain) {
+		stats.comboBreaks++;
+		stats.combo = 0;
+
 		scoring.sustainDropped(sustain);
 		accuracy.sustainDropped(sustain);
 
 		stats.score = scoring.get(stats);
 		stats.accuracy = accuracy.get(stats);
 		updateInfo();
+		updateJudgeCounter();
 	}
 
+	var judgeNames:FlxText;
+	var judgeCounters:FlxText;
+	var clearTypeTxt:FlxText;
 	function makeHUD() {
 		if (hud == null) return;
 		hud.clear();
@@ -192,7 +212,7 @@ class PlayState extends FunkinState {
 		infoText.borderStyle = FlxTextBorderStyle.OUTLINE;
 		infoText.borderSize = 1.5;
 
-/*		hud.add(judgeNames = new FlxText(5, 0, 0, '', 18));
+		hud.add(judgeNames = new FlxText(5, 0, 0, '', 18));
 		judgeNames.font = Assets.getPath('fonts/LineSeed.ttf');
 		judgeNames.color = 0xFF999999; // sets the default format color to the miss color
 		judgeNames.borderStyle = FlxTextBorderStyle.OUTLINE;
@@ -200,8 +220,8 @@ class PlayState extends FunkinState {
 		judgeNames.visible = Settings.data.judgementCounter;
 		generateJudgeColors();
 		judgeNames.screenCenter(Y);
-		if (isEnemy)
-			judgeNames.x = FlxG.width - ((judgeNames.x + judgeNames.width) + 50) - 75;
+/*		if (isEnemy)
+			judgeNames.x = FlxG.width - ((judgeNames.x + judgeNames.width) + 50) - 75;*/
 
 		hud.add(judgeCounters = new FlxText((judgeNames.x + judgeNames.width) + 50, judgeNames.y, 75, '', judgeNames.size));
 		judgeCounters.font = judgeNames.font;
@@ -221,17 +241,17 @@ class PlayState extends FunkinState {
 			clearTypePos.y = FlxG.height - 30;
 		}
 
-		hud.add(clearType = new FlxText(
+		hud.add(clearTypeTxt = new FlxText(
 			clearTypePos.x, 
 			clearTypePos.y, 
 			judgeCounters.fieldWidth, '', judgeNames.size
 		));
-		clearType.font = judgeNames.font;
-		clearType.borderStyle = FlxTextBorderStyle.OUTLINE;
-		clearType.borderSize = 1.5;
-		clearType.alignment = Settings.data.judgementCounter ? 'center' : 'left';
+		clearTypeTxt.font = judgeNames.font;
+		clearTypeTxt.borderStyle = FlxTextBorderStyle.OUTLINE;
+		clearTypeTxt.borderSize = 1.5;
+		clearTypeTxt.alignment = Settings.data.judgementCounter ? 'center' : 'left';
 
-		hud.add(botplayTxt = new FunkinSprite(0, 0, Assets.image('images/ui/botplay')));
+		/*hud.add(botplayTxt = new FunkinSprite(0, 0, Assets.image('images/ui/botplay')));
 		botplayTxt.visible = false;
 		botplayTxt.screenCenter();
 		botplayTxt.camera = camHUD;*/
@@ -240,17 +260,17 @@ class PlayState extends FunkinState {
 		infoText.screenCenter(X);
 	}
 
-/*	public function generateJudgeColors() {
+	public function generateJudgeColors() {
 		if (!Settings.data.judgementCounter) return;
 
 		judgeNames.clearFormats();
 		judgeNames.text = "";
-		var lastNameEnd = 0;
-		for (i in 0...Judgement.current.length) {
+		var lastNameEnd:Int = 0;
+		for (i in 0 ... Judgement.current.length) {
 			final judge = Judgement.current[i];
 
 			judgeNames.text += judge.name + "\n";
-			judgeNames.addFormat(new FlxTextFormat(/judge.color/ 0xFFFFFFFF), lastNameEnd, judgeNames.text.length);
+			judgeNames.addFormat(new FlxTextFormat(judge.color), lastNameEnd, judgeNames.text.length);
 			lastNameEnd = judgeNames.text.length;
 		}
 		judgeNames.text += "MS";
@@ -262,19 +282,23 @@ class PlayState extends FunkinState {
 
 		judgeCounters.text = '';
 		var judgeBreaks:Int = 0;
-		for (i in 0...Judgement.current.length) {
-			var judge = Judgement.current[i];
+		for (i in 0 ... Judgement.current.length) {
+			var judge:Judgement = Judgement.current[i];
 			judgeCounters.text += Util.moneyString(judge.hits) + '\n';
-			if (judge.causesMisses) judgeBreaks += judge.hits;
+			if (judge.breaksCombo) judgeBreaks += judge.hits;
 		}
 
-		judgeCounters.text += Math.max(comboBreaks - judgeBreaks, 0);
-	}*/
+		judgeCounters.text += Math.max(stats.comboBreaks - judgeBreaks, 0);
+	}
 
 	function updateInfo():Void {
 		infoText.text = 'Score: ${Util.moneyString(stats.score)} | Combo Breaks: ${stats.comboBreaks}';
 		if (!Settings.data.hideAcc)
 			infoText.text += ' | Accuracy: ${Util.truncateFloat(stats.accuracy, 3)}%';
+
+		var clearType:ClearType = Statistics.getClearType(stats);
+		clearTypeTxt.text = clearType;
+		clearTypeTxt.color = clearType.color;
 	}
 
 	@:unreflective
