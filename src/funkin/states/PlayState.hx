@@ -366,9 +366,12 @@ class PlayState extends FunkinState {
 		judgeNames.text = "";
 		var lastNameEnd:Int = 0;
 		for (i in 0 ... Judgement.current.length) {
-			final judge = Judgement.current[i];
+			final judge:Judgement = Judgement.current[i];
 
-			judgeNames.text += judge.name + "\n";
+			var nameLength:Int = judge.name.length;
+			var shortenedName:String = judge.name.charAt(0) + judge.name.charAt(nameLength - 1);
+
+			judgeNames.text += shortenedName.toUpperCase() + "\n";
 			judgeNames.addFormat(new FlxTextFormat(judge.color), lastNameEnd, judgeNames.text.length);
 			lastNameEnd = judgeNames.text.length;
 		}
