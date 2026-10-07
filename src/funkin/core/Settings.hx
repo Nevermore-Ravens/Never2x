@@ -160,29 +160,4 @@ class Settings {
 
 		if (saveToDisk) save();
 	}
-
-	public static function validate() {
-		if (!funkin.core.LanguageHandler.getLanguages().contains(data.language)) {
-			data.language = "English";
-			Sys.println("Invalid language! Resetting value in settings.");
-		}
-
-		if (!["Default", "Legacy", "Off"].contains(data.cameraZooms)) {
-			data.cameraZooms = (data.cameraZooms.toLowerCase() == "false") ? "Off" : "Default";
-			Sys.println("Recieved bool instead of string in camera zooms! Adjusting value in settings.");
-		}
-
-		final possibleNotesplashes: Array<String> = ['none'];
-		for (splashPath in Paths.readDirectory("data/noteSplashes"))
-			if (splashPath.endsWith(".json5") || splashPath.endsWith(".json")) {
-				var splashName:String = haxe.io.Path.withoutDirectory(haxe.io.Path.withoutExtension(splashPath));
-				if(possibleNotesplashes.contains(splashName)) continue;
-				possibleNotesplashes.insert(0, splashName);
-			}
-
-		if (!possibleNotesplashes.contains(data.noteSplashSkin)) {
-			data.noteSplashSkin = "classic";
-			Sys.println("Note splash doesn't exist! Resetting value in settings.");
-		}
-	}
 }

@@ -52,6 +52,9 @@ class PlayState extends FunkinState {
 
 		camHUD = FlxG.cameras.add(new FlxCamera(), false);
 
+		add(spectator = new Character(0, 0, 'gf'));
+		spectator.screenCenter();
+
 		add(enemy = new Character(200, -200, 'bf'));
 		add(player = new Character(700, -200, 'bf'));
 
@@ -111,7 +114,7 @@ class PlayState extends FunkinState {
 		iconP2.scale.set(1, 1);
 		iconP2.updateHitbox();
 
-		for (character in [player, enemy]) {
+		for (character in [player, enemy, spectator]) {
 			if (beat % character.danceInterval != 0) continue;
 			character.dance();
 		}

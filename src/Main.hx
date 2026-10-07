@@ -114,7 +114,6 @@ class InitState extends flixel.FlxState {
 		Alphabet.loadData();
 		LanguageHandler.loadTranslations();
 
-		Settings.validate();
 		LanguageHandler.setLanguage(Settings.data.language);
 
 		FlxG.fullscreen = Settings.data.fullscreen;

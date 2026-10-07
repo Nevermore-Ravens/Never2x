@@ -67,14 +67,14 @@ class Character extends FunkinSprite {
 		this.reflective = Settings.data.reflections && hasReflection;
 		this.singDuration = _file.singDuration;
 		this.healthColor = _file.healthColor;
-		this.sheets = [for (img in _file.sheets.split(',')) "images/" + img];
+		this.sheets = _file.sheets.split(',');
 		this.icon = _file.icon;
 		this.danceInterval = _file.danceInterval;
 		this.reflectionY = _file.reflectionOffset;
 		flipX = _file.flipX;
 		antialiasing = _file.antialiasing;
 
-		frames = Assets.multiAtlas(this.sheets);
+		frames = FunkinAssets.multiAtlas(this.sheets);
 
 		for (fnfAnim in _file.animations) {
 			var indices:Array<Int> = fnfAnim.indices ?? [];
