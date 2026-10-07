@@ -228,6 +228,7 @@ class PlayState extends FunkinState {
 
 	function noteMissed(strumline:Strumline, note:Note) {
 		stats.comboBreaks++;
+		stats.misses++;
 		stats.combo = 0;
 
 		scoring.noteMissed(note);
@@ -375,14 +376,12 @@ class PlayState extends FunkinState {
 		if (!Settings.data.judgementCounter) return;
 
 		judgeCounters.text = '';
-		var judgeBreaks:Int = 0;
 		for (i in 0 ... Judgement.current.length) {
 			var judge:Judgement = Judgement.current[i];
 			judgeCounters.text += Util.moneyString(judge.hits) + '\n';
-			if (judge.breaksCombo) judgeBreaks += judge.hits;
 		}
 
-		judgeCounters.text += Math.max(stats.comboBreaks - judgeBreaks, 0);
+		judgeCounters.text += Math.max(stats.misses, 0);
 	}
 
 	dynamic function updateTimeText() {

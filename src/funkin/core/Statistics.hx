@@ -82,7 +82,18 @@ class Statistics {
 	var judgements:Array<Judgement> = Judgement.current;
 
 	var score:Int = 0;
+
+	// combo breaks and misses are NOT the same thing !!
+	// misses are for when you completely *miss* hitting a note and it goes off screen
+	//
+	// combo breaks are the more broader term for that
+	// it includes both misses *and* judgements that cause you to lose a combo
+	// (in n2x's case, shits break your combo)
+	// hence the name "combo breaks"
+	// it's how many times your combo has been set to 0, or "broken"
 	var comboBreaks:Int = 0;
+	var misses:Int = 0;
+
 	var accuracy:Float = 0.0;
 	var combo:Int = 0;
 	var highestCombo:Int = 0;
