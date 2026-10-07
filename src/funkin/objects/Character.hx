@@ -26,6 +26,11 @@ typedef CharacterAnim = {
 }
 
 class Character extends FunkinSprite {
+	public function sing(type:String, direction:String) {
+		direction = direction.toUpperCase();
+		playAnim(type + direction);
+	}
+
 	public static inline var default_name:String = 'bf';
 	public var name:String = default_name;
 	public var singDuration:Float = 4;
@@ -42,14 +47,15 @@ class Character extends FunkinSprite {
 	public var reflective:Bool = true;
 	public var specialAnim:Bool = false;
 
-	public var reflectionY:Int = 0; //i'll use a smaller type of number to save some memory
+	public var reflectionY:Int = 0; 
 	var _file:CharacterFile;
 
 	public var cameraOffset:FlxPoint = FlxPoint.get(0, 0);
 
-	public function new(?x:Float, ?y:Float, ?name:String, ?hasReflection:Bool = true) {
+	public function new(?x:Float, ?y:Float, ?name:String, ?hasReflection:Bool = false) {
 		name ??= default_name;
 		super(x, y);
+		active = true;
 
 		if (!Assets.exists('characters/$name.json')) {
 			trace('character "$name" doesn\'t exist');
@@ -118,11 +124,13 @@ class Character extends FunkinSprite {
 	}
 
 	var _singTimer:Float = 0.0;
-	override function update(elapsed:Float) {
-		super.update(elapsed);
+	override function update(delta:Float) {
+		updateAnimation(delta);
+		if (moves) updateMotion(delta);
+
 		if (!autoIdle || specialAnim || dancing || dead) return;
 
-		_singTimer -= elapsed * (singDuration * (Conductor.semiquaver * 0.25));
+		_singTimer -= delta * (Conductor.crotchet / 1000);
 		if (_singTimer <= 0.0) dance(true);
 	}
 
@@ -159,7 +167,7 @@ class Character extends FunkinSprite {
 	override function playAnim(name:String, ?forced:Bool = true, ?suffix:String = "") {
 		super.playAnim(name, forced, suffix);
 		if (name.startsWith('sing') || name.startsWith('miss')) {
-			_singTimer = singDuration * (Conductor.semiquaver * 0.15);
+			_singTimer = singDuration;
 		}
 	}
 
@@ -192,7 +200,7 @@ class Character extends FunkinSprite {
 
 	static function getFile(path:String):CharacterFile {
 		var file:CharacterFile = createDummyFile();
-		if (!FileSystem.exists(path)) return file;
+		if (!Assets.exists(path)) return file;
 		
 		var data = Json5.parse(Assets.text(path));
 		for (property in Reflect.fields(data)) {

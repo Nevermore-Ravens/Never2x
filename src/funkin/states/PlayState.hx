@@ -8,6 +8,7 @@ import nevermore.skins.Noteskin;
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
 import funkin.core.Statistics;
+import funkin.objects.Character;
 import funkin.objects.JudgeDisplay;
 import funkin.objects.ComboDisplay;
 import funkin.objects.Bar;
@@ -37,12 +38,24 @@ class PlayState extends FunkinState {
 	var judgeSprite:JudgeDisplay;
 	var comboSprite:ComboDisplay;
 
+	var player:Character;
+	var enemy:Character;
+	var spectator:Character;
+
+	var camHUD:FlxCamera;
+
 	override function create():Void {
 		super.create();
 		Conductor.stop();
 
 		stats = {};
-		stats.judgements = Judgement.current;
+
+		camHUD = FlxG.cameras.add(new FlxCamera(), false);
+
+		add(enemy = new Character(200, -200, 'bf'));
+		add(player = new Character(700, -200, 'bf'));
+
+		FlxG.camera.zoom = 0.8;
 
 		Conductor.metronome = Settings.data.metronome;
 
@@ -56,6 +69,7 @@ class PlayState extends FunkinState {
 		rightStrumline = new Strumline(960, strumlineYPos, skin);
 
 		add(notefield = new NoteField([leftStrumline, rightStrumline], 1));
+		notefield.cameras = [camHUD];
 		notefield.noteHit = noteHit;
 		notefield.noteMissed = noteMissed;
 		notefield.sustainHit = sustainHit;
@@ -64,10 +78,14 @@ class PlayState extends FunkinState {
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
 
 		add(hud = new FlxSpriteGroup());
+		hud.cameras = [camHUD];
+
 		add(judgeSprite = new JudgeDisplay(400, 300));
+		judgeSprite.camera = camHUD;
 
 		var judgeY:Float = judgeSprite.y + judgeSprite.height;
 		add(comboSprite = new ComboDisplay(judgeSprite.x + 50, judgeY + 20));
+		comboSprite.cameras = [camHUD];
 
 		load();
 		makeHUD();
@@ -92,6 +110,11 @@ class PlayState extends FunkinState {
 
 		iconP2.scale.set(1, 1);
 		iconP2.updateHitbox();
+
+		for (character in [player, enemy]) {
+			if (beat % character.danceInterval != 0) continue;
+			character.dance();
+		}
 	}
 
 	function load() {
@@ -121,7 +144,19 @@ class PlayState extends FunkinState {
 		});
 	}
 
+	function getCharacter(playerID:Int):Character {
+		return switch playerID {
+			default: null;
+
+			case 0: enemy;
+			case 1: player;
+			case 2: spectator;
+		}
+	}
+
 	function noteHit(strumline:Strumline, note:Note) {
+		getCharacter(note.player).sing('sing', Note.directions[note.lane]);
+
 		if (note.player != notefield.playerID) return;
 
 		stats.notesHit++;
@@ -159,9 +194,15 @@ class PlayState extends FunkinState {
 		stats.accuracy = accuracy.get(stats);
 		updateInfo();
 		updateJudgeCounter();
+
+		player.sing('miss', Note.directions[note.lane]);
 	}
 
 	function sustainHit(strumline:Strumline, sustain:Sustain, mostRecent:Bool) {
+		if (mostRecent) {
+			getCharacter(sustain.player).sing('sing', Note.directions[sustain.lane]);
+		}
+
 		if (sustain.player != notefield.playerID) return;
 		scoring.sustainHit(sustain);
 		accuracy.sustainHit(sustain);
@@ -182,6 +223,8 @@ class PlayState extends FunkinState {
 		stats.accuracy = accuracy.get(stats);
 		updateInfo();
 		updateJudgeCounter();
+
+		player.sing('miss', Note.directions[sustain.lane]);
 	}
 
 	var judgeNames:FlxText;
@@ -198,22 +241,8 @@ class PlayState extends FunkinState {
 
 		final isEnemy = Settings.data.gameplayModifiers['playingSide'] == 'Opponent';
 
-/*		hud.add(hitErrorBar = new HitErrorBar(isEnemy ? 20 : FlxG.width - 25, 0));
-		hitErrorBar.screenCenter(Y);
-		hitErrorBar.visible = Settings.data.hitErrorBar;
-
-		hud.add(timingIndicator = new FlxText((hitErrorBar.x + (isEnemy ? 25 : -25)) - 150, 0, 300, '0 ms', 16));
-		timingIndicator.alignment = 'center';
-		timingIndicator.alpha = 0;
-		timingIndicator.font = Assets.getPath('fonts/LineSeed.ttf');
-		timingIndicator.borderSize = 1.25;
-		timingIndicator.borderStyle = OUTLINE;
-		timingIndicator.borderColor = 0xFF000000;
-		timingIndicator.angle = isEnemy ? -90 : 90;
-		timingIndicator.screenCenter(Y);*/
-
 		hud.add(healthBar = new Bar(0, downscroll ? 55 : 640, function() return health, 0, 100));
-		healthBar.setColors(FlxColor.RED, FlxColor.LIME);
+		healthBar.setColors(enemy.healthColor, player.healthColor);
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
 		healthBar.alpha = Settings.data.healthBarAlpha;
@@ -252,8 +281,6 @@ class PlayState extends FunkinState {
 		judgeNames.visible = Settings.data.judgementCounter;
 		generateJudgeColors();
 		judgeNames.screenCenter(Y);
-/*		if (isEnemy)
-			judgeNames.x = FlxG.width - ((judgeNames.x + judgeNames.width) + 50) - 75;*/
 
 		hud.add(judgeCounters = new FlxText((judgeNames.x + judgeNames.width) + 50, judgeNames.y, 75, '', judgeNames.size));
 		judgeCounters.font = judgeNames.font;
@@ -282,11 +309,6 @@ class PlayState extends FunkinState {
 		clearTypeTxt.borderStyle = FlxTextBorderStyle.OUTLINE;
 		clearTypeTxt.borderSize = 1.5;
 		clearTypeTxt.alignment = Settings.data.judgementCounter ? 'center' : 'left';
-
-		/*hud.add(botplayTxt = new FunkinSprite(0, 0, Assets.image('images/ui/botplay')));
-		botplayTxt.visible = false;
-		botplayTxt.screenCenter();
-		botplayTxt.camera = camHUD;*/
 
 		updateInfo();
 		infoText.screenCenter(X);
@@ -373,45 +395,11 @@ class PlayState extends FunkinState {
 
 	@:unreflective
 	function songCompleted() {
-		//if (disqualified) {endSong(); return;}
-
-/*		var modifiers = Settings.data.gameplayModifiers.copy();
-		#if !SV_ALLOWED
-		modifiers["svs"] = false;
-		#end
-
-		Scores.setPlay({
-			songID: songID,
-			difficulty: Difficulty.current,
-
-			score: score,
-			accuracy: accuracy,
-
-			modifiers: modifiers.copy()
-		});
-
-		if (storyMode) {
-			storyScore += score;
-			if (currentLevel == songList.length - 1) {
-				Scores.setWeekPlay({
-					weekID: weekData.fileName,
-					difficulty: Difficulty.current,
-					score: storyScore,
-					modifiers: modifiers.copy()
-				});
-				weekData = null;
-				storyScore = 0;
-		}
-		}*/
-
 		endSong();
-		//Scores.save();
 	}
 
 	// forceLeave:Bool - forces you to leave to the main menu
 	public function endSong(?forceLeave:Bool = false) {
-		/*if (!forceLeave && ScriptHandler.call('onEndSong', [songID], true) == -1) return;*/
-
 		Conductor.stop();
 		FlxG.switchState(new FreeplayState());
 	}

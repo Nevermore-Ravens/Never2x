@@ -145,7 +145,7 @@
 		}
 	],
 	healthColor: -13520687,
-	singDuration: 4,
+	singDuration: 0.25,
 	flipX: false,
 	sheets: 'characters/bf,characters/bf-dead',
 	danceInterval: 2,
