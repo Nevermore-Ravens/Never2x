@@ -5,7 +5,7 @@ import flixel.tweens.FlxTween;
 
 using flixel.util.FlxColorTransformUtil;
 
-class ComboNums extends FlxTypedSpriteGroup<Number> {
+class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 	public static inline final default_precacheDigits:Int = 4;
 
 	public var minDigits:Int = 3;

@@ -8,8 +8,10 @@ import nevermore.skins.Noteskin;
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
 import funkin.core.Statistics;
-import funkin.objects.JudgementSpr;
-import funkin.objects.ComboNums;
+import funkin.objects.JudgeDisplay;
+import funkin.objects.ComboDisplay;
+import funkin.objects.Bar;
+import funkin.objects.CharIcon;
 
 class PlayState extends FunkinState {
 	public static var songID:String = '';
@@ -23,14 +25,17 @@ class PlayState extends FunkinState {
 	var extraTime:Float = 2500; // 2.5 seconds
 	var downscroll:Bool = false;
 
+	var health:Float = 50;
+	var iconSpacing:Float = 20;
+
 	var stats:Statistics;
 	var scoring:ScoreHandler = new DefaultScoring();
 	var accuracy:AccuracyHandler = new DefaultAccuracy();
 
 	var hud:FlxSpriteGroup;
 	var infoText:FlxText;
-	var judgeSprite:JudgementSpr;
-	var comboSprite:ComboNums;
+	var judgeSprite:JudgeDisplay;
+	var comboSprite:ComboDisplay;
 
 	override function create():Void {
 		super.create();
@@ -59,10 +64,10 @@ class PlayState extends FunkinState {
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
 
 		add(hud = new FlxSpriteGroup());
-		add(judgeSprite = new JudgementSpr(400, 300));
+		add(judgeSprite = new JudgeDisplay(400, 300));
 
 		var judgeY:Float = judgeSprite.y + judgeSprite.height;
-		add(comboSprite = new ComboNums(judgeSprite.x + 50, judgeY + 20));
+		add(comboSprite = new ComboDisplay(judgeSprite.x + 50, judgeY + 20));
 
 		load();
 		makeHUD();
@@ -72,11 +77,21 @@ class PlayState extends FunkinState {
 		super.update(delta);
 
 		updateTimeText();
+		updateIconScales(delta);
+		updateIconPositions();
 	}
 
 	override function destroy():Void {
 		Judgement.resetHits();
 		super.destroy();
+	}
+
+	override function beatHit(beat:Int):Void {
+		iconP1.scale.set(1, 1);
+		iconP1.updateHitbox();
+
+		iconP2.scale.set(1, 1);
+		iconP2.updateHitbox();
 	}
 
 	function load() {
@@ -174,6 +189,9 @@ class PlayState extends FunkinState {
 	var clearTypeTxt:FlxText;
 	var timeText:FlxText;
 	var updateTime:Bool = false;
+	var healthBar:Bar;
+	var iconP1:CharIcon;
+	var iconP2:CharIcon;
 	function makeHUD() {
 		if (hud == null) return;
 		hud.clear();
@@ -192,23 +210,23 @@ class PlayState extends FunkinState {
 		timingIndicator.borderStyle = OUTLINE;
 		timingIndicator.borderColor = 0xFF000000;
 		timingIndicator.angle = isEnemy ? -90 : 90;
-		timingIndicator.screenCenter(Y);
+		timingIndicator.screenCenter(Y);*/
 
 		hud.add(healthBar = new Bar(0, downscroll ? 55 : 640, function() return health, 0, 100));
-		healthBar.setColors(dad.healthColor, bf.healthColor);
+		healthBar.setColors(FlxColor.RED, FlxColor.LIME);
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
 		healthBar.alpha = Settings.data.healthBarAlpha;
 
-		hud.add(iconP1 = new CharIcon(bf.icon, true));
+		hud.add(iconP1 = new CharIcon('bf', true));
 		iconP1.y = healthBar.y - (iconP1.height * 0.5);
 		iconP1.alpha = Settings.data.healthBarAlpha;
 
-		hud.add(iconP2 = new CharIcon(dad.icon));
+		hud.add(iconP2 = new CharIcon('dad'));
 		iconP2.y = healthBar.y - (iconP2.height * 0.5);
 		iconP2.alpha = Settings.data.healthBarAlpha;
 
-		updateIconPositions();*/
+		updateIconPositions();
 
 		// fuck it im pulling a forever engine
 		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songID (Starting....)', 18));
@@ -331,6 +349,26 @@ class PlayState extends FunkinState {
 			clearTypeTxt.text = stats.clearType;
 			clearTypeTxt.color = stats.clearType.color;
 		} else clearTypeTxt.visible = false;
+	}
+
+	dynamic function updateIconPositions():Void {
+		iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconSpacing;
+		iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconSpacing * 2;
+	}
+
+	dynamic function updateIconStates() {
+		iconP1.animation.curAnim.curFrame = healthBar.percent < 20 ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+		iconP2.animation.curAnim.curFrame = healthBar.percent > 80 ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+	}
+
+	dynamic function updateIconScales(delta:Float):Void {
+		var mult:Float = FlxMath.lerp(0.8, iconP1.scale.x, Math.exp(-delta * 9));
+		iconP1.scale.set(mult, mult);
+		iconP1.centerOrigin();
+
+		mult = FlxMath.lerp(0.8, iconP2.scale.x, Math.exp(-delta * 9));
+		iconP2.scale.set(mult, mult);
+		iconP2.centerOrigin();
 	}
 
 	@:unreflective

@@ -6,7 +6,7 @@ import flixel.tweens.FlxEase;
 
 using flixel.util.FlxColorTransformUtil;
 
-class JudgementSpr extends FunkinSprite {
+class JudgeDisplay extends FunkinSprite {
 	public var simple:Bool = false;
 	
 	// using this instead of `alpha`
