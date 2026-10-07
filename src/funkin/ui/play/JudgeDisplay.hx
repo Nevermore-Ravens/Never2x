@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.ui.play;
 
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
@@ -40,7 +40,7 @@ class JudgeDisplay extends FunkinSprite {
 	public function display(timing:Float) {
 		if (Settings.data.judgementAlpha <= 0) return;
 
-		Main.tweenManager.cancelTweensOf(this);
+		FlxTween.cancelTweensOf(this);
 		animation.frameIndex = Judgement.getID(timing);
 		if (animation.frameIndex == 0 && Settings.data.hideHighest) {
 			visibility = 0;
@@ -57,15 +57,15 @@ class JudgeDisplay extends FunkinSprite {
 			velocity.set();
 			acceleration.y = 0;
 
-			Main.tweenManager.cancelTweensOf(this.scale);
+			FlxTween.cancelTweensOf(this.scale);
 			scale.set(0.7, 0.7);
 
-			Main.tweenManager.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
-			Main.tweenManager.tween(this.scale, {x: 0.65, y: 0.65}, 0.2, {ease: FlxEase.cubeIn});
+			FlxTween.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
+			FlxTween.tween(this.scale, {x: 0.65, y: 0.65}, 0.2, {ease: FlxEase.cubeIn});
 		} else { // fnf-like judgements
 			velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
 			acceleration.y = 550;
-			Main.tweenManager.tween(this, {visibility: 0}, 0.2, {startDelay: Conductor.crotchet * 0.001});
+			FlxTween.tween(this, {visibility: 0}, 0.2, {startDelay: Conductor.crotchet * 0.001});
 		}
 	}
 

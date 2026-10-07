@@ -10,6 +10,17 @@ import openfl.display.Sprite;
 import openfl.events.UncaughtErrorEvent;
 import nevermore.InfoCounter;
 import funkin.core.chart.*;
+import nevermore.core.Judgement;
+import funkin.states.*;
+import funkin.core.*;
+import nevermore.core.HitWindows;
+import funkin.ui.Alphabet;
+
+import flixel.FlxG;
+import sys.FileSystem;
+import sys.io.File;
+
+using StringTools;
 
 #if (linux && !debug)
 @:cppInclude('../../_external/gamemode_client.h')
@@ -19,14 +30,10 @@ import funkin.core.chart.*;
 // Fix cyrillic characters in terminal output
 @:cppInclude("windows.h")
 #end
-class Main extends Sprite {
+class Never2x extends Sprite {
 	public static var infoCounter:InfoCounter;
 
-	public static var engineVersion:String = '1.0.0';
-	/**
-	 * Tween Manager that works regardless FlxG.timeScale
-	 */
-	public static var tweenManager:FlxTweenManager = null;
+	public static var version:String = '1.0.0';
 
 	public function new() {
 		super();
@@ -38,7 +45,7 @@ class Main extends Sprite {
 
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 
-		addChild(new FlxGame(InitState, 0, 0, 120, true));
+		addChild(new flixel.FlxGame(InitState, 0, 0, 120, true));
 		addChild(infoCounter = new InfoCounter());
 		infoCounter.visible = Settings.data.infoCounter;
 
@@ -105,7 +112,6 @@ class InitState extends flixel.FlxState {
 		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomSSC;
 		nevermore.core.Song.parser = new SongParser();
 
-		Main.tweenManager = new FlxTweenManager();
 		Controls.load();
 		Settings.load();
 		Scores.load();
@@ -128,10 +134,6 @@ class InitState extends flixel.FlxState {
 		FlxG.sound.volumeDownKeys = Controls.binds["volume_down"];
 		FlxG.sound.muteKeys = Controls.binds["volume_mute"];
 
-		FlxG.signals.preUpdate.add(() -> {
-			Main.tweenManager.update(FlxG.elapsed / FlxG.timeScale);
-		});
-
 		FlxG.sound.volume = FlxG.save.data.volume ?? 1.0;
 		FlxG.sound.muted = FlxG.save.data.muted ?? false;
 		//FlxG.sound.volumeHandler(FlxG.sound.muted ? 0 : FlxG.sound.volume);
@@ -150,7 +152,6 @@ class InitState extends flixel.FlxState {
         }, true);
 
 		FlxG.plugins.add(new funkin.substates.AddonsMenu());
-
 
 		Judgement.register('Never2x', [
 			{

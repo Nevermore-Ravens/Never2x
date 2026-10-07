@@ -1,9 +1,9 @@
 #if !macro
 // project specific
 import funkin.core.*;
+import funkin.ui.*;
 import funkin.core.WeekData.WeekFile;
 import funkin.core.Scores.PlayData;
-import funkin.objects.menu.Alphabet;
 import funkin.objects.FunkinSprite;
 import funkin.core.ScriptHandler;
 import funkin.states.*;

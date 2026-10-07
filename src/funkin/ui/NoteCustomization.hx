@@ -1,4 +1,4 @@
-package funkin.objects.menu;
+package funkin.ui;
 /*
 import funkin.shaders.GradMask;
 import funkin.shaders.HueGrad;

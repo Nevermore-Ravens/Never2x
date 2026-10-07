@@ -1,8 +1,8 @@
 package funkin.states;
 
 import funkin.states.OptionsState;
-import funkin.objects.menu.OptionList;
-import funkin.objects.CharIcon;
+import funkin.ui.OptionList;
+import funkin.ui.CharIcon;
 
 import flixel.util.FlxDestroyUtil;
 

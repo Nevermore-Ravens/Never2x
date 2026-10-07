@@ -1,6 +1,6 @@
 package funkin.substates;
 
-import funkin.objects.menu.AddonList;
+import funkin.ui.AddonList;
 
 class AddonsMenu extends FlxSubState {
 	var wasVisible:Bool;
@@ -38,7 +38,7 @@ class AddonsMenu extends FlxSubState {
 		bg.scale.set(FlxG.width, 0);
 		bg.updateHitbox();
 		add(bg);
-		Main.tweenManager.tween(bg.scale, {y: FlxG.height}, 0.25, {ease: FlxEase.cubeOut});
+		FlxTween.tween(bg.scale, {y: FlxG.height}, 0.25, {ease: FlxEase.cubeOut});
 
 		add(leftBox = new AddonList(50, 100, 565, 520, addonsOff));
 		leftBox.mouseCamera = camera;

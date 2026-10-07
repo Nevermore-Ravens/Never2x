@@ -2,7 +2,7 @@
 <project>
 
 	<!-- application stuff -->
-	<app title="Friday Night Funkin': Never2x" file="Funkin'" main="Main" version="1.0.0" company="Rudyrue" />
+	<app title="Friday Night Funkin': Never2x" file="Funkin'" main="Never2x" version="1.0.0" company="Rudyrue" />
 
 	<window width="1280" height="720" fps="120" background="#000000" hardware="true" vsync="false" />
 	<window orientation="landscape" fullscreen="false" resizable="true"/>

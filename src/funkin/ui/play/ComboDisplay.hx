@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.ui.play;
 
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxTween;
@@ -50,21 +50,21 @@ class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 			num.color = color;
 			num.visibility = Settings.data.comboAlpha;
 
-			Main.tweenManager.cancelTweensOf(num);
+			FlxTween.cancelTweensOf(num);
 			
 			num.moves = !simple;
 			if (simple) {
 				num.velocity.set();
 				num.acceleration.y = 0;
-				Main.tweenManager.tween(num, {visibility: 0}, 0.35, {startDelay: 0.75});
-				Main.tweenManager.tween(num, {y: y}, 0.1, {
+				FlxTween.tween(num, {visibility: 0}, 0.35, {startDelay: 0.75});
+				FlxTween.tween(num, {y: y}, 0.1, {
 					onComplete: function(_) num.y = y,
 					ease: FlxEase.cubeIn
 				});
 			} else {
 				num.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
 				num.acceleration.y = FlxG.random.int(250, 300);
-				Main.tweenManager.tween(num, {visibility: 0}, 0.2, {
+				FlxTween.tween(num, {visibility: 0}, 0.2, {
 					onComplete: function(_) num.visibility = 0,
 					startDelay: Conductor.crotchet * 0.001
 				});
@@ -97,7 +97,7 @@ private class Number extends FunkinSprite {
 	}
 
 	override function destroy() {
-		Main.tweenManager.cancelTweensOf(this);
+		FlxTween.cancelTweensOf(this);
 		super.destroy();
 	}
 

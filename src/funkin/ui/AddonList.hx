@@ -1,4 +1,4 @@
-package funkin.objects.menu;
+package funkin.ui;
 
 import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;

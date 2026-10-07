@@ -27,8 +27,6 @@ class PauseMenu extends flixel.FlxSubState {
 	}
 
 	override function create():Void {
-		Main.tweenManager.forEach(function(twn:FlxTween) if (twn != null)
-			twn.active = false);
 		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null)
 			twn.active = false);
 		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
@@ -181,8 +179,6 @@ class PauseMenu extends flixel.FlxSubState {
 	override function close() {
 		PauseMenu.wentToOptions = false; // reset
 
-		Main.tweenManager.forEach(function(twn:FlxTween) if (twn != null)
-			twn.active = true);
 		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null)
 			twn.active = true);
 		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)

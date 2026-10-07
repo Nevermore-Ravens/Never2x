@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.ui;
 
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxSignal;

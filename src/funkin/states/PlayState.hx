@@ -8,11 +8,8 @@ import nevermore.skins.Noteskin;
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
 import funkin.core.Statistics;
+import funkin.ui.play.*;
 import funkin.objects.Character;
-import funkin.objects.JudgeDisplay;
-import funkin.objects.ComboDisplay;
-import funkin.objects.Bar;
-import funkin.objects.CharIcon;
 import funkin.substates.PauseMenu;
 
 class PlayState extends FunkinState {
@@ -173,6 +170,8 @@ class PlayState extends FunkinState {
 		// it doesn't stutter for a bit
 		//
 		// why does this actually work what the fuck
+		var lastVolume:Float = Conductor.volume;
+		Conductor.volume = 0; // to make sure we don't actually hear a sliver of the audio
 		Conductor.inst.play();
 		Conductor.inst.stop();
 
@@ -180,6 +179,8 @@ class PlayState extends FunkinState {
 			Conductor.vocals.play();
 			Conductor.vocals.stop();
 		}
+
+		Conductor.volume = lastVolume;
 
 		Conductor.audioTime = -extraTime;
 		Conductor.clock.active = true;

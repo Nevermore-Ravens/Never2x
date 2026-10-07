@@ -1,8 +1,8 @@
 package funkin.states;
 
 import haxe.io.Path;
-import funkin.objects.menu.TextList;
-import funkin.objects.menu.OptionList;
+import funkin.ui.TextList;
+import funkin.ui.OptionList;
 // import funkin.objects.menu.NoteCustomization;
 import funkin.objects.FunkinSprite;
 import funkin.core.Settings.SaveVariables;
@@ -236,7 +236,7 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("fps_counter", "fps_counter_desc", 'infoCounter', BoolOption);
 				opt.onChange = function(v) {
-					Main.infoCounter.visible = v;
+					Never2x.infoCounter.visible = v;
 				};
 				opt;
 			},

@@ -52,7 +52,7 @@ class MainMenuState extends FunkinState {
 		changeSelection();
 
 		#if WATERMARKS_ALLOWED
-		final versions:FlxText = new FlxText(4, 0, 0, 'Never2x v${Main.engineVersion}', 16);
+		final versions:FlxText = new FlxText(4, 0, 0, 'Never2x v${Never2x.version}', 16);
 		versions.font = Assets.getPath('fonts/vcr.ttf');
 		versions.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versions.scrollFactor.set();

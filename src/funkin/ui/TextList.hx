@@ -1,4 +1,4 @@
-package funkin.objects.menu;
+package funkin.ui;
 
 class TextList extends FunkinSprite {
 	// variables to create a mouse deadzone
