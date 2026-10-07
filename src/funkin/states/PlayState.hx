@@ -17,6 +17,8 @@ class PlayState extends FunkinState {
 	public static var self:PlayState;
 	var chart:Chart;
 
+	var playerID:Int = 1;
+
 	var notefield:NoteField;
 	var leftStrumline:Strumline;
 	var rightStrumline:Strumline;
@@ -84,7 +86,7 @@ class PlayState extends FunkinState {
 		leftStrumline = new Strumline(320, strumlineYPos, skin);
 		rightStrumline = new Strumline(960, strumlineYPos, skin);
 
-		add(notefield = new NoteField([leftStrumline, rightStrumline], 1));
+		add(notefield = new NoteField([leftStrumline, rightStrumline], playerID));
 		notefield.cameras = [camHUD];
 		notefield.noteHit = noteHit;
 		notefield.noteMissed = noteMissed;
@@ -92,6 +94,13 @@ class PlayState extends FunkinState {
 		notefield.sustainDropped = sustainDropped;
 		notefield.assistTicks = Settings.data.assistTicks;
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
+
+		if (Settings.data.centeredNotes) {
+			for (i => strumline in notefield.strumlines.members) {
+				if (i != playerID) strumline.visible = false;
+				else strumline.screenCenter(X);
+			}
+		}
 
 		add(hud = new FlxSpriteGroup());
 		hud.cameras = [camHUD];

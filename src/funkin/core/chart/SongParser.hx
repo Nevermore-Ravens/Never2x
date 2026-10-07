@@ -28,7 +28,7 @@ import funkin.core.Addons;
 //
 // this is fucking stupid but whatever
 class SongParser extends BaseParser {
-	static var extensions:Array<String> = ['json', 'sm', 'ssc', 'osu', 'qua'];
+	static var extensions:Array<String> = ['json', 'sm', 'ssc', 'osu', 'qua', 'chart'];
 
 	override function exists(path:String, ?diff:String):Bool {
 		return findInFolder(path, diff) != ""; // returns an empty string if it screwed up
@@ -60,6 +60,19 @@ class SongParser extends BaseParser {
 		}
 
 		switch path.ext {
+			case 'chart':
+				var gh = new GuitarHero().fromFile(file);
+				var meta:BasicMetaData = gh.getChartMeta();
+				addBPMChanges(meta);
+				result.offset = meta.offset;
+
+				fnf.fromFormat(gh);
+
+				// some gh charts can be 4k/6k but
+				// for the sake of simplicity
+				// im doing 5k
+				fnf.data.song.keyCount = 5;
+
 			case 'json':
 				// parse the file ourselves
 				// because we need to check if it's v-slice or legacy
