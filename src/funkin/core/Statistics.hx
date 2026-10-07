@@ -32,6 +32,11 @@ enum abstract ClearType(String) from String to String {
 			case CLEARTYPE_DEFAULT: 0xFF808080;
 		}
 	}
+
+	public var fullCombo(get, never):Bool;
+	function get_fullCombo():Bool {
+		return this != MISS_FLAG && this != SINGLE_DIGIT_COMBO_BREAK && this != CLEAR && this != CLEARTYPE_DEFAULT;
+	}
 }
 
 enum abstract GradeType(String) from String to String {
