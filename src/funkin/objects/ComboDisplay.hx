@@ -5,12 +5,20 @@ import flixel.tweens.FlxTween;
 
 using flixel.util.FlxColorTransformUtil;
 
+enum abstract ComboColorMode(Int) {
+	var NONE;
+	var PER_NOTE;
+	var CLEAR_FLAG;
+}
+
 class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 	public static inline final default_precacheDigits:Int = 4;
 
 	public var minDigits:Int = 3;
 	public var simple:Bool = false;
 	public var spacing:Float = 0;
+
+	public var colorMode:ComboColorMode = NONE;
 
 	public function new(?x:Float, ?y:Float) {
 		super(x, y);
@@ -47,7 +55,6 @@ class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 			num.scale.set(scale.x, scale.y);
 			num.updateHitbox();
 			num.setPosition(x + ((num.width + spacing) * centerI), y - 5);
-			num.color = color;
 			num.visibility = Settings.data.comboAlpha;
 
 			Main.tweenManager.cancelTweensOf(num);
@@ -70,6 +77,16 @@ class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 				});
 			}
 		}
+	}
+
+	public function colorizeCombo(judge:Judgement, clearType:Statistics.ClearType) {
+		var targetColor = switch (colorMode) {
+			case PER_NOTE: judge.color;
+			case CLEAR_FLAG: clearType.fullCombo ? clearType.color : 0xFFFFFFFF;
+			default: 0xFFFFFFFF;
+		};
+		for (mem in members)
+			mem.color = targetColor;
 	}
 }
 

@@ -105,6 +105,11 @@ class PlayState extends FunkinState {
 		var judgeY:Float = judgeSprite.y + judgeSprite.height;
 		add(comboSprite = new ComboDisplay(judgeSprite.x + 50, judgeY + 20));
 		comboSprite.cameras = [camHUD];
+		comboSprite.colorMode = switch (Settings.data.comboTinting) {
+			case "Per-Note": PER_NOTE;
+			case "Clear Flag": CLEAR_FLAG;
+			default: NONE;
+		};
 
 		load();
 		makeHUD();
@@ -224,6 +229,7 @@ class PlayState extends FunkinState {
 
 		updateInfo();
 		updateJudgeCounter();
+		comboSprite.colorizeCombo(judge, stats.clearType);
 	}
 
 	function noteMissed(strumline:Strumline, note:Note) {
@@ -296,7 +302,7 @@ class PlayState extends FunkinState {
 		updateIconPositions();
 
 		// fuck it im pulling a forever engine
-		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '$songID (Starting....)', 18));
+		hud.add(timeText = new FlxText(0, downscroll ? 675 : 15, 500, '${chart.title} (Starting....)', 18));
 		timeText.screenCenter(X);
 		timeText.alignment = 'center';
 		timeText.font = Assets.getPath('fonts/LineSeed.ttf');
@@ -390,7 +396,7 @@ class PlayState extends FunkinState {
 		var current:String = flixel.util.FlxStringUtil.formatTime(Conductor.audioTime * 0.001, false);
 		var duration:String = flixel.util.FlxStringUtil.formatTime(Conductor.inst.length * 0.001, false);
 
-		timeText.text = '$songID ($current / $duration)';
+		timeText.text = '${chart.title} ($current / $duration)';
 	}
 
 	function updateInfo():Void {
