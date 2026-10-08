@@ -1,8 +1,6 @@
-package funkin.states;
+package funkin;
 
-import flixel.FlxState;
-
-class FunkinState extends FlxState {
+class FunkinState extends flixel.FlxState {
 	public static var menuSong:String = "";
 
 	public static var skipNextTransIn:Bool = false;
@@ -17,21 +15,6 @@ class FunkinState extends FlxState {
 		Conductor.clock.stepHit.add(stepHit);
 		Conductor.clock.beatHit.add(beatHit);
 		Conductor.clock.measureHit.add(measureHit);
-
-		//FlxG.camera.bgColor.alpha = 0;
-		//Conductor.reset();
-		//Paths.clearUnusedMemory();
-
-		Conductor.clock.stepHit.add(stepHit);
-		Conductor.clock.beatHit.add(beatHit);
-		Conductor.clock.measureHit.add(measureHit);
-	}
-
-	override function destroy() {
-		super.destroy();
-		Conductor.clock.stepHit.remove(stepHit);
-		Conductor.clock.beatHit.remove(beatHit);
-		Conductor.clock.measureHit.remove(measureHit);
 	}
 
 	// i am so sorry (this is just taken directly from psych im not trying to bother with flixel's transition bs

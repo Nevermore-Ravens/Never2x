@@ -11,6 +11,7 @@ import funkin.core.Statistics;
 import funkin.ui.play.*;
 import funkin.objects.Character;
 import funkin.substates.PauseMenu;
+import funkin.substates.ResultsScreen;
 
 class PlayState extends FunkinState {
 	public static var songID:String = '';
@@ -47,15 +48,16 @@ class PlayState extends FunkinState {
 	var camOther:FlxCamera;
 
 	override function create():Void {
+		camHUD = FlxG.cameras.add(new FlxCamera(), false);
+		camHUD.bgColor.alphaFloat = 1 - (Settings.data.gameVisibility / 100);
+
+		camOther = FlxG.cameras.add(new FlxCamera(), false);
+		camOther.bgColor = 0x00;
+
 		super.create();
 		Conductor.stop();
 
 		self = this;
-
-		stats = {};
-
-		camHUD = FlxG.cameras.add(new FlxCamera(), false);
-		camHUD.bgColor.alphaFloat = 1 - (Settings.data.gameVisibility / 100);
 
 		// to prevent more lag when you can't even see the game camera
 		if (Settings.data.gameVisibility <= 0) {
@@ -64,8 +66,7 @@ class PlayState extends FunkinState {
 			camHUD.bgColor = 0x00;
 		}
 
-		camOther = FlxG.cameras.add(new FlxCamera(), false);
-		camOther.bgColor = 0x00;
+		stats = {};
 
 		add(spectator = new Character(0, 0, 'gf'));
 		spectator.screenCenter();
@@ -219,10 +220,14 @@ class PlayState extends FunkinState {
 
 		if (note.player != notefield.playerID) return;
 
-		stats.notesHit++;
+		var deviation:Float = note.getDeviation(notefield.input.timestamp);
+		stats.noteHits[stats.notesHit++] = {
+			time: Std.int(note.time),
+			deviation: deviation
+		};
+
 		stats.combo++;
 
-		var deviation:Float = note.getDeviation(notefield.input.timestamp);
 		var judge:Judgement = Judgement.get(deviation);
 		judge.hits++;
 
@@ -458,7 +463,28 @@ class PlayState extends FunkinState {
 
 	// forceLeave:Bool - forces you to leave to the main menu
 	public function endSong(?forceLeave:Bool = false) {
-		Conductor.stop();
-		FlxG.switchState(new FreeplayState());
+		var totalDeviation:Float = 0.0;
+		var squaredDeviation:Float = 0.0;
+		for (note in stats.noteHits) {
+			if (!note.countMean) continue;
+			totalDeviation += note.deviation;
+			squaredDeviation += Math.pow(note.deviation, 2);
+		}
+		stats.mean = totalDeviation / stats.notesHit;
+
+		// ty etterna server for helping <3
+		// (i was NOT good at math back in high school
+		var what:Float = (squaredDeviation / stats.notesHit);
+		stats.standardDeviation = Math.sqrt(what - Math.pow(stats.mean, 2));
+
+		persistentUpdate = false;
+		Conductor.pause();
+		var results = new ResultsScreen({
+			song: chart.title,
+			difficulty: Difficulty.current,
+			stats: stats
+		});
+		results.cameras = [camOther];
+		openSubState(results);
 	}
 }
