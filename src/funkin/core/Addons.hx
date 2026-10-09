@@ -164,12 +164,16 @@ class Addons {
 		}
 
 		function search() {
-			if (hasExtension || extensions.length == 1) {
-				if (extensions.length == 1) path.ext = extensions[0];
+			if (hasExtension) {
 				return FileSystem.exists(path.toString());
 			}
 
 			if (!FileSystem.exists(path.dir)) return false;
+
+			if (extensions.length == 1) {
+				path.ext = extensions[0];
+				return FileSystem.exists(path.toString());
+			}
 
 			for (ext in extensions) {
 				path.ext = ext;
