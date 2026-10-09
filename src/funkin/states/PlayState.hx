@@ -170,7 +170,7 @@ class PlayState extends FunkinState {
 			randomizedNotes: Settings.data.gameplayModifiers['randomizedNotes'],
 			mirroredNotes: Settings.data.gameplayModifiers['mirroredNotes']
 		});
-		Conductor.clock.reset(chart.timingPoints);
+		Conductor.clock.reset(chart);
 		Conductor.clock.offset = chart.offset;
 
 		Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
