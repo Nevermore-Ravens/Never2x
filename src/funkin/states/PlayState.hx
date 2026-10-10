@@ -28,7 +28,19 @@ class PlayState extends FunkinState {
 	var extraTime:Float = 2500; // 2.5 seconds
 	var downscroll:Bool = false;
 
-	var health:Float = 50;
+	var health(default, set):Float = 50;
+	function set_health(value:Float):Float {
+		value = FlxMath.bound(value, 0, 100);
+
+		health = value;
+		healthBar.updatePercent();
+
+		updateIconStates();
+		updateIconPositions();
+
+		return value;
+	}
+
 	var iconSpacing:Float = 20;
 
 	var stats:Statistics;
@@ -241,6 +253,25 @@ class PlayState extends FunkinState {
 			stats.combo = 0;
 		}
 
+		health += switch judge.name {
+			default: 0;
+
+			case 'Killer':
+				1.25;
+
+			case 'Sick':
+				1;
+
+			case 'Good':
+				0.25;
+
+			case 'Bad':
+				-5;
+
+			case 'Shit':
+				-10;
+		}
+
 		judgeSprite.display(deviation);
 		comboSprite.display(stats.combo);
 
@@ -256,6 +287,7 @@ class PlayState extends FunkinState {
 		stats.comboBreaks++;
 		stats.misses++;
 		stats.combo = 0;
+		health -= 12.5;
 
 		scoring.noteMissed(note);
 		accuracy.noteMissed(note);
