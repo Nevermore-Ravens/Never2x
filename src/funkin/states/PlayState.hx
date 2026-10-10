@@ -2,7 +2,6 @@ package funkin.states;
 
 import nevermore.core.Chart;
 import nevermore.play.*;
-import nevermore.play.note.*;
 import nevermore.skins.Noteskin;
 
 import funkin.core.scoring.*;
@@ -10,6 +9,7 @@ import funkin.core.accuracy.*;
 import funkin.core.Statistics;
 import funkin.ui.play.*;
 import funkin.objects.Character;
+import funkin.objects.NoteSplash;
 import funkin.substates.PauseMenu;
 import funkin.substates.ResultsScreen;
 
@@ -230,6 +230,11 @@ class PlayState extends FunkinState {
 
 		var judge:Judgement = Judgement.get(deviation);
 		judge.hits++;
+
+		if (Settings.data.noteSplashSkin != "none" && Judgement.getID(deviation) <= 1) { // TODO: make this not so hardcoded (hell even the skin is settings only)
+			var splash = NoteSplash.getSplash(note.receptor);
+			splash.hit(note.receptor);
+		}
 
 		if (judge.breaksCombo) {
 			stats.comboBreaks++;
