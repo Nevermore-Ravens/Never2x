@@ -116,13 +116,8 @@ class Statistics {
 	var clearType:ClearType = CLEARTYPE_DEFAULT;
 	var grade:Grade = grades[grades.length - 1];
 
-	// not calculated until the song ends
-	var mean:Float = 0.0; 
-	var standardDeviation:Float = 0.0;
-	
-	var noteHits:Array<NoteHitData> = [];
-
-	function calculateMean():Float {
+	var mean(get, never):Float;
+	function get_mean():Float {
 		if (noteHits.length == 0) return 0.0;
 
 		var deviation:Float = 0.0;
@@ -136,7 +131,8 @@ class Statistics {
 
 	// ty etterna server for helping <3
 	// (i was NOT good at math back in high school
-	function calculateStandardDeviation():Float {
+	var standardDeviation(get, never):Float;
+	function get_standardDeviation():Float {
 		if (noteHits.length == 0) return 0.0;
 
 		var totalDeviation:Float = 0.0;
@@ -151,6 +147,8 @@ class Statistics {
 		var what:Float = (squaredDeviation / notesHit);
 		return Math.sqrt(what - Math.pow(totalDeviation / notesHit, 2));
 	}
+	
+	var noteHits:Array<NoteHitData> = [];
 
 	function getClearType():ClearType {
 		var type:ClearType = CLEARTYPE_DEFAULT;

@@ -460,9 +460,6 @@ class PlayState extends FunkinState {
 		stats.time = Conductor.audioTime;
 		Conductor.stop();
 
-		stats.mean = stats.calculateMean();
-		stats.standardDeviation = stats.calculateStandardDeviation();
-
 		for (camera in FlxG.cameras.list) camera.visible = false;
 		camOther.visible = true;
 
@@ -520,9 +517,6 @@ class PlayState extends FunkinState {
 
 	// forceLeave:Bool - forces you to leave to the main menu
 	public function endSong(?forceLeave:Bool = false) {
-		stats.mean = stats.calculateMean();
-		stats.standardDeviation = stats.calculateStandardDeviation();
-
 		persistentUpdate = false;
 		Conductor.stop();
 		var results = new ResultsScreen(stats);
