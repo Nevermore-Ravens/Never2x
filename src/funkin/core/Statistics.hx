@@ -102,7 +102,7 @@ class Statistics {
 	var comboBreaks:Int = 0;
 	var misses:Int = 0;
 
-	// time in milliseconds of when you died
+	// time in milliseconds of when you died in the song
 	// is only applicable to failing
 	var time:Float = 0.0;
 
@@ -115,6 +115,12 @@ class Statistics {
 	var notesHit:Int = 0;
 	var clearType:ClearType = CLEARTYPE_DEFAULT;
 	var grade:Grade = grades[grades.length - 1];
+
+	var _currentNote:Int = 0;
+	function registerNote(data:NoteHitData) {
+		noteHits[_currentNote] = data;
+		_currentNote++;
+	}
 
 	var mean(get, never):Float;
 	function get_mean():Float {
@@ -150,6 +156,12 @@ class Statistics {
 	
 	var noteHits:Array<NoteHitData> = [];
 
+	// TODO
+	// i wanna make this a getter at some point
+	// so instead of having to do `stats.clearType = stats.getClearType();`
+	// you just `stats.clearType`
+	// although probably doing all of this every call wouldn't be performant 
+	// so we need to cache it somehow ?
 	function getClearType():ClearType {
 		var type:ClearType = CLEARTYPE_DEFAULT;
 
@@ -179,6 +191,7 @@ class Statistics {
 		return type;
 	}
 
+	// look at the comment for `getClearType()`
 	function getGrade():Grade {
 		for (grade in grades) {
 			if (accuracy < grade.accuracy) continue;

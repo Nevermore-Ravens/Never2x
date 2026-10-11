@@ -256,10 +256,10 @@ class PlayState extends FunkinState {
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
 
-		stats.noteHits[currentStat++] = {
+		stats.registerNote({
 			time: Std.int(note.time),
 			deviation: deviation
-		};
+		});
 
 		var judgeID:Int = Judgement.getID(deviation);
 		var judge:Judgement = Judgement.current[judgeID];
