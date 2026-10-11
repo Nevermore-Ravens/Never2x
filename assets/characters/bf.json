@@ -146,7 +146,7 @@
 	],
 	healthColor: -13520687,
 	singDuration: 0.25,
-	flipX: false,
+	shouldFaceLeft: true,
 	sheets: 'characters/bf,characters/bf-dead',
 	danceInterval: 2,
 	reflectionOffset: 35,

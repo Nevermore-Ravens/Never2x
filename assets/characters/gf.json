@@ -118,7 +118,6 @@
 	],
 	healthColor: -5963699,
 	singDuration: 4,
-	flipX: false,
 	sheets: 'characters/GF_assets',
 	danceInterval: 1,
 	reflectionOffset: 9,

@@ -6,6 +6,17 @@ import flixel.math.FlxRect;
 import flixel.math.FlxMatrix;
 import flixel.util.FlxDestroyUtil;
 
+typedef FunkinAnimData = {
+	var name:String;
+	var id:String;
+	
+	var ?offset:Array<Float>;
+	var ?framerate:Float;
+	var ?looped:Bool;
+	var ?indices:Array<Int>;
+	var ?useFrameLabel:Bool;
+}
+
 class FunkinSprite extends animate.FlxAnimate {
 	public var offsetMap:Map<String, Array<Float>> = [];
 	public var zoomFactor(default, null):FlxPoint;
@@ -70,6 +81,24 @@ class FunkinSprite extends animate.FlxAnimate {
 		return this;
 	}
 
+	public function makeAnimFromData(data:FunkinAnimData) {
+		var hasSymbol:Bool = library != null && library.getSymbol(data.id) != null;
+		var hasIndices:Bool = data.indices != null && data.indices.length > 0;
+		var useLabel:Bool = data.useFrameLabel == true;
+		var fps:Float = data.framerate ?? 24;
+		var loop:Bool = data.looped == true;
+
+		switch ([hasSymbol, useLabel, hasIndices]) {
+			case [false,	false,	false]:		anim.addByPrefix(data.name, data.id, fps, loop);
+			case [false,	false,	true]:		anim.addByIndices(data.name, data.id, data.indices, "", fps, loop);
+			case [true,		false,	false]:		anim.addBySymbol(data.name, data.id, fps, loop);
+			case [true,		false,	true]:		anim.addBySymbolIndices(data.name, data.id, data.indices, fps, loop);
+			case [_,		true,	false]:		anim.addByFrameLabel(data.name, data.id, fps, loop);
+			case [_,		true,	true]:		anim.addByFrameLabelIndices(data.name, data.id, data.indices, fps, loop);
+		}
+		setOffset(data.name, data.offset ?? [0, 0]);
+	}
+
 	public function setOffset(name:String, offsets:Array<Float>) offsetMap.set(name, offsets);
 
 	public function playAnim(name:String, ?forced:Bool = true, ?suffix:String = "") {
@@ -97,75 +126,40 @@ class FunkinSprite extends animate.FlxAnimate {
 		);
 	}
 
-	// basically the beginning of drawComplex
-	function prepareMatrix(matrix:FlxMatrix, camera:FlxCamera) {
+	override function prepareDrawMatrix(matrix:FlxMatrix, camera:FlxCamera) {
+		final doStageMatrix:Bool = (isAnimate && applyStageMatrix);
+
+		if (doStageMatrix) {
+			if (postStageMatrixApply) {
+				matrix.translate(timeline._bounds.x, timeline._bounds.y);
+			} else {
+				matrix.concat(library.matrix);
+				matrix.translate(timeline._bounds.x * library.matrix.a, timeline._bounds.y * library.matrix.d);
+			}
+		}
+
 		matrix.translate(-origin.x, -origin.y);
 		matrix.translate(-frameOffset.x, -frameOffset.y);
 		matrix.scale(scale.x, scale.y);
 
-		if (bakedRotationAngle <= 0)
-		{
+		if (angle != 0) {
 			updateTrig();
-
-			if (angle != 0)
-				matrix.rotateWithTrig(_cosAngle, _sinAngle);
+			matrix.rotateWithTrig(_cosAngle, _sinAngle);
 		}
-		if (skew.x != 0 || skew.y != 0)
-		{
+		if (skew.x != 0 || skew.y != 0) {
 			updateSkew();
 			@:privateAccess matrix.concat(animate.FlxAnimate._skewMatrix);
 		}
 
-		getScreenPosition(_point, camera).subtractPoint(offset).add(origin.x, origin.y);
+		if (doStageMatrix && postStageMatrixApply)
+			matrix.concat(library.matrix);
+
+		getScreenPosition(_point, camera);
+		_point.x += origin.x - offset.x;
+		_point.y += origin.y - offset.y;
 		matrix.translate(_point.x, _point.y);
 
-		if (!isSimpleZoomFactor()) {
-			prepareZoomFactor(_rect, camera);
-			matrix.setTo(
-				matrix.a * _rect.width, matrix.b * _rect.height,
-				matrix.c * _rect.width, matrix.d * _rect.height,
-				(matrix.tx - _rect.x) * _rect.width + _rect.x,
-				(matrix.ty - _rect.y) * _rect.height + _rect.y,
-			);
-		}
-
-		if (isPixelPerfectRender(camera)) {
-			matrix.tx = Math.floor(matrix.tx);
-			matrix.ty = Math.floor(matrix.ty);
-		}
-	}
-
-	override function drawAnimate(camera:FlxCamera):Void {
-		final bounds = @:privateAccess timeline._bounds;
-		_matrix.setTo(1, 0, 0, 1, -bounds.x, -bounds.y);
-
-		if (checkFlipX()) {
-			_matrix.scale(-1, 1);
-			_matrix.translate(frame.sourceSize.x, 0);
-		}
-
-		if (checkFlipY()) {
-			_matrix.scale(1, -1);
-			_matrix.translate(0, frame.sourceSize.y);
-		}
-
-		if (applyStageMatrix) {
-			_matrix.concat(library.matrix);
-			_matrix.translate(-library.matrix.tx, -library.matrix.ty);
-		}
-
-		prepareMatrix(_matrix, camera);
-
-		if (renderStage)
-			drawStage(camera);
-
-		timeline.currentFrame = animation.frameIndex;
-		timeline.draw(camera, _matrix, colorTransform, blend, antialiasing, shader);
-	}
-
-	override function drawComplex(camera:FlxCamera) {
-		_frame.prepareMatrix(_matrix, ANGLE_0, checkFlipX(), checkFlipY());
-		prepareMatrix(_matrix, camera);
-		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader, wrapMode);
+		if (isPixelPerfectRender(camera))
+			preparePixelPerfectMatrix(matrix);
 	}
 }

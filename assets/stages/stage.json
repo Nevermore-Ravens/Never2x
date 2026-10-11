@@ -1,0 +1,64 @@
+{
+	"zoom": 0.9,
+
+	"objects": [
+		{
+			"name": "back",
+			"type": "SPRITE",
+
+			"sheets": "stages/stage/back",
+			"pos": [-600, -200],
+			"scroll": [0.9, 0.9]
+		},
+		{
+			"name": "front",
+			"type": "SPRITE",
+
+			"sheets": "stages/stage/front",
+			"pos": [-600, 600],
+			"scroll": [0.9, 0.9]
+		},
+		{
+			"name": "spectatorPos",
+			"type": "SPECTATOR",
+			"pos": [400, 130]
+		},
+		{
+			"name": "enemyPos",
+			"type": "ENEMY",
+			"pos": [100, 100]
+		},
+		{
+			"name": "playerPos",
+			"type": "PLAYER",
+			"pos": [770, 100]
+		},
+		{
+			"name": "lightLeft",
+			"type": "SPRITE",
+
+			"sheets": "stages/stage/light",
+			"pos": [-125, -100],
+			"scale": [1.1, 1.1],
+			"scroll": [0.9, 0.9]
+		},
+		{
+			"name": "lightRight",
+			"type": "SPRITE",
+
+			"sheets": "stages/stage/light",
+			"pos": [1225, -100],
+			"scale": [1.1, 1.1],
+			"scroll": [0.9, 0.9],
+			"flipX": true
+		},
+		{
+			"name": "curtains",
+			"type": "SPRITE",
+
+			"sheets": "stages/stage/curtains",
+			"pos": [-500, -300],
+			"scroll": [1.3, 1.3]
+		}
+	]
+}

@@ -1,44 +1,168 @@
 package funkin.objects;
 
-typedef StageFile = {
-	var ?zoom:Float;
-	var ?isSpectatorVisible:Bool;
+import funkin.objects.Character;
 
-	var ?playerPos:Array<Float>;
-	var ?spectatorPos:Array<Float>;
-	var ?opponentPos:Array<Float>;
-
-	var ?cameraPos:Array<Float>;
-
-	var ?reflective:Bool;
-	var ?canMoveCamera:Bool;
+enum abstract StageObjType(String) {
+	var SPRITE;
+	var GROUP;
+	var SPECTATOR;
+	var ENEMY;
+	var PLAYER;
+	var CHARACTER; // general positions, for if it's dedicated to like a special script character
 }
 
-class Stage {
+typedef StageFile = {
+	var ?zoom:Float;
+	var ?cameraPos:Array<Float>;
+	var ?canMoveCamera:Bool;
+
+	var objects:Array<StageObject>;
+}
+
+typedef StageObject = {
+	var name:String;
+	var type:StageObjType;
+
+	var pos:Array<Float>;
+	var ?scale:Array<Float>;
+	var ?scroll:Array<Float>;
+	var ?alpha:Float;
+
+	// sprite specific
+	var ?sheets:String;
+	var ?antialiasing:Bool;
+	var ?animations:Array<FunkinAnimData>;
+	var ?flipX:Bool;
+	var ?flipY:Bool;
+
+	// group specific
+	var ?objects:Array<StageObject>;
+
+	// character specific
+	var ?reflective:Bool;
+	var ?facesLeft:Bool;
+	var ?legacyPositioning:Bool;
+	var ?cameraOffset:Array<Float>;
+}
+
+class CharacterPos extends FunkinSpriteGroup<Character> {
+	public var cameraOffset:FlxPoint;
+	public var facesLeft:Bool = false;
+	public var reflective:Bool = false;
+	public var legacyPositioning:Bool = true; // true for now
+
+	override function preAdd(char:Character) {
+		char.cameraOffset.add(cameraOffset.x, cameraOffset.y);
+		char.facingLeft = facesLeft;
+		char.reflective = reflective;
+		if (!legacyPositioning)
+			char.setPosition(char.x - char.width * 0.5, char.y - char.height);
+		super.preAdd(char);
+	}
+	override function remove(char:Character, splice:Bool = false) {
+		char.cameraOffset.subtract(cameraOffset.x, cameraOffset.y);
+		var result = super.remove(char, splice);
+		if (!legacyPositioning)
+			char.setPosition(char.x + char.width * 0.5, char.y + char.height);
+		return result;
+	}
+
+	override function initVars() {
+		super.initVars();
+		cameraOffset = FlxPoint.get(0, 0);
+	}
+	override function destroy() {
+		super.destroy();
+		cameraOffset = flixel.util.FlxDestroyUtil.put(cameraOffset);
+	}
+}
+class Stage extends FunkinSpriteGroup {
 	var _file:StageFile;
 
-	public var player:FlxPoint = FlxPoint.get(0, 0);
-	public var spectator:FlxPoint = FlxPoint.get(0, 0);
-	public var opponent:FlxPoint = FlxPoint.get(0, 0);
-	public var camera:FlxPoint = FlxPoint.get(0, 0);
-
 	public var zoom:Float = 1;
-	public var isSpectatorVisible:Bool = true;
-	public var reflective:Bool = false;
 	public var canMoveCamera:Bool = false;
+	public var cameraPos:FlxPoint;
+
+	public var spectatorPos:CharacterPos;
+	public var enemyPos:CharacterPos;
+	public var playerPos:CharacterPos;
+
+	public var objectMap:Map<String, FlxSprite> = [];
 
 	public function new(name:String) {
+		super();
 		_file = getFile('stages/$name.json');
-
-		player.set(_file.playerPos[0], _file.playerPos[1]);
-		spectator.set(_file.spectatorPos[0], _file.spectatorPos[1]);
-		opponent.set(_file.opponentPos[0], _file.opponentPos[1]);
-		camera.set(_file.cameraPos[0], _file.cameraPos[1]);
-
 		zoom = _file.zoom;
-		isSpectatorVisible = _file.isSpectatorVisible;
-		reflective = _file.reflective;
+		cameraPos.set(_file.cameraPos[0], _file.cameraPos[1]);
 		canMoveCamera = _file.canMoveCamera;
+
+		for (obj in _file.objects)
+			loadObject(obj, this);
+	}
+
+	public function loadObject(data:StageObject, to:FunkinSpriteGroup) {
+		var obj:FlxSprite = switch (data.type) {
+			case GROUP:
+				new FunkinSpriteGroup();
+			case SPECTATOR | ENEMY | PLAYER | CHARACTER:
+				var pos = new CharacterPos();
+				var camera = data.cameraOffset ?? [0.0, 0.0];
+
+				pos.cameraOffset.set(camera[0], camera[1]);
+				pos.facesLeft = data.facesLeft ?? (data.type == PLAYER);
+				pos.reflective = data.reflective == true;
+				pos.legacyPositioning = data.legacyPositioning != false; // default true for now
+
+				pos;
+			default:
+				var spr = new FunkinSprite();
+				spr.flipX = data.flipX == true;
+				spr.flipY = data.flipY == true;
+
+				if (data.animations == null || data.animations.length <= 0)
+					spr.loadGraphic(Assets.image("images/" + data.sheets));
+				else {
+					spr.frames = FunkinAssets.multiAtlas(data.sheets.split(","));
+					for (anim in (data.animations ?? []))
+						spr.makeAnimFromData(anim);
+				}
+				spr;
+		}
+
+		var scale = data.scale ?? [1.0, 1.0];
+		var scroll = data.scroll ?? [1.0, 1.0];
+		obj.setPosition(data.pos[0], data.pos[1]);
+		obj.scale.set(scale[0], scale[1]);
+		obj.scrollFactor.set(scroll[0], scroll[1]);
+		obj.alpha = data.alpha ?? 1;
+
+		objectMap.set(data.name, obj);
+		to.add(obj);
+		switch (data.type) {
+			case GROUP:
+				var grp:FunkinSpriteGroup = cast obj;
+				for (child in (data.objects ?? []))
+					loadObject(child, grp); // better to load after transformations for less iterations
+			case SPECTATOR:
+				spectatorPos = cast obj;
+			case ENEMY:
+				enemyPos = cast obj;
+			case PLAYER:
+				playerPos = cast obj;
+			default:
+				obj.updateHitbox();
+				obj.antialiasing = data.antialiasing != false;
+		}
+	}
+
+	override function initVars() {
+		super.initVars();
+		cameraPos = FlxPoint.get(0, 0);
+	}
+	override function destroy() {
+		super.destroy();
+		cameraPos = flixel.util.FlxDestroyUtil.put(cameraPos);
+		objectMap.clear();
 	}
 
 	public static function getFile(path:String):StageFile {
@@ -57,15 +181,26 @@ class Stage {
 	public static function createDummyFile():StageFile {
 		return {
 			zoom: 1,
-			isSpectatorVisible: true,
-
-			playerPos: [750, 225],
-			spectatorPos: [350, 0],
-			opponentPos: [100, 225],
-
 			cameraPos: [0, 0],
-			reflective: false,
-			canMoveCamera: true
+			canMoveCamera: true,
+
+			objects: [
+				{
+					name: "spectatorPos",
+					type: SPECTATOR,
+					pos: [400, 130]
+				},
+				{
+					name: "enemyPos",
+					type: ENEMY,
+					pos: [100, 100]
+				},
+				{
+					name: "playerPos",
+					type: PLAYER,
+					pos: [770, 100]
+				}
+			]
 		}
 	}
 }

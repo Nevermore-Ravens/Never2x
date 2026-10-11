@@ -2,7 +2,7 @@ package funkin.objects;
 
 typedef CharacterFile = {
 	var antialiasing:Bool;
-	var flipX:Bool;
+	var shouldFaceLeft:Bool;
 	var icon:String;
 	var scale:Float;
 	var singDuration:Float;
@@ -13,16 +13,7 @@ typedef CharacterFile = {
 	var danceInterval:Int;
 	var reflectionOffset:Int;
 
-	var animations:Array<CharacterAnim>;
-}
-
-typedef CharacterAnim = {
-	var name:String;
-	var id:String;
-	var indices:Array<Int>;
-	var framerate:Int;
-	var looped:Bool;
-	var offset:Array<Float>;
+	var animations:Array<FunkinAnimData>;
 }
 
 class Character extends FunkinSprite {
@@ -46,6 +37,9 @@ class Character extends FunkinSprite {
 	public var dead:Bool = false;
 	public var reflective:Bool = true;
 	public var specialAnim:Bool = false;
+
+	public var facingLeft:Bool = false;
+	public var shouldFaceLeft:Bool = false;
 
 	public var reflectionY:Int = 0; 
 	var _file:CharacterFile;
@@ -71,33 +65,13 @@ class Character extends FunkinSprite {
 		this.icon = _file.icon;
 		this.danceInterval = _file.danceInterval;
 		this.reflectionY = _file.reflectionOffset;
-		flipX = _file.flipX;
+		this.shouldFaceLeft = _file.shouldFaceLeft;
 		antialiasing = _file.antialiasing;
 
 		frames = FunkinAssets.multiAtlas(this.sheets);
 
-		for (fnfAnim in _file.animations) {
-			var indices:Array<Int> = fnfAnim.indices ?? [];
-			var framerate:Float = fnfAnim.framerate ?? 24;
-			var looped:Bool = fnfAnim.looped ?? false;
-			var offsets:Array<Float> = fnfAnim.offset ?? [0.0, 0.0];
-
-			if (isAnimate && library != null && library.getSymbol(fnfAnim.id) != null) {
-				if (indices.length == 0) {
-					anim.addBySymbol(fnfAnim.name, fnfAnim.id, framerate, looped);
-				} else {
-					anim.addBySymbolIndices(fnfAnim.name, fnfAnim.id, indices, framerate, looped);
-				}
-			} else {
-				if (indices.length == 0) {
-					animation.addByPrefix(fnfAnim.name, fnfAnim.id, framerate, looped);
-				} else {
-					animation.addByIndices(fnfAnim.name, fnfAnim.id, indices, '', framerate, looped);
-				}
-			}
-
-			offsetMap.set(fnfAnim.name, offsets);
-		}
+		for (fnfAnim in _file.animations)
+			makeAnimFromData(fnfAnim);
 
 		scale.set(_file.scale, _file.scale);
 		updateHitbox();
@@ -174,7 +148,7 @@ class Character extends FunkinSprite {
 	public static function createDummyFile():CharacterFile {
 		return {
 			antialiasing: true,
-			flipX: false,
+			shouldFaceLeft: false,
 			icon: 'face',
 			scale: 1,
 			singDuration: 4,
@@ -218,17 +192,29 @@ class Character extends FunkinSprite {
 	
 	//this function fixes flickering when the character is at the edge of the screen
 	//i'll see later if saving the camera where the character is will let us get rid of the for loop
-	override function isOnScreen(?camera:FlxCamera):Bool{
-		for (c in cameras)
-			if (c.visible && c.exists && super.isOnScreen(c))
-				return true;
-		return false;
-			//return cameras.any(c -> c.visible && c.exists /*&& super.isOnScreen(c)*/);
+	//this has now been modified to reverse faceLeft scaling
+	override function isOnScreen(?camera:FlxCamera):Bool {
+		var scaleMult = (shouldFaceLeft != facingLeft) ? -1 : 1;
+		scale.x *= scaleMult;
+
+		var result = false;
+		for (c in cameras) {
+			if (c.visible && c.exists && super.isOnScreen(c)) {
+				result = true;
+				break;
+			}
+		}
+		scale.x *= scaleMult;
+		return result;
+		//return cameras.any(c -> c.visible && c.exists /*&& super.isOnScreen(c)*/);
 	}
 	
 	override function draw() {
+		var scaleMult = (shouldFaceLeft != facingLeft) ? -1 : 1;
+		scale.x *= scaleMult;
 		if (!reflective) {
 			super.draw();
+			scale.x *= scaleMult;
 			return;
 		}
 
@@ -238,6 +224,7 @@ class Character extends FunkinSprite {
 	
 		// Draw the character again but normally
 		super.draw();
+		scale.x *= scaleMult;
 	}
 	
 	// Save original properties

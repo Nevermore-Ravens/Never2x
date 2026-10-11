@@ -8,6 +8,7 @@ import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
 import funkin.core.Statistics;
 import funkin.ui.play.*;
+import funkin.objects.Stage;
 import funkin.objects.Character;
 import funkin.objects.NoteSplash;
 import funkin.substates.PauseMenu;
@@ -54,6 +55,7 @@ class PlayState extends FunkinState {
 	var judgeSprite:JudgeDisplay;
 	var comboSprite:ComboDisplay;
 
+	var stage:Stage;
 	var player:Character;
 	var enemy:Character;
 	var spectator:Character;
@@ -86,13 +88,17 @@ class PlayState extends FunkinState {
 
 		stats = {};
 
-		add(spectator = new Character(0, 0, 'gf'));
-		spectator.screenCenter();
+		// TODO: make the strings customizible
+		spectator = new Character(0, 0, 'gf');
+		enemy = new Character(0, 0, 'bf');
+		player = new Character(0, 0, 'bf');
+		add(stage = new Stage('stage'));
 
-		add(enemy = new Character(200, -200, 'bf'));
-		add(player = new Character(700, -200, 'bf'));
+		stage.spectatorPos?.add(spectator);
+		stage.enemyPos?.add(enemy);
+		stage.playerPos?.add(player);
 
-		FlxG.camera.zoom = 0.8;
+		FlxG.camera.zoom = stage.zoom;
 
 		Conductor.metronome = Settings.data.metronome;
 
@@ -342,11 +348,11 @@ class PlayState extends FunkinState {
 		healthBar.leftToRight = false;
 		healthBar.alpha = Settings.data.healthBarAlpha;
 
-		hud.add(iconP1 = new CharIcon('bf', true));
+		hud.add(iconP1 = new CharIcon(player.icon, true));
 		iconP1.y = healthBar.y - (iconP1.height * 0.5);
 		iconP1.alpha = Settings.data.healthBarAlpha;
 
-		hud.add(iconP2 = new CharIcon('dad'));
+		hud.add(iconP2 = new CharIcon(enemy.icon));
 		iconP2.y = healthBar.y - (iconP2.height * 0.5);
 		iconP2.alpha = Settings.data.healthBarAlpha;
 
