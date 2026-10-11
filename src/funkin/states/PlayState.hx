@@ -94,9 +94,13 @@ class PlayState extends FunkinState {
 		player = new Character(0, 0, 'bf');
 		add(stage = new Stage('stage'));
 
-		stage.spectatorPos?.add(spectator);
-		stage.enemyPos?.add(enemy);
-		stage.playerPos?.add(player);
+		// don't want the positions auto instantiating/adding (it's a whole story trust me it's for the better)
+		if (stage.hasSpectatorPos())
+			stage.spectatorPos.add(spectator);
+		if (stage.hasEnemyPos())
+			stage.enemyPos.add(enemy);
+		if (stage.hasPlayerPos())
+			stage.playerPos.add(player);
 
 		FlxG.camera.zoom = stage.zoom;
 

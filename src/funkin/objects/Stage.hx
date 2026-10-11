@@ -83,9 +83,9 @@ class Stage extends FunkinSpriteGroup {
 	public var canMoveCamera:Bool = false;
 	public var cameraPos:FlxPoint;
 
-	public var spectatorPos:CharacterPos;
-	public var enemyPos:CharacterPos;
-	public var playerPos:CharacterPos;
+	public var spectatorPos(get, default):CharacterPos;
+	public var enemyPos(get, default):CharacterPos;
+	public var playerPos(get, default):CharacterPos;
 
 	public var objectMap:Map<String, FlxSprite> = [];
 
@@ -104,16 +104,14 @@ class Stage extends FunkinSpriteGroup {
 		var obj:FlxSprite = switch (data.type) {
 			case GROUP:
 				new FunkinSpriteGroup();
-			case SPECTATOR | ENEMY | PLAYER | CHARACTER:
-				var pos = new CharacterPos();
-				var camera = data.cameraOffset ?? [0.0, 0.0];
-
-				pos.cameraOffset.set(camera[0], camera[1]);
-				pos.facesLeft = data.facesLeft ?? (data.type == PLAYER);
-				pos.reflective = data.reflective == true;
-				pos.legacyPositioning = data.legacyPositioning != false; // default true for now
-
-				pos;
+			case SPECTATOR:
+				spectatorPos;
+			case ENEMY:
+				enemyPos;
+			case PLAYER:
+				playerPos;
+			case CHARACTER:
+				new CharacterPos();
 			default:
 				var spr = new FunkinSprite();
 				spr.flipX = data.flipX == true;
@@ -143,16 +141,48 @@ class Stage extends FunkinSpriteGroup {
 				var grp:FunkinSpriteGroup = cast obj;
 				for (child in (data.objects ?? []))
 					loadObject(child, grp); // better to load after transformations for less iterations
-			case SPECTATOR:
-				spectatorPos = cast obj;
-			case ENEMY:
-				enemyPos = cast obj;
-			case PLAYER:
-				playerPos = cast obj;
+			case SPECTATOR | ENEMY | PLAYER | CHARACTER:
+				var pos:CharacterPos = cast obj;
+				var camera = data.cameraOffset ?? [0.0, 0.0];
+
+				pos.cameraOffset.set(camera[0], camera[1]);
+				pos.facesLeft = data.facesLeft ?? (data.type == PLAYER);
+				pos.reflective = data.reflective == true;
+				pos.legacyPositioning = data.legacyPositioning != false; // default true for now
 			default:
 				obj.updateHitbox();
 				obj.antialiasing = data.antialiasing != false;
 		}
+	}
+
+	public function hasSpectatorPos()
+		@:bypassAccessor return spectatorPos != null;
+	function get_spectatorPos() {
+		if (spectatorPos == null) {
+			spectatorPos = new CharacterPos();
+			add(spectatorPos); // may remove this auto add but
+		}
+		return spectatorPos;
+	}
+
+	public function hasEnemyPos()
+		@:bypassAccessor return enemyPos != null;
+	function get_enemyPos() {
+		if (enemyPos == null) {
+			enemyPos = new CharacterPos();
+			add(enemyPos);
+		}
+		return enemyPos;
+	}
+
+	public function hasPlayerPos()
+		@:bypassAccessor return playerPos != null;
+	function get_playerPos() {
+		if (playerPos == null) {
+			playerPos = new CharacterPos();
+			add(playerPos);
+		}
+		return playerPos;
 	}
 
 	override function initVars() {
