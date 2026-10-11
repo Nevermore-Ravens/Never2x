@@ -115,27 +115,32 @@ class InitState extends flixel.FlxState {
 			{
 				name: 'Killer',
 				window: HitWindows.current[0],
+				health: 1.25,
 				color: 0xFF8ACDFF
 			},
 			{
 				name: 'Sick',
 				window: HitWindows.current[1],
+				health: 1,
 				color: 0xFFFFED5E
 			},
 			{
 				name: 'Good',
 				window: HitWindows.current[2],
+				health: 0.25,
 				color: 0xFF5EF95E
 			},
 			{
 				name: 'Bad',
 				window: HitWindows.current[3],
+				health: -5,
 				color: 0xFFBF7BE9
 			},
 			{
 				name: 'Shit',
 				breaksCombo: true,
 				window: HitWindows.current[4],
+				health: -10,
 				color: 0xFF5E3596
 			}
 		]);

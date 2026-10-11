@@ -245,6 +245,7 @@ class PlayState extends FunkinState {
 		if (note.player != notefield.playerID) return;
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
+
 		stats.noteHits[currentStat++] = {
 			time: Std.int(note.time),
 			deviation: deviation
@@ -263,26 +264,12 @@ class PlayState extends FunkinState {
 		if (note.behavior.punishable || judge.breaksCombo) {
 			stats.comboBreaks++;
 			stats.combo = 0;
+		} else {
+			stats.notesHit++;
+			stats.combo++;
 		}
 
-		health += switch judge.name {
-			default: 0;
-
-			case 'Killer':
-				1.25;
-
-			case 'Sick':
-				1;
-
-			case 'Good':
-				0.25;
-
-			case 'Bad':
-				-5;
-
-			case 'Shit':
-				-10;
-		}
+		health += judge.health;
 
 		judgeSprite.display(deviation);
 		comboSprite.display(stats.combo);
@@ -464,6 +451,7 @@ class PlayState extends FunkinState {
 	}
 
 	function death() {
+		stats.time = Conductor.audioTime;
 		Conductor.stop();
 
 		stats.mean = stats.calculateMean();
