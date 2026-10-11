@@ -65,7 +65,7 @@ class Grade {
 class NoteHitData {
 	var time:Int = 0;
 	var deviation:Float = 0;
-	var countMean:Bool = true;
+	var count:Bool = true;
 }
 
 @:structInit
@@ -83,6 +83,9 @@ class Statistics {
 	];
 
 	var fails:Int = 0;
+
+	var songName:String = 'Unknown';
+	var difficulty:String = Difficulty.current;
 
 	var judgements:Array<Judgement> = Judgement.current;
 
@@ -111,6 +114,36 @@ class Statistics {
 	var standardDeviation:Float = 0.0;
 	
 	var noteHits:Array<NoteHitData> = [];
+
+	function calculateMean():Float {
+		if (noteHits.length == 0) return 0.0;
+
+		var deviation:Float = 0.0;
+		for (note in noteHits) {
+			if (!note.count) continue;
+			deviation += note.deviation;
+		}
+
+		return deviation / notesHit;
+	}
+
+	// ty etterna server for helping <3
+	// (i was NOT good at math back in high school
+	function calculateStandardDeviation():Float {
+		if (noteHits.length == 0) return 0.0;
+
+		var totalDeviation:Float = 0.0;
+		var squaredDeviation:Float = 0.0;
+		for (note in noteHits) {
+			if (!note.count) continue;
+
+			totalDeviation += note.deviation;
+			squaredDeviation += Math.pow(note.deviation, 2);
+		}
+
+		var what:Float = (squaredDeviation / notesHit);
+		return Math.sqrt(what - Math.pow(totalDeviation / notesHit, 2));
+	}
 
 	function getClearType():ClearType {
 		var type:ClearType = CLEARTYPE_DEFAULT;

@@ -12,6 +12,7 @@ import funkin.objects.Character;
 import funkin.objects.NoteSplash;
 import funkin.substates.PauseMenu;
 import funkin.substates.ResultsScreen;
+import funkin.substates.FailedMenu;
 
 class PlayState extends FunkinState {
 	public static var songID:String = '';
@@ -31,6 +32,7 @@ class PlayState extends FunkinState {
 	var health(default, set):Float = 50;
 	function set_health(value:Float):Float {
 		value = FlxMath.bound(value, 0, 100);
+		if (value == 0) death();
 
 		health = value;
 		healthBar.updatePercent();
@@ -68,6 +70,8 @@ class PlayState extends FunkinState {
 
 		super.create();
 		Conductor.stop();
+
+		Assets.audio('music/Breakfast.ogg');
 
 		self = this;
 
@@ -107,6 +111,7 @@ class PlayState extends FunkinState {
 		notefield.sustainDropped = sustainDropped;
 		notefield.assistTicks = Settings.data.assistTicks;
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
+		notefield.scrollDirection = Settings.data.scrollDirection;
 
 		if (Settings.data.centeredNotes) {
 			for (i => strumline in notefield.strumlines.members) {
@@ -175,6 +180,8 @@ class PlayState extends FunkinState {
 
 	function load() {
 		chart = Song.load('songs/$songID', Difficulty.current);
+		stats.songName = chart.title;
+		stats.difficulty = Difficulty.current;
 
 		notefield.load(chart, {
 			scrollVelocities: Settings.data.gameplayModifiers['svs'],
@@ -226,29 +233,30 @@ class PlayState extends FunkinState {
 			case 2: spectator;
 		}
 	}
-
+	
+	var currentStat:Int = 0;
 	function noteHit(strumline:Strumline, note:Note) {
 		getCharacter(note.player).sing('sing', Note.directions[note.lane]);
 
 		if (note.player != notefield.playerID) return;
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
-		stats.noteHits[stats.notesHit++] = {
+		stats.noteHits[currentStat++] = {
 			time: Std.int(note.time),
 			deviation: deviation
 		};
 
-		stats.combo++;
-
-		var judge:Judgement = Judgement.get(deviation);
+		var judgeID:Int = Judgement.getID(deviation);
+		var judge:Judgement = Judgement.current[judgeID];
 		judge.hits++;
 
-		if (Settings.data.noteSplashSkin != "none" && Judgement.getID(deviation) <= 1) { // TODO: make this not so hardcoded (hell even the skin is settings only)
+		// TODO: make this not so hardcoded (hell even the skin is settings only)
+		if (Settings.data.noteSplashSkin != "none" && judgeID <= 1) {
 			var splash = NoteSplash.getSplash(note.receptor);
 			splash.hit(note.receptor);
 		}
 
-		if (judge.breaksCombo) {
+		if (note.behavior.punishable || judge.breaksCombo) {
 			stats.comboBreaks++;
 			stats.combo = 0;
 		}
@@ -451,6 +459,20 @@ class PlayState extends FunkinState {
 		timeText.text = '${chart.title} ($current / $duration)';
 	}
 
+	function death() {
+		Conductor.stop();
+
+		stats.mean = stats.calculateMean();
+		stats.standardDeviation = stats.calculateStandardDeviation();
+
+		for (camera in FlxG.cameras.list) camera.visible = false;
+		camOther.visible = true;
+
+		var menu = new FailedMenu(stats);
+		menu.cameras = [camOther];
+		openSubState(menu);
+	}
+
 	function updateInfo():Void {
 		stats.clearType = stats.getClearType();
 
@@ -479,8 +501,8 @@ class PlayState extends FunkinState {
 	}
 
 	dynamic function updateIconStates() {
-		iconP1.animation.curAnim.curFrame = healthBar.percent < 20 ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
-		iconP2.animation.curAnim.curFrame = healthBar.percent > 80 ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+		iconP1.animation.curAnim.curFrame = healthBar.percent < 20 ? 1 : 0;
+		iconP2.animation.curAnim.curFrame = healthBar.percent > 80 ? 1 : 0;
 	}
 
 	dynamic function updateIconScales(delta:Float):Void {
@@ -500,27 +522,12 @@ class PlayState extends FunkinState {
 
 	// forceLeave:Bool - forces you to leave to the main menu
 	public function endSong(?forceLeave:Bool = false) {
-		var totalDeviation:Float = 0.0;
-		var squaredDeviation:Float = 0.0;
-		for (note in stats.noteHits) {
-			if (!note.countMean) continue;
-			totalDeviation += note.deviation;
-			squaredDeviation += Math.pow(note.deviation, 2);
-		}
-		stats.mean = totalDeviation / stats.notesHit;
-
-		// ty etterna server for helping <3
-		// (i was NOT good at math back in high school
-		var what:Float = (squaredDeviation / stats.notesHit);
-		stats.standardDeviation = Math.sqrt(what - Math.pow(stats.mean, 2));
+		stats.mean = stats.calculateMean();
+		stats.standardDeviation = stats.calculateStandardDeviation();
 
 		persistentUpdate = false;
-		Conductor.pause();
-		var results = new ResultsScreen({
-			song: chart.title,
-			difficulty: Difficulty.current,
-			stats: stats
-		});
+		Conductor.stop();
+		var results = new ResultsScreen(stats);
 		results.cameras = [camOther];
 		openSubState(results);
 	}
