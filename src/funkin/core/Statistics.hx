@@ -102,6 +102,13 @@ class Statistics {
 	var comboBreaks:Int = 0;
 	var misses:Int = 0;
 
+	// time in milliseconds of when you died
+	// is only applicable to failing
+	var time:Float = 0.0;
+
+	// time in milliseconds of how long the song is
+	var length:Float = 0.0;
+
 	var accuracy:Float = 0.0;
 	var combo:Int = 0;
 	var highestCombo:Int = 0;

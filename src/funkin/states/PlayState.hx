@@ -72,6 +72,8 @@ class PlayState extends FunkinState {
 		Conductor.stop();
 
 		Assets.audio('music/Breakfast.ogg');
+		Assets.audio('sfx/gameover-start.ogg');
+		Assets.audio('sfx/gameover-loop.ogg');
 
 		self = this;
 
@@ -194,6 +196,8 @@ class PlayState extends FunkinState {
 
 		Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
 		Conductor.inst.onComplete = function() songCompleted();
+
+		stats.length = Conductor.inst.length;
 
 		if (Assets.exists('songs/$songID/Vocals.ogg')) {
 			Conductor.vocals = FlxG.sound.load(Assets.audio('songs/$songID/Vocals'));

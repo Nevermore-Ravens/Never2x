@@ -1,6 +1,6 @@
 package funkin.substates;
 
-class FailedMenu extends flixel.FlxSubState {
+class FailedMenu extends FunkinSubstate {
 	var stats:Statistics;
 
 	public function new(stats:Statistics) {
@@ -9,12 +9,28 @@ class FailedMenu extends flixel.FlxSubState {
 	}
 
 	override function create():Void {
+		super.create();
+
+		FlxG.sound.play(Assets.audio('sfx/gameover-start.ogg'));
+		Conductor.inst = FlxG.sound.load(Assets.audio('sfx/gameover-loop.ogg'), 1, true);
+		Conductor.vocals = null;
+		Conductor.clock.timingMap.reset([{time: 0, tempo: 100}]);
+		Conductor.clock.offset = 0;
+
+		new FlxTimer().start(3, function(_) {
+			Conductor.play();
+			inputs = true;
+		});
+
 		var failed:FlxText = new FlxText(5, 5, 0, 'You failed...', 40);
 		failed.color = 0xFFFF0000;
 		failed.font = Assets.getPath('fonts/LineSeed.ttf');
 		add(failed);
 
-		var songName:FlxText = new FlxText(5, (failed.y + failed.height), 0, stats.songName, 30);
+		var current:String = flixel.util.FlxStringUtil.formatTime(stats.time * 0.001, false);
+		var duration:String = flixel.util.FlxStringUtil.formatTime(stats.length * 0.001, false);
+
+		var songName:FlxText = new FlxText(5, (failed.y + failed.height), 0, stats.songName + ' ($current / $duration)', 30);
 		songName.font = Assets.getPath('fonts/LineSeed.ttf');
 		add(songName);
 
@@ -36,8 +52,8 @@ class FailedMenu extends flixel.FlxSubState {
 		judgements.x = (FlxG.width - judgements.width) - 10;
 		judgements.screenCenter(Y);
 
-		var mean:FlxText = new FlxText(5, 0, 500, 'Mean: ' + stats.mean + 'ms', 30);
-		mean.text += '\nStd. Deviation: ' + stats.standardDeviation + 'ms';
+		var mean:FlxText = new FlxText(5, 0, 500, 'Mean: ' + Util.truncateFloat(stats.mean, 3) + 'ms', 30);
+		mean.text += '\nStd. Deviation: ' + Util.truncateFloat(stats.standardDeviation, 3) + 'ms';
 		mean.font = Assets.getPath('fonts/LineSeed.ttf');
 		add(mean);
 		mean.y = (FlxG.height - mean.height);
@@ -50,9 +66,18 @@ class FailedMenu extends flixel.FlxSubState {
 		controls.y = (FlxG.height - controls.height);
 	}
 
+	var accepted:Bool = false;
+	var inputs:Bool = false;
 	override function update(delta:Float) {
+		if (!inputs || accepted) return;
+
 		if (FlxG.keys.justPressed.ENTER) {
-			FlxG.resetState();
+			accepted = true;
+			FlxG.sound.play(Assets.audio('sfx/gameover-confirm.ogg'));
+			FlxTween.num(1, 0, 1, function(num:Float) Conductor.inst.volume = num);
+			new FlxTimer().start(3, function(_) {
+				FlxG.resetState();
+			});
 		}
 	}
 }
