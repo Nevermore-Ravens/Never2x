@@ -42,7 +42,7 @@ class SongParser extends BaseParser {
 		var path:Path = new Path(file);
 
 		var fnf:FNFTroll = new FNFTroll();
-		fnf.noteTypeResolver.register('Fake', 'StepMania Fake');
+		fnf.noteTypeResolver.register('Fake', BasicNoteType.FAKE);
 		fnf.noteTypeResolver.register('Mine', BasicNoteType.MINE);
 		fnf.bakedOffset = false;
 		fnf.offsetHolds = false;
@@ -115,7 +115,7 @@ class SongParser extends BaseParser {
 				}
 
 			case 'sm':
-				var sm = new CustomStepMania().fromFile(file);
+				var sm:StepMania = new StepMania().fromFile(file);
 				var meta:BasicMetaData = sm.getChartMeta();
 				addBPMChanges(meta);
 				addEvents(sm);
