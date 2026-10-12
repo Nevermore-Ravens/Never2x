@@ -110,8 +110,13 @@ class Statistics {
 	var length:Float = 0.0;
 
 	var accuracy:Float = 0.0;
-	var combo:Int = 0;
+	var combo(default, set):Int = 0;
+	function set_combo(v:Int):Int {
+		if (v > highestCombo) highestCombo = v;
+		return combo = v;
+	}
 	var highestCombo:Int = 0;
+
 	var notesHit:Int = 0;
 	var clearType:ClearType = CLEARTYPE_DEFAULT;
 	var grade:Grade = grades[grades.length - 1];
