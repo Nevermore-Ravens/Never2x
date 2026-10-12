@@ -4,6 +4,7 @@ import nevermore.core.Chart;
 import nevermore.play.*;
 import nevermore.skins.Noteskin;
 
+import funkin.core.chart.EventHandler;
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
 import funkin.core.Statistics;
@@ -19,7 +20,7 @@ class PlayState extends FunkinState {
 	public static var songID:String = '';
 	public static var self:PlayState;
 	var chart:Chart;
-
+	var events:EventHandler;
 	var playerID:Int = 1;
 
 	var notefield:NoteField;
@@ -60,10 +61,21 @@ class PlayState extends FunkinState {
 	var enemy:Character;
 	var spectator:Character;
 
+	var resetZoom:Bool = true;
+	var defaultZoom:Float = 1.0;
+	var zoomInterval:Int = 4;
+	var zoomStrength:Float = 0.015;
+
+	var camFollow:FlxObject;
+	var camGame:FlxCamera;
 	var camHUD:FlxCamera;
 	var camOther:FlxCamera;
 
 	override function create():Void {
+		FlxG.cameras.reset(camGame = new FlxCamera());
+		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
+		camGame.bgColor.alpha = 0;
+
 		camHUD = FlxG.cameras.add(new FlxCamera(), false);
 		camHUD.bgColor.alphaFloat = 1 - (Settings.data.gameVisibility / 100);
 
@@ -88,6 +100,11 @@ class PlayState extends FunkinState {
 
 		stats = {};
 
+		events = new EventHandler();
+		events.registerEvent("Retarget Camera", moveCamera);
+		events.registerEvent("Zoom Camera", zoomCamera);
+		events.registerEvent("Bump Interval", setZoomInterval);
+
 		// TODO: make the strings customizible
 		spectator = new Character(0, 0, 'gf');
 		enemy = new Character(0, 0, 'bf');
@@ -102,7 +119,13 @@ class PlayState extends FunkinState {
 		if (stage.hasPlayerPos())
 			stage.playerPos.add(player);
 
+		defaultZoom = stage.zoom;
+		camFollow = new FlxObject(stage.cameraPos.x, stage.cameraPos.y, 2, 2);
+		if (stage.canMoveCamera)
+			moveCamera(0);
+		FlxG.camera.follow(camFollow, LOCKON, 0.1); // turns out our flixel still scrolls to the target the ol fps dependant way wuh oh
 		FlxG.camera.zoom = stage.zoom;
+		FlxG.camera.snapToTarget();
 
 		Conductor.metronome = Settings.data.metronome;
 
@@ -160,7 +183,9 @@ class PlayState extends FunkinState {
 
 	override function update(delta:Float) {
 		super.update(delta);
+		events.update(Conductor.clock);
 
+		updateCameraScale(delta);
 		updateTimeText();
 		updateIconScales(delta);
 		updateIconPositions();
@@ -178,6 +203,12 @@ class PlayState extends FunkinState {
 	}
 
 	override function beatHit(beat:Int):Void {
+		// there may be an offset and hud bump softcoding later on but
+		if (zoomInterval > 0 && beat % zoomInterval == 0) {
+			FlxG.camera.zoom += zoomStrength;
+			camHUD.zoom += zoomStrength * 2;
+		}
+
 		iconP1.scale.set(1, 1);
 		iconP1.updateHitbox();
 
@@ -195,6 +226,7 @@ class PlayState extends FunkinState {
 		stats.songName = chart.title;
 		stats.difficulty = Difficulty.current;
 
+		events.load(chart);
 		notefield.load(chart, {
 			scrollVelocities: Settings.data.gameplayModifiers['svs'],
 			sustains: Settings.data.gameplayModifiers['sustains'],
@@ -514,6 +546,14 @@ class PlayState extends FunkinState {
 		iconP2.centerOrigin();
 	}
 
+	function updateCameraScale(delta:Float):Void {
+		if (!resetZoom) return;
+
+		final scalingMult:Float = Math.exp(-delta * 6);
+		camGame.zoom = FlxMath.lerp(defaultZoom, camGame.zoom, scalingMult);
+		camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, scalingMult);
+	}
+
 	@:unreflective
 	function songCompleted() {
 		endSong();
@@ -526,5 +566,54 @@ class PlayState extends FunkinState {
 		var results = new ResultsScreen(stats);
 		results.cameras = [camOther];
 		openSubState(results);
+	}
+
+
+	var camMoveTwn:FlxTween;
+	public function moveCamera(target:Int, ?ease:String = "CLASSIC", ?duration:Float = 4, ?xOffset:Float = 0, ?yOffset:Float = 0) {
+		if (camMoveTwn != null)
+			camMoveTwn.cancel();
+
+		var char = getCharacter(target);
+
+		var xMult = char.facingLeft != char.shouldFaceLeft ? -1 : 1;
+		var midpoint = char.getMidpoint();
+		midpoint.add(char.cameraOffset.x * xMult + xOffset, char.cameraOffset.y + yOffset);
+
+		camFollow.setPosition(midpoint.x, midpoint.y);
+		midpoint.put();
+		switch (ease) {
+			case "CLASSIC":
+				return;
+			case "INSTANT":
+				FlxG.camera.snapToTarget();
+			default:
+				var easeFunc = Util.easeFromString(ease);
+				camMoveTwn = FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x, y: camFollow.y}, duration * Conductor.crotchet, {ease: easeFunc});
+		}
+	}
+	
+	var camZoomTwn:FlxTween;
+	public function zoomCamera(zoom:Float, ?ease:String = "CLASSIC", ?duration:Float = 4, ?mode:String = "direct") {
+		if (camZoomTwn != null)
+			camZoomTwn.cancel();
+
+		var targetZoom = mode.toLowerCase() == "direct" ? zoom : zoom * stage.zoom;
+
+		defaultZoom = targetZoom;
+		switch (ease) {
+			case "CLASSIC":
+				return;
+			case "INSTANT":
+				FlxG.camera.zoom = targetZoom;
+			default:
+				var easeFunc = Util.easeFromString(ease);
+				camZoomTwn = FlxTween.tween(FlxG.camera, {zoom: targetZoom}, duration * Conductor.crotchet, {ease: easeFunc});
+		}
+	}
+
+	public function setZoomInterval(interval:Int, strength:Float) {
+		zoomInterval = interval;
+		zoomStrength = 0.015 * strength;
 	}
 }

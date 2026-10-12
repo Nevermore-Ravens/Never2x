@@ -59,11 +59,20 @@ class SongParser extends BaseParser {
 			}
 		}
 
+		inline function addEvents(format:DynamicFormat) {
+			for (ev in format.getEvents()) {
+				var event = EventInterp.interpEvent(ev, result, format);
+				if (event != null)
+					result.events.push(event);
+			}
+		}
+
 		switch path.ext {
 			case 'chart':
 				var gh = new GuitarHero().fromFile(file);
 				var meta:BasicMetaData = gh.getChartMeta();
 				addBPMChanges(meta);
+				addEvents(gh);
 				result.offset = meta.offset;
 
 				fnf.fromFormat(gh);
@@ -72,7 +81,7 @@ class SongParser extends BaseParser {
 				// for the sake of simplicity
 				// im doing 5k
 				fnf.data.song.keyCount = 5;
-
+			
 			case 'json':
 				// parse the file ourselves
 				// because we need to check if it's v-slice or legacy
@@ -81,7 +90,9 @@ class SongParser extends BaseParser {
 				// legacy
 				if (json.song != null) {
 					fnf.data = cast json;
+					fnf.data.song.events ??= [];
 					addBPMChanges(fnf.getChartMeta());
+					addEvents(fnf);
 
 				} else if (json.codenameChart != null) {
 					var meta = Json.parse(File.getContent(path.dir + '/codename-meta.json'));
@@ -89,6 +100,7 @@ class SongParser extends BaseParser {
 
 					fnf.fromFormat(codename);
 					addBPMChanges(codename.getChartMeta());
+					addEvents(codename);
 
 				// v-slice/0.3.0+
 				// fucking kill me dude this format sucks dick
@@ -99,12 +111,14 @@ class SongParser extends BaseParser {
 
 					fnf.fromFormat(vslice);
 					addBPMChanges(vslice.getChartMeta());
+					addEvents(vslice);
 				}
 
 			case 'sm':
 				var sm = new CustomStepMania().fromFile(file);
 				var meta:BasicMetaData = sm.getChartMeta();
 				addBPMChanges(meta);
+				addEvents(sm);
 				result.offset = meta.offset;
 
 				fnf.fromFormat(sm);
@@ -113,6 +127,7 @@ class SongParser extends BaseParser {
 				var ssc:CustomSSC = cast new CustomSSC().fromFile(file);
 				var meta:BasicMetaData = ssc.getChartMeta();
 				addBPMChanges(meta);
+				addEvents(ssc);
 
 				result.scrollVelocities = ssc.getScrollVelocities();
 				result.offset = meta.offset;
@@ -122,6 +137,7 @@ class SongParser extends BaseParser {
 			case 'qua':
 				var qua:CustomQuaver = cast new CustomQuaver().fromFile(file);
 				addBPMChanges(qua.getChartMeta());
+				addEvents(qua);
 				result.scrollVelocities = qua.getScrollVelocities();
 				result.snapRelativeToChanges = false;
 
@@ -130,6 +146,7 @@ class SongParser extends BaseParser {
 			case 'osu':
 				var osu:OsuMania = new OsuMania().fromFile(file);
 				addBPMChanges(osu.getChartMeta());
+				addEvents(osu);
 
 				result.snapRelativeToChanges = false;
 
