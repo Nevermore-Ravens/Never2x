@@ -147,6 +147,7 @@ class PlayState extends FunkinState {
 		notefield.assistTicks = Settings.data.assistTicks;
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
 		notefield.scrollDirection = Settings.data.scrollDirection;
+		notefield.underlays.alpha = Settings.data.laneUnderlay;
 
 		if (Settings.data.centeredNotes) {
 			for (i => strumline in notefield.strumlines.members) {

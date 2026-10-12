@@ -171,7 +171,13 @@ class OptionsState extends FunkinState {
 			},
 			new Option('center_notes', 'center_notes_desc', "centeredNotes", BoolOption),
 			new Option('opp_notes', 'opp_notes_desc', "opponentNotes", BoolOption),
-			//and this is where i would put lane underlay ^_^...........IF I HAD ONE!!
+			{
+				var opt = new Option('lane_underlay', 'lane_underlay_desc', 'laneUnderlay', FloatOption(0, 1, 0.05, false, true));
+				opt.formatText = function(_) {
+					return (opt.value * 100) + "%";
+				};
+				opt;
+			},
 			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"], true)),
 			new Option("cam_movement", "cam_movement_desc", "notesMoveCamera", BoolOption),
 			new Option('strum_glow', 'strum_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Per-Note'], true)),
