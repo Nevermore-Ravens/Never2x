@@ -108,7 +108,7 @@ class InitState extends flixel.FlxState {
 
 		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomQuaver;
 		//moonchart.backend.FormatDetector.getFormatData(STEPMANIA).handler = CustomStepMania;
-		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomSSC;
+		moonchart.backend.FormatDetector.getFormatData(STEPMANIA_SHARK).handler = CustomSSC;
 		nevermore.core.Song.parser = new SongParser();
 
 		Judgement.register('Never2x', [
