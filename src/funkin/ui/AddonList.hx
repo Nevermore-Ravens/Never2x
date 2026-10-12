@@ -238,12 +238,12 @@ class AddonList extends TextList {
 		superDraw();
 		// i'm sorry -Nebula
 		hover.draw();
-		hover.blend = INVERT;
-		hover.draw();
+		// hover.blend = INVERT;
+		// hover.draw();
 		texts.draw();
 		subTexts.draw();
-		hover.draw();
-		hover.blend = NORMAL;
+		// hover.draw();
+		// hover.blend = NORMAL;
 		icons.draw();
 	}
 

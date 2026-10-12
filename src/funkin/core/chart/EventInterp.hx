@@ -2,12 +2,14 @@ package funkin.core.chart;
 
 import nevermore.core.Chart;
 import moonchart.formats.fnf.legacy.FNFLegacy;
+import moonchart.formats.fnf.FNFVSlice;
+import moonchart.formats.fnf.FNFGlobal;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.Util;
 
 /*
 The intended conversion list currently:
-	"Retarget Camera" => [target, ease, stepsDuration, xOffset, yOffset]
+	"Retarget Camera" => [target, ease, stepsDuration, xOffset, yOffset, offsetPos]
 	"Zoom Camera" => [zoom, ease, stepsDuration, stageORdirect]
 	"Bump Interval" => [interval, strength]
 */
@@ -55,7 +57,7 @@ class EventInterp {
 				name = "Bump Interval";
 				params = event.data.array;
 
-			case moonchart.formats.fnf.FNFVSlice.VSLICE_FOCUS_EVENT:
+			case FNFVSlice.VSLICE_FOCUS_EVENT:
 				event.data = expectFields(event.data, ["char", "duration", "ease", "easeDir", "x", "y"]);
 				name = "Retarget Camera";
 				params = Util.resolveEventValues(event);
@@ -67,7 +69,8 @@ class EventInterp {
 
 				params[2] = params[1]; // swap ease and duration
 				params[1] = ease;
-			case "ZoomCamera":
+			// seems like a lot of these are converted
+			/*case "ZoomCamera":
 				event.data = expectFields(event.data, ["duration", "ease", "easeDir", "mode", "zoom"]);
 				name = "Zoom Camera";
 				params = Util.resolveEventValues(event);
@@ -82,7 +85,36 @@ class EventInterp {
 				event.data = expectFields(event.data, ["intensity", "rate"]);
 				name = "Bump Interval";
 				params = Util.resolveEventValues(event);
-				params = [params[1], params[0]]; // swap rate and intensity
+				params = [params[1], params[0]]; // swap rate and intensity*/
+
+			case BasicFNFEvent.POSITION_CAMERA:
+				if (format is FNFVSlice)
+					return null; // we already interpreted it
+
+				// fields: [char, duration, ease, isOffset, x, y]
+				name = "Retarget Camera";
+				params = Util.resolveEventValues(event);
+
+				var ease = params[2]; // swap ease and duration
+				params[2] = params[1]; 
+				params[1] = ease;
+				var isOffset = params[3]; // move isOffset to the end
+				params.splice(3, 1);
+				params.push(isOffset);
+			case BasicFNFEvent.ZOOM_CAMERA:
+				// fields: [duration, ease, mode, zoom]
+				name = "Zoom Camera";
+				params = Util.resolveEventValues(event);
+				params.insert(0, params.pop()); // zoom was the last argument, make it the first
+				
+				var ease = params[2]; // swap ease and duration
+				params[2] = params[1]; 
+				params[1] = ease;
+			case BasicFNFEvent.SET_CAMERA_BOP:
+				// fields: [intensity, offset, rate]
+				name = "Bump Interval";
+				params = Util.resolveEventValues(event);
+				params = [params[2], params[0]]; // ill add an offset later
 
 			default:
 				params = Util.resolveEventValues(event);

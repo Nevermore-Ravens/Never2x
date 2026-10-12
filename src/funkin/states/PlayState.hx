@@ -570,18 +570,25 @@ class PlayState extends FunkinState {
 
 
 	var camMoveTwn:FlxTween;
-	public function moveCamera(target:Int, ?ease:String = "CLASSIC", ?duration:Float = 4, ?xOffset:Float = 0, ?yOffset:Float = 0) {
+	public function moveCamera(target:Int, ?ease:String = "CLASSIC", ?duration:Float = 4, ?xOffset:Float = 0, ?yOffset:Float = 0, ?offset:Bool = false) {
 		if (camMoveTwn != null)
 			camMoveTwn.cancel();
 
 		var char = getCharacter(target);
+		if (char == null) {
+			camFollow.setPosition(
+				(offset ? camFollow.x : 0) + xOffset,
+				(offset ? camFollow.y : 0) + yOffset
+			);
+		} else {
+			var xMult = char.facingLeft != char.shouldFaceLeft ? -1 : 1;
+			var midpoint = char.getMidpoint();
+			midpoint.add(char.cameraOffset.x * xMult + xOffset, char.cameraOffset.y + yOffset);
+	
+			camFollow.setPosition(midpoint.x, midpoint.y);
+			midpoint.put();
+		}
 
-		var xMult = char.facingLeft != char.shouldFaceLeft ? -1 : 1;
-		var midpoint = char.getMidpoint();
-		midpoint.add(char.cameraOffset.x * xMult + xOffset, char.cameraOffset.y + yOffset);
-
-		camFollow.setPosition(midpoint.x, midpoint.y);
-		midpoint.put();
 		switch (ease) {
 			case "CLASSIC":
 				return;
@@ -589,7 +596,7 @@ class PlayState extends FunkinState {
 				FlxG.camera.snapToTarget();
 			default:
 				var easeFunc = Util.easeFromString(ease);
-				camMoveTwn = FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x, y: camFollow.y}, duration * Conductor.crotchet, {ease: easeFunc});
+				camMoveTwn = FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x, y: camFollow.y}, duration * Conductor.semiquaver * 0.001, {ease: easeFunc});
 		}
 	}
 	
@@ -608,7 +615,7 @@ class PlayState extends FunkinState {
 				FlxG.camera.zoom = targetZoom;
 			default:
 				var easeFunc = Util.easeFromString(ease);
-				camZoomTwn = FlxTween.tween(FlxG.camera, {zoom: targetZoom}, duration * Conductor.crotchet, {ease: easeFunc});
+				camZoomTwn = FlxTween.tween(FlxG.camera, {zoom: targetZoom}, duration * Conductor.semiquaver * 0.001, {ease: easeFunc});
 		}
 	}
 

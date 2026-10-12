@@ -124,8 +124,8 @@
 	icon: 'gf',
 	antialiasing: true,
 	offset: [
-		185,
-		-115,
+		50,
+		50,
 	],
 	scale: 1,
 }

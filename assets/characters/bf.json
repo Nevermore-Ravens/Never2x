@@ -153,8 +153,8 @@
 	icon: 'bf',
 	antialiasing: true,
 	offset: [
-		50,
-		-375,
+		0,
+		-350,
 	],
 	cameraOffset: [
 		-200,

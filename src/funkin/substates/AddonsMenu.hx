@@ -13,11 +13,13 @@ class AddonsMenu extends FlxSubState {
 	var actions:Array<String> = ["cancel", "open_folder", "refresh", "apply"];
 	var actionTxt:FlxTypedGroup<FlxText>;
 	var actionHover:FunkinSprite;
-	var actionInvertPrep:FunkinSprite;
-	var actionInvert:FunkinSprite;
+	// var actionInvertPrep:FunkinSprite;
+	// var actionInvert:FunkinSprite;
+	var actionPercentages:Array<Float>;
 
 	public function new() {
 		super();
+		actionPercentages = [for (a in actions) 0.0];
 		visible = false;
 	}
 
@@ -80,11 +82,11 @@ class AddonsMenu extends FlxSubState {
 		actionHover.origin.set();
 		actionHover.scale.set();
 
-		add(actionInvertPrep = new FunkinSprite());
-		actionInvertPrep.makeGraphic(1, 1);
-		actionInvertPrep.origin.set();
-		actionInvertPrep.scale.set();
-		actionInvertPrep.blend = INVERT;
+		// add(actionInvertPrep = new FunkinSprite());
+		// actionInvertPrep.makeGraphic(1, 1);
+		// actionInvertPrep.origin.set();
+		// actionInvertPrep.scale.set();
+		// actionInvertPrep.blend = INVERT;
 		
 		add(actionTxt = new FlxTypedGroup());
 		for (i => act in actions) {
@@ -94,18 +96,18 @@ class AddonsMenu extends FlxSubState {
 			actionTxt.add(txt);
 		}
 
-		add(actionInvert = new FunkinSprite());
-		actionInvert.makeGraphic(1, 1);
-		actionInvert.origin.set();
-		actionInvert.scale.set();
-		actionInvert.blend = INVERT;
+		// add(actionInvert = new FunkinSprite());
+		// actionInvert.makeGraphic(1, 1);
+		// actionInvert.origin.set();
+		// actionInvert.scale.set();
+		// actionInvert.blend = INVERT;
 
 		actionHover.scale.set(actionTxt.members[curAction].width + 10, actionTxt.members[curAction].height + 10);
-		actionInvertPrep.scale.copyFrom(actionHover.scale);
-		actionInvert.scale.copyFrom(actionHover.scale);
+		// actionInvertPrep.scale.copyFrom(actionHover.scale);
+		// actionInvert.scale.copyFrom(actionHover.scale);
 		actionHover.setPosition(actionTxt.members[curAction].x - 5, actionTxt.members[curAction].y - 5);
-		actionInvertPrep.setPosition(actionHover.x, actionHover.y);
-		actionInvert.setPosition(actionHover.x, actionHover.y);
+		// actionInvertPrep.setPosition(actionHover.x, actionHover.y);
+		// actionInvert.setPosition(actionHover.x, actionHover.y);
 	}
 
 	override function update(delta:Float) {
@@ -203,13 +205,18 @@ class AddonsMenu extends FlxSubState {
 			}
 		}
 
-		actionHover.alpha = actionInvertPrep.alpha = actionInvert.alpha = FlxMath.lerp(actionHover.alpha, (inActions ? 1 : 0), delta * 15);
+		actionHover.alpha = FlxMath.lerp(actionHover.alpha, (inActions ? 1 : 0), delta * 15);
 		actionHover.scale.x = FlxMath.lerp(actionHover.scale.x, actionTxt.members[curAction].width + 10, delta * 15);
-		actionInvertPrep.scale.copyFrom(actionHover.scale);
-		actionInvert.scale.copyFrom(actionHover.scale);
+		// actionInvertPrep.scale.copyFrom(actionHover.scale);
+		// actionInvert.scale.copyFrom(actionHover.scale);
 		actionHover.x = FlxMath.lerp(actionHover.x, actionTxt.members[curAction].x - 5, delta * 15);
-		actionInvertPrep.setPosition(actionHover.x, actionHover.y);
-		actionInvert.setPosition(actionHover.x, actionHover.y);
+		// actionInvertPrep.setPosition(actionHover.x, actionHover.y);
+		// actionInvert.setPosition(actionHover.x, actionHover.y);
+
+		for (i in 0...actionPercentages.length) {
+			actionPercentages[i] = FlxMath.lerp(actionPercentages[i], (i == curAction ? 1 : 0), delta * 15);
+			actionTxt.members[i].color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, actionPercentages[i] * actionHover.alpha);
+		}
 	}
 
 	override function destroy() {

@@ -105,10 +105,14 @@ class Stage extends FunkinSpriteGroup {
 			case GROUP:
 				new FunkinSpriteGroup();
 			case SPECTATOR:
+				// set to prevent auto-adding (may remove auto add but)
+				spectatorPos = new CharacterPos();
 				spectatorPos;
 			case ENEMY:
+				enemyPos = new CharacterPos();
 				enemyPos;
 			case PLAYER:
+				playerPos = new CharacterPos();
 				playerPos;
 			case CHARACTER:
 				new CharacterPos();
