@@ -65,7 +65,7 @@ class PlayState extends FunkinState {
 	var resetZoom:Bool = true;
 	var defaultZoom:Float = 1.0;
 	var zoomInterval:Int = 4;
-	var zoomStrength:Float = 0.015;
+	var zoomStrength:Float = 0.010;
 
 	var camFollow:FlxObject;
 	var camGame:FlxCamera;
@@ -221,8 +221,8 @@ class PlayState extends FunkinState {
 	override function beatHit(beat:Int):Void {
 		// there may be an offset and hud bump softcoding later on but
 		if (zoomInterval > 0 && beat % zoomInterval == 0) {
-			FlxG.camera.zoom += zoomStrength;
-			camHUD.zoom += zoomStrength * 2;
+			FlxG.camera.zoom += zoomStrength * 2;
+			camHUD.zoom += zoomStrength;
 		}
 
 		iconP1.scale.set(1, 1);
@@ -259,7 +259,7 @@ class PlayState extends FunkinState {
 		Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
 		Conductor.inst.onComplete = function() songCompleted();
 
-		stats.length = Conductor.inst.length;
+		stats.songLength = Conductor.inst.length;
 
 		if (Assets.exists('songs/$songID/Vocals.ogg')) {
 			Conductor.vocals = FlxG.sound.load(Assets.audio('songs/$songID/Vocals'));
@@ -517,7 +517,7 @@ class PlayState extends FunkinState {
 	}
 
 	function death() {
-		stats.time = Conductor.audioTime;
+		stats.songTime = Conductor.audioTime;
 		Conductor.stop();
 
 		for (camera in FlxG.cameras.list) camera.visible = false;
@@ -645,6 +645,6 @@ class PlayState extends FunkinState {
 
 	public function setZoomInterval(interval:Int, strength:Float) {
 		zoomInterval = interval;
-		zoomStrength = 0.015 * strength;
+		zoomStrength = 0.010 * strength;
 	}
 }

@@ -104,10 +104,9 @@ class Statistics {
 
 	// time in milliseconds of when you died in the song
 	// is only applicable to failing
-	var time:Float = 0.0;
+	var songTime:Float = 0.0;
 
-	// time in milliseconds of how long the song is
-	var length:Float = 0.0;
+	var songLength:Float = 0.0;
 
 	var accuracy:Float = 0.0;
 	var combo(default, set):Int = 0;

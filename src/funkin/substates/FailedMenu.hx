@@ -11,35 +11,41 @@ class FailedMenu extends FunkinSubstate {
 	override function create():Void {
 		super.create();
 
-		FlxG.sound.play(Assets.audio('sfx/gameover-start.ogg'));
 		Conductor.inst = FlxG.sound.load(Assets.audio('sfx/gameover-loop.ogg'), 1, true);
 		Conductor.vocals = null;
 		Conductor.clock.timingMap.reset([{time: 0, tempo: 100}]);
 		Conductor.clock.offset = 0;
 
-		new FlxTimer().start(3, function(_) {
-			Conductor.play();
-			inputs = true;
-		});
+		var font = Assets.getPath('fonts/LineSeed.ttf');
 
-		var failed:FlxText = new FlxText(5, 5, 0, 'You failed...', 40);
+		// 5, 5
+		// height 69 
+		var failed:FlxText = new FlxText(5, 0, 0, 'You failed...', 40);
 		failed.color = 0xFFFF0000;
-		failed.font = Assets.getPath('fonts/LineSeed.ttf');
+		failed.font = font;
 		add(failed);
+		failed.y = -failed.height;
+		failed.alpha = 0;
 
-		var current:String = flixel.util.FlxStringUtil.formatTime(stats.time * 0.001, false);
-		var duration:String = flixel.util.FlxStringUtil.formatTime(stats.length * 0.001, false);
+		var current:String = flixel.util.FlxStringUtil.formatTime(stats.songTime * 0.001, false);
+		var duration:String = flixel.util.FlxStringUtil.formatTime(stats.songLength * 0.001, false);
 
-		var songName:FlxText = new FlxText(5, (failed.y + failed.height), 0, stats.songName + ' ($current / $duration)', 30);
-		songName.font = Assets.getPath('fonts/LineSeed.ttf');
+		// 5, 74
+		// height 53
+		var songName:FlxText = new FlxText(5, 74, 0, stats.songName + ' ($current / $duration)', 30);
+		songName.font = font;
+		songName.alpha = 0;
 		add(songName);
 
-		var difficulty:FlxText = new FlxText(5, (songName.y + songName.height), 0, stats.difficulty, 25);
-		difficulty.font = Assets.getPath('fonts/LineSeed.ttf');
+		// 5, 127
+		var difficulty:FlxText = new FlxText(5, 127, 0, stats.difficulty, 25);
+		difficulty.font = font;
+		difficulty.alpha = 0;
 		add(difficulty);
 
-		var judgements:FlxText = new FlxText(0, 0, 700, '', 30);
-		judgements.font = Assets.getPath('fonts/LineSeed.ttf');
+		// 
+		var judgements:FlxText = new FlxText(0, 0, 700, '', 25);
+		judgements.font = font;
 		judgements.alignment = 'right';
 		add(judgements);
 
@@ -49,21 +55,44 @@ class FailedMenu extends FunkinSubstate {
 
 		judgements.text += 'Misses: ' + stats.misses + '\n';
 		judgements.text += 'Combo breaks: ' + stats.comboBreaks;
-		judgements.x = (FlxG.width - judgements.width) - 10;
+		judgements.x = FlxG.width;
 		judgements.screenCenter(Y);
+		judgements.alpha = 0;
 
-		var mean:FlxText = new FlxText(5, 0, 500, 'Mean: ' + Util.truncateFloat(stats.mean, 3) + 'ms', 30);
+		// FlxG.height - mean.height
+		var mean:FlxText = new FlxText(5, 0, 500, 'Mean: ' + Util.truncateFloat(stats.mean, 3) + 'ms', 25);
 		mean.text += '\nStd. Deviation: ' + Util.truncateFloat(stats.standardDeviation, 3) + 'ms';
-		mean.font = Assets.getPath('fonts/LineSeed.ttf');
+		mean.font = font;
 		add(mean);
-		mean.y = (FlxG.height - mean.height);
+		mean.y = FlxG.height;
+		mean.alpha = 0;
 
-		var controls:FlxText = new FlxText(0, 0, 700, 'Press ENTER to retry\nPress ESCAPE to go back', 30);
-		controls.font = Assets.getPath('fonts/LineSeed.ttf');
+		var controls:FlxText = new FlxText(0, 0, 700, 'Press ENTER to retry\nPress ESCAPE to quit', 30);
+		controls.font = font;
 		controls.alignment = 'right';
 		add(controls);
 		controls.x = (FlxG.width - controls.width) - 10;
 		controls.y = (FlxG.height - controls.height);
+		controls.alpha = 0;
+
+		FlxG.sound.play(Assets.audio('sfx/gameover-start.ogg'));
+		new FlxTimer().start(1.062, function(_) {
+			FlxTween.tween(failed, {y: 5}, 1.5, {ease: FlxEase.cubeOut});
+			FlxTween.tween(failed, {alpha: 1}, 3, {ease: FlxEase.cubeOut});
+
+			FlxTween.tween(songName, {alpha: 1}, 3, {ease: FlxEase.cubeOut});
+			FlxTween.tween(difficulty, {alpha: 1}, 3, {ease: FlxEase.cubeOut});
+			
+			FlxTween.tween(judgements, {x: (FlxG.width - judgements.width) - 10, alpha: 1}, 2, {ease: FlxEase.cubeOut});
+			FlxTween.tween(mean, {y: FlxG.height - mean.height, alpha: 1}, 2, {ease: FlxEase.cubeOut});
+		});
+
+		new FlxTimer().start(3, function(_) {
+			Conductor.play();
+			inputs = true;
+
+			FlxTween.tween(controls, {alpha: 1}, 2.5, {ease: FlxEase.cubeOut});
+		});
 	}
 
 	var accepted:Bool = false;
@@ -72,10 +101,13 @@ class FailedMenu extends FunkinSubstate {
 		if (!inputs || accepted) return;
 
 		if (FlxG.keys.justPressed.ENTER) {
+			camera.flash(0xFF999999, 2);
+			for (obj in members) obj.visible = false;
+
 			accepted = true;
 			FlxG.sound.play(Assets.audio('sfx/gameover-confirm.ogg'));
 			FlxTween.num(1, 0, 1, function(num:Float) Conductor.inst.volume = num);
-			new FlxTimer().start(3, function(_) {
+			new FlxTimer().start(4, function(_) {
 				FlxG.resetState();
 			});
 		}
