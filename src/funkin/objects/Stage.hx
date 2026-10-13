@@ -78,6 +78,7 @@ class CharacterPos extends FunkinSpriteGroup<Character> {
 }
 class Stage extends FunkinSpriteGroup {
 	var _file:StageFile;
+	public var name:String;
 
 	public var zoom:Float = 1;
 	public var canMoveCamera:Bool = false;
@@ -91,6 +92,8 @@ class Stage extends FunkinSpriteGroup {
 
 	public function new(name:String) {
 		super();
+		this.name = name;
+
 		_file = getFile('stages/$name.json');
 		zoom = _file.zoom;
 		cameraPos.set(_file.cameraPos[0], _file.cameraPos[1]);
@@ -105,14 +108,10 @@ class Stage extends FunkinSpriteGroup {
 			case GROUP:
 				new FunkinSpriteGroup();
 			case SPECTATOR:
-				// set to prevent auto-adding (may remove auto add but)
-				spectatorPos = new CharacterPos();
 				spectatorPos;
 			case ENEMY:
-				enemyPos = new CharacterPos();
 				enemyPos;
 			case PLAYER:
-				playerPos = new CharacterPos();
 				playerPos;
 			case CHARACTER:
 				new CharacterPos();
@@ -162,30 +161,24 @@ class Stage extends FunkinSpriteGroup {
 	public function hasSpectatorPos()
 		@:bypassAccessor return spectatorPos != null;
 	function get_spectatorPos() {
-		if (spectatorPos == null) {
+		if (spectatorPos == null)
 			spectatorPos = new CharacterPos();
-			add(spectatorPos); // may remove this auto add but
-		}
 		return spectatorPos;
 	}
 
 	public function hasEnemyPos()
 		@:bypassAccessor return enemyPos != null;
 	function get_enemyPos() {
-		if (enemyPos == null) {
+		if (enemyPos == null)
 			enemyPos = new CharacterPos();
-			add(enemyPos);
-		}
 		return enemyPos;
 	}
 
 	public function hasPlayerPos()
 		@:bypassAccessor return playerPos != null;
 	function get_playerPos() {
-		if (playerPos == null) {
+		if (playerPos == null)
 			playerPos = new CharacterPos();
-			add(playerPos);
-		}
 		return playerPos;
 	}
 

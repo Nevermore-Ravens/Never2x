@@ -4,6 +4,7 @@ import nevermore.core.Chart;
 import nevermore.play.*;
 import nevermore.skins.Noteskin;
 
+import funkin.core.scripts.ScriptList;
 import funkin.core.chart.EventHandler;
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
@@ -71,6 +72,8 @@ class PlayState extends FunkinState {
 	var camHUD:FlxCamera;
 	var camOther:FlxCamera;
 
+	var scripts:ScriptList;
+
 	override function create():Void {
 		FlxG.cameras.reset(camGame = new FlxCamera());
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
@@ -105,11 +108,20 @@ class PlayState extends FunkinState {
 		events.registerEvent("Zoom Camera", zoomCamera);
 		events.registerEvent("Bump Interval", setZoomInterval);
 
+		scripts = new ScriptList();
+		scripts.loadFolder("scripts");
+		scripts.loadFolder("songs/" + songID); // may become limited to only the addons list
+
 		// TODO: make the strings customizible
 		spectator = new Character(0, 0, 'gf');
+		scripts.loadFile("characters/" + spectator.name); // these may be attached to the instance itself later on but
 		enemy = new Character(0, 0, 'bf');
+		scripts.loadFile("characters/" + enemy.name);
 		player = new Character(0, 0, 'bf');
+		scripts.loadFile("characters/" + player.name);
 		add(stage = new Stage('stage'));
+		scripts.loadFile("stages/" + stage.name);
+		scripts.call("loadedStage");
 
 		// don't want the positions auto instantiating/adding (it's a whole story trust me it's for the better)
 		if (stage.hasSpectatorPos())
@@ -173,6 +185,7 @@ class PlayState extends FunkinState {
 
 		load();
 		makeHUD();
+		scripts.call("create");
 	}
 
 	function openPauseMenu() {
@@ -194,6 +207,8 @@ class PlayState extends FunkinState {
 		if (FlxG.keys.justPressed.ENTER) {
 			openPauseMenu();
 		}
+
+		scripts.call("update", [delta]);
 	}
 
 	override function destroy():Void {
@@ -217,15 +232,19 @@ class PlayState extends FunkinState {
 		iconP2.updateHitbox();
 
 		for (character in [player, enemy, spectator]) {
-			if (beat % character.danceInterval != 0) continue;
+			if (!character.autoIdle || beat % character.danceInterval != 0) continue;
 			character.dance();
 		}
+
+		scripts.call("beatHit", [beat]);
 	}
 
 	function load() {
 		chart = Song.load('songs/$songID', Difficulty.current);
 		stats.songName = chart.title;
 		stats.difficulty = Difficulty.current;
+
+		scripts.call("loadSong", [chart]);
 
 		events.load(chart);
 		notefield.load(chart, {
@@ -263,6 +282,7 @@ class PlayState extends FunkinState {
 
 		Conductor.volume = lastVolume;
 
+		// TODO: make this customizable
 		Conductor.audioTime = -extraTime;
 		Conductor.clock.active = true;
 		new FlxTimer().start(extraTime / 1000, function(_) {
@@ -283,6 +303,9 @@ class PlayState extends FunkinState {
 	
 	var currentStat:Int = 0;
 	function noteHit(strumline:Strumline, note:Note) {
+		// havent added the script calls here because i'd to see if i can make this a bit customizible
+		// like a HitBehavior sorta thing like cne and vslice
+
 		getCharacter(note.player).sing('sing', Note.directions[note.lane]);
 
 		if (note.player != notefield.playerID) return;

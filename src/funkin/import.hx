@@ -6,7 +6,6 @@ import funkin.core.WeekData.WeekFile;
 import funkin.core.Scores.PlayData;
 import funkin.objects.FunkinSprite;
 import funkin.objects.FunkinSpriteGroup;
-import funkin.core.ScriptHandler;
 import funkin.states.*;
 
 //these are functions we use a lot, so make them generally available
