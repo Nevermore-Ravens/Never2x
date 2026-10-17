@@ -107,7 +107,7 @@ class SongParser extends BaseParser {
 				} else {
 					var meta = Json.parse(File.getContent(path.dir + '/vslice-meta.json'));
 					var vslice = new FNFVSlice(cast json, cast meta);
-					vslice.diffs = [diff];
+					vslice.diffs = [Util.format(diff)];
 
 					fnf.fromFormat(vslice);
 					addBPMChanges(vslice.getChartMeta());
