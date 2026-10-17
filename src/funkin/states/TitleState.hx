@@ -124,7 +124,7 @@ class TitleState extends FunkinState {
 			return;
 		}
 
-		Conductor.inst = FlxG.sound.load(Assets.audio('music/freakyMenu'), 0, true);
+		Conductor.inst = Util.makeSound(Assets.audio('music/freakyMenu'), 0, true);
 		Conductor.play();
 
 		FlxTween.num(0, 0.7, 4, {ease: FlxEase.linear}, function(num) {

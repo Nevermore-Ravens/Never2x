@@ -11,7 +11,7 @@ class FailedMenu extends FunkinSubstate {
 	override function create():Void {
 		super.create();
 
-		Conductor.inst = FlxG.sound.load(Assets.audio('sfx/gameover-loop.ogg'), 1, true);
+		Conductor.inst = Util.makeSound(Assets.audio('sfx/gameover-loop.ogg'), 1, true);
 		Conductor.vocals = null;
 		Conductor.clock.timingMap.reset([{time: 0, tempo: 100}]);
 		Conductor.clock.offset = 0;

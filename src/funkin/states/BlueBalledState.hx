@@ -41,7 +41,7 @@ class BlueBalledState extends flixel.FlxSubState {
 
         FlxG.sound.play(Assets.audio("sfx/menu_deletedata"));
         new FlxTimer().start(1.2, _ -> {
-            Conductor.inst = FlxG.sound.load(Assets.audio("music/zenith"), 0.5, true);
+            Conductor.inst = Util.makeSound(Assets.audio("music/zenith"), 0.5, true);
             Conductor.inst.pitch = 1;
 			Conductor.inst.play();
             char.playAnim('death-loop');

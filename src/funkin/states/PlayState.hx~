@@ -1013,7 +1013,7 @@ class PlayState extends FunkinState {
 
 		// load inst
 		try {
-		Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
+		Conductor.inst = Util.makeSound(Assets.audio('songs/$songID/Inst'));
 			Conductor.inst.pitch = FlxG.timeScale;
 			Conductor.inst.onComplete = function() songCompleted();
 
@@ -1024,7 +1024,7 @@ class PlayState extends FunkinState {
 		// load vocals
 		try {
 			if (Assets.exists('songs/$songID/Vocals.ogg'))
-			Conductor.vocals = FlxG.sound.load(Assets.audio('songs/$songID/Vocals'));
+			Conductor.vocals = Util.makeSound(Assets.audio('songs/$songID/Vocals'));
 
 			/*if (song.meta.hasVocals) {
 				var folder:String = 'songs/$songID';

@@ -13,12 +13,23 @@ class Util {
 			Conductor.vocals.destroy();
 
 		Conductor.reset();
-		Conductor.inst = FlxG.sound.load(Assets.audio('music/freakyMenu'), true);
+		Conductor.inst = makeSound(Assets.audio('music/freakyMenu'), true);
 		Conductor.clock.timingMap.reset([{tempo: 102}]);
 		Conductor.metronome = false;
 		Conductor.play();
 		Addons.current = null;
 		FunkinState.switchState(target);
+	}
+
+	// because Util.makeSound() is utterly fucked for making sounds
+	// we do it the old fnf-legacy ninjamuffin method
+	// and just make it ourselves
+	public static function makeSound(openflSound:openfl.media.Sound, ?volume:Float = 1.0, ?looped:Bool = false):FlxSound {
+		var sound:FlxSound = new FlxSound().loadEmbedded(openflSound, looped);
+		sound.volume = volume;
+		FlxG.sound.list.add(sound);
+
+		return sound;
 	}
 
 	inline public static function quantize(f:Float, snap:Float):Float

@@ -42,8 +42,8 @@ class PauseMenu extends flixel.FlxSubState {
 		if (musicPath != 'None') {
 			/*if (musicPath == 'Song Instrumental') {
 				@:privateAccess
-				music = FlxG.sound.load(Conductor.inst._sound, 0, true);
-			} else */music = FlxG.sound.load(Assets.audio("music/" + musicPath), 0);
+				music = Util.makeSound(Conductor.inst._sound, 0, true);
+			} else */music = Util.makeSound(Assets.audio("music/" + musicPath), 0);
 
 			music.time = FlxG.random.float(0, music.length * 0.75);
 			music.play();

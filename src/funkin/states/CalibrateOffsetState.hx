@@ -91,7 +91,7 @@ class CalibrateOffsetState extends FunkinState {
 			beat += 2;
 		}
 
-		Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
+		Conductor.inst = Util.makeSound(Assets.audio('songs/$songID/Inst'));
 		Conductor.inst.onComplete = finish;
 
 		playfield.load(song.notes);

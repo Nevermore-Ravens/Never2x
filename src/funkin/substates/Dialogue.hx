@@ -261,10 +261,10 @@ class DialogueCharacter extends FunkinSprite {
 		if (file.sound != 'none') {
 			var path:String = 'sfx/dialogue/${file.sound}';
 			if (!Paths.isDirectory(path)) {
-				sounds.push(FlxG.sound.load(Paths.audio(file.sound, 'sfx/dialogue')));
+				sounds.push(Util.makeSound(Paths.audio(file.sound, 'sfx/dialogue')));
 			} else {
 				for (i in 0...Paths.readDirectory(path).length - 1) {
-					sounds.push(FlxG.sound.load(Paths.audio('$path/$i')));
+					sounds.push(Util.makeSound(Paths.audio('$path/$i')));
 				}
 			}
 		}

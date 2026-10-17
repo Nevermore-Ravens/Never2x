@@ -199,6 +199,10 @@ class PlayState extends FunkinState {
 		super.update(delta);
 		events.update(Conductor.clock);
 
+		if (FlxG.keys.justPressed.F8) {
+			notefield.autoplay = !notefield.autoplay;
+		}
+
 		updateCameraScale(delta);
 		updateTimeText();
 		updateIconScales(delta);
@@ -256,13 +260,13 @@ class PlayState extends FunkinState {
 		Conductor.clock.reset(chart);
 		Conductor.clock.offset = chart.offset;
 
-		Conductor.inst = FlxG.sound.load(Assets.audio('songs/$songID/Inst'));
+		Conductor.inst = Util.makeSound(Assets.audio('songs/$songID/Inst'));
 		Conductor.inst.onComplete = function() songCompleted();
 
 		stats.songLength = Conductor.inst.length;
 
 		if (Assets.exists('songs/$songID/Vocals.ogg')) {
-			Conductor.vocals = FlxG.sound.load(Assets.audio('songs/$songID/Vocals'));
+			Conductor.vocals = Util.makeSound(Assets.audio('songs/$songID/Vocals'));
 		}
 
 		// quickly plays the song and then stops it
@@ -308,7 +312,11 @@ class PlayState extends FunkinState {
 
 		getCharacter(note.player).sing('sing', Note.directions[note.lane]);
 
-		if (note.player != notefield.playerID) return;
+		if (note.player != playerID) return;
+
+		if (notefield.autoplay) {
+			return;
+		}
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
 
@@ -368,7 +376,9 @@ class PlayState extends FunkinState {
 			getCharacter(sustain.player).sing('sing', Note.directions[sustain.lane]);
 		}
 
-		if (sustain.player != notefield.playerID) return;
+		if (sustain.player != playerID) return;
+		if (notefield.autoplay) return;
+
 		scoring.sustainHit(sustain);
 		accuracy.sustainHit(sustain);
 
@@ -473,6 +483,8 @@ class PlayState extends FunkinState {
 
 		updateInfo();
 		infoText.screenCenter(X);
+
+		hud.visible = !Settings.data.hideHUD;
 	}
 
 	public function generateJudgeColors() {
