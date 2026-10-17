@@ -21,7 +21,7 @@ class Util {
 		FunkinState.switchState(target);
 	}
 
-	// because Util.makeSound() is utterly fucked for making sounds
+	// because FlxG.sound.load() is utterly fucked for making sounds
 	// we do it the old fnf-legacy ninjamuffin method
 	// and just make it ourselves
 	public static function makeSound(openflSound:openfl.media.Sound, ?volume:Float = 1.0, ?looped:Bool = false):FlxSound {
