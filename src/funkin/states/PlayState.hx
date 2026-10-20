@@ -335,6 +335,8 @@ class PlayState extends FunkinState {
 			stats.combo++;
 		}
 
+		health += (note.behavior.hitHealth ?? judge.health) * note.behavior.healthMult;
+
 		scoring.noteHit(note, deviation);
 		accuracy.noteHit(note, deviation);
 
@@ -362,6 +364,8 @@ class PlayState extends FunkinState {
 
 	function noteMissed(strumline:Strumline, note:Note) {
 		player.sing('miss', Note.directions[note.lane]);
+
+		health += (note.behavior.missHealth ?? -10.5) * note.behavior.healthMult;
 
 		scoring.noteMissed(note);
 		accuracy.noteMissed(note);
