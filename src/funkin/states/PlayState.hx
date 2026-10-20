@@ -314,6 +314,7 @@ class PlayState extends FunkinState {
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
 		var judgeID:Int = Judgement.getID(deviation);
+		var judge:Judgement = Judgement.current[judgeID];
 		var displayJudge:Bool = true;
 		var displayCombo:Bool = true;		
 
@@ -324,12 +325,13 @@ class PlayState extends FunkinState {
 		});
 		stats.notesHit++;
 
-		if (note.behavior.punishable) {
+		judge.hits++;
+
+		if (judge.breaksCombo || note.behavior.punishable) {
 			stats.comboBreaks++;
 			stats.combo = 0;
-			displayJudge = false;
+			displayJudge = !note.behavior.punishable;
 		} else {
-			Judgement.current[judgeID].hits++;
 			stats.combo++;
 		}
 
@@ -344,7 +346,6 @@ class PlayState extends FunkinState {
 			}
 
 			if (judgeSprite.visible) judgeSprite.display(judgeID);
-			
 			updateJudgeCounter();
 		}
 
@@ -371,6 +372,9 @@ class PlayState extends FunkinState {
 
 		judgeSprite.visible = true;
 		judgeSprite.display();
+
+		updateInfo();
+		updateJudgeCounter();
 	}
 
 	function sustainHit(strumline:Strumline, sustain:Sustain, mostRecent:Bool) {
