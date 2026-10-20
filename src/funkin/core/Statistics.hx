@@ -122,8 +122,7 @@ class Statistics {
 
 	var _currentNote:Int = 0;
 	function registerNote(data:NoteHitData) {
-		noteHits[_currentNote] = data;
-		_currentNote++;
+		noteHits[_currentNote++] = data;
 	}
 
 	var mean(get, never):Float;

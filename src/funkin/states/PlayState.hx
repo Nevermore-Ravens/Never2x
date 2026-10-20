@@ -304,71 +304,73 @@ class PlayState extends FunkinState {
 			case 2: spectator;
 		}
 	}
-	
-	var currentStat:Int = 0;
+
 	function noteHit(strumline:Strumline, note:Note) {
 		// havent added the script calls here because i'd to see if i can make this a bit customizible
 		// like a HitBehavior sorta thing like cne and vslice
 
 		getCharacter(note.player).sing('sing', Note.directions[note.lane]);
-
-		if (note.player != playerID) return;
-
-		if (notefield.autoplay) {
-			return;
-		}
+		if (notefield.autoplay || note.player != playerID) return;
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
+		var judgeID:Int = Judgement.getID(deviation);
+		var displayJudge:Bool = true;
+		var displayCombo:Bool = true;		
 
+		// update statistics before visuals
 		stats.registerNote({
 			time: Std.int(note.time),
 			deviation: deviation
 		});
+		stats.notesHit++;
 
-		var judgeID:Int = Judgement.getID(deviation);
-		var judge:Judgement = Judgement.current[judgeID];
-		judge.hits++;
+		if (note.behavior.punishable) {
+			stats.comboBreaks++;
+			stats.combo = 0;
+			displayJudge = false;
+		} else {
+			Judgement.current[judgeID].hits++;
+			stats.combo++;
+		}
+
+		scoring.noteHit(note, deviation);
+		accuracy.noteHit(note, deviation);
+
+		// now we update visuals
+		updateInfo();
+		if (displayJudge) {
+			if (Settings.data.hideHighest) {
+				judgeSprite.visible = judgeID != 0;
+			}
+
+			if (judgeSprite.visible) judgeSprite.display(judgeID);
+			
+			updateJudgeCounter();
+		}
+
+		if (displayCombo) {
+			comboSprite.display(stats.combo);
+		}
 
 		// TODO: make this not so hardcoded (hell even the skin is settings only)
 		if (Settings.data.noteSplashSkin != "none" && judgeID <= 1) {
 			var splash = NoteSplash.getSplash(note.receptor);
 			splash.hit(note.receptor);
 		}
-
-		if (note.behavior.punishable || judge.breaksCombo) {
-			stats.comboBreaks++;
-			stats.combo = 0;
-		} else {
-			stats.notesHit++;
-			stats.combo++;
-		}
-
-		health += judge.health;
-
-		judgeSprite.display(deviation);
-		comboSprite.display(stats.combo);
-
-		scoring.noteHit(note, deviation);
-		accuracy.noteHit(note, deviation);
-
-		updateInfo();
-		updateJudgeCounter();
-		comboSprite.colorizeCombo(judge, stats.clearType);
 	}
 
 	function noteMissed(strumline:Strumline, note:Note) {
-		stats.comboBreaks++;
-		stats.misses++;
-		stats.combo = 0;
-		health -= 12.5;
+		player.sing('miss', Note.directions[note.lane]);
 
 		scoring.noteMissed(note);
 		accuracy.noteMissed(note);
 
-		updateInfo();
-		updateJudgeCounter();
+		stats.comboBreaks++;
+		stats.misses++;
+		stats.combo = 0;
 
-		player.sing('miss', Note.directions[note.lane]);
+		judgeSprite.visible = true;
+		judgeSprite.display();
 	}
 
 	function sustainHit(strumline:Strumline, sustain:Sustain, mostRecent:Bool) {
@@ -376,26 +378,25 @@ class PlayState extends FunkinState {
 			getCharacter(sustain.player).sing('sing', Note.directions[sustain.lane]);
 		}
 
-		if (sustain.player != playerID) return;
-		if (notefield.autoplay) return;
+		if (notefield.autoplay || sustain.player != playerID) return;
 
 		scoring.sustainHit(sustain);
 		accuracy.sustainHit(sustain);
-
-		updateInfo();
 	}
 
 	function sustainDropped(strumline:Strumline, sustain:Sustain) {
+		player.sing('miss', Note.directions[sustain.lane]);
+
+		stats.misses++;
 		stats.comboBreaks++;
-		stats.combo = 0;
+		
 
 		scoring.sustainDropped(sustain);
 		accuracy.sustainDropped(sustain);
 
-		updateInfo();
+		judgeSprite.display();
 		updateJudgeCounter();
-
-		player.sing('miss', Note.directions[sustain.lane]);
+		comboSprite.display(stats.combo = 0);
 	}
 
 	var judgeNames:FlxText;

@@ -27,8 +27,10 @@ class JudgeDisplay extends FunkinSprite {
 		super(x, y);
 		ogX = x;
 		ogY = y;
-		final texture = Assets.image('images/ui/judgements');
-		loadGraphic(texture, true, texture.width, Math.floor(texture.height / Judgement.current.length));
+		var texture = Assets.image('images/ui/judgements.png');
+
+		var textureHeight:Int = Math.floor(texture.height / (Judgement.current.length + 1));
+		loadGraphic(texture, true, texture.width, textureHeight);
 		
 		visibility = 0;
 
@@ -37,18 +39,12 @@ class JudgeDisplay extends FunkinSprite {
 		updateHitbox();
 	}
 	
-	public function display(timing:Float) {
-		if (Settings.data.judgementAlpha <= 0) return;
-
+	public function display(?judgeID:Int) {
 		FlxTween.cancelTweensOf(this);
-		animation.frameIndex = Judgement.getID(timing);
-		if (animation.frameIndex == 0 && Settings.data.hideHighest) {
-			visibility = 0;
-			return;
-		}
+		animation.frameIndex = judgeID ?? Judgement.current.length;
 		
+		visibility = 1;
 		centerOffsets();
-		visibility = Settings.data.judgementAlpha;
 		
 		moves = !simple;
 		setPosition(ogX, ogY);
