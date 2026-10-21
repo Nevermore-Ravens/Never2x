@@ -15,7 +15,7 @@ class VSliceAccuracy extends AccuracyHandler {
 		var sicks:Int = judgements[1].hits;
 		var goods:Int = judgements[2].hits;
 
-		return (((marvs + sicks) + goods - stats.comboBreaks) / noteCount) * 100;
+		return (((killers + sicks) + goods - stats.comboBreaks) / noteCount) * 100;
 		// return ((sicks + goods - stats.comboBreaks) / noteCount) * 100;
 	}
 }
