@@ -223,6 +223,7 @@ class PlayState extends FunkinState {
 	}
 
 	override function destroy():Void {
+		Conductor.rate = 1;
 		Judgement.resetHits();
 		super.destroy();
 
@@ -546,7 +547,10 @@ class PlayState extends FunkinState {
 	}
 
 	function death() {
+		if (Settings.data.gameplayModifiers['noFail']) return;
+
 		stats.songTime = Conductor.audioTime;
+		Conductor.rate = 1;
 		Conductor.stop();
 
 		for (camera in FlxG.cameras.list) camera.visible = false;
