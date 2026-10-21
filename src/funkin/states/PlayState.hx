@@ -147,26 +147,33 @@ class PlayState extends FunkinState {
 		var skin:Noteskin = Noteskin.get('images/noteSkins/' + noteSkin);
 		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - skin.spacing * Settings.data.strumSize : 50;
 
+		playerID = switch Settings.data.gameplayModifiers['playingSide'] {
+			default: 1;
+			case 'Opponent': 0;
+		}
+
 		leftStrumline = new Strumline(320, strumlineYPos, skin);
 		rightStrumline = new Strumline(960, strumlineYPos, skin);
 
 		add(notefield = new NoteField([leftStrumline, rightStrumline], playerID));
+		notefield.visible = !Settings.data.gameplayModifiers['blind'];
+		notefield.autoplay = Settings.data.gameplayModifiers['botplay'];
+		notefield.assistTicks = Settings.data.assistTicks;
+		notefield.scrollSpeed = Settings.data.scrollSpeed;
+		notefield.scrollDirection = Settings.data.scrollDirection;
+		notefield.underlays.alpha = Settings.data.laneUnderlay;
 		notefield.cameras = [camHUD];
 		notefield.noteHit = noteHit;
 		notefield.noteMissed = noteMissed;
 		notefield.sustainHit = sustainHit;
 		notefield.sustainDropped = sustainDropped;
-		notefield.assistTicks = Settings.data.assistTicks;
-		notefield.scrollSpeed = Settings.data.scrollSpeed;
-		notefield.scrollDirection = Settings.data.scrollDirection;
-		notefield.underlays.alpha = Settings.data.laneUnderlay;
 
 		if (Settings.data.centeredNotes) {
 			for (i => strumline in notefield.strumlines.members) {
 				if (i != playerID) strumline.visible = false;
 				else strumline.screenCenter(X);
 			}
-		}
+		} else leftStrumline.visible = Settings.data.opponentNotes;
 
 		add(hud = new FlxSpriteGroup());
 		hud.cameras = [camHUD];
@@ -285,9 +292,10 @@ class PlayState extends FunkinState {
 		}
 
 		Conductor.volume = lastVolume;
+		Conductor.rate = Settings.data.gameplayModifiers['playbackRate'];
 
 		// TODO: make this customizable
-		Conductor.audioTime = -extraTime;
+		Conductor.audioTime = -(extraTime * Conductor.rate);
 		Conductor.clock.active = true;
 		new FlxTimer().start(extraTime / 1000, function(_) {
 			Conductor.play();
