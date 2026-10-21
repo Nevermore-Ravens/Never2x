@@ -275,7 +275,7 @@ class PlayState extends FunkinState {
 		//
 		// why does this actually work what the fuck
 		var lastVolume:Float = Conductor.volume;
-		Conductor.volume = 0; // to make sure we don't actually hear a sliver of the audio
+		Conductor.volume = 0; // to make sure we don't accidentally hear a sliver of the audio
 		Conductor.inst.play();
 		Conductor.inst.stop();
 

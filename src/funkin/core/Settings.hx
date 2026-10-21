@@ -30,7 +30,6 @@ class SaveVariables {
 	var assistTicks:Bool = false;
 	var accuracyType:String = 'Simple';
 	var hitErrorBar:Bool = true;
-	var modcharts:Bool = true;
 	var pauseType:String = 'Unlimited';
 	var pauseMusic:String = 'Breakfast';
 	var pauseMusicVolume:Float = 0.7;

@@ -40,10 +40,12 @@ class JudgeDisplay extends FunkinSprite {
 	}
 	
 	public function display(?judgeID:Int) {
+		if (Settings.data.judgementAlpha <= 0) return;
+
 		FlxTween.cancelTweensOf(this);
 		animation.frameIndex = judgeID ?? Judgement.current.length;
 		
-		visibility = 1;
+		visibility = Settings.data.judgementAlpha;
 		centerOffsets();
 		
 		moves = !simple;
