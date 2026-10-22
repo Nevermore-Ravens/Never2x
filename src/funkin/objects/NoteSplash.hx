@@ -2,6 +2,7 @@ package funkin.objects;
 
 import nevermore.play.*;
 import nevermore.skins.Noteskin;
+import nevermore.skins.BasicNoteskin;
 import nevermore.skins.NoteskinSection;
 
 class NoteSplash extends NoteObject {
@@ -25,35 +26,33 @@ class NoteSplash extends NoteObject {
 	}
 
 	/// oooooooooooohhhhhh i do not like this -srt, the damn guy who made this shit
-	public static function getData(key:String, ?quants:Bool = false):NoteskinSection<Dynamic> {
-		var mapKey = quants ? key + "-quant" : key; 
+	// its just, messy
+	public static function getData(key:String, keyCount:Int, ?luminized:Bool = false):NoteskinSection<Dynamic> {
+		var mapKey = Noteskin.cache.getMapKey(key, keyCount, luminized); 
 		if (loader.sections.exists(mapKey))
 			return loader.sections.get(mapKey);
 
-		inline function getLoadKey(tryQuants:Bool)
-			return 'images/noteSplashes/' + (#if !NEVERMORE_NO_QUANTIZATION tryQuants ? key + '-quant' : #end key);
+		inline function getLoadKey(tryLumin:Bool)
+			return 'images/noteSplashes/' + (tryLumin ? key + "-luminized" : key);
 		inline function createSection(from:Dynamic) {
 			var sect = NoteskinSection.create(loader, from);
 			loader.sections.set(mapKey, sect);
 			return sect;
 		}
 		
-		var preferQuants = quants;
-		var attempts = quants ? 2 : 1;
+		var attempts = luminized ? 2 : 1;
 		for (i in 0...attempts) {
-			var loadKey = getLoadKey(quants);
+			var loadKey = getLoadKey(luminized && i == 0);
 			var jsonPath = loadKey + ".json";
 			if (Assets.exists(jsonPath)) {
 				try {
 					var json = haxe.Json.parse(Assets.text(jsonPath));
 					return createSection(json);
-				} catch (e) {
-					quants = false;
-				}
-			} else
-				quants = false;
+				} catch (e) {}
+			}
 		}
 
+		var colors = [for (idx in BasicNoteskin.directionList[keyCount - 1]) Note.colors[idx]];
 		inline function makeBasic(key) {
 			return createSection({
 				style: "sparrow",
@@ -61,19 +60,19 @@ class NoteSplash extends NoteObject {
 				animations: [
 					{
 						name: "splash1",
-						prefixes: [for (col in Note.colors) 'note splash ${col} 1']
+						prefixes: [for (col in colors) 'note splash ${col} 1']
 					},
 					{
 						name: "splash2",
-						prefixes: [for (col in Note.colors) 'note splash ${col} 2']
+						prefixes: [for (col in colors) 'note splash ${col} 2']
 					}
 				]
 			});
 		}
 
-		if (preferQuants) {
+		if (luminized) {
 			var loadKey = getLoadKey(true);
-			if (!quants || Assets.exists(loadKey + ".xml"))
+			if (Assets.exists(loadKey + ".xml"))
 				return makeBasic(loadKey);
 		}
 
@@ -98,8 +97,8 @@ class NoteSplash extends NoteObject {
 		luminize = receptor.luminize;
 		color = receptor.color;
 
-		var data = getData(Settings.data.noteSplashSkin, receptor.luminize);
-		data.apply(this, loader.supportsXKeys ? lane : lane % 4);
+		var data = getData(Settings.data.noteSplashSkin, receptor.parent.keyCount, receptor.luminize);
+		data.applyNoteObject(this);
 		scale.scale(receptor.parent.size * receptor.parent.keyScale);
 		animation.play(FlxG.random.getObject(data.animations).name, true);
 		updateHitbox();
