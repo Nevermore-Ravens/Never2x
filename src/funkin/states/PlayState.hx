@@ -163,7 +163,7 @@ class PlayState extends FunkinState {
 		notefield.assistTicks = Settings.data.assistTicks;
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
 		notefield.scrollDirection = Settings.data.scrollDirection;
-		notefield.underlays.alpha = Settings.data.laneUnderlay;
+		notefield.background.alpha = Settings.data.laneUnderlay;
 		notefield.cameras = [camHUD];
 		notefield.noteHit = noteHit;
 		notefield.noteMissed = noteMissed;
