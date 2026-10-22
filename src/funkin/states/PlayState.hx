@@ -153,7 +153,9 @@ class PlayState extends FunkinState {
 		}
 
 		leftStrumline = new Strumline(320, strumlineYPos, skin);
+		leftStrumline.size = Settings.data.strumSize;
 		rightStrumline = new Strumline(960, strumlineYPos, skin);
+		rightStrumline.size = Settings.data.strumSize;
 
 		add(notefield = new NoteField([leftStrumline, rightStrumline], playerID));
 		notefield.visible = !Settings.data.gameplayModifiers['blind'];
@@ -362,6 +364,7 @@ class PlayState extends FunkinState {
 
 		if (displayCombo) {
 			comboSprite.display(stats.combo);
+			comboSprite.colorizeCombo(judge, stats.clearType);
 		}
 
 		// TODO: make this not so hardcoded (hell even the skin is settings only)
