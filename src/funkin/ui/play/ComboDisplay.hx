@@ -2,6 +2,7 @@ package funkin.ui.play;
 
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxTween;
+import funkin.core.N2XStatistics.ClearType;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -79,7 +80,7 @@ class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 		}
 	}
 
-	public function colorizeCombo(judge:Judgement, clearType:Statistics.ClearType) {
+	public function colorizeCombo(judge:Judgement, clearType:ClearType) {
 		var targetColor = switch (colorMode) {
 			case PER_NOTE: judge.color;
 			case CLEAR_FLAG: clearType.fullCombo ? clearType.color : 0xFFFFFFFF;

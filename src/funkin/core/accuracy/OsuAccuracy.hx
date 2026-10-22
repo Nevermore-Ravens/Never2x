@@ -13,14 +13,14 @@ class OsuAccuracy extends AccuracyHandler {
 	}
 
 	override function get(stats:Statistics):Float {
-		var judgementCount:Int = stats.notesHit + stats.comboBreaks;
+		var judgementCount:Int = stats.noteHits + stats.comboBreaks;
 		if (judgementCount == 0) return 100.0;
 
-		var max:Int = judgements[0].hits;
-		var sicks:Int = judgements[1].hits;
-		var goods:Int = judgements[2].hits;
-		var bads:Int = judgements[3].hits;
-		var shits:Int = judgements[4].hits;
+		var max:Int = stats.judgements[0].hits;
+		var sicks:Int = stats.judgements[1].hits;
+		var goods:Int = stats.judgements[2].hits;
+		var bads:Int = stats.judgements[3].hits;
+		var shits:Int = stats.judgements[4].hits;
 
 		return (300 * (max + sicks) + 200 * goods + 100 * bads + 50 * shits) /
 		(300 * (max + sicks + goods + bads + shits + stats.comboBreaks)) * 100;

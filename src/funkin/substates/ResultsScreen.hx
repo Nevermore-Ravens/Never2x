@@ -1,12 +1,12 @@
 package funkin.substates;
 
-import funkin.core.Statistics;
+import funkin.core.N2XStatistics;
 import flixel.text.FlxText;
 
 class ResultsScreen extends flixel.FlxSubState {
-	var stats:Statistics;
+	var stats:N2XStatistics;
 
-	public function new(stats:Statistics) {
+	public function new(stats:N2XStatistics) {
 		super();
 		this.stats = stats;
 	}

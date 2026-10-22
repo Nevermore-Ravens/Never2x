@@ -11,9 +11,9 @@ class VSliceAccuracy extends AccuracyHandler {
 	override function get(stats:Statistics):Float {
 		if (noteCount == 0) return 0.0;
 
-		var killers:Int = judgements[0].hits;
-		var sicks:Int = judgements[1].hits;
-		var goods:Int = judgements[2].hits;
+		var killers:Int = stats.judgements[0].hits;
+		var sicks:Int = stats.judgements[1].hits;
+		var goods:Int = stats.judgements[2].hits;
 
 		return (((killers + sicks) + goods - stats.comboBreaks) / noteCount) * 100;
 		// return ((sicks + goods - stats.comboBreaks) / noteCount) * 100;

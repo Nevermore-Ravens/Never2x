@@ -1,9 +1,9 @@
 package funkin.substates;
 
 class FailedMenu extends FunkinSubstate {
-	var stats:Statistics;
+	var stats:N2XStatistics;
 
-	public function new(stats:Statistics) {
+	public function new(stats:N2XStatistics) {
 		super();
 		this.stats = stats;
 	}

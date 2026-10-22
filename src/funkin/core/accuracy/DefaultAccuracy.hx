@@ -23,7 +23,7 @@ class DefaultAccuracy extends AccuracyHandler {
 
 	// average of all weights
 	override function get(stats:Statistics):Float {
-		if (stats.notesHit == 0) return 0.0;
-		return notesPlayed / (stats.notesHit + stats.comboBreaks);
+		if (stats.noteHits == 0) return 0.0;
+		return notesPlayed / (stats.noteHits + stats.comboBreaks);
 	}
 }

@@ -38,10 +38,10 @@ class QuaverAccuracy extends AccuracyHandler {
 	override function sustainDropped(_) notesPlayed -= 50;
 
 	override function get(stats:Statistics):Float {
-		if (stats.notesHit == 0) return 0.0;
+		if (stats.noteHits == 0) return 0.0;
 
 		var minWeight:Float = getWeight(0);
-		var judgementCount:Int = stats.notesHit + stats.comboBreaks;
+		var judgementCount:Int = stats.noteHits + stats.comboBreaks;
 
 		var mean:Float = notesPlayed / (judgementCount * minWeight);
 		return Math.max(mean, 0) * minWeight;

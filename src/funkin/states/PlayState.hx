@@ -8,7 +8,7 @@ import funkin.core.scripts.ScriptList;
 import funkin.core.chart.EventHandler;
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
-import funkin.core.Statistics;
+import funkin.core.N2XStatistics;
 import funkin.ui.play.*;
 import funkin.objects.Stage;
 import funkin.objects.Character;
@@ -48,7 +48,7 @@ class PlayState extends FunkinState {
 
 	var iconSpacing:Float = 20;
 
-	var stats:Statistics;
+	var stats:N2XStatistics;
 	var scoring:ScoreHandler = new DefaultScoring();
 	var accuracy:AccuracyHandler = new DefaultAccuracy();
 
@@ -94,14 +94,14 @@ class PlayState extends FunkinState {
 
 		self = this;
 
+		stats = {};
+
 		// to prevent more lag when you can't even see the game camera
 		if (Settings.data.gameVisibility <= 0) {
 			FlxG.camera.visible = false;
 			FlxG.camera.active = false;
 			camHUD.bgColor = 0x00;
 		}
-
-		stats = {};
 
 		events = new EventHandler();
 		events.registerEvent("Retarget Camera", moveCamera);
@@ -194,6 +194,7 @@ class PlayState extends FunkinState {
 
 		load();
 		makeHUD();
+
 		scripts.call("create");
 	}
 
@@ -206,6 +207,8 @@ class PlayState extends FunkinState {
 
 	override function update(delta:Float) {
 		super.update(delta);
+
+		stats.update(delta);
 		events.update(Conductor.clock);
 
 		if (FlxG.keys.justPressed.F8) {
@@ -326,25 +329,16 @@ class PlayState extends FunkinState {
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
 		var judgeID:Int = Judgement.getID(deviation);
 		var judge:Judgement = Judgement.current[judgeID];
-		var displayJudge:Bool = true;
-		var displayCombo:Bool = true;		
+		var displayJudge:Bool = !note.behavior.punishable;
+		var displayCombo:Bool = true;	
 
 		// update statistics before visuals
-		stats.registerNote({
+		stats.registerHit({
 			time: Std.int(note.time),
 			deviation: deviation
 		});
-		stats.notesHit++;
 
-		judge.hits++;
-
-		if (judge.breaksCombo || note.behavior.punishable) {
-			stats.comboBreaks++;
-			stats.combo = 0;
-			displayJudge = !note.behavior.punishable;
-		} else {
-			stats.combo++;
-		}
+		stats.hit(note.behavior, judge);
 
 		health += (note.behavior.hitHealth ?? judge.health) * note.behavior.healthMult;
 
@@ -382,9 +376,7 @@ class PlayState extends FunkinState {
 		scoring.noteMissed(note);
 		accuracy.noteMissed(note);
 
-		stats.comboBreaks++;
-		stats.misses++;
-		stats.combo = 0;
+		stats.miss();
 
 		judgeSprite.visible = true;
 		judgeSprite.display();
@@ -407,16 +399,14 @@ class PlayState extends FunkinState {
 	function sustainDropped(strumline:Strumline, sustain:Sustain) {
 		player.sing('miss', Note.directions[sustain.lane]);
 
-		stats.misses++;
-		stats.comboBreaks++;
+		stats.miss();
 		
-
 		scoring.sustainDropped(sustain);
 		accuracy.sustainDropped(sustain);
 
 		judgeSprite.display();
 		updateJudgeCounter();
-		comboSprite.display(stats.combo = 0);
+		comboSprite.display(stats.combo);
 	}
 
 	var judgeNames:FlxText;

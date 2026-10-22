@@ -70,7 +70,7 @@ class NoteHitData {
 
 @:structInit
 @:publicFields
-class Statistics {
+class N2XStatistics extends nevermore.play.Statistics {
 	static var grades:Array<Grade> = [
 		{type: GRADE_X, accuracy: 100, color: 0xFF8BE4FF},
 		{type: GRADE_SPLUS, accuracy: 99, color: 0xFFFFED49},
@@ -84,23 +84,7 @@ class Statistics {
 
 	var fails:Int = 0;
 
-	var songName:String = 'Unknown';
-	var difficulty:String = Difficulty.current;
-
-	var judgements:Array<Judgement> = Judgement.current;
-
 	var score:Int = 0;
-
-	// combo breaks and misses are NOT the same thing !!
-	// misses are for when you completely *miss* hitting a note and it goes off screen
-	//
-	// combo breaks are the more broader term for that
-	// it includes both misses *and* judgements that cause you to lose a combo
-	// (in n2x's case, shits break your combo)
-	// hence the name "combo breaks"
-	// it's how many times your combo has been set to 0, or "broken"
-	var comboBreaks:Int = 0;
-	var misses:Int = 0;
 
 	// time in milliseconds of when you died in the song
 	// is only applicable to failing
@@ -109,55 +93,9 @@ class Statistics {
 	var songLength:Float = 0.0;
 
 	var accuracy:Float = 0.0;
-	var combo(default, set):Int = 0;
-	function set_combo(v:Int):Int {
-		if (v > highestCombo) highestCombo = v;
-		return combo = v;
-	}
-	var highestCombo:Int = 0;
 
-	var notesHit:Int = 0;
 	var clearType:ClearType = CLEARTYPE_DEFAULT;
 	var grade:Grade = grades[grades.length - 1];
-
-	var _currentNote:Int = 0;
-	function registerNote(data:NoteHitData) {
-		noteHits[_currentNote++] = data;
-	}
-
-	var mean(get, never):Float;
-	function get_mean():Float {
-		if (noteHits.length == 0) return 0.0;
-
-		var deviation:Float = 0.0;
-		for (note in noteHits) {
-			if (!note.count) continue;
-			deviation += note.deviation;
-		}
-
-		return deviation / notesHit;
-	}
-
-	// ty etterna server for helping <3
-	// (i was NOT good at math back in high school
-	var standardDeviation(get, never):Float;
-	function get_standardDeviation():Float {
-		if (noteHits.length == 0) return 0.0;
-
-		var totalDeviation:Float = 0.0;
-		var squaredDeviation:Float = 0.0;
-		for (note in noteHits) {
-			if (!note.count) continue;
-
-			totalDeviation += note.deviation;
-			squaredDeviation += Math.pow(note.deviation, 2);
-		}
-
-		var what:Float = (squaredDeviation / notesHit);
-		return Math.sqrt(what - Math.pow(totalDeviation / notesHit, 2));
-	}
-	
-	var noteHits:Array<NoteHitData> = [];
 
 	// TODO
 	// i wanna make this a getter at some point
