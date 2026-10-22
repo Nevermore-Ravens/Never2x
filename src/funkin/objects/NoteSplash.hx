@@ -52,7 +52,7 @@ class NoteSplash extends NoteObject {
 			}
 		}
 
-		var colors = [for (idx in BasicNoteskin.directionList[keyCount - 1]) Note.colors[idx]];
+		var colors = [for (idx in BasicNoteskin.directionList[keyCount - 1]) Noteskin.colors[idx]];
 		inline function makeBasic(key) {
 			return createSection({
 				style: "sparrow",
