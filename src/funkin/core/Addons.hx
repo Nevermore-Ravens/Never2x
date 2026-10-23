@@ -103,6 +103,7 @@ class Addons {
 			result.data.name = directory;
 		}
 
+		result.enabled = !Settings.data.addonsOff.contains(directory);
 		return result;
 	}
 

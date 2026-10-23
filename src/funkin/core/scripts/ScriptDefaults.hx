@@ -43,9 +43,6 @@ class ScriptDefaults {
 			to.set(name.substring(name.lastIndexOf(".") + 1, name.length), cls);
 		}
 
-		// id say duct tape but this is just lazyness I HAVE THE DAMN REPOSITORY -srt
-		@:privateAccess to.interp.binops.set("...", (e1, e2) -> range(to.interp.expr(e1), to.interp.expr(e2) - 1, 1));
-
 		var game = FlxG.state is PlayState ? cast FlxG.state : null;
 		set('game', game);
 		set('state', FlxG.state);
@@ -56,9 +53,6 @@ class ScriptDefaults {
 		// 		FlxMath.lerp(from.blueFloat, to.blueFloat, ratio), FlxMath.lerp(from.alphaFloat, to.alphaFloat, ratio));
 		// });
 		set('lerpColor', FlxColor.interpolate);
-
-		set("Std", Std);
-		set("Math", Math);
 
 		setClass(funkin.objects.FunkinSprite);
 		setClass(funkin.objects.FunkinSpriteGroup);

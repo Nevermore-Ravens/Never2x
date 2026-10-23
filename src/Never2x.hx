@@ -149,10 +149,11 @@ class InitState extends flixel.FlxState {
 
 	private function setDefines() {
 		startNevermore();
-		Addons.init();
 
 		Controls.load();
 		Settings.load();
+		Addons.init();
+		
 		Scores.load();
 		DiscordClient.start();
 		Meta.cacheFiles();

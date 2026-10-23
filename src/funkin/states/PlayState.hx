@@ -230,6 +230,7 @@ class PlayState extends FunkinState {
 	override function destroy():Void {
 		Conductor.rate = 1;
 		Judgement.resetHits();
+		scripts.call("destroy");
 		super.destroy();
 
 		self = null;
