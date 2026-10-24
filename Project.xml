@@ -50,7 +50,7 @@
 	<haxelib name="nevermore" />
 	<haxelib name="openfl" version="9.5.0" />
 	<haxelib name="flixel" version="git" />
-	<haxelib name="flixel-addons" version="3.0.2"/>
+	<haxelib name="flixel-addons" version="4.0.2"/>
 	<haxelib name="hxdiscord_rpc" version="1.2.4" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxjson5"/>
 	<haxelib name="moonchart"/>
