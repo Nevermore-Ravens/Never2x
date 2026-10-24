@@ -53,6 +53,11 @@ class ScriptDefaults {
 		// 		FlxMath.lerp(from.blueFloat, to.blueFloat, ratio), FlxMath.lerp(from.alphaFloat, to.alphaFloat, ratio));
 		// });
 		set('lerpColor', FlxColor.interpolate);
+		set('shaderFromFile', function(frag:String, ?vert:String) {
+			vert ??= frag;
+			var vertText = Assets.exists("shaders/" + vert + ".vert") ? Assets.text("shaders/" + vert + ".vert") : null;
+			return new flixel.addons.display.FlxRuntimeShader(Assets.text("shaders/" + frag + ".frag"), vertText);
+		});
 
 		setClass(funkin.objects.FunkinSprite);
 		setClass(funkin.objects.FunkinSpriteGroup);
@@ -76,6 +81,8 @@ class ScriptDefaults {
 		setClass(flixel.group.FlxGroup);
 		setClass(flixel.group.FlxSpriteGroup);
 		setClass(flixel.math.FlxPoint.FlxBasePoint);
+
+		setClass(flixel.addons.display.FlxRuntimeShader);
 
 		if (game == null)
 			return; // maybe one day getModchart will become smarter but
