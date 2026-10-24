@@ -1,6 +1,7 @@
 package funkin.core.scripts;
 
 import nevermore.modchart.ModchartManager;
+import nevermore.core.timing.ScrollVelocity;
 import flixel.util.FlxColor;
 import flixel.FlxG;
 
@@ -81,10 +82,7 @@ class ScriptDefaults {
 			return; // maybe one day getModchart will become smarter but
 
 		set('addSV', function(time:Float, mult:Float) {
-			game.chart.scrollVelocities.push({
-				time: time,
-				multiplier: mult
-			});
+			game.chart.scrollVelocities.push(new ScrollVelocity(time, mult));
 		});
 
 		set('getModchartManager', getModchart);
