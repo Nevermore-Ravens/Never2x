@@ -154,7 +154,8 @@ class Addons {
 		var mainAddon:Addon = current ?? list[0];
 		var hasExtension:Bool = false;
 		var path = new Path('');
-
+		
+		var directory = Path.directory(key);
 		path.file = Path.withoutDirectory(key);
 		path.ext = Path.extension(key);
 
@@ -165,13 +166,17 @@ class Addons {
 
 			var extIndex:Int = path.file.lastIndexOf('.');
 			path.file = path.file.substr(0, extIndex);
-		} else path.ext = null;
+		} else if (extensions.length <= 1) {
+			hasExtension = true;
+			path.ext = extensions.length <= 0 ? "" : extensions[0];
+		} else
+			path.ext = null;
 
 		function updateDirectory(?addon:Addon) {
 			var root:String = 'assets';
 			if (addon != null) root = 'addons/' + addon.directory; 
 
-			path.dir = root + '/' + Path.directory(key);
+			path.dir = root + '/' + directory;
 		}
 
 		function search() {
@@ -180,11 +185,6 @@ class Addons {
 			}
 
 			if (!FileSystem.exists(path.dir)) return false;
-
-			if (extensions.length == 1) {
-				path.ext = extensions[0];
-				return FileSystem.exists(path.toString());
-			}
 
 			for (ext in extensions) {
 				path.ext = ext;

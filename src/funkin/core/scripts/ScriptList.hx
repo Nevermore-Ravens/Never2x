@@ -37,7 +37,7 @@ class ScriptList {
 		if (!FileSystem.exists(file))
 			return null;
 
-		var script = new Script(file, "", false);
+		var script = new Script(file, "", true);
 		if (script.interp != null) {
 			list.push(script);
 			return script;

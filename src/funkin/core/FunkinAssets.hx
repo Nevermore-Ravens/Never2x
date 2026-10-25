@@ -16,7 +16,7 @@ class FunkinAssets {
 
 	public static dynamic function animateAtlas(path:String, ?subFolder:String = 'images'):FlxAnimateFrames {
 		var frames = FlxAnimateFrames.fromAnimate(getPath(path, subFolder));
-		frames.parent.persist = true;
+		//frames.parent.persist = true;
 		return frames;
 	}
 

@@ -22,8 +22,8 @@ class Script {
 	var curFunc:Null<String> = null;
 
 	public function new(path:Null<String>, ?code:String, ?absolutePath:Bool = false) {
-		this.path = absolutePath ? path : Assets.getPath(path);
-		code = (path != null && sys.FileSystem.exists(path)) ? sys.io.File.getContent(path) : (code ?? "");
+		this.path = absolutePath ? path : Assets.main.getPath(path, extensions);
+		code = (path != null && sys.FileSystem.exists(this.path)) ? sys.io.File.getContent(this.path) : (code ?? "");
 
 		parser.line = 1;
 		var expr:hscript.Expr = null;
