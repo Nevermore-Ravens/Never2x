@@ -181,12 +181,12 @@ class AddonList extends TextList {
 		icons.add(icon);
 
 		var txt = new FlxText(x + 15, y, 0, "_");
-		txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 24, 0xFFFFFFFF, LEFT);
+		txt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 24, 0xFFFFFFFF, LEFT);
 		txt.antialiasing = Settings.data.antialiasing;
 		texts.add(txt);
 
 		var sub = new FlxText(txt.x, txt.y, 0, "_");
-		sub.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 16, 0xFFFFFFFF, LEFT);
+		sub.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 16, 0xFFFFFFFF, LEFT);
 		sub.antialiasing = Settings.data.antialiasing;
 		subTexts.add(sub);
 		sub.alpha = 0;

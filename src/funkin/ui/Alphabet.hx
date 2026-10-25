@@ -2,6 +2,7 @@ package funkin.ui;
 
 import flixel.math.FlxPoint;
 import flixel.group.FlxSpriteGroup;
+import flixel.graphics.frames.FlxFramesCollection;
 import haxe.Json;
 import flixel.util.FlxAxes;
 import flixel.FlxObject;
@@ -267,6 +268,7 @@ typedef Glyph = {
 class AlphabetGlyph extends FunkinSprite {
 	public var image(default, set):String;
 	public static var allGlyphs:Map<String, Glyph>;
+	public static var frameCache:Map<String, FlxFramesCollection> = [];
 
 	public var type(default, set):AlphabetGlyphType;
 	public var char(default, set):String;
@@ -294,14 +296,14 @@ class AlphabetGlyph extends FunkinSprite {
 	@:noCompletion
 	function set_image(value:String):String {
 		if (frames == null) {
-			frames = Assets.sparrowAtlas("images/" + (image = value));
+			frames = getFrames(image = value);
 			return value;
 		}
 
 		var lastAnim:String = null;
 		if (animation != null) lastAnim = animation.name;
 
-		frames = Assets.sparrowAtlas("images/" + (image = value));
+		frames = getFrames(image = value);
 		
 		if (lastAnim != null) {
 			animation.addByPrefix(lastAnim, lastAnim, 24);
@@ -314,7 +316,7 @@ class AlphabetGlyph extends FunkinSprite {
 
 	@:noCompletion
 	inline function set_char(newChar:String):String {
-		frames = Assets.sparrowAtlas("images/" + image);
+		frames = getFrames(image);
 
 		var converted:String = newChar.toLowerCase();
 		final isLowerCase:Bool = converted == newChar;
@@ -359,6 +361,15 @@ class AlphabetGlyph extends FunkinSprite {
 	override function updateHitbox() {
 		super.updateHitbox();
 		updateLetterOffset();
+	}
+
+	public static function getFrames(image:String) {
+		if (frameCache.exists(image))
+			return frameCache.get(image);
+
+		var frames = Assets.sparrowAtlas("images/" + image);
+		frameCache.set(image, frames);
+		return frames;
 	}
 }
 

@@ -75,13 +75,23 @@ class Addons {
 	public static function reload() {
 		list.resize(0);
 
-		for (directory in FileSystem.readDirectory('addons')) {
-			if (!FileSystem.isDirectory('addons/$directory')) continue;
-			var addon:Addon = getFromDisk(directory);
+		var loaded = [];
+		inline function loadAddon(key) {
+			if (!FileSystem.exists('addons/$key') || !FileSystem.isDirectory('addons/$key') || loaded.contains(key))
+				return null;
+
+			var addon:Addon = getFromDisk(key);
+			loaded.push(key);
 			list.push(addon);
 
 			Sys.println('Addon "${addon.name}" loaded!');
+			return addon;
 		}
+
+		for (directory in Settings.data.addonsOrder)
+			loadAddon(directory);
+		for (directory in FileSystem.readDirectory('addons'))
+			loadAddon(directory);
 	}
 
 	public static function getFromDisk(directory:String):Addon {

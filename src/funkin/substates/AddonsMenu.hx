@@ -91,7 +91,7 @@ class AddonsMenu extends FlxSubState {
 		add(actionTxt = new FlxTypedGroup());
 		for (i => act in actions) {
 			var txt = new FlxText((FlxG.width / (actions.length + 1)) * (i + 1), 665, 0, _t(act));
-			txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 28, 0xFFFFFFFF, CENTER);
+			txt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 28, 0xFFFFFFFF, CENTER);
 			txt.x -= txt.width * 0.5;
 			actionTxt.add(txt);
 		}

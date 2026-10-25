@@ -9,6 +9,7 @@ import funkin.core.chart.EventHandler;
 import funkin.core.scoring.*;
 import funkin.core.accuracy.*;
 import funkin.core.N2XStatistics;
+import funkin.core.Meta;
 import funkin.ui.play.*;
 import funkin.objects.Stage;
 import funkin.objects.Character;
@@ -57,6 +58,7 @@ class PlayState extends FunkinState {
 	var judgeSprite:JudgeDisplay;
 	var comboSprite:ComboDisplay;
 
+	var meta:MetaFile;
 	var stage:Stage;
 	var player:Character;
 	var enemy:Character;
@@ -87,6 +89,7 @@ class PlayState extends FunkinState {
 
 		super.create();
 		Conductor.stop();
+		meta = Meta.load(songID);
 
 		Assets.audio('music/Breakfast.ogg');
 		Assets.audio('sfx/gameover-start.ogg');
@@ -112,23 +115,30 @@ class PlayState extends FunkinState {
 		scripts.loadFolder("scripts");
 		scripts.loadFolder("songs/" + songID); // may become limited to only the addons list
 
+		inline function makeChar(id:Null<String>) {
+			if (id == null)
+				return null;
+			var char = new Character(0, 0, id);
+			var script = scripts.loadFile("characters/" + char.name); // these may be attached to the instance itself later on but
+			if (script != null)
+				script.set("character", char);
+			return char;
+		}
+
 		// TODO: make the strings customizible
-		spectator = new Character(0, 0, 'gf');
-		scripts.loadFile("characters/" + spectator.name); // these may be attached to the instance itself later on but
-		enemy = new Character(0, 0, 'bf');
-		scripts.loadFile("characters/" + enemy.name);
-		player = new Character(0, 0, 'bf');
-		scripts.loadFile("characters/" + player.name);
-		add(stage = new Stage('stage'));
+		spectator = makeChar(meta.spectator);
+		enemy = makeChar(meta.opponent);
+		player = makeChar(meta.player);
+		add(stage = new Stage(meta.stage));
 		scripts.loadFile("stages/" + stage.name);
 		scripts.call("loadedStage");
 
 		// don't want the positions auto instantiating/adding (it's a whole story trust me it's for the better)
-		if (stage.hasSpectatorPos())
+		if (spectator != null && stage.hasSpectatorPos())
 			stage.spectatorPos.add(spectator);
-		if (stage.hasEnemyPos())
+		if (enemy != null && stage.hasEnemyPos())
 			stage.enemyPos.add(enemy);
-		if (stage.hasPlayerPos())
+		if (player != null && stage.hasPlayerPos())
 			stage.playerPos.add(player);
 
 		defaultZoom = stage.zoom;
@@ -243,14 +253,17 @@ class PlayState extends FunkinState {
 			camHUD.zoom += zoomStrength;
 		}
 
-		iconP1.scale.set(1, 1);
-		iconP1.updateHitbox();
-
-		iconP2.scale.set(1, 1);
-		iconP2.updateHitbox();
+		if (iconP1 != null) {
+			iconP1.scale.set(1, 1);
+			iconP1.updateHitbox();
+		}
+		if (iconP2 != null) {
+			iconP2.scale.set(1, 1);
+			iconP2.updateHitbox();
+		}
 
 		for (character in [player, enemy, spectator]) {
-			if (!character.autoIdle || beat % character.danceInterval != 0) continue;
+			if (character == null || !character.autoIdle || beat % character.danceInterval != 0) continue;
 			character.dance();
 		}
 
@@ -324,7 +337,7 @@ class PlayState extends FunkinState {
 		// havent added the script calls here because i'd to see if i can make this a bit customizible
 		// like a HitBehavior sorta thing like cne and vslice
 
-		getCharacter(note.player).sing('sing', Note.directions[note.lane]);
+		getCharacter(note.player)?.sing('sing', Note.directions[note.lane]);
 		if (notefield.autoplay || note.player != playerID) return;
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
@@ -370,7 +383,7 @@ class PlayState extends FunkinState {
 	}
 
 	function noteMissed(strumline:Strumline, note:Note) {
-		player.sing('miss', Note.directions[note.lane]);
+		player?.sing('miss', Note.directions[note.lane]);
 
 		health += (note.behavior.missHealth ?? -10.5) * note.behavior.healthMult;
 
@@ -388,7 +401,7 @@ class PlayState extends FunkinState {
 
 	function sustainHit(strumline:Strumline, sustain:Sustain, mostRecent:Bool) {
 		if (mostRecent) {
-			getCharacter(sustain.player).sing('sing', Note.directions[sustain.lane]);
+			getCharacter(sustain.player)?.sing('sing', Note.directions[sustain.lane]);
 		}
 
 		if (notefield.autoplay || sustain.player != playerID) return;
@@ -398,7 +411,7 @@ class PlayState extends FunkinState {
 	}
 
 	function sustainDropped(strumline:Strumline, sustain:Sustain) {
-		player.sing('miss', Note.directions[sustain.lane]);
+		player?.sing('miss', Note.directions[sustain.lane]);
 
 		stats.miss();
 		
@@ -425,18 +438,22 @@ class PlayState extends FunkinState {
 		final isEnemy = Settings.data.gameplayModifiers['playingSide'] == 'Opponent';
 
 		hud.add(healthBar = new Bar(0, downscroll ? 55 : 640, function() return health, 0, 100));
-		healthBar.setColors(enemy.healthColor, player.healthColor);
+		healthBar.setColors(enemy?.healthColor ?? 0xFF404040, player?.healthColor ?? 0xFF00FF48);
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
 		healthBar.alpha = Settings.data.healthBarAlpha;
 
-		hud.add(iconP1 = new CharIcon(player.icon, true));
-		iconP1.y = healthBar.y - (iconP1.height * 0.5);
-		iconP1.alpha = Settings.data.healthBarAlpha;
+		if (player != null) {
+			hud.add(iconP1 = new CharIcon(player.icon, true));
+			iconP1.y = healthBar.y - (iconP1.height * 0.5);
+			iconP1.alpha = Settings.data.healthBarAlpha;
+		}
 
-		hud.add(iconP2 = new CharIcon(enemy.icon));
-		iconP2.y = healthBar.y - (iconP2.height * 0.5);
-		iconP2.alpha = Settings.data.healthBarAlpha;
+		if (enemy != null) {
+			hud.add(iconP2 = new CharIcon(enemy.icon));
+			iconP2.y = healthBar.y - (iconP2.height * 0.5);
+			iconP2.alpha = Settings.data.healthBarAlpha;
+		}
 
 		updateIconPositions();
 
@@ -578,23 +595,32 @@ class PlayState extends FunkinState {
 	}
 
 	dynamic function updateIconPositions():Void {
-		iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconSpacing;
-		iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconSpacing * 2;
+		if (iconP1 != null)
+			iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconSpacing;
+		if (iconP2 != null)
+			iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconSpacing * 2;
 	}
 
 	dynamic function updateIconStates() {
-		iconP1.animation.curAnim.curFrame = healthBar.percent < 20 ? 1 : 0;
-		iconP2.animation.curAnim.curFrame = healthBar.percent > 80 ? 1 : 0;
+		if (iconP1 != null)
+			iconP1.animation.curAnim.curFrame = healthBar.percent < 20 ? 1 : 0;
+		if (iconP2 != null)
+			iconP2.animation.curAnim.curFrame = healthBar.percent > 80 ? 1 : 0;
 	}
 
 	dynamic function updateIconScales(delta:Float):Void {
-		var mult:Float = FlxMath.lerp(0.8, iconP1.scale.x, Math.exp(-delta * 9));
-		iconP1.scale.set(mult, mult);
-		iconP1.centerOrigin();
+		var mult:Float = 1;
+		if (iconP1 != null) {
+			mult = FlxMath.lerp(0.8, iconP1.scale.x, Math.exp(-delta * 9));
+			iconP1.scale.set(mult, mult);
+			iconP1.centerOrigin();
+		}
 
-		mult = FlxMath.lerp(0.8, iconP2.scale.x, Math.exp(-delta * 9));
-		iconP2.scale.set(mult, mult);
-		iconP2.centerOrigin();
+		if (iconP2 != null) {
+			mult = FlxMath.lerp(0.8, iconP2.scale.x, Math.exp(-delta * 9));
+			iconP2.scale.set(mult, mult);
+			iconP2.centerOrigin();
+		}
 	}
 
 	function updateCameraScale(delta:Float):Void {

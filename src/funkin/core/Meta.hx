@@ -5,22 +5,22 @@ import nevermore.core.timing.TimingPoint;
 @:structInit
 class MetaFile {
 	public var songName:String = 'Unknown';
-	public var timingPoints:Array<TimingPoint> = [];
-	public var offset:Float = 0.0;
+	// public var timingPoints:Array<TimingPoint> = [];
+	//public var offset:Float = 0.0;
 	public var hasVocals:Bool = true;
 	public var hasModchart:Bool = false;
 
-	public var player:String = 'bf';
-	public var spectator:String = 'bf';
-	public var opponent:String = 'bf';
-	public var stage:String = 'stage';
+	public var player:Null<String> = "bf";
+	public var spectator:Null<String> = "gf";
+	public var opponent:Null<String> = "dad";
+	public var stage:String = "stage";
 }
 
-typedef MetaTimingPoint = {
+/*typedef MetaTimingPoint = {
 	var time:Float;
 	var ?tempo:Float;
 	var ?beatsPerMeasure:Int;
-}
+}*/
 
 class Meta {
 	static var _cache:Map<String, MetaFile> = [];
@@ -58,18 +58,19 @@ class Meta {
 		if (!Assets.exists(path)) return file;
 		var data:Dynamic = Json5.parse(Assets.text(path));
 
+		var dataFields = Reflect.fields(data);
+		var metaFields = Type.getInstanceFields(MetaFile);
 		if (data.enemy != null)
 			file.opponent = data.enemy;
 
-		for (property in Reflect.fields(data)) {
-			// ??????? ok i guess no `Reflect.hasField()` for you
-			if (!Reflect.fields(file).contains(property)) continue;
+		for (property in dataFields) {
+			if (!metaFields.contains(property)) continue;
 			if (property == 'timingPoints') continue;
 			
 			Reflect.setField(file, property, Reflect.field(data, property));
 		}
 
-		// have to do it this way
+		/* // have to do it this way
 		// otherwise haxe shits itself and starts printing insane numbers
 		// and that's no good /ref
 		var timingPoints:Array<MetaTimingPoint> = data.timingPoints;
@@ -81,7 +82,7 @@ class Meta {
 					beatsPerMeasure: point.beatsPerMeasure ?? 4
 				});
 			}
-		}
+		} */
 		_cache.set(song, file);
 		return file;
 	}

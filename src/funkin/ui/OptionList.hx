@@ -156,8 +156,8 @@ class OptionList extends TextList {
             y += txt.height;
 		}
         scrollInc = Math.max((y + curScroll - this.y - 15 + 60) - height, 0) / texts.length;
-        var targetHeight = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height - 5) * selPercentages[current] : 0)) + 10;
-		hoverY = FlxMath.lerp(hoverY, texts.members[current].y - 5, elapsed * 15);
+        var targetHeight = (texts.members[current].height + (hasSubTexts ? (subTexts.members[current].height - 5) * selPercentages[current] : 0));
+		hoverY = FlxMath.lerp(hoverY, texts.members[current].y, elapsed * 15);
         hover.setPosition(x, hoverY);
         hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
 		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
@@ -191,13 +191,13 @@ class OptionList extends TextList {
             selPercentages[i] = i == current ? 1 : 0;
 
 			var txt = new FlxText(x + 15, y, width - 30, txts[i]);
-			txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 24, 0xFFFFFFFF, LEFT);
+			txt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 24, 0xFFFFFFFF, LEFT);
 			txt.antialiasing = Settings.data.antialiasing;
 			texts.add(txt);
 
 			if (hasSubTexts) {
 				var sub = new FlxText(txt.x, txt.y + (txt.height - 5) * selPercentages[i], width - 30, subs[i]);
-				sub.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 16, 0xFFFFFFFF, LEFT);
+				sub.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 16, 0xFFFFFFFF, LEFT);
 				sub.antialiasing = Settings.data.antialiasing;
 				subTexts.add(sub);
                 sub.alpha = selPercentages[i];
@@ -427,7 +427,7 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 			text = "< " + text + " >";
 
 		obj = this;
-		setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
+		setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 40, 0xFFFFFFFF, RIGHT);
 	}
 
 	public function drawRegularCompon() {}
@@ -481,7 +481,7 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 		origin.x = offset.x = frameWidth;
 
 		label = new FlxText(0, 0, 0, opt.formatText(selected));
-		label.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 40, 0xFFFFFFFF, RIGHT);
+		label.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 40, 0xFFFFFFFF, RIGHT);
 	}
 
 	override function draw() {
@@ -590,7 +590,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 		fill.offset.set();
 
 		label = new FlxText(0, 0, 0, opt.formatText(selected));
-		label.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 32, 0xFFFFFFFF, RIGHT);
+		label.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 32, 0xFFFFFFFF, RIGHT);
 	}
 
 	public function drawRegularCompon() {

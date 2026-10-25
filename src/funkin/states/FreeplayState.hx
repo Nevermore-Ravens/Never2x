@@ -111,6 +111,7 @@ class FreeplayState extends FunkinState {
 		add(grpSongs = new FlxTypedSpriteGroup<Alphabet>());
 		add(grpIcons = new FlxTypedSpriteGroup<CharIcon>());
 
+
 		for (index => song in songList) {
 			var songName:String = song.id == 'random' ? 'Random' : Meta.load(song.id).songName;
 			final alphabet:Alphabet = grpSongs.add(new Alphabet(90, 320, songName));
@@ -148,7 +149,7 @@ class FreeplayState extends FunkinState {
 		modsMenu.allowKeys = false;
 
 		add(modsText = new FlxText(modsMenu.x, modsMenu.y + modsMenu.height * 0.5, modsMenu.height, "v [CTRL] - Edit Modifiers v"));
-		modsText.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 24, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
+		modsText.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 24, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
 		modsText.angle = -90;
 		modsText.x -= (modsText.width + modsText.height) * 0.5;
 		modsText.y -= modsText.height * 0.5;
