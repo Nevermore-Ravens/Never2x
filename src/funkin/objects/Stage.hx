@@ -177,8 +177,10 @@ class Stage extends FunkinSpriteGroup {
 	public function hasPlayerPos()
 		@:bypassAccessor return playerPos != null;
 	function get_playerPos() {
-		if (playerPos == null)
+		if (playerPos == null) {
 			playerPos = new CharacterPos();
+			playerPos.facesLeft = true;
+		}
 		return playerPos;
 	}
 
@@ -196,6 +198,8 @@ class Stage extends FunkinSpriteGroup {
 		var file:StageFile = createDummyFile();
 		if (!Assets.exists(path)) return file;
 		
+		// only blank out the objects if the file does exist
+		file.objects = [];
 		var data = Json5.parse(Assets.text(path));
 		for (property in Reflect.fields(data)) {
 			if (!Reflect.hasField(file, property)) continue;

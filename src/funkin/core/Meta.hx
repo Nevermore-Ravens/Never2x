@@ -13,7 +13,7 @@ class MetaFile {
 	public var player:Null<String> = "bf";
 	public var spectator:Null<String> = "gf";
 	public var opponent:Null<String> = "dad";
-	public var stage:String = "stage";
+	public var stage:String = "blank";
 }
 
 /*typedef MetaTimingPoint = {
