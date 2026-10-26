@@ -33,6 +33,8 @@ class PlayState extends FunkinState {
 	var extraTime:Float = 2500; // 2.5 seconds
 	var downscroll:Bool = false;
 
+	var hitErrorBar:HitErrorBar;
+
 	var health(default, set):Float = 50;
 	function set_health(value:Float):Float {
 		value = FlxMath.bound(value, 0, 100);
@@ -361,6 +363,7 @@ class PlayState extends FunkinState {
 
 		// now we update visuals
 		updateInfo();
+		hitErrorBar.hit(deviation);
 		if (displayJudge) {
 			if (Settings.data.hideHighest) {
 				judgeSprite.visible = judgeID != 0;
@@ -394,6 +397,7 @@ class PlayState extends FunkinState {
 
 		judgeSprite.visible = true;
 		judgeSprite.display();
+		hitErrorBar.hit(Judgement.max.window);
 
 		updateInfo();
 		updateJudgeCounter();
@@ -442,6 +446,10 @@ class PlayState extends FunkinState {
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
 		healthBar.alpha = Settings.data.healthBarAlpha;
+
+		add(hitErrorBar = new HitErrorBar());
+		hitErrorBar.screenCenter();
+		hitErrorBar.cameras = [camHUD];
 
 		if (player != null) {
 			hud.add(iconP1 = new CharIcon(player.icon, true));
