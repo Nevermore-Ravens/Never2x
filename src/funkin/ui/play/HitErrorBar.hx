@@ -68,11 +68,8 @@ class HitErrorBar extends FlxSpriteGroup {
 	var curDeviation:Float = 0.0;
 	override function update(elapsed:Float) {
 		if (!pointer.visible) return;
-
-		var lineLength:Float = line.x + line.width;
-		var lineCenter:Float = line.x + (line.width / 2);
-
-		var rawPos = FlxMath.remapToRange(curDeviation, -Judgement.max.window, Judgement.max.window, line.x, line.x + line.width) - pointer.width;
+		
+		var rawPos = FlxMath.remapToRange(curDeviation, -Judgement.max.window, Judgement.max.window, line.x, line.x + line.width) - (pointer.width / 2);
 
 		pointer.x = Util.expDecay(pointer.x, rawPos, 7.5);
 	}
