@@ -26,31 +26,24 @@ class HitErrorBar extends FlxSpriteGroup {
 
 		list ??= Judgement.current;
 
-		// make `marv -> ... -> bad`
-		// and convert it into `bad -> ... -> marv`
-		var judgements:Array<Judgement> = list.copy();
-		judgements.reverse();
+		// grab the highest hit window
+		var highestWindow:Float = list[list.length - 1].window;
+		// multiply by 2 since this goes both ways
+		var bitmapLine:BitmapData = new BitmapData(Std.int(highestWindow * 2), 5, true);
 
-		// make a new instance of `marv -> ... -> bad`
-		// and add it to the array
-		judgements = judgements.concat(list.copy());
-
-		// now we have `bad -> ... -> marv (center) marv -> ... -> bad !!!
-
-		var totalWidth:Float = 0.0;
-		for (i in judgements) {
-			totalWidth += i.window;
-		}
-		
-		var bitmapLine:BitmapData = new BitmapData(Std.int(totalWidth), 5, true);
-
+		var rect = new openfl.geom.Rectangle(0, 0, 1, bitmapLine.height);
 		var posOffset:Float = 0.0;
-		for (i in 0 ... judgements.length) {
-			var width:Float = judgements[i].window;
-			var colour:Int = judgements[i].color;
-			bitmapLine.fillRect(new openfl.geom.Rectangle(posOffset, 0, width, 5), colour);
+		for (i in 0 ... list.length) {
+			var width:Float = list[i].window;
+			var colour:Int = list[i].color;
+			rect.width = width;
 
-			posOffset += width;
+			rect.x = highestWindow - posOffset - width; // top-left positioning, offset by width to "right-align" it
+			bitmapLine.fillRect(rect, colour);
+			rect.x = highestWindow + posOffset;
+			bitmapLine.fillRect(rect, colour);
+
+			posOffset = width;
 		}
 
 		line = new FlxSprite().loadGraphic(FlxGraphic.fromBitmapData(bitmapLine, false, 'judgeLine'));
@@ -79,7 +72,7 @@ class HitErrorBar extends FlxSpriteGroup {
 		var lineLength:Float = line.x + line.width;
 		var lineCenter:Float = line.x + (line.width / 2);
 
-		var rawPos = FlxMath.remapToRange(lineCenter + curDeviation, lineCenter, lineCenter + Judgement.max.window, lineCenter, lineLength) - 5;
+		var rawPos = FlxMath.remapToRange(curDeviation, -Judgement.max.window, Judgement.max.window, line.x, line.x + line.width) - pointer.width;
 
 		pointer.x = Util.expDecay(pointer.x, rawPos, 7.5);
 	}
@@ -93,7 +86,7 @@ class HitErrorBar extends FlxSpriteGroup {
 		var lineLength:Float = line.x + line.width;
 		var lineCenter:Float = line.x + (line.width / 2);
 
-		var barPos:Float = FlxMath.remapToRange(lineCenter + deviation, lineCenter, lineCenter + Judgement.max.window, lineCenter, lineLength - 1.5);
+		var barPos:Float = FlxMath.remapToRange(deviation, -Judgement.max.window, Judgement.max.window, line.x, line.x + line.width - hitBar.width);
 		hitBar.camera = camera;
 		hitBar.setPosition(barPos, this.y - 7);
 		hitBar.alpha = 0.7;
