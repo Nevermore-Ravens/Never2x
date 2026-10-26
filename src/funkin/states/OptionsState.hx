@@ -122,6 +122,7 @@ class OptionsState extends FunkinState {
 			new Option("time_text", "time_text_desc", "timeText", BoolOption),
 			new Option("hide_acc", "hide_acc_desc", "hideAcc", BoolOption),
 			new Option("hide_hud", "hide_hud_desc", "hideHUD", BoolOption),
+			new Option("hide_tightest_judge", "hide_tightest_judge_desc", "hideTightestJudge", BoolOption),
 			{
 				var opt = new Option("judge_alpha", "judge_alpha_desc", "judgementAlpha", FloatOption(0, 1, 0.05, false, true));
 					opt.formatText = function(_) {

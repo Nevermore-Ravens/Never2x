@@ -73,7 +73,7 @@ class SaveVariables {
 	var popupCenter:String = "Top";
 	var judgementAlpha:Float = 1;
 	var judgementCounter:Bool = false;
-	var hideHighest:Bool = false;
+	var hideTighestJudge:Bool = false;
 	var comboAlpha:Float = 1;
 	var healthBarAlpha:Float = 1;
 	var language:String = 'English';

@@ -373,7 +373,7 @@ class PlayState extends FunkinState {
 		}
 
 		if (displayJudge) {
-			if (Settings.data.hideHighest) {
+			if (Settings.data.hideTighestJudge) {
 				judgeSprite.visible = judgeID != 0;
 			}
 
