@@ -351,6 +351,7 @@ class PlayState extends FunkinState {
 		// update statistics before visuals
 		stats.registerHit({
 			time: Std.int(note.time),
+			lane: note.lane,
 			deviation: deviation
 		});
 
@@ -364,6 +365,13 @@ class PlayState extends FunkinState {
 		// now we update visuals
 		updateInfo();
 		hitErrorBar.hit(deviation);
+
+		// TODO: make this not so hardcoded (hell even the skin is settings only)
+		if (Settings.data.noteSplashSkin != "none" && judgeID <= 1) {
+			var splash = NoteSplash.getSplash(note.receptor);
+			splash.hit(note.receptor);
+		}
+
 		if (displayJudge) {
 			if (Settings.data.hideHighest) {
 				judgeSprite.visible = judgeID != 0;
@@ -376,12 +384,6 @@ class PlayState extends FunkinState {
 		if (displayCombo) {
 			comboSprite.display(stats.combo);
 			comboSprite.colorizeCombo(judge, stats.clearType);
-		}
-
-		// TODO: make this not so hardcoded (hell even the skin is settings only)
-		if (Settings.data.noteSplashSkin != "none" && judgeID <= 1) {
-			var splash = NoteSplash.getSplash(note.receptor);
-			splash.hit(note.receptor);
 		}
 	}
 
@@ -447,9 +449,13 @@ class PlayState extends FunkinState {
 		healthBar.leftToRight = false;
 		healthBar.alpha = Settings.data.healthBarAlpha;
 
-		add(hitErrorBar = new HitErrorBar());
+		hud.add(hitErrorBar = new HitErrorBar());
+		hitErrorBar.visible = Settings.data.hitErrorBar;
 		hitErrorBar.screenCenter();
-		hitErrorBar.cameras = [camHUD];
+
+		var errorBarOffset:Float = 200;
+		if (downscroll) hitErrorBar.y -= errorBarOffset;
+		else hitErrorBar.y += errorBarOffset;
 
 		if (player != null) {
 			hud.add(iconP1 = new CharIcon(player.icon, true));

@@ -145,6 +145,8 @@ class InitState extends flixel.FlxState {
 			}
 		]);
 		Judgement.type = 'Never2x';
+
+		nevermore.skins.BasicNoteskin.scale = 0.65;
 	}
 
 	private function setDefines() {
