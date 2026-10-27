@@ -56,6 +56,7 @@ class PlayState extends FunkinState {
 	var accuracy:AccuracyHandler = new DefaultAccuracy();
 
 	var hud:FlxSpriteGroup;
+	var autoplayText:FlxText;
 	var infoText:FlxText;
 	var judgeSprite:JudgeDisplay;
 	var comboSprite:ComboDisplay;
@@ -246,6 +247,7 @@ class PlayState extends FunkinState {
 
 		if (FlxG.keys.justPressed.F8) {
 			notefield.autoplay = !notefield.autoplay;
+			autoplayText.visible = notefield.autoplay;
 		}
 
 		updateCameraScale(delta);
@@ -511,6 +513,14 @@ class PlayState extends FunkinState {
 		infoText.font = Assets.getPath('fonts/LineSeed.ttf');
 		infoText.borderStyle = FlxTextBorderStyle.OUTLINE;
 		infoText.borderSize = 1.5;
+
+		hud.add(autoplayText = new FlxText(0, 0, FlxG.width, 'Autoplay', 30));
+		autoplayText.alignment = 'center';
+		autoplayText.font = Assets.getPath('fonts/LineSeed.ttf');
+		autoplayText.borderStyle = FlxTextBorderStyle.OUTLINE;
+		autoplayText.borderSize = 1.5;
+		autoplayText.screenCenter();
+		autoplayText.visible = notefield.autoplay;
 
 		hud.add(judgeNames = new FlxText(5, 0, 0, '', 18));
 		judgeNames.font = Assets.getPath('fonts/LineSeed.ttf');
