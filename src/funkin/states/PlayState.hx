@@ -89,6 +89,13 @@ class PlayState extends FunkinState {
 		camOther = FlxG.cameras.add(new FlxCamera(), false);
 		camOther.bgColor = 0x00;
 
+		// to prevent more lag when you can't even see the game camera
+		if (Settings.data.gameVisibility <= 0) {
+			FlxG.camera.visible = false;
+			FlxG.camera.active = false;
+			camHUD.bgColor = 0x00;
+		}
+
 		super.create();
 		Conductor.stop();
 		meta = Meta.load(songID);
@@ -100,13 +107,6 @@ class PlayState extends FunkinState {
 		self = this;
 
 		stats = {};
-
-		// to prevent more lag when you can't even see the game camera
-		if (Settings.data.gameVisibility <= 0) {
-			FlxG.camera.visible = false;
-			FlxG.camera.active = false;
-			camHUD.bgColor = 0x00;
-		}
 
 		events = new EventHandler();
 		events.registerEvent("Retarget Camera", moveCamera);
@@ -182,27 +182,48 @@ class PlayState extends FunkinState {
 		notefield.sustainHit = sustainHit;
 		notefield.sustainDropped = sustainDropped;
 
-		if (Settings.data.centeredNotes) {
-			for (i => strumline in notefield.strumlines.members) {
-				if (i != playerID) strumline.visible = false;
-				else strumline.screenCenter(X);
+		for (i => strumline in notefield.strumlines.members) {
+			if (i != playerID) {
+				strumline.visible = Settings.data.opponentNotes;
+				continue;
 			}
-		} else leftStrumline.visible = Settings.data.opponentNotes;
+
+			if (Settings.data.centeredNotes) {
+				strumline.screenCenter(X);
+			}
+		}
 
 		add(hud = new FlxSpriteGroup());
 		hud.cameras = [camHUD];
 
-		add(judgeSprite = new JudgeDisplay(400, 300));
+		var simplePopups:Bool = Settings.data.popupCenter != 'FNF';
+		var centeredPopups:Bool = Settings.data.centeredNotes || Settings.data.popupCenter == 'Center';
+		var popupX:Float = notefield.getStrumline(playerID).x;
+
+		add(judgeSprite = new JudgeDisplay(simplePopups ? popupX : 400, 300));
+		judgeSprite.simple = simplePopups;
 		judgeSprite.camera = camHUD;
 
 		var judgeY:Float = judgeSprite.y + judgeSprite.height;
-		add(comboSprite = new ComboDisplay(judgeSprite.x + 50, judgeY + 20));
+		add(comboSprite = new ComboDisplay(simplePopups ? popupX : 450, judgeY + 20));
+		comboSprite.simple = simplePopups;
 		comboSprite.cameras = [camHUD];
-		comboSprite.colorMode = switch (Settings.data.comboTinting) {
+		comboSprite.colorMode = switch Settings.data.comboTinting {
 			case "Per-Note": PER_NOTE;
 			case "Clear Flag": CLEAR_FLAG;
 			default: NONE;
 		};
+
+		if (simplePopups) {
+			if (centeredPopups) {
+				judgeSprite.screenCenter();
+				comboSprite.screenCenter(X);
+				comboSprite.x += comboSprite.width / 2;
+				comboSprite.y = judgeSprite.y + 110;
+			} else {
+				judgeSprite.x -= judgeSprite.width / 2;
+			}
+		}
 
 		load();
 		makeHUD();
@@ -241,6 +262,7 @@ class PlayState extends FunkinState {
 
 	override function destroy():Void {
 		Conductor.rate = 1;
+		Conductor.metronome = false;
 		Judgement.resetHits();
 		scripts.call("destroy");
 		super.destroy();
@@ -250,7 +272,10 @@ class PlayState extends FunkinState {
 
 	override function beatHit(beat:Int):Void {
 		// there may be an offset and hud bump softcoding later on but
-		if (zoomInterval > 0 && beat % zoomInterval == 0) {
+		if (
+			Settings.data.cameraZooms.toLowerCase() != 'off' && 
+			zoomInterval > 0 && beat % zoomInterval == 0
+		) {
 			FlxG.camera.zoom += zoomStrength * 2;
 			camHUD.zoom += zoomStrength;
 		}
@@ -495,6 +520,8 @@ class PlayState extends FunkinState {
 		judgeNames.visible = Settings.data.judgementCounter;
 		generateJudgeColors();
 		judgeNames.screenCenter(Y);
+		if (isEnemy)
+			judgeNames.x = FlxG.width - ((judgeNames.x + judgeNames.width) + 50) - 75;
 
 		hud.add(judgeCounters = new FlxText((judgeNames.x + judgeNames.width) + 50, judgeNames.y, 75, '', judgeNames.size));
 		judgeCounters.font = judgeNames.font;
@@ -522,7 +549,7 @@ class PlayState extends FunkinState {
 		clearTypeTxt.font = judgeNames.font;
 		clearTypeTxt.borderStyle = FlxTextBorderStyle.OUTLINE;
 		clearTypeTxt.borderSize = 1.5;
-		clearTypeTxt.alignment = Settings.data.judgementCounter ? 'center' : 'left';
+		clearTypeTxt.alignment = Settings.data.judgementCounter ? 'center' : (isEnemy ? 'right' : 'left');
 
 		updateInfo();
 		infoText.screenCenter(X);
@@ -555,11 +582,11 @@ class PlayState extends FunkinState {
 
 		judgeCounters.text = '';
 		for (i in 0 ... Judgement.current.length) {
-			var judge:Judgement = Judgement.current[i];
-			judgeCounters.text += Util.moneyString(judge.hits) + '\n';
+			var hits:String = Util.moneyString(Judgement.current[i].hits);
+			judgeCounters.text += hits + '\n';
 		}
 
-		judgeCounters.text += Math.max(stats.misses, 0);
+		judgeCounters.text += Util.moneyString(stats.misses);
 	}
 
 	dynamic function updateTimeText() {
@@ -589,14 +616,16 @@ class PlayState extends FunkinState {
 	function updateInfo():Void {
 		stats.clearType = stats.getClearType();
 
+		stats.grade = stats.getGrade();
+		stats.score = scoring.get(stats);
+		stats.accuracy = accuracy.get(stats);
+
+		if (!hud.visible) return;
+
 		if (stats.clearType != CLEAR) {
 			clearTypeTxt.text = stats.clearType;
 			clearTypeTxt.color = stats.clearType.color;
 		} else clearTypeTxt.visible = false;
-
-		stats.grade = stats.getGrade();
-		stats.score = scoring.get(stats);
-		stats.accuracy = accuracy.get(stats);
 
 		infoText.text = 'Score: ${Util.moneyString(stats.score)}';
 

@@ -70,7 +70,7 @@ class SaveVariables {
 	var unglowOnAnimFinish:Bool = true;
 	var gameVisibility:Int = 100;
 	var cameraZooms:String = 'Default';
-	var popupCenter:String = "Top";
+	var popupCenter:String = "FNF";
 	var judgementAlpha:Float = 1;
 	var judgementCounter:Bool = false;
 	var hideTightestJudge:Bool = false;
