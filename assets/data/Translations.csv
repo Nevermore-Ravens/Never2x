@@ -106,8 +106,8 @@ hide_acc,Hide Accuracy,Esconder Precisão,Hide Accuracy
 hide_acc_desc,Hides the accuracy % in the HUD.,Esconde a porcentagem de precisão na HUD.,HUDに精度を隠す
 hide_hud,Hide HUD,Esconder a HUD,HUD隠す
 hide_hud_desc,Makes the entire HUD disappear{C} if you want just the notes. Or if you're showcasing something.,Esconde toda a HUD{C} caso você queria ver apenas as notas.,Makes the entire HUD disappear{C} if you want just the notes. Or if you're showcasing something.
-hide_highest,Hide Highest Judgement,Hide Highest Judgement,Hide Highest Judgement
-hide_highest_desc,Whether or not the game will display the highest possible judgement when it is hit.,Whether or not the game will display the highest possible judgement when it is hit.,Whether or not the game will display the highest possible judgement when it is hit.
+hide_tightest_judge,Hide Tightest Judgement,Hide Tightest Judgement,Hide Tightest Judgement
+hide_tightest_judge_desc,Whether or not the game will display the highest possible judgement when it is hit.,Whether or not the game will display the highest possible judgement when it is hit.,Whether or not the game will display the highest possible judgement when it is hit.
 judge_alpha,Judgement Alpha,Opacidade dos Julgamentos,判定透明度
 judge_alpha_desc,How much you can see the judgements of the notes you hit.,Altera a opacidade dos julgamentos durante o jogo.,How much you can see the judgements of the notes you hit.
 combo_alpha,Combo Alpha,Opacidade do Combo,コンボ透明度
