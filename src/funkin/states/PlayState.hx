@@ -181,6 +181,7 @@ class PlayState extends FunkinState {
 		notefield.noteHit = noteHit;
 		notefield.noteMissed = noteMissed;
 		notefield.sustainHit = sustainHit;
+		notefield.sustainFinished = sustainFinished;
 		notefield.sustainDropped = sustainDropped;
 
 		for (i => strumline in notefield.strumlines.members) {
@@ -443,6 +444,19 @@ class PlayState extends FunkinState {
 		accuracy.sustainHit(sustain);
 	}
 
+	function sustainFinished(strumline:Strumline, sustain:Sustain, deviation:Float) {
+		if (!notefield.releaseTimings || sustain.isRoll) return;
+
+		if (sustain.player != playerID) return;
+
+		var judgeID:Int = Judgement.getID(deviation);
+		Judgement.current[judgeID].hits++;
+
+		judgeSprite.display(judgeID);
+		updateJudgeCounter();
+		hitErrorBar.hit(deviation);
+	}
+
 	function sustainDropped(strumline:Strumline, sustain:Sustain) {
 		player?.sing('miss', Note.directions[sustain.lane]);
 
@@ -454,6 +468,8 @@ class PlayState extends FunkinState {
 		judgeSprite.display();
 		updateJudgeCounter();
 		comboSprite.display(stats.combo);
+		hitErrorBar.hit(Judgement.max.window);
+		updateInfo();
 	}
 
 	var judgeNames:FlxText;
