@@ -2,7 +2,6 @@ package funkin.states;
 
 import nevermore.core.Chart;
 import nevermore.play.*;
-import nevermore.skins.Noteskin;
 
 import funkin.core.scripts.ScriptList;
 import funkin.core.chart.EventHandler;
@@ -30,6 +29,8 @@ class PlayState extends FunkinState {
 	var rightStrumline:Strumline;
 
 	var noteSkin:String = 'funkin';
+	var noteStyle:String = 'default';
+	var splashSkin:String = 'funkin';
 	var extraTime:Float = 2500; // 2.5 seconds
 	var downscroll:Bool = false;
 
@@ -155,9 +156,11 @@ class PlayState extends FunkinState {
 		Conductor.metronome = Settings.data.metronome;
 
 		noteSkin = Settings.data.noteSkin;
+		noteStyle = Settings.data.noteSkinStyle;
+		splashSkin = Settings.data.noteSplashSkin;
 		downscroll = Settings.data.downscroll;
 
-		var skin:Noteskin = Noteskin.get('images/noteSkins/' + noteSkin);
+		var skin = NoteStyling.getSkinAndStyle(noteSkin, noteStyle);
 		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - skin.spacing * Settings.data.strumSize : 50;
 
 		playerID = switch Settings.data.gameplayModifiers['playingSide'] {

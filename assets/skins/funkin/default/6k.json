@@ -1,0 +1,70 @@
+{
+	"scale": 0.7,
+	"fallback": 4,
+
+	"receptor": {
+		"style": "sparrow",
+		"spritesheet": "sheet",
+		"angles": [180, -45, 0, 180, 45, 0],
+		"animations": [
+			{
+				"name": "standard",
+				"prefixes": ["arrowRIGHT", "arrowUP", "arrowDOWN", "arrowDOWN", "arrowUP", "arrowRIGHT"],
+				"looped": true
+			},
+			{
+				"name": "pressed",
+				"prefixes": ["right press", "up press", "down press", "down press", "up press", "right press"]
+			},
+			{
+				"name": "glow",
+				"prefixes": ["right confirm", "up confirm", "down confirm", "down confirm", "up confirm", "right confirm"]
+			}
+		]
+	},
+
+	"note": {
+		"style": "sparrow",
+		"spritesheet": "sheet",
+		"angles": [180, -45, 0, 180, 45, 0],
+		"animations": [{
+			"name": "standard",
+			"prefixes": ["red0", "green0", "blue0", "blue0", "green0", "red0"],
+			"looped": true
+		}]
+	},
+
+	"sustain": {
+		"style": "sparrow",
+		"spritesheet": "sheet",
+		"animations": [
+			{
+				"name": "piece",
+				"prefixes": ["red hold piece", "green hold piece", "blue hold piece", "blue hold piece", "green hold piece", "red hold piece"],
+				"looped": true
+			},
+			{
+				"name": "tail",
+				"prefixes": ["red hold end", "green hold end", "blue hold end", "blue hold end", "green hold end", "red hold end"],
+				"looped": true
+			}
+		]
+	},
+
+	"roll": {
+		"style": "sparrow",
+		"spritesheet": "sheet",
+		"animations": [
+			{
+				"name": "piece",
+				"prefixes": ["red roll piece", "green roll piece", "blue roll piece", "blue roll piece", "green roll piece", "red roll piece"],
+				"looped": true
+			},
+			{
+				"name": "tail",
+				"prefixes": ["red roll end", "green roll end", "blue roll end", "blue roll end", "green roll end", "red roll end"],
+				"looped": true
+			}
+		]
+	}
+}

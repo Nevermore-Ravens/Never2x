@@ -1,0 +1,13 @@
+{
+	"displayName": "Cam. v2",
+	"styles": [
+		{
+			"name": "Default",
+			"key": "default"
+		},
+		{
+			"name": "Pixel",
+			"key": "pixel"
+		}
+	]
+}

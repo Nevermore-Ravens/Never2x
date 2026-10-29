@@ -1,0 +1,79 @@
+{
+	"scale": 6,
+	"spacing": 112,
+	"antialiasing": false,
+
+	"receptor": {
+		"style": "grid",
+		"width": 17,
+		"height": 17,
+		"spritesheet": "sheet",
+		"animations": [
+			{
+				"name": "standard",
+				"prefixes": [[0], [1], [3], [4]],
+				"looped": true
+			},
+			{
+				"name": "pressed",
+				"framerate": 12,
+				"prefixes": [[9, 18], [10, 19], [12, 21], [13, 22]]
+			},
+			{
+				"name": "glow",
+				"framerate": 12,
+				"prefixes": [[27, 36], [28, 37], [30, 39], [31, 40]]
+			}
+		]
+	},
+
+	"note": {
+		"style": "grid",
+		"width": 17,
+		"height": 17,
+		"spritesheet": "sheet",
+		"animations": [{
+			"name": "standard",
+			"prefixes": [[9], [10], [12], [13]],
+			"looped": true
+		}]
+	},
+
+	"sustain": {
+		"style": "grid",
+		"width": 7,
+		"height": 6,
+		"spritesheet": "ends",
+		"animations": [
+			{
+				"name": "piece",
+				"prefixes": [[0], [1], [3], [4]],
+				"looped": true
+			},
+			{
+				"name": "tail",
+				"prefixes": [[5], [6], [8], [9]],
+				"looped": true
+			}
+		]
+	},
+
+	"roll": {
+		"style": "grid",
+		"width": 7,
+		"height": 6,
+		"spritesheet": "ends",
+		"animations": [
+			{
+				"name": "piece",
+				"prefixes": [[0], [1], [3], [4]],
+				"looped": true
+			},
+			{
+				"name": "tail",
+				"prefixes": [[5], [6], [8], [9]],
+				"looped": true
+			}
+		]
+	}
+}

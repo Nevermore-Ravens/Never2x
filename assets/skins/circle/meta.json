@@ -1,0 +1,13 @@
+{
+	"displayName": "Circles",
+	"styles": [
+		{
+			"name": "Default",
+			"key": "default"
+		},
+		{
+			"name": "Pixel",
+			"key": "pixel"
+		}
+	]
+}
