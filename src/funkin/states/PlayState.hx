@@ -188,13 +188,13 @@ class PlayState extends FunkinState {
 		notefield.sustainDropped = sustainDropped;
 
 		for (i => strumline in notefield.strumlines.members) {
-			if (i != playerID) {
-				strumline.visible = Settings.data.opponentNotes;
-				continue;
-			}
+			var isPlayer:Bool = i == playerID;
 
 			if (Settings.data.centeredNotes) {
-				strumline.screenCenter(X);
+				if (isPlayer) strumline.screenCenter(X);
+				else strumline.visible = false;
+			} else if (!isPlayer) {
+				strumline.visible = Settings.data.opponentNotes;
 			}
 		}
 
