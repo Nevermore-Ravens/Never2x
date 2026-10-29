@@ -10,8 +10,7 @@ class NoteStyling {
 	}
 
 	public static function findRelativeStyle(skin:Noteskin, style:String) {
-		var dir = Path.directory(skin.loadKey);
-		var newKey = Path.join([dir, "..", style]);
+		var newKey = Path.join([skin.loadKey, "..", style]);
 		if (newKey == skin.loadKey)
 			return skin;
 
@@ -26,12 +25,12 @@ class NoteStyling {
 		field.skin = newSkin;
 
 		for (note in field.field.notes.members) {
-			if (note.player == idx)
+			if (note.alive && note.player == idx)
 				note.behavior.applySkin(note, NOTE);
 		}
 		for (hold in field.field.sustains.members) {
-			if (hold.player == idx)
-				hold.behavior.applySkin(hold, SUSTAIN);
+			if (hold.alive && hold.player == idx)
+				hold.type = hold.type; // Sustain has a setter
 		}
 	}
 }
