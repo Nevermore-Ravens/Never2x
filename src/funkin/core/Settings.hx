@@ -34,7 +34,7 @@ class SaveVariables {
 	var pauseMusic:String = 'Breakfast';
 	var pauseMusicVolume:Float = 0.7;
 
-	var customColumns:Array<FlxColor> = [0xFFED34A9, 0xFF9653D6, 0xFF596AF6, 0xFF69E4B5];
+	var customColumns:Array<FlxColor> = [0xFFCEA2C3, 0xFFA8C2E7, 0xFF2DD4BA, 0xFFC96F78];
 	var customQuants:Array<FlxColor> = [
 		0xFFED34A9,
 		0xFF596AF6,

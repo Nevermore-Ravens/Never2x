@@ -160,6 +160,11 @@ class PlayState extends FunkinState {
 		splashSkin = Settings.data.noteSplashSkin;
 		downscroll = Settings.data.downscroll;
 
+		NoteStyling.updatePalette();
+		// should i make like a NoteStyling.getStyleSafe?
+		var meta = NoteStyling.getSkinMeta(noteSkin);
+		noteStyle = noteStyle != "default" && meta.styleNames.exists(noteStyle) ? noteStyle : meta.styleKeys[0];
+
 		var skin = NoteStyling.getSkinAndStyle(noteSkin, noteStyle);
 		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - skin.spacing * Settings.data.strumSize : 50;
 

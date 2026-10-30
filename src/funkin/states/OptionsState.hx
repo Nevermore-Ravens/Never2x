@@ -84,7 +84,7 @@ class OptionsState extends FunkinState {
 				var opt = new Option('scroll_speed', 'scroll_speed_desc', "scrollSpeed", FloatOption(0.5, 7, 0.05));
 				opt;
 			},
-			/*{
+			{
 				var opt = new Option('customize_notes', 'customize_notes_desc', "", ButtonOption);
 				opt.hasSound = true;
 				opt.onChange = function(_) {
@@ -98,7 +98,7 @@ class OptionsState extends FunkinState {
 					self.noteEdit.active = true;
 				};
 				opt;
-			},*/
+			},
 			{
 				var opt = new Option('note_offset', 'note_offset_desc', "inputOffset", FloatOption(-5000, 5000, 1));
 				opt.formatText = function(_) {
@@ -211,13 +211,7 @@ class OptionsState extends FunkinState {
 				opt;
 			},
 			new Option("streams", "streams_desc", "audioStreams", BoolOption),
-			{
-				var opt = new Option("reduced_quality", "reduced_quality_desc", "reducedQuality", BoolOption);
-				opt.onChange = function(v) {
-					//self.lineBG.shader = v ? null : self.lineShader;
-				}
-				opt;
-			},
+			new Option("reduced_quality", "reduced_quality_desc", "reducedQuality", BoolOption),
 			{
 				var opt = new Option("game_alpha", "game_alpha_desc", "gameVisibility", IntOption(0, 100, 5, false, true));
 				opt.formatText = function(_) {
@@ -287,7 +281,7 @@ class OptionsState extends FunkinState {
 	var cateText:TextList;
 	var optText:OptionList;
 
-	// var noteEdit:NoteCustomization;
+	var noteEdit:NoteCustomization;
 
 	override function create() {
 		super.create();
@@ -311,11 +305,11 @@ class OptionsState extends FunkinState {
 		optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700);
 		optText.onOptEnter = optEnter.bind(optText);
 
-		// noteEdit = new NoteCustomization(FlxG.width + 10, 10, FlxG.width - 20, FlxG.height - 20);
-		// noteEdit.onOptEnter = optEnter.bind(noteEdit);
-		// noteEdit.active = false;
+		noteEdit = new NoteCustomization(FlxG.width + 10, 10, FlxG.width - 20, FlxG.height - 20);
+		noteEdit.onOptEnter = optEnter.bind(noteEdit);
+		noteEdit.active = false;
 
-		// add(noteEdit); // dont want a chain reaction with onAccept
+		add(noteEdit); // dont want a chain reaction with onAccept
 		add(optText);
 		add(cateText);
 
@@ -367,14 +361,14 @@ class OptionsState extends FunkinState {
 		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
 			FlxG.sound.play(Assets.audio("sfx/cancel"));
 
-			/*if (noteEdit.active) {
+			if (noteEdit.active) {
 				noteEdit.active = false;
 
 				cateText.allowMouse = true;
 				cateText.allowKeys = !wasInOpts;
 				optText.allowMouse = true;
 				optText.allowKeys = wasInOpts;
-			} else */if (optText.allowKeys) {
+			} else if (optText.allowKeys) {
 				cateText.allowKeys = true;
 				optText.allowKeys = false;
 			} else {
@@ -383,28 +377,9 @@ class OptionsState extends FunkinState {
 			}
 		}
 		super.update(delta);
-		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, /*noteEdit.active ? FlxG.width : */0, delta * 20);
+		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, noteEdit.active ? FlxG.width : 0, delta * 20);
 		cateText.displayHover = cateText.allowKeys || cateText.hovered;
 		optText.displayHover = optText.allowKeys || optText.hovered;
-
-		/*final topMargin = optBG.y;
-		final botMargin = (optBG.y + optBG.frameHeight * optBG.scale.y);
-		Util.reposNClipTexts(optTxt, curSelected, topMargin, botMargin, (optBG.y + 25 - curOptScroll), delta, function(idx:Int, y:Float, scale:Float) {
-			// similar code to the static func just for val.
-			final txt = optTxt.members[idx];
-			final val = optValTxt.members[idx];
-			@:privateAccess val.regenGraphic();
-
-			val.origin.x = val.frameWidth;
-			val.scale.copyFrom(txt.scale);
-
-			val.x = optBG.x + optBG.width - 20 - val.width;
-			val.y = txt.y + (txt.height - val.height) * 0.5 + ((idx == curSelected) ? 3 * scale : 0);
-
-			final tMargin = (idx == curSelected) ? Math.max(optSel.y + (optSel.height - optSel.scale.y) * 0.5, topMargin) : topMargin;
-			final bMargin = (idx == curSelected) ? Math.min(optSel.y + (optSel.height + optSel.scale.y) * 0.5, botMargin) : botMargin;
-			Util.clipByCoords(val, optSel.x, null, tMargin, bMargin);
-		});*/
 	}
 
 	function optEnter(list:OptionList, current:Int) {

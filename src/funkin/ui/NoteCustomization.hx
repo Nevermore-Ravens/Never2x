@@ -1,19 +1,25 @@
 package funkin.ui;
-/*
+
+import nevermore.play.Note;
+import nevermore.skins.NoteskinSection;
+import nevermore.Nevermore;
+
 import funkin.shaders.GradMask;
 import funkin.shaders.HueGrad;
 import funkin.states.OptionsState;
-import funkin.core.NoteSkin;
-import funkin.objects.NoteSplash;
-import haxe.io.Path;
+import funkin.core.NoteStyling.NoteskinMeta;
 
+@:access(nevermore.skins.NoteskinSection)
 class NoteCustomization extends OptionList {
+    var curSection:NoteskinSection<Dynamic>;
+    var noteSkinMap:Map<String, NoteskinMeta> = [];
     var notes:FlxTypedGroup<Note>;
 	var hoverNote:Int = -1;
 	var curNote:Int = 0;
 	var bigNote:Note;
 
 	// from experience, setting a color to pitch black can screw up these values.
+    var curPalette:Array<flixel.util.FlxColor>;
 	var curCol:Array<Int> = [0, 0, 0];
 	var rgb:Bool = false;
 	var holdingCol:Bool = false;
@@ -31,38 +37,47 @@ class NoteCustomization extends OptionList {
 
     public function new(x:Float, y:Float, width:Float, height:Float) {
         super(x, y, width, height);
+        noteSkinMap = NoteStyling.getList();
 
+        var skin = Settings.data.noteSkin;
+        var style = Settings.data.noteSkinStyle;
+		style = style != "default" && noteSkinMap[skin].styleNames.exists(style) ? style : noteSkinMap[skin].styleKeys[0];
+
+        NoteStyling.updatePalette();
+        updatePalette();
+        curSection = NoteStyling.getSkinAndStyle(Settings.data.noteSkin, style).sections.get("note");
         notes = new FlxTypedGroup();
-		final lumin = Settings.data.quantColouring != "None";
-		if (Settings.data.quantColouring.startsWith("Custom")) {
-			Note.byQuant = Settings.data.quantColouring == "Custom";
-			Note.curPalette = Note.byQuant ? Settings.data.customQuants : Settings.data.customColumns;
-		} else {
-			Note.byQuant = lumin;
-			Note.curPalette = Note.byQuant && Note.quantPalettes.exists(Settings.data.quantColouring) ? Note.quantPalettes[Settings.data.quantColouring].copy() : getDefaultColumns();
-		}
-		final centerIdx:Float = Note.byQuant ? 5.5 : 2;
-		for (i in 0...Settings.data.customQuants.length) {
+
+		final centerIdx:Float = curPalette.length * 0.5;
+        final noteSize:Float = curSection.parent.spacing * 0.85;
+		for (i in 0...NoteColor.currentQuants.length) {
 			var note = new Note();
-			note.data.lane = i % 4;
-			note.luminColors = lumin;
-			note.skin = '';
-			note.setPosition(FlxG.width * 1.5 + 160 * 0.55 * (i - centerIdx), 0);
-			scaleNote(note, 0.55);
+            note.data = {snapID: i};
+			note.lane = i % NoteColor.current.length;
+			note.luminize = Nevermore.settings.quantization;
+            note.color = NoteColor.get(note);
+            note.scrollFactor.x = 1;
+
+            curSection.applyNoteObject(note);
+            note.scale.scale(0.85);
 			note.updateHitbox();
-			note.y += ((160 * 0.55) - note.height) * 0.5;
-			note.color = lumin ? Note.curPalette[Std.int(Math.min(i, Note.curPalette.length - 1))] : 0xFFFFFFFF;
-			note.alpha = (Note.byQuant || i < 4) ? 1 : 0;
+
+			note.setPosition(
+                x + FlxG.width * 0.5 + noteSize * 0.85 * (i - centerIdx),
+                ((curSection.parent.spacing * 0.85) - note.height) * 0.5
+            );
+
+			note.alpha = (NoteColor.bySnap || i < NoteColor.current.length) ? 1 : 0;
 			notes.add(note);
 		}
 
 		bigNote = new Note();
-		bigNote.data.lane = notes.members[curNote].data.lane;
-		bigNote.luminColors = notes.members[curNote].luminColors;
-		bigNote.skin = '';
-		scaleNote(bigNote, 1.5);
+		bigNote.lane = notes.members[curNote].lane;
+		bigNote.luminize = Nevermore.settings.quantization;
+		curSection.applyNoteObject(bigNote);
+		bigNote.scale.scale(2.25);
 		bigNote.updateHitbox();
-		bigNote.setPosition(FlxG.width + 250, 370 + ((160 * 1.5) - bigNote.height) * 0.5);
+		bigNote.setPosition(x + 250, y + 370 + ((curSection.parent.spacing * 2.25) - bigNote.height) * 0.5);
 		bigNote.color = notes.members[curNote].color;
 
 		colHover = new FunkinSprite();
@@ -73,7 +88,7 @@ class NoteCustomization extends OptionList {
 		colVals = new FlxTypedGroup<FlxText>();
 		colTxts = new FlxTypedGroup<FlxText>();
 		for (i in 0...3) {
-			var wheel = new FunkinSprite(x + 740, (i == 0) ? 370 : wheels.members[i - 1].y + wheels.members[i - 1].height + 60);
+			var wheel = new FunkinSprite(x + 740, (i == 0) ? y + 370 : wheels.members[i - 1].y + wheels.members[i - 1].height + 60);
 			wheel.makeGraphic(1, 1, 0xFFFFFFFF);
 			wheel.scale.set(390, 35);
 			wheel.updateHitbox();
@@ -82,12 +97,12 @@ class NoteCustomization extends OptionList {
 			wheels.add(wheel);
 
 			var txt = new FlxText(wheel.x, wheel.y - 5, wheel.width, _t(names[i]));
-			txt.setFormat(Paths.font("cafeSquare.ttf"), 20, 0xFFFFFFFF, LEFT);
+			txt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 20, 0xFFFFFFFF, LEFT);
 			txt.y -= txt.height;
 			colTxts.add(txt);
 
 			var val = new FlxText(txt.x, txt.y, txt.fieldWidth, Std.string(curCol[i]));
-			val.setFormat(Paths.font("cafeSquare.ttf"), 20, 0xFFFFFFFF, RIGHT);
+			val.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 20, 0xFFFFFFFF, RIGHT);
 			colVals.add(val);
 		}
 
@@ -102,124 +117,67 @@ class NoteCustomization extends OptionList {
         onSelect = (_, __) -> holdingCol = false;
         setOptions([
             {
-                final possible: Array<String> = [];
-                final names: Map<String, String> = [];
-                for (path in Paths.readDirectory("data/noteSkins"))
-                    if (path.endsWith(".json5") || path.endsWith(".json")) {
-                        var name:String = Path.withoutDirectory(Path.withoutExtension(path));
-                        if(name == "default" || possible.contains(name)) continue;
-                        var data = NoteSkin.get(name);
-                        possible.push(name);
-                        names.set(name, data.displayName);
-                    }
-    
-                var opt = new Option("note_skin", "note_skin_desc", "noteSkin", ListOption(possible, true));
+                var opt = new Option("note_skin", "note_skin_desc", "noteSkin", ListOption([for (skin in noteSkinMap) skin.key], true));
                 opt.formatListOption = function(val, _) {
-                    return names[val];
+                    return noteSkinMap[val].name ?? val;
                 };
                 opt.onChange = function(v) {
-                    var newStyle = null;
                     for (i => opt in list) {
                         if (opt.id != "noteSkinStyle") continue;
     
-                        final data = NoteSkin.get(v);
-                        final possible: Array<String> = [];
-                        final names: Map<String, String> = [];
-                        for (name in data.styleOrder) {
-                            if (name == "default" || possible.contains(name)) continue;
-                            possible.push(name);
-                            names.set(name, data.styles[name].displayName);
-                        }
-                        possible.unshift("default");
+                        var keys = noteSkinMap[v].styleKeys.copy();
+                        var names = noteSkinMap[v].styleNames.copy();
+                        keys.unshift("default");
                         names.set("default", "Default (By Context)");
     
-                        opt.type = ListOption(possible, true);
+                        opt.type = ListOption(keys, true);
                         opt.formatListOption = function(item, _) {
-                            return names[item];
+                            return names[item] ?? item;
                         };
     
-                        if (!possible.contains(Settings.data.noteSkinStyle)) {
+                        if (!noteSkinMap[v].styleNames.exists(Settings.data.noteSkinStyle)) {
                             Settings.data.noteSkinStyle = "default";
-                            newStyle = "normal";
                             components[i].change(opt);
                         }
                     }
     
-                    final lumin = Settings.data.quantColouring != "None";
-                    for (note in notes) {
-                        @:bypassAccessor note.style = (newStyle == null ? note.style : newStyle);
-                        note.skin = '';
-                        scaleNote(note, 0.55);
-                        note.updateHitbox();
-    
-                        if (!lumin && note.luminColors) {
-                            note.luminColors = false;
-                            note.color = 0xFFFFFFFF;
-                        }
-                    }
-                    @:bypassAccessor bigNote.style = (newStyle == null ? bigNote.style : newStyle);
-                    bigNote.skin = '';
-                    scaleNote(bigNote, 1.5);
-                    bigNote.updateHitbox();
-                    if (!lumin && bigNote.luminColors) {
-                        bigNote.luminColors = false;
-                        bigNote.color = 0xFFFFFFFF;
-                    }
+                    var style = Settings.data.noteSkinStyle;
+                    style = style != "default" && noteSkinMap[v].styleNames.exists(style) ? style : noteSkinMap[v].styleKeys[0];
+
+                    curSection = NoteStyling.getSkinAndStyle(v, style).sections.get("note");
+                    applySection();
     
                     position(0);
-                    if (!lumin) {
-                        Note.curPalette = getDefaultColumns();
-                        changeNote(0);
-                    }
+                    updatePalette();
+                    changeNote(0);
                 }
                 opt;
             },
             {
-                final data = NoteSkin.get(Settings.data.noteSkin);
-                final possible: Array<String> = [];
-                final names: Map<String, String> = [];
-                for (name in data.styleOrder) {
-                    if (name == "default" || possible.contains(name)) continue;
-                    possible.push(name);
-                    names.set(name, data.styles[name].displayName);
-                }
-                possible.unshift("default");
+                var keys = noteSkinMap[Settings.data.noteSkin].styleKeys.copy();
+                var names = noteSkinMap[Settings.data.noteSkin].styleNames.copy();
+                keys.unshift("default");
                 names.set("default", "Default (By Context)");
     
-                var opt = new Option("note_skin_style", "note_skin_style_desc", "noteSkinStyle", ListOption(possible, true));
+                var opt = new Option("note_skin_style", "note_skin_style_desc", "noteSkinStyle", ListOption(keys, true));
                 opt.formatListOption = function(item, _) {
-                    return names[item];
+                    return names[item] ?? item;
                 };
                 opt.onChange = function(v) {
-                    final style = v == "default" ? "normal" : v;
-                    final lumin = Settings.data.quantColouring != "None";
-                    for (note in notes) {
-                        note.style = style;
-                        scaleNote(note, 0.55);
-                        note.updateHitbox();
-    
-                        if (!lumin && note.luminColors) {
-                            note.luminColors = false;
-                            note.color = 0xFFFFFFFF;
-                        }
-                    }
-                    bigNote.style = style;
-                    scaleNote(bigNote, 1.5);
-                    bigNote.updateHitbox();
-                    bigNote.y = y + 370 + ((160 * 1.5) - bigNote.height) * 0.5;
-                    if (!lumin && bigNote.luminColors) {
-                        bigNote.luminColors = false;
-                        bigNote.color = 0xFFFFFFFF;
-                    }
+                    var skin = Settings.data.noteSkin;
+                    v = v != "default" && noteSkinMap[skin].styleNames.exists(v) ? v : noteSkinMap[skin].styleKeys[0];
+
+                    curSection = NoteStyling.getSkinAndStyle(Settings.data.noteSkin, v).sections.get("note");
+                    applySection();
     
                     position(0);
-                    if (!lumin) {
-                        Note.curPalette = getDefaultColumns();
-                        changeNote(0);
-                    }
+                    updatePalette();
+                    changeNote(0);
                 }
                 opt;
             },
+            /*
+            *yawwwwwwwwwwwwwnnnnnnnn later
             {
                 final possibleNotesplashes: Array<String> = ['none'];
                 final notesplashNames: Map<String, String> = ['none' => 'None'];
@@ -237,11 +195,12 @@ class NoteCustomization extends OptionList {
                     return notesplashNames.get(val) ?? 'Fallback (${val})'; // Display the name so you can figure out what the splash WAS
                 };
                 opt;
-            },
+            },*/
             { // this can be reverted if the order of the quants matter
                 var quantPalettes: Array<String> = [];
-                for(name in funkin.objects.Note.quantPalettes.keys())
+                for(name in NoteColor.quantList.keys())
                     quantPalettes.push(name);
+                quantPalettes.remove("Custom");
     
                 quantPalettes.unshift('Custom (Columns)');
                 quantPalettes.unshift('Custom');
@@ -249,32 +208,10 @@ class NoteCustomization extends OptionList {
     
                 var opt = new Option('quant_col', 'quant_col_desc', "quantColouring", ListOption(quantPalettes, true));
                 opt.onChange = function(v) {
-                    final lumin = v != "None";
-                    if (v.startsWith("Custom")) {
-                        Note.byQuant = v == "Custom";
-                        Note.curPalette = Note.byQuant ? Settings.data.customQuants : Settings.data.customColumns;
-                    } else {
-                        Note.byQuant = lumin;
-                        Note.curPalette = Note.byQuant && Note.quantPalettes.exists(v) ? Note.quantPalettes[v].copy() : getDefaultColumns();
-                    }
-                    
-                    for (i => note in notes) {
-                        if (!lumin || i < Note.curPalette.length)
-                            note.color = lumin ? Note.curPalette[i] : 0xFFFFFFFF;
-                        if (note.luminColors != lumin) {
-                            note.luminColors = lumin;
-                            note.skin = '';
-                            scaleNote(note, 0.55);
-                            note.updateHitbox();
-                        }
-                    }
-                    bigNote.color = notes.members[curNote].color;
-                    if (bigNote.luminColors != lumin) {
-                        bigNote.luminColors = lumin;
-                        bigNote.skin = '';
-                        scaleNote(bigNote, 1.5);
-                        bigNote.updateHitbox();
-                    }
+                    NoteStyling.updatePalette();
+                    updatePalette();
+
+                    applySection();
                     
                     // actions[0] = v.startsWith("Custom") ? "reset" : "apply_custom";
                     // actionTxt.members[0].text = _t(actions[0]).toUpperCase();
@@ -304,7 +241,7 @@ class NoteCustomization extends OptionList {
                 opt;
             },
             {
-                var opt = new Option("<NO-LANG> ", "<NO-LANG> ", "NOTE_ACTION", ButtonOption);
+                var opt = new Option("<NO-LANG> ", "<NO-LANG> ", "NOTE_ACTIONS", ButtonOption);
                 opt.hasMove = true;
                 opt;
             }
@@ -323,16 +260,16 @@ class NoteCustomization extends OptionList {
         final inc = left ? -1 : 1;
         switch (list[current].id) {
             case "NOTE_SELECT":
-                FlxG.sound.play(Paths.audio("scroll", "sfx"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 changeNote(inc);
             case "NOTE_EDIT_COL_0":
-                FlxG.sound.play(Paths.audio("scroll", "sfx"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 editColor(0, Std.int(FlxMath.bound(curCol[0] + inc * (FlxG.keys.pressed.SHIFT ? 1 : 5), 0, rgb ? 255 : 360)));
             case "NOTE_EDIT_COL_1":
-                FlxG.sound.play(Paths.audio("scroll", "sfx"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 editColor(1, Std.int(FlxMath.bound(curCol[1] + inc * (FlxG.keys.pressed.SHIFT ? 1 : 5), 0, rgb ? 255 : 100)));
             case "NOTE_EDIT_COL_2":
-                FlxG.sound.play(Paths.audio("scroll", "sfx"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 editColor(2, Std.int(FlxMath.bound(curCol[2] + inc * (FlxG.keys.pressed.SHIFT ? 1 : 5), 0, rgb ? 255 : 100)));
             case "NOTE_ACTIONS":
         }
@@ -340,9 +277,9 @@ class NoteCustomization extends OptionList {
 
 	function updateColor() {
 		if (rgb) {
-			curCol[0] = Note.curPalette[curNote].red;
-			curCol[1] = Note.curPalette[curNote].green;
-			curCol[2] = Note.curPalette[curNote].blue;
+			curCol[0] = curPalette[curNote].red;
+			curCol[1] = curPalette[curNote].green;
+			curCol[2] = curPalette[curNote].blue;
 
 			for (i in 0...shaders.length) {
 				shaders[i].fromCol.value = [(i == 0 ? 0 : curCol[0] / 255), (i == 1 ? 0 : curCol[1] / 255), (i == 2 ? 0 : curCol[2] / 255), 1];
@@ -355,14 +292,14 @@ class NoteCustomization extends OptionList {
 			return;
 		}
 
-		if (Note.curPalette[curNote].rgb == 0x000000) {
+		if (curPalette[curNote].rgb == 0x000000) {
 			curCol[0] = 0;
 			curCol[1] = 100;
 			curCol[2] = 0;
 		} else {
-			curCol[0] = Math.floor(Note.curPalette[curNote].hue);
-			curCol[1] = Math.floor(Note.curPalette[curNote].saturation * 100);
-			curCol[2] = Math.floor(Note.curPalette[curNote].brightness * 100);
+			curCol[0] = Math.floor(curPalette[curNote].hue);
+			curCol[1] = Math.floor(curPalette[curNote].saturation * 100);
+			curCol[2] = Math.floor(curPalette[curNote].brightness * 100);
 		}
 
 		hueShader.sat.value = [curCol[1] * 0.01];
@@ -382,16 +319,40 @@ class NoteCustomization extends OptionList {
 			val.text = Std.string(curCol[i]);
 	}
 
-	function changeNote(inc:Int) {
-		curNote = FlxMath.wrap(curNote + inc, 0, Note.byQuant ? notes.length - 1 : 3);
+    function updatePalette() {
+        if (!Nevermore.settings.quantization)
+            curPalette = (noteSkinMap[Settings.data.noteSkin].colors[/*keyCount - 1*/ 3]).copy();
+        else
+            curPalette = (NoteColor.bySnap ? NoteColor.currentQuants : NoteColor.current).copy();
+    }
+    function applySection() {
+        for (note in notes) {
+            note.luminize = Nevermore.settings.quantization;
+            note.color = NoteColor.get(note);
+            curSection.applyNoteObject(note);
+            note.scale.scale(0.85);
+            note.updateHitbox();
+        }
 
-		bigNote.luminColors = notes.members[curNote].luminColors;
-		bigNote.color = notes.members[curNote].color;
-		bigNote.data.lane = notes.members[curNote].data.lane;
-		bigNote.reload(bigNote.styleData);
-		scaleNote(bigNote, 1.5);
-		bigNote.updateHitbox();
-		bigNote.y = 370 + ((160 * 1.5) - bigNote.height) * 0.5;
+        bigNote.color = notes.members[curNote].color;
+        bigNote.luminize = Nevermore.settings.quantization;
+        curSection.applyNoteObject(bigNote);
+        bigNote.scale.scale(2.25);
+        bigNote.updateHitbox();
+        bigNote.y = y + 370 + ((curSection.parent.spacing * 2.25) - bigNote.height) * 0.5;
+    }
+	function changeNote(inc:Int) {
+		curNote = FlxMath.wrap(curNote + inc, 0, (NoteColor.bySnap ? NoteColor.currentQuants.length : NoteColor.current.length) - 1);
+
+        bigNote.luminize = Nevermore.settings.quantization;
+        bigNote.color = notes.members[curNote].color;
+        bigNote.lane = notes.members[curNote].lane;
+        curSection.applyNoteObject(bigNote);
+
+        bigNote.scale.scale(2.25);
+        bigNote.updateHitbox();
+        bigNote.y = y + 370 + ((curSection.parent.spacing * 2.25) - bigNote.height) * 0.5;
+
 		updateColor();
 
 		/*checkCanApply();
@@ -405,16 +366,16 @@ class NoteCustomization extends OptionList {
 				actionTxt.members[curAction].font = Paths.font('Rockford-NTLG Medium.ttf');
 			}
 		}*/
-    /*}
+    }
 
 	function editColor(idx:Int, to:Int) {
 		curCol[idx] = to;
 		colVals.members[idx].text = Std.string(curCol[idx]);
 
-		notes.members[curNote].luminColors = bigNote.luminColors = true;
+		notes.members[curNote].luminize = bigNote.luminize = true;
 		if (rgb) {
-			notes.members[curNote].color = bigNote.color = Note.curPalette[curNote] = FlxColor.fromRGB(curCol[0], curCol[1], curCol[2]);
-			//checkCanApply();
+			notes.members[curNote].color = bigNote.color = curPalette[curNote] = FlxColor.fromRGB(curCol[0], curCol[1], curCol[2]);
+			checkCanApply();
 
 			for (i in 0...shaders.length) {
 				if (i == idx) continue;
@@ -425,8 +386,8 @@ class NoteCustomization extends OptionList {
 			return;
 		}
 
-		notes.members[curNote].color = bigNote.color = Note.curPalette[curNote] = FlxColor.fromHSB(curCol[0], curCol[1] * 0.01, curCol[2] * 0.01);
-		//checkCanApply();
+		notes.members[curNote].color = bigNote.color = curPalette[curNote] = FlxColor.fromHSB(curCol[0], curCol[1] * 0.01, curCol[2] * 0.01);
+		checkCanApply();
 		switch (idx) {
 			case 0:
 				var satCol = FlxColor.fromHSB(curCol[0], 0, curCol[2] * 0.01);
@@ -455,23 +416,19 @@ class NoteCustomization extends OptionList {
 		}
 	}
 	function checkCanApply() {
-		final isCustom = Settings.data.quantColouring.startsWith("Custom");
+        if (Settings.data.quantColouring.startsWith("Custom")) {
+            if (NoteColor.bySnap)
+                Settings.data.customQuants = curPalette;
+            else
+                Settings.data.customColumns = curPalette;
+        }
+
+		/*final isCustom = Settings.data.quantColouring.startsWith("Custom");
 		final data = isCustom ? Settings.default_data : Settings.data;
-		//actionTxt.members[0].visible = Note.curPalette[curNote] != (Note.byQuant ? data.customQuants : data.customColumns)[curNote];
+		//actionTxt.members[0].visible = curPalette[curNote] != (NoteColor.bySnap ? data.customQuants : data.customColumns)[curNote];
 
-		colWarning.visible = !isCustom && Note.curPalette[curNote] != (Note.byQuant ? Note.quantPalettes[Settings.data.quantColouring] : getDefaultColumns())[curNote];
-	}
-
-	static function getDefaultColumns():Array<FlxColor> {
-		return switch (Settings.data.noteSkin) {
-			case 'camv2': [0xFFE5307F, 0xFF1BC8F1, 0xFF32D844, 0xFFF32931];
-			case 'circle': [0xFFDB41B8, 0xFF24D4F7, 0xFF31EB40, 0xFFF32931];
-			default: [0xFFC24C99, 0xFF02FFFF, 0xFF13FA06, 0xFFF93A40];
-		}
-	}
-
-	function scaleNote(note:Note, by:Float) {
-		@:privateAccess note.scale.x = note.scale.y = note.styleData.getScale(note) * (by / 0.65);
+        var skinPalette = noteSkinMap[Settings.data.noteSkin].colors[3]; // [keyCount - 1]
+		colWarning.visible = !isCustom && curPalette[curNote] != (NoteColor.bySnap ? NoteColor.quantList[Settings.data.quantColouring] : skinPalette)[curNote];*/
 	}
 
     override function mouseControl() {
@@ -482,7 +439,7 @@ class NoteCustomization extends OptionList {
         if (holdingCol) {
 			if (FlxG.mouse.justReleased) {
 				holdingCol = false;
-				FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+				FlxG.sound.play(Assets.audio("sfx/scroll"));
 			}
 
             final curItem = current - noteColIdx;
@@ -511,18 +468,18 @@ class NoteCustomization extends OptionList {
         if (current == noteSelIdx && mousePoint.y >= hover.y && mousePoint.y <= hover.y + hover.scale.y) {
             var queueHover = -1;
             for (i => note in notes.members) {
-                if ((Note.byQuant || i < 4) && mousePoint.x >= note.x && mousePoint.x <= note.x + note.width) {
+                if ((NoteColor.bySnap || i < NoteColor.current.length) && mousePoint.x >= note.x && mousePoint.x <= note.x + note.width) {
                     queueHover = i;
 
                     if (FlxG.mouse.justReleased && curNote != i) {
                         changeNote(i - curNote);
-                        FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+                        FlxG.sound.play(Assets.audio("sfx/scroll"));
                     }
                 }
             }
 
             if (queueHover >= 0 && queueHover != hoverNote)
-                FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
             hoverNote = queueHover;
         } else
             hoverNote = -1;
@@ -531,12 +488,12 @@ class NoteCustomization extends OptionList {
             if (mousePoint.x >= wheel.x - 4 && mousePoint.x <= wheel.x + wheel.width + 4 && mousePoint.y >= colTxts.members[i].y && mousePoint.y <= wheel.y + wheel.height) {
                 if (mouseMoved && current != noteColIdx + i) {
                     current = noteColIdx + i;
-                    FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+                    FlxG.sound.play(Assets.audio("sfx/scroll"));
                 }
 
                 if (FlxG.mouse.justPressed) {
                     holdingCol = true;
-                    FlxG.sound.play(Paths.audio("scroll", 'sfx'));
+                    FlxG.sound.play(Assets.audio("sfx/scroll"));
                 }
             }
         }
@@ -563,10 +520,12 @@ class NoteCustomization extends OptionList {
             Util.clipByCoords(txt, null, null, y, y + scale.y);
             
             selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current ? 1 : 0), elapsed * 15);
+            txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i]);
 			if (hasSubTexts) {
                 final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
 				sub.alpha = alpha * selPercentages[i];
+                sub.color = txt.color;
                 Util.clipByCoords(sub, null, null, y, y + scale.y);
                 
                 curHeight += (sub.height + 5) * selPercentages[i];
@@ -600,22 +559,28 @@ class NoteCustomization extends OptionList {
 		hover.scale.y = Math.max(hover.scale.y, 0);
 
         // Note Positioning
-        final centerIdx:Float = Note.byQuant ? 5.5 : 2;
+        final centerIdx:Float = curPalette.length * 0.5;
+        final noteSize:Float = curSection.parent.spacing * 0.85;
 		for (i => note in notes.members) {
 			note.setPosition(
-                FlxMath.lerp(note.x, x + width * 0.5 + 160 * 0.55 * (i - centerIdx), elapsed * 15),
-                noteSelY + ((160 * 0.55) - note.height) * 0.5
+                FlxMath.lerp(note.x, x + width * 0.5 + noteSize * (i - centerIdx), elapsed * 15),
+                noteSelY + (noteSize - note.height) * 0.5
             );
-			scaleNote(note, FlxMath.lerp(note.scale.x / note.styleData.getScale(note) * 0.65, (hoverNote == i || curNote == i) ? 0.65 : 0.55, elapsed * 15));
-			note.alpha = FlxMath.lerp(note.alpha, (Note.byQuant || i < 4) ? 1 : 0, elapsed * (7.5 + 7.5 * ((i - 4) / 7)));
-		}
-        bigNote.y = this.y + 360 + ((160 * 1.5) - bigNote.height) * 0.5;
+            note.scale.x = note.scale.y = FlxMath.lerp(note.scale.x, curSection.scale * (hoverNote == i || curNote == i ? 1 : 0.85), elapsed * 15);
+
+            var alphaLerpRatio = elapsed * (7.5 + 7.5 * ((i - NoteColor.current.length) / 7));
+			note.alpha = FlxMath.lerp(note.alpha, (NoteColor.bySnap || i < NoteColor.current.length) ? 1 : 0, alphaLerpRatio);
+        }
+        bigNote.y = this.y + 360 + ((curSection.parent.spacing * 2.25) - bigNote.height) * 0.5;
 
         for (i in 0...wheels.length) {
             final wheel = wheels.members[i];
             final txt = colTxts.members[i];
 			wheel.setPosition(x + 740, this.y + ((i == 0) ? 360 : wheels.members[i - 1].y + wheels.members[i - 1].height + 60));
             txt.setPosition(wheel.x, wheel.y - 5 - txt.height);
+
+            txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i + noteColIdx]);
+            colVals.members[i].color = txt.color;
             colVals.members[i].setPosition(txt.x, txt.y);
         }
         
@@ -632,6 +597,18 @@ class NoteCustomization extends OptionList {
         );
 	}
 
+    override function destroy() {
+        super.destroy();
+
+        notes.destroy();
+        bigNote.destroy();
+        colHover.destroy();
+
+        wheels.destroy();
+        colTxts.destroy();
+        colVals.destroy();
+    }
+
     override function draw() {
         super.draw();
 
@@ -640,12 +617,11 @@ class NoteCustomization extends OptionList {
         colHover.draw();
 
         wheels.draw();
-        colHover.blend = INVERT;
-        colHover.draw();
+        // colHover.blend = INVERT;
+        // colHover.draw();
         colTxts.draw();
         colVals.draw();
-        colHover.draw();
-        colHover.blend = NORMAL;
+        // colHover.draw();
+        // colHover.blend = NORMAL;
     }
 }
-*/
