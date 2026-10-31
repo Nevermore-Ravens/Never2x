@@ -18,6 +18,8 @@ class TextList extends FunkinSprite {
 
 	var curScroll:Float = 0;
 	public var scrollInc:Float = 0;
+	public var itemSpacing(default, set):Float = 40;
+	public var size(default, set):Int = 24;
 
 	public var current:Int = 0;
 
@@ -46,7 +48,7 @@ class TextList extends FunkinSprite {
 		hover = new FunkinSprite(x, y);
 		hover.makeGraphic(1, 1, 0xFFFFFFFF);
 		hover.blend = INVERT;
-		hover.scale.set(width, ITEM_SPACING);
+		hover.scale.set(width, itemSpacing);
 		hover.origin.set();
 
 		texts = new FlxTypedGroup();
@@ -72,20 +74,20 @@ class TextList extends FunkinSprite {
 		var y = y + 15;
 		for (i in 0...txts.length) {
 			var txt = new FlxText(x + 15, y, width - 30, txts[i]);
-			txt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 24, 0xFFFFFFFF, LEFT);
+			txt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), size, 0xFFFFFFFF, LEFT);
 			txt.antialiasing = Settings.data.antialiasing;
 			texts.add(txt);
 
 			if (hasSubTexts) {
 				var sub = new FlxText(txt.x, txt.y, width - 30, subs[i]);
-				sub.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 24, 0xFFFFFFFF, RIGHT);
+				sub.setFormat(Assets.getPath("fonts/LineSeed.ttf"), size, 0xFFFFFFFF, RIGHT);
 				sub.antialiasing = Settings.data.antialiasing;
 				subTexts.add(sub);
 			}
 
 			y += 30;
 		}
-		scrollInc = Math.max(txts.length * ITEM_SPACING + ITEM_SPACING - height, 0) / txts.length;
+		scrollInc = Math.max(txts.length * itemSpacing + itemSpacing - height, 0) / txts.length;
 		position(0);
 	}
 
@@ -146,9 +148,9 @@ class TextList extends FunkinSprite {
 
 	function mouseControl() {
 		for (i in 0...texts.length) {
-			var top = y + 15 - curScroll + ITEM_SPACING * i;
+			var top = y + 15 - curScroll + itemSpacing * i;
 
-			if (mousePoint.y >= top && mousePoint.y <= top + ITEM_SPACING && canSelect(i)) {
+			if (mousePoint.y >= top && mousePoint.y <= top + itemSpacing && canSelect(i)) {
 				retarget((mouseMoved || FlxG.mouse.justPressed) ? i : current);
 
 				if (FlxG.mouse.justPressed && onClick != null)
@@ -162,7 +164,7 @@ class TextList extends FunkinSprite {
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
 		for (i in 0...texts.length) {
 			final txt = texts.members[i];
-			txt.setPosition(x + 15, y + 15 - curScroll + ITEM_SPACING * i);
+			txt.setPosition(x + 15, y + 15 - curScroll + itemSpacing * i);
 			txt.alpha = alpha;
 			Util.clipByCoords(txt, null, null, y, y + scale.y);
 			txt.color = FlxColor.interpolate(txt.color, i != current ? 0xFFFFFFFF : 0xFF000000, elapsed * 15);
@@ -176,7 +178,7 @@ class TextList extends FunkinSprite {
 			}
 		}
 
-		var targetHeight = ITEM_SPACING;
+		var targetHeight = itemSpacing;
 		if (texts.length > 0) {
 			targetHeight = texts.members[current].height;
 			hoverY = FlxMath.lerp(hoverY, texts.members[current].y, elapsed * 15);
@@ -250,5 +252,23 @@ class TextList extends FunkinSprite {
 		hover.destroy();
 		texts.destroy();
 		subTexts.destroy();
+	}
+
+	function set_itemSpacing(to:Float) {
+		scrollInc = Math.max(texts.members.length * to + to - height, 0) / texts.members.length;
+		return itemSpacing = to;
+	}
+	function set_size(to:Int) {
+		size = to;
+		
+		for (txt in texts.members)
+			txt.size = to;
+
+		if (hasSubTexts) {
+			for (sub in subTexts.members)
+				sub.size = to;
+		}
+
+		return size;
 	}
 }
