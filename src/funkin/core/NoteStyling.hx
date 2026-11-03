@@ -23,7 +23,6 @@ class NoteStyling {
 	}
 
 	public static function getSkinAndStyle(key:String, style:String, ?force:Bool) {
-		trace(Nevermore.settings.quantization);
 		return Noteskin.get('skins/' + key + '/' + style, 4, Nevermore.settings.quantization);
 	}
 

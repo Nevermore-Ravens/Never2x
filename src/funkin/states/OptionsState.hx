@@ -405,7 +405,7 @@ class OptionsState extends FunkinState {
 				}
 
 				persistentUpdate = false;
-				openSubState(new DropdownPrompt(x, y, 300, opts, function(idx) {
+				openSubState(new DropdownPrompt(x, y, 250, opts, function(idx) {
 					FlxG.sound.play(Assets.audio("sfx/scroll"));
 					list.list[current].value = options[idx];
 					list.components[current].change(list.list[current]);
@@ -451,6 +451,8 @@ class DropdownPrompt extends FlxSubState {
 	public function new(x:Float, y:Float, width:Float, options:Array<String>, onClick:Int->Void) {
 		super();
 		add(list = new TextList(x, y, width, 0, options));
+		list.itemSpacing = 30;
+		list.size = 18;
 		list.height = Math.min(list.scrollInc * options.length, 600);
 		list.scrollInc = Math.max(list.scrollInc * options.length - list.height, 0) / options.length;
 
