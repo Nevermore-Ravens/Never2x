@@ -10,32 +10,33 @@ class PBOT1Scoring extends ScoreHandler {
 
 	override function get(_):Int return current;
 
+	
+	var current:Int = 0;
+
+	var missScore:Int = -100;
   	var maxScore:Int = 500;
 	var scoringOffset:Float = 54.99;
 	var scoringSlope:Float = 0.080;
 	var minScore:Float = 9.0;
-	var missScore:Int = -100;
 	var perfectThreshold:Float = 5.0;
-	var current:Int = 0;
-
 	function _pbot1(deviation:Float):Int {
 		deviation = Math.abs(deviation);
 
-		return switch deviation {
-			case (_ > Judgement.max.window) => true:
-				missScore;
-
-			case (_ < perfectThreshold) => true:
-				maxScore;
-
-			default:
-				// Fancy equation.
-				// -EliteMasterEric, 2024
-				var factor:Float = 1.0 - (1.0 / (1.0 + Math.exp(-scoringSlope * (deviation - scoringOffset))));
-				var score:Int = Std.int(maxScore * factor + minScore);
-
-				score;
+		if (deviation > Judgement.max.window) {
+			return missScore;
 		}
+
+		if (deviation < perfectThreshold) {
+			return maxScore;
+		}
+
+		// Fancy equation.
+		// -EliteMasterEric, 2024
+		var offset:Float = deviation - scoringOffset;
+		var curve:Float = 1.0 + Math.exp(-scoringSlope * offset);
+		var factor:Float = 1.0 - (1.0 / curve);
+
+		return Std.int(maxScore * factor + minScore);
 	}
 
 	override function noteHit(note:Note, ?deviation:Float) {
