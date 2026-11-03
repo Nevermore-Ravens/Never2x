@@ -715,13 +715,15 @@ class PlayState extends FunkinState {
 
 	// forceLeave:Bool - forces you to leave to the main menu
 	public function endSong(?forceLeave:Bool = false) {
-		Scores.setPlay({
+		Scores.set({
 			songID: songID,
 			difficulty: Difficulty.current,
 			score: stats.score,
 			accuracy: stats.accuracy,
 			modifiers: Settings.data.gameplayModifiers.copy()
 		});
+
+		Scores.save();
 
 		persistentUpdate = false;
 		Conductor.stop();
@@ -752,10 +754,11 @@ class PlayState extends FunkinState {
 		}
 
 		switch (ease) {
-			case "CLASSIC":
-				return;
+			case "CLASSIC": return;
+			
 			case "INSTANT":
 				FlxG.camera.snapToTarget();
+
 			default:
 				var easeFunc = Util.easeFromString(ease);
 				camMoveTwn = FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x, y: camFollow.y}, duration * Conductor.semiquaver * 0.001, {ease: easeFunc});
@@ -771,10 +774,11 @@ class PlayState extends FunkinState {
 
 		defaultZoom = targetZoom;
 		switch (ease) {
-			case "CLASSIC":
-				return;
+			case "CLASSIC": return;
+
 			case "INSTANT":
 				FlxG.camera.zoom = targetZoom;
+				
 			default:
 				var easeFunc = Util.easeFromString(ease);
 				camZoomTwn = FlxTween.tween(FlxG.camera, {zoom: targetZoom}, duration * Conductor.semiquaver * 0.001, {ease: easeFunc});

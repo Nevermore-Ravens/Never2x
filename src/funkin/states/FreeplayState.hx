@@ -140,7 +140,7 @@ class FreeplayState extends FunkinState {
 		add(modsMenu = new OptionList(FlxG.width - 15, FlxG.height * 0.5 - 275, 650, 550));
 		modsMenu.setOptions(cast Modifier.list);
 		modsMenu.onOptMove = (cur, left) -> {
-			var play:PlayData = Scores.getPlay(songList[curSelected].id, curDiffName);
+			var play:PlayData = Scores.get(songList[curSelected].id, curDiffName);
 			intendedScore = play.score;
 			intendedAccuracy = play.accuracy;
 		};
@@ -348,7 +348,7 @@ class FreeplayState extends FunkinState {
 		var displayDiff:String = curDiffName.toUpperCase();
 		difficultyText.text = curDiffs.length == 1 ? displayDiff : '< $displayDiff >';
 
-		var play:PlayData = Scores.getPlay(songList[curSelected].id, curDiffName);
+		var play:PlayData = Scores.get(songList[curSelected].id, curDiffName);
 		intendedScore = play.score;
 		intendedAccuracy = play.accuracy;
 

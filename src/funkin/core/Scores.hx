@@ -51,7 +51,19 @@ class PlayData {
 
 class Scores {
 	public static var list:Array<PlayData> = [];
-	public static var weekList:Array<WeekPlayData> = [];
+
+	// any of these modifiers automatically make
+	// a score unique/separate from other scores
+	public static var uniqueMods:Array<String> = [
+		'playbackRate', 
+		'onlySicks', 
+		'mirroredNotes', 
+		'randomizedNotes', 
+		'playingSide' 
+		#if SV_ALLOWED 
+		, 'svs'
+		#end
+	];
 
 	static var _save:FlxSave;
 
@@ -61,70 +73,23 @@ class Scores {
 
 		list.resize(0);
 		if (_save.data.list != null) list = _save.data.list.copy();
-		if (_save.data.weekList != null) weekList = _save.data.weekList.copy();
 
 		trace(list);
 	}
 
 	public static function save():Void {
 		_save.data.list = list.copy();
-		_save.data.weekList = weekList.copy();
 		_save.flush();
 	}
 
-	////////////////////////////////
-	// WEEKS
-	////////////////////////////////
+	public static function reset(?writeToDisk:Bool = true) {
+		list.resize(0); 
+	}
 
-	public static function getWeekPlay(weekID:String, ?difficulty:String):WeekPlayData {
+	public static function get(songID:String, ?difficulty:String, ?hasModchart:Bool = false):PlayData {
 		difficulty ??= Difficulty.current;
 
-		var plays:Array<WeekPlayData> = filterWeekPlays(weekList, weekID, difficulty);
-		if (plays.length == 0) {
-			return {
-				weekID: weekID,
-				difficulty: difficulty,
-				score: 0,
-
-				modifiers: []
-			}
-		}
-
-		return plays[0];
-	}
-
-	public static function setWeekPlay(data:WeekPlayData):Void {
-		var filteredList:Array<WeekPlayData> = filterWeekPlays(weekList, data.weekID, data.difficulty);
-
-		if (filteredList.length == 0) {
-			weekList.push(data);
-			return;
-		}
-
-		var oldPlay:WeekPlayData = weekList[weekList.indexOf(filteredList[0])];
-		if (oldPlay.score < data.score) oldPlay.score = data.score;
-	}
-
-	public static function filterWeekPlays(plays:Array<WeekPlayData>, weekID:String, difficulty:String):Array<WeekPlayData> {
-		var modifiers:Map<String, Dynamic> = Settings.data.gameplayModifiers.copy();
-
-		return plays.filter(function(play:WeekPlayData) {
-			for (m in ['playbackRate', 'onlySicks', 'mirroredNotes', 'playingSide']) {
-				if (!play.modifiers.exists(m) || play.modifiers[m] != modifiers[m]) return false;
-			}
-
-			return play.weekID == weekID && play.difficulty == difficulty;
-		});
-	}
-
-	////////////////////////////
-	// PLAYS
-	////////////////////////////
-
-	public static function getPlay(songID:String, ?difficulty:String, ?hasModchart:Bool = false):PlayData {
-		difficulty ??= Difficulty.current;
-
-		var plays:Array<PlayData> = filterPlays(list, songID, difficulty, hasModchart);
+		var plays:Array<PlayData> = filter(list, songID, difficulty, hasModchart);
 		if (plays.length == 0) {
 			return {
 				songID: songID,
@@ -139,12 +104,11 @@ class Scores {
 		return plays[0];
 	}
 
-	public static function setPlay(data:PlayData, ?hasModchart:Bool = false):Void {
-		var filteredList:Array<PlayData> = filterPlays(list, data.songID, data.difficulty, hasModchart);
+	public static function set(data:PlayData, ?hasModchart:Bool = false):Void {
+		var filteredList:Array<PlayData> = filter(list, data.songID, data.difficulty, hasModchart);
 
 		if (filteredList.length == 0) {
 			list.push(data);
-			trace(list);
 			return;
 		}
 
@@ -157,19 +121,18 @@ class Scores {
 		if (oldPlay.score < data.score) {
 			oldPlay.score = data.score;
 		}
-
-		trace(list);
 	}
 
-	public static function filterPlays(plays:Array<PlayData>, songID:String, difficulty:String, ?hasModchart:Bool = false):Array<PlayData> {
+	public static function filter(plays:Array<PlayData>, songID:String, difficulty:String, ?hasModchart:Bool = false):Array<PlayData> {
 		var modifiers:Map<String, Dynamic> = Settings.data.gameplayModifiers.copy();
 
 		return plays.filter(function(play:PlayData) {
 			if (hasModchart && (!play.modifiers.exists("modcharts") || play.modifiers["modcharts"] != modifiers["modcharts"])) return false;
 
-			for (m in ['playbackRate', 'onlySicks', 'mirroredNotes', 'playingSide' #if SV_ALLOWED , 'svs' #end]) {
+			for (m in uniqueMods) {
 				if (!play.modifiers.exists(m) || play.modifiers[m] != modifiers[m]) return false;
 			}
+
 			#if !SV_ALLOWED 
 			if(!play.modifiers.exists("svs") || play.modifiers["svs"] == true)return false;
 			#end
