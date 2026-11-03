@@ -43,6 +43,10 @@ class PlayData {
 			modifiers: copyMods ? modifiers.copy() : modifiers
 		};
 	}
+
+	public function toString() {
+		return 'Song: ' + songID + ' | Difficulty: ' + difficulty + ' | Score: ' + score + ' | Accuracy: ' + Util.truncateFloat(accuracy, 3) + '%';
+	}
 }
 
 class Scores {
@@ -58,6 +62,8 @@ class Scores {
 		list.resize(0);
 		if (_save.data.list != null) list = _save.data.list.copy();
 		if (_save.data.weekList != null) weekList = _save.data.weekList.copy();
+
+		trace(list);
 	}
 
 	public static function save():Void {
@@ -89,10 +95,6 @@ class Scores {
 
 	public static function setWeekPlay(data:WeekPlayData):Void {
 		var filteredList:Array<WeekPlayData> = filterWeekPlays(weekList, data.weekID, data.difficulty);
-
-		trace('current modifiers for "${data.weekID} - ${data.difficulty}":');
-		for (key => value in data.modifiers) Sys.println('$key: $value');
-		Sys.println('');
 
 		if (filteredList.length == 0) {
 			weekList.push(data);
@@ -140,12 +142,9 @@ class Scores {
 	public static function setPlay(data:PlayData, ?hasModchart:Bool = false):Void {
 		var filteredList:Array<PlayData> = filterPlays(list, data.songID, data.difficulty, hasModchart);
 
-		Sys.println('current modifiers for "${data.songID} - ${data.difficulty}":');
-		for (key => value in data.modifiers) Sys.println('$key: $value');
-		Sys.println('');
-
 		if (filteredList.length == 0) {
 			list.push(data);
+			trace(list);
 			return;
 		}
 
@@ -158,6 +157,8 @@ class Scores {
 		if (oldPlay.score < data.score) {
 			oldPlay.score = data.score;
 		}
+
+		trace(list);
 	}
 
 	public static function filterPlays(plays:Array<PlayData>, songID:String, difficulty:String, ?hasModchart:Bool = false):Array<PlayData> {

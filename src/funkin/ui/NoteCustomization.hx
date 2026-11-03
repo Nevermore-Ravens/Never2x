@@ -37,10 +37,13 @@ class NoteCustomization extends OptionList {
 
     public function new(x:Float, y:Float, width:Float, height:Float) {
         super(x, y, width, height);
+		Settings.data.noteSkin = Settings.data.noteSkin.toLowerCase();
+
         noteSkinMap = NoteStyling.getList();
 
         var skin = Settings.data.noteSkin;
         var style = Settings.data.noteSkinStyle;
+
 		style = style != "default" && noteSkinMap[skin].styleNames.exists(style) ? style : noteSkinMap[skin].styleKeys[0];
 
         NoteStyling.updatePalette();

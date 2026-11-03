@@ -715,6 +715,14 @@ class PlayState extends FunkinState {
 
 	// forceLeave:Bool - forces you to leave to the main menu
 	public function endSong(?forceLeave:Bool = false) {
+		Scores.setPlay({
+			songID: songID,
+			difficulty: Difficulty.current,
+			score: stats.score,
+			accuracy: stats.accuracy,
+			modifiers: Settings.data.gameplayModifiers.copy()
+		});
+
 		persistentUpdate = false;
 		Conductor.stop();
 		var results = new ResultsScreen(stats);
