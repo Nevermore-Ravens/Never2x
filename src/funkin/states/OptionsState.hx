@@ -51,7 +51,6 @@ class OptionsState extends FunkinState {
 				opt.onChange = function(v) {
 					// reverse the function before settings as this gets inputted after setting.
 					FlxG.sound.toggleMuted();
-					FlxG.sound.muteKeys = v;
 				}
 				opt;
 			},
@@ -60,7 +59,6 @@ class OptionsState extends FunkinState {
 				opt.onChange = function(v) {
 					// reverse the function before settings as this gets inputted after setting.
 					FlxG.sound.changeVolume(-0.1);
-					FlxG.sound.volumeUpKeys = v;
 				}
 				opt;
 			},
@@ -69,7 +67,6 @@ class OptionsState extends FunkinState {
 				opt.onChange = function(v) {
 					// reverse the function before settings as this gets inputted after setting.
 					FlxG.sound.changeVolume(0.1);
-					FlxG.sound.volumeDownKeys = v;
 				}
 				opt;
 			}
@@ -633,17 +630,13 @@ class Option {
 
 	function get_value():Dynamic {
 		if (type == KeyOption)
-			return (controllerMode) ? Controls.gamepad_binds[id] : Controls.binds[id];
+			return Controls.getBindSet(id, controllerMode);
 		return Reflect.field(Settings.data, id);
 	}
 
 	function set_value(v:Dynamic):Dynamic {
-		if (type == KeyOption) {
-		    if(controllerMode)
-				Controls.gamepad_binds.set(id, v);
-			else
-			    Controls.binds.set(id, v);
-		}
+		if (type == KeyOption)
+			Controls.setBindSet(id, v, controllerMode);
 		else
 			Reflect.setField(Settings.data, id, v);
 

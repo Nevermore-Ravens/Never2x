@@ -1,5 +1,8 @@
 package funkin.core;
 
+import nevermore.input.KeyMapping;
+import nevermore.input.Controls as NevermoreControls;
+
 import flixel.input.FlxInput.FlxInputState;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxSave;
@@ -18,6 +21,7 @@ class Controls {
 		'note_down'		=> [F, DOWN],
 		'note_up'		=> [J, UP],
 		'note_right'	=> [K, RIGHT],
+		// if we do add the other key counts here, make sure noteInputDirs gets changed as well.
 
 		'ui_up'			=> [W, UP],
 		'ui_left'		=> [A, LEFT],
@@ -57,11 +61,43 @@ class Controls {
 	];
 	public static var gamepad_binds:Map<String, Array<FlxGamepadInputID>> = default_gamepad_binds;
 
+	public static var bindSetters:Map<String, (name:String, list:Array<Int>, gamepad:Bool) -> Void> = [
+		'note_left' => onNoteBind,
+		'note_down' => onNoteBind,
+		'note_up' => onNoteBind,
+		'note_right' => onNoteBind,
+
+		'volume_mute' => function(_, list, gamepad) {
+			if (!gamepad)
+				FlxG.sound.muteKeys = list;
+		},
+		'volume_up' => function(_, list, gamepad) {
+			if (!gamepad)
+				FlxG.sound.volumeUpKeys = list;
+		},
+		'volume_down' => function(_, list, gamepad) {
+			if (!gamepad)
+				FlxG.sound.volumeDownKeys = list;
+		}
+	];
+
 	static var _save:FlxSave;
 
 	public static function justPressed(name:String):Bool return _getKeyStatus(name, JUST_PRESSED);
 	public static function pressed(name:String):Bool return _getKeyStatus(name, PRESSED);
 	public static function released(name:String):Bool return _getKeyStatus(name, JUST_RELEASED);
+
+	public static function getBindSet(name:String, ?gamepad:Bool = false) {
+		var map:Map<String, Array<Int>> = gamepad ? gamepad_binds : binds;
+		return map.get(name);
+	}
+	public static function setBindSet(name:String, list:Array<Int>, ?gamepad:Bool = false) {
+		var map:Map<String, Array<Int>> = gamepad ? gamepad_binds : binds;
+		map.set(name, list);
+
+		if (bindSetters.exists(name))
+			bindSetters[name](name, list, gamepad);
+	}
 
 	// backend functions to reduce repetitive code
 	static function _getKeyStatus(name:String, state:FlxInputState):Bool {
@@ -129,7 +165,7 @@ class Controls {
 			var loadedKeys:Map<String, Array<FlxKey>> = _save.data.binds;
 			for (control => keys in loadedKeys) {
 				if (!binds.exists(control)) continue;
-				binds.set(control, keys);
+				setBindSet(control, keys);
 			}
 		}
 	}
@@ -152,11 +188,25 @@ class Controls {
         return inline openfl.ui.Keyboard.__convertKeyCode(code);
     }
 
-
 	public static function reset() {
 		for (key in binds.keys()) {
 			if (!default_binds.exists(key)) continue;
-			binds.set(key, default_binds.get(key).copy());
+			setBindSet(key, default_binds.get(key).copy());
 		}
+	}
+
+	// use noteInputDirs.indexOf(name) to get the name corresponding with the input map's index
+	static final noteInputDirs:Array<String> = ["note_left", "note_down", "note_up", "note_right"];
+	static function onNoteBind(name:String, list:Array<Int>, gamepad:Bool) {
+		var dir = noteInputDirs.indexOf(name);
+		var input = gamepad ? NevermoreControls.gamepad : NevermoreControls.keyboard;
+
+		if (gamepad) {
+			// NOTE: most likely inaccurate, research gamepad relation later
+			input.binds.set(dir, list.copy());
+		} else
+			input.binds.set(dir, [for (key in list) KeyMapping.boardToCode(key)]);
+
+		input.bind();
 	}
 }

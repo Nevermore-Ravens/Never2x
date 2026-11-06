@@ -172,10 +172,6 @@ class InitState extends flixel.FlxState {
 		FlxG.cameras.useBufferLocking = true;
 		FlxG.autoPause = Settings.data.autoPause;
 
-		FlxG.sound.volumeUpKeys = Controls.binds["volume_up"];
-		FlxG.sound.volumeDownKeys = Controls.binds["volume_down"];
-		FlxG.sound.muteKeys = Controls.binds["volume_mute"];
-
 		FlxG.sound.volume = FlxG.save.data.volume ?? 1.0;
 		FlxG.sound.muted = FlxG.save.data.muted ?? false;
 		//FlxG.sound.volumeHandler(FlxG.sound.muted ? 0 : FlxG.sound.volume);
