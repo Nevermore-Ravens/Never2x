@@ -73,8 +73,6 @@ class Scores {
 
 		list.resize(0);
 		if (_save.data.list != null) list = _save.data.list.copy();
-
-		trace(list);
 	}
 
 	public static function save():Void {
