@@ -103,48 +103,47 @@ class InitState extends flixel.FlxState {
 	}
 
 	private function startNevermore() {
-		nevermore.Nevermore.init();
-		moonchart.Moonchart.init();
-
-		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomQuaver;
-		//moonchart.backend.FormatDetector.getFormatData(STEPMANIA).handler = CustomStepMania;
-		moonchart.backend.FormatDetector.getFormatData(STEPMANIA_SHARK).handler = CustomSSC;
-		nevermore.core.Song.parser = new SongParser();
-
 		Judgement.register('Never2x', [
 			{
 				name: 'Killer',
-				window: HitWindows.current[0],
 				health: 1.25,
 				color: 0xFF8ACDFF
 			},
 			{
 				name: 'Sick',
-				window: HitWindows.current[1],
 				health: 1,
 				color: 0xFFFFED5E
 			},
 			{
 				name: 'Good',
-				window: HitWindows.current[2],
 				health: 0.25,
 				color: 0xFF5EF95E
 			},
 			{
 				name: 'Bad',
-				window: HitWindows.current[3],
 				health: -5,
 				color: 0xFFBF7BE9
 			},
 			{
 				name: 'Shit',
 				breaksCombo: true,
-				window: HitWindows.current[4],
 				health: -10,
 				color: 0xFF5E3596
 			}
 		]);
-		Judgement.type = 'Never2x';
+
+		nevermore.core.Song.parser = new SongParser();
+		nevermore.Nevermore.init({
+			judgements: 'Never2x',
+			// vv these are custom and modified by n2x itself
+			//quants: 'StepMania',
+			//laneColors: 'Custom'
+		});
+		moonchart.Moonchart.init();
+
+		moonchart.backend.FormatDetector.getFormatData(QUAVER).handler = CustomQuaver;
+		//moonchart.backend.FormatDetector.getFormatData(STEPMANIA).handler = CustomStepMania;
+		moonchart.backend.FormatDetector.getFormatData(STEPMANIA_SHARK).handler = CustomSSC;
 
 		nevermore.skins.BasicNoteskin.scale = 0.65;
 	}
