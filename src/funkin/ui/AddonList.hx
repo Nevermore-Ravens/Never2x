@@ -63,7 +63,7 @@ class AddonList extends TextList {
 				}
 
 				retarget((mouseMoved || dragging || FlxG.mouse.justPressed) ? i : current);
-				if (onSelect != null && !displayHover)
+				if (onSelect != null && !focused)
 					onSelect(current, current);
 
 				if (FlxG.mouse.justReleased && !dragOnce)
@@ -85,13 +85,15 @@ class AddonList extends TextList {
 		if (dragging && allowMouse && (mousePoint.x < x || mousePoint.x > x + scale.x))
 			mouseControl();
 
+		alpha = FlxMath.lerp(alpha, focused ? 1 : 0.5, elapsed * 15);
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
+		var colorMult = Math.max(2 * alpha - 1, 0);
 		var y = y + 15 - curScroll;
 		for (i in 0...texts.length) {
 			var offset = 0.0;
 			final txt = texts.members[i];
 			final sub = subTexts.members[i];
-			selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current && displayHover ? 1 : 0), elapsed * 15);
+			selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current && focused ? 1 : 0), elapsed * 15);
 			if (iconGraphics[i] != null) {
 				final icon = icons.members[i];
 				
@@ -106,7 +108,7 @@ class AddonList extends TextList {
 			txt.setPosition(x + 15 + offset, (dragging && i == current) ? mousePoint.y - dragY : FlxMath.lerp(txt.y, y, elapsed * 20));
 			txt.alpha = alpha;
 			Util.clipByCoords(txt, null, null, this.y, this.y + scale.y);
-			txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i]);
+			txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i] * colorMult);
 			
 			sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
 			sub.alpha = alpha * selPercentages[i];
@@ -124,7 +126,7 @@ class AddonList extends TextList {
 		} else
 			scrollInc = 0;
 		hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
-		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
+		hover.alpha = FlxMath.lerp(hover.alpha, focused ? alpha : 0, elapsed * 15);
 
 		hover.scale.y = hoverHeight;
 		hover.scale.y -= Math.max((hover.y + hoverHeight) - (this.y + scale.y), 0);

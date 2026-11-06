@@ -131,7 +131,9 @@ class OptionList extends TextList {
 				compon.update(elapsed);
 		}
 
+		alpha = FlxMath.lerp(alpha, focused ? 1 : 0.5, elapsed * 15);
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
+        var colorMult = Math.max(2 * alpha - 1, 0);
         var y = y + 15 - curScroll;
 		for (i in 0...texts.length) {
             final txt = texts.members[i];
@@ -140,7 +142,7 @@ class OptionList extends TextList {
             Util.clipByCoords(txt, null, null, this.y, this.y + scale.y);
             
             selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current ? 1 : 0), elapsed * 15);
-			txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i]);
+			txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i] * colorMult);
 			if (hasSubTexts) {
                 final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
@@ -160,7 +162,7 @@ class OptionList extends TextList {
 		hoverY = FlxMath.lerp(hoverY, texts.members[current].y, elapsed * 15);
         hover.setPosition(x, hoverY);
         hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
-		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
+		hover.alpha = FlxMath.lerp(hover.alpha, focused ? alpha : 0, elapsed * 15);
 
 		hover.scale.y = hoverHeight;
 		hover.scale.y -= Math.max((hover.y + hoverHeight) - (this.y + scale.y), 0);
@@ -316,7 +318,8 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 		setPosition(txt.x + txt.width - width, y + (height - this.height) * 0.5);
 		scale.x = scale.y = 0.65 + 0.35 * selPercent;
 
-		color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
+		color = txt.color;
+		alpha = txt.alpha;
 	}
 	public function clip(top:Float, bottom:Float) {
 		//var y =  Math.max(top - y, 0);
@@ -405,7 +408,8 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 		scale.x = scale.y = 0.5 + 0.5 * selPercent;
 		setPosition(txt.x + txt.width, y + (height - this.height) * 0.5);
 
-		color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
+		color = txt.color;
+		alpha = txt.alpha;
 	}
 	public function clip(top:Float, bottom:Float) {
 		//Util.clipByCoords(this, null, null, top, bottom);
@@ -461,8 +465,10 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 		label.scale.x = label.scale.y = 0.5 + 0.5 * selPercent;
 		label.setPosition(x - frameWidth * this.scale.x, this.y + (this.frameHeight - label.height) * 0.5);
 
-		color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
+		color = txt.color;
+		alpha = txt.alpha;
 		label.color = color;
+		label.alpha = alpha;
 	}
 	public function clip(top:Float, bottom:Float) {
 		//Util.clipByCoords(this, null, null, top, bottom);
@@ -551,7 +557,11 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 		label.offset.x = label.origin.x = label.graphic.width;
 		label.scale.x = label.scale.y = 0.65 + 0.35 * selPercent;
 		label.setPosition(x, this.y + (this.scale.y - label.height) * 0.5);
-		label.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercent);
+		label.color = txt.color;
+
+		alpha = txt.alpha;
+		fill.alpha = alpha;
+		label.alpha = alpha;
 	}
 	public function clip(top:Float, bottom:Float) {
 		//Util.clipByCoords(this, null, null, top, bottom);

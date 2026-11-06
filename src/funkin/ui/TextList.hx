@@ -27,7 +27,7 @@ class TextList extends FunkinSprite {
 	public var hovered(get, never):Bool;
 	public var allowKeys:Bool = true;
 	public var allowMouse:Bool = true;
-	public var displayHover:Bool = true;
+	public var focused:Bool = true;
 	public var mouseCamera:FlxCamera;
 
 	public var onClick:(current:Int)->Void;
@@ -161,13 +161,14 @@ class TextList extends FunkinSprite {
 	}
 
 	function position(elapsed:Float) {
+		alpha = FlxMath.lerp(alpha, focused ? 1 : 0.5, elapsed * 15);
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
 		for (i in 0...texts.length) {
 			final txt = texts.members[i];
 			txt.setPosition(x + 15, y + 15 - curScroll + itemSpacing * i);
 			txt.alpha = alpha;
 			Util.clipByCoords(txt, null, null, y, y + scale.y);
-			txt.color = FlxColor.interpolate(txt.color, i != current ? 0xFFFFFFFF : 0xFF000000, elapsed * 15);
+			txt.color = FlxColor.interpolate(txt.color, (!focused || i != current) ? 0xFFFFFFFF : 0xFF000000, elapsed * 15);
 
 			if (hasSubTexts) {
 				final sub = subTexts.members[i];
@@ -184,7 +185,7 @@ class TextList extends FunkinSprite {
 			hoverY = FlxMath.lerp(hoverY, texts.members[current].y, elapsed * 15);
 			hover.setPosition(x, hoverY);
 		}
-		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
+		hover.alpha = FlxMath.lerp(hover.alpha, focused ? alpha : 0, elapsed * 15);
 
 		hover.scale.y = targetHeight;
 		hover.scale.y -= Math.max((hover.y + hover.scale.y) - (y + scale.y), 0);

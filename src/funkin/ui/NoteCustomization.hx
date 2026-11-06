@@ -518,7 +518,9 @@ class NoteCustomization extends OptionList {
         notes.update(elapsed);
         bigNote.update(elapsed);
 
+        alpha = FlxMath.lerp(alpha, focused ? 1 : 0.5, elapsed * 15);
 		curScroll = FlxMath.lerp(curScroll, scrollInc * current, elapsed * 15);
+        var colorMult = Math.max(2 * alpha - 1, 0);
         var y = y + 45 - curScroll;
         var targetHeight = 0.0;
         var noteSelY = 0.0;
@@ -530,7 +532,7 @@ class NoteCustomization extends OptionList {
             Util.clipByCoords(txt, null, null, y, y + scale.y);
             
             selPercentages[i] = FlxMath.lerp(selPercentages[i], (i == current ? 1 : 0), elapsed * 15);
-            txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i]);
+            txt.color = FlxColor.interpolate(0xFFFFFFFF, 0xFF000000, selPercentages[i] * colorMult);
 			if (hasSubTexts) {
                 final sub = subTexts.members[i];
 				sub.setPosition(txt.x, txt.y + (txt.height - 5) * selPercentages[i]);
@@ -559,7 +561,7 @@ class NoteCustomization extends OptionList {
         scrollInc = Math.max((y + curScroll - this.y - 15 + 60) - height, 0) / texts.length;
         hover.setPosition(x, FlxMath.lerp(hover.y, texts.members[current].y - 5, elapsed * 15));
         hoverHeight = FlxMath.lerp(hoverHeight, targetHeight, elapsed * 15);
-		hover.alpha = FlxMath.lerp(hover.alpha, displayHover ? alpha : 0, elapsed * 15);
+		hover.alpha = FlxMath.lerp(hover.alpha, focused ? alpha : 0, elapsed * 15);
 
 		hover.scale.y = hoverHeight;
 		hover.scale.y -= Math.max((hover.y + hoverHeight) - (y + scale.y), 0);

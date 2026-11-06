@@ -44,38 +44,38 @@ class AddonsMenu extends FlxSubState {
 
 		add(leftBox = new AddonList(50, 100, 565, 520, addonsOff));
 		leftBox.mouseCamera = camera;
-		leftBox.displayHover = leftBox.allowKeys = addonsOff.length > 0;
+		leftBox.focused = leftBox.allowKeys = addonsOff.length > 0;
 		leftBox.allowDrag = false;
 		leftBox.onRemoveAddon = function(addon, graphic) {
 			rightBox.addAddon(addon, graphic);
 			FlxG.sound.play(Assets.audio('sfx/scroll'));
-			leftBox.displayHover = leftBox.allowKeys = leftBox.list.length > 1;
-			rightBox.displayHover = rightBox.allowKeys = !leftBox.displayHover;
-			curBox = leftBox.displayHover ? leftBox: rightBox;
+			leftBox.focused = leftBox.allowKeys = leftBox.list.length > 1;
+			rightBox.focused = rightBox.allowKeys = !leftBox.focused;
+			curBox = leftBox.focused ? leftBox: rightBox;
 		};
 		leftBox.onSelect = function(cur, last) {
 			FlxG.sound.play(Assets.audio('sfx/scroll'));
-			leftBox.displayHover = leftBox.allowKeys = true;
-			rightBox.displayHover = rightBox.allowKeys = false;
+			leftBox.focused = leftBox.allowKeys = true;
+			rightBox.focused = rightBox.allowKeys = false;
 			curBox = leftBox;
 		};
 		add(rightBox = new AddonList(665, 100, 565, 520, addonsOn));
 		rightBox.mouseCamera = camera;
-		rightBox.displayHover = rightBox.allowKeys = addonsOff.length <= 0 && addonsOn.length > 0;
+		rightBox.focused = rightBox.allowKeys = addonsOff.length <= 0 && addonsOn.length > 0;
 		rightBox.onRemoveAddon = function(addon, graphic) {
 			leftBox.addAddon(addon, graphic);
 			FlxG.sound.play(Assets.audio('sfx/scroll'));
-			rightBox.displayHover = rightBox.allowKeys = rightBox.list.length > 1;
-			leftBox.displayHover = leftBox.allowKeys = !rightBox.displayHover;
-			curBox = leftBox.displayHover ? leftBox: rightBox;
+			rightBox.focused = rightBox.allowKeys = rightBox.list.length > 1;
+			leftBox.focused = leftBox.allowKeys = !rightBox.focused;
+			curBox = leftBox.focused ? leftBox: rightBox;
 		};
 		rightBox.onSelect = function(cur, last) {
 			FlxG.sound.play(Assets.audio('sfx/scroll'));
-			leftBox.displayHover = leftBox.allowKeys = false;
-			rightBox.displayHover = rightBox.allowKeys = true;
+			leftBox.focused = leftBox.allowKeys = false;
+			rightBox.focused = rightBox.allowKeys = true;
 			curBox = rightBox;
 		};
-		curBox = leftBox.displayHover ? leftBox : rightBox;
+		curBox = leftBox.focused ? leftBox : rightBox;
 
 		add(actionHover = new FunkinSprite());
 		actionHover.makeGraphic(1, 1);
@@ -123,7 +123,7 @@ class AddonsMenu extends FlxSubState {
 		super.update(delta);
 
 		final upJustPressed = Controls.justPressed("ui_up");
-		var inActions = !leftBox.displayHover && !rightBox.displayHover;
+		var inActions = !leftBox.focused && !rightBox.focused;
 		if (inActions && (leftBox.list.length > 0 || rightBox.list.length > 0) && (upJustPressed || Controls.justPressed("ui_down"))) {
 			inActions = false;
 			curBox = curBox == leftBox && leftBox.list.length > 0 ? leftBox : rightBox;
@@ -133,11 +133,11 @@ class AddonsMenu extends FlxSubState {
 				curBox.onSelect(idx, idx);
 			else
 				curBox.retarget(idx);
-		} else if (curBox.displayHover && !FlxG.keys.pressed.SHIFT && ((lastCurrent == 0 && upJustPressed) || (lastCurrent == curBox.list.length - 1 && Controls.justPressed("ui_down")))) {
+		} else if (curBox.focused && !FlxG.keys.pressed.SHIFT && ((lastCurrent == 0 && upJustPressed) || (lastCurrent == curBox.list.length - 1 && Controls.justPressed("ui_down")))) {
 			curBox.current = lastCurrent;
 			inActions = true;
 			FlxG.sound.play(Assets.audio("sfx/scroll"));
-			curBox.displayHover = curBox.allowKeys = false;
+			curBox.focused = curBox.allowKeys = false;
 		}
 		
 		var runAction = inActions && Controls.justPressed("accept");
@@ -148,8 +148,8 @@ class AddonsMenu extends FlxSubState {
 						FlxG.sound.play(Assets.audio('sfx/scroll'));
 					curAction = i;
 					inActions = true;
-					leftBox.displayHover = leftBox.allowKeys = false;
-					rightBox.displayHover = rightBox.allowKeys = false;
+					leftBox.focused = leftBox.allowKeys = false;
+					rightBox.focused = rightBox.allowKeys = false;
 					runAction = runAction || FlxG.mouse.justPressed;
 					break;
 				}
@@ -193,7 +193,7 @@ class AddonsMenu extends FlxSubState {
 		final leftJustPressed = Controls.justPressed("ui_left");
 		if (leftJustPressed || Controls.justPressed("ui_right")) {
 			if (!inActions && leftBox.list.length > 0 && rightBox.list.length > 0) {
-				final target = leftBox.displayHover ? rightBox : leftBox;
+				final target = leftBox.focused ? rightBox : leftBox;
 				final idx = Std.int(Math.min(curBox.current, target.list.length - 1));
 				if (target.current == idx)
 					target.onSelect(idx, idx);

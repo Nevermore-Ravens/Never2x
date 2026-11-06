@@ -85,14 +85,8 @@ class OptionsState extends FunkinState {
 				var opt = new Option('customize_notes', 'customize_notes_desc', "", ButtonOption);
 				opt.hasSound = true;
 				opt.onChange = function(_) {
-					self.wasInOpts = self.optText.allowKeys;
-
-					self.cateText.allowKeys = false;
-					self.cateText.allowMouse = false;
-					self.optText.allowKeys = false;
-					self.optText.allowMouse = false;
-
-					self.noteEdit.active = true;
+					self.lastList = self.targetList;
+					self.targetList = self.noteEdit;
 				};
 				opt;
 			},
@@ -266,7 +260,7 @@ class OptionsState extends FunkinState {
 	];
 	public static var inPlayState:Bool = false;
 	
-	var wasInOpts:Bool = false;
+	var lastList:TextList;
 	var waitingForKey:Bool = false;
 	var controllerMode:Bool = false;
 	
@@ -277,6 +271,9 @@ class OptionsState extends FunkinState {
 	var bg:FunkinSprite;
 	var cateText:TextList;
 	var optText:OptionList;
+
+	var targetList(default, set):TextList;
+	var targetPos:FlxPoint = FlxPoint.get();
 
 	var noteEdit:NoteCustomization;
 
@@ -311,8 +308,9 @@ class OptionsState extends FunkinState {
 		add(cateText);
 
 		openCategory(0);
-		cateText.allowKeys = true;
-		optText.allowKeys = false;
+
+		lastList = cateText;
+		targetList = cateText;
 	}
 
 	override function update(delta:Float) {
@@ -323,10 +321,7 @@ class OptionsState extends FunkinState {
 			inline function restore(sound:String) {
 				optText.setSubText(optText.current, OptionList.getDesc(opt));
 				optText.components[optText.current].change(opt);
-				cateText.allowKeys = !wasInOpts;
-				cateText.allowMouse = true;
-				optText.allowKeys = wasInOpts;
-				optText.allowMouse = true;
+				targetList = lastList;
 
 				FlxG.sound.play(Assets.audio("sfx/" + sound));
 				waitingForKey = false;
@@ -358,34 +353,30 @@ class OptionsState extends FunkinState {
 		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
 			FlxG.sound.play(Assets.audio("sfx/cancel"));
 
-			if (noteEdit.active) {
-				noteEdit.active = false;
-
-				cateText.allowMouse = true;
-				cateText.allowKeys = !wasInOpts;
-				optText.allowMouse = true;
-				optText.allowKeys = wasInOpts;
-			} else if (optText.allowKeys) {
-				cateText.allowKeys = true;
-				optText.allowKeys = false;
-			} else {
+			if (targetList == cateText) {
 				if (inPlayState) FunkinState.switchState(new PlayState());
 				else FunkinState.switchState(new MainMenuState());
+			} else if (targetList == optText) {
+				targetList = cateText;
+			} else {
+				targetList = lastList;
 			}
 		}
 		super.update(delta);
-		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, noteEdit.active ? FlxG.width : 0, delta * 20);
-		cateText.displayHover = cateText.allowKeys || cateText.hovered;
-		optText.displayHover = optText.allowKeys || optText.hovered;
+
+		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, targetPos.x, delta * 20);
+		FlxG.camera.scroll.y = FlxMath.lerp(FlxG.camera.scroll.y, targetPos.y, delta * 20);
+
+		cateText.focused = cateText.allowKeys || cateText.hovered;
+		optText.focused = optText.allowKeys || optText.hovered;
 	}
 
 	function optEnter(list:OptionList, current:Int) {
 		switch (list.list[current].type) {
 			case KeyOption:
-				wasInOpts = optText.allowKeys;
-				cateText.allowKeys = false;
+				lastList = targetList;
+				targetList.allowKeys = false;
 				cateText.allowMouse = false;
-				optText.allowKeys = false;
 				optText.allowMouse = false;
 	
 				waitingForKey = true;
@@ -414,12 +405,11 @@ class OptionsState extends FunkinState {
 
 	function openCategory(cate:Int) {
 		FlxG.sound.play(Assets.audio("sfx/scroll"));
-		if (optText.allowKeys && cate == selCategory)
+		if (targetList == optText && cate == selCategory)
 			return;
 
 		selCategory = cate;
-		cateText.allowKeys = false;
-		optText.allowKeys = true;
+		targetList = optText;
 
 		curOptList.resize(0);
 		final settingFields = Type.getInstanceFields(SaveVariables);
@@ -437,7 +427,30 @@ class OptionsState extends FunkinState {
 		Controls.save();
 		Settings.save();
 		Settings.updateNevermore();
+		targetPos.put();
 		self = null;
+	}
+
+	function set_targetList(to:TextList) {
+		var mainOpts = to == cateText || to == optText;
+		for (mem in members) {
+			if (!Std.isOfType(mem, TextList))
+				continue;
+			var list:TextList = cast mem;
+			var isMain:Bool = list == cateText || list == optText;
+
+			list.allowKeys = list == to;
+			list.allowMouse = (mainOpts && isMain) || list == to;
+			list.active = isMain || list == to;
+		}
+
+		// damn switch didnt wanna work
+		if (to == noteEdit)
+			targetPos.set(FlxG.width, 0);
+		else
+			targetPos.set();
+
+		return targetList = to;
 	}
 }
 
