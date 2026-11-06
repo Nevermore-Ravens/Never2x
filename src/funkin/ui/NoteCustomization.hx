@@ -64,7 +64,7 @@ class NoteCustomization extends OptionList {
 			var note = new Note();
             note.data = {snapID: i};
 			note.lane = i % NoteColor.current.length;
-			note.luminize = Nevermore.settings.quantization;
+			note.luminize = Nevermore.settings.luminize;
             note.color = NoteColor.get(note);
             note.scrollFactor.x = 1;
 
@@ -83,7 +83,7 @@ class NoteCustomization extends OptionList {
 
 		bigNote = new Note();
 		bigNote.lane = notes.members[curNote].lane;
-		bigNote.luminize = Nevermore.settings.quantization;
+		bigNote.luminize = Nevermore.settings.luminize;
 		curSection.applyNoteObject(bigNote);
 		bigNote.scale.scale(2.25);
 		bigNote.updateHitbox();
@@ -330,14 +330,14 @@ class NoteCustomization extends OptionList {
 	}
 
     function updatePalette() {
-        if (!Nevermore.settings.quantization)
+        if (!Nevermore.settings.luminize)
             curPalette = (noteSkinMap[Settings.data.noteSkin].colors[/*keyCount - 1*/ 3]).copy();
         else
             curPalette = (NoteColor.bySnap ? NoteColor.currentQuants : NoteColor.current).copy();
     }
     function applySection() {
         for (note in notes) {
-            note.luminize = Nevermore.settings.quantization;
+            note.luminize = Nevermore.settings.luminize;
             note.color = NoteColor.get(note);
             curSection.applyNoteObject(note);
             note.scale.scale(0.85);
@@ -345,7 +345,7 @@ class NoteCustomization extends OptionList {
         }
 
         bigNote.color = notes.members[curNote].color;
-        bigNote.luminize = Nevermore.settings.quantization;
+        bigNote.luminize = Nevermore.settings.luminize;
         curSection.applyNoteObject(bigNote);
         bigNote.scale.scale(2.25);
         bigNote.updateHitbox();
@@ -354,7 +354,7 @@ class NoteCustomization extends OptionList {
 	function changeNote(inc:Int) {
 		curNote = FlxMath.wrap(curNote + inc, 0, (NoteColor.bySnap ? NoteColor.currentQuants.length : NoteColor.current.length) - 1);
 
-        bigNote.luminize = Nevermore.settings.quantization;
+        bigNote.luminize = Nevermore.settings.luminize;
         bigNote.color = notes.members[curNote].color;
         bigNote.lane = notes.members[curNote].lane;
         curSection.applyNoteObject(bigNote);

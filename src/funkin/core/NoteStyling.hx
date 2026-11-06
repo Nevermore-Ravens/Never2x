@@ -23,7 +23,7 @@ class NoteStyling {
 	}
 
 	public static function getSkinAndStyle(key:String, style:String, ?force:Bool) {
-		return Noteskin.get('skins/' + key + '/' + style, 4, Nevermore.settings.quantization);
+		return Noteskin.get('skins/' + key + '/' + style, 4, Nevermore.settings.luminize);
 	}
 
 	public static function findRelativeStyle(skin:Noteskin, style:String, ?force:Bool) {
@@ -55,7 +55,7 @@ class NoteStyling {
 		NoteColor.quantList["Custom"] = Settings.data.customQuants;
 		NoteColor.list["Custom"] = Settings.data.customColumns; // may become Array<Array> later on
 
-		Nevermore.settings.quantization = Settings.data.quantColouring != "None";
+		Nevermore.settings.luminize = Settings.data.quantColouring != "None";
 		NoteColor.bySnap = NoteColor.quantList.exists(Settings.data.quantColouring);
 		@:privateAccess NoteColor.quantType = NoteColor.bySnap ? Settings.data.quantColouring : CUSTOM;
 		@:privateAccess NoteColor.type = CUSTOM;
