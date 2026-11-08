@@ -62,10 +62,11 @@ class Grade {
 
 @:structInit
 @:publicFields
-class NoteHitData {
-	var time:Int = 0;
-	var deviation:Float = 0;
-	var count:Bool = true;
+class GraphPoint {
+	var time:Float = 0;
+	var nps:Int = 0;
+	var combo:Int = 0;
+	var accuracy:Float = 100;
 }
 
 @:structInit
@@ -82,6 +83,8 @@ class N2XStatistics extends nevermore.play.Statistics {
 		{type: GRADE_F, accuracy: 0, color: 0xFF27060D},
 	];
 
+	var missName:String = "Miss";
+	var missColor:FlxColor = 0xFFE3083F;
 	var fails:Int = 0;
 
 	var score:Int = 0;
@@ -96,6 +99,20 @@ class N2XStatistics extends nevermore.play.Statistics {
 
 	var clearType:ClearType = CLEARTYPE_DEFAULT;
 	var grade:Grade = grades[grades.length - 1];
+
+	var graphPoints:Array<GraphPoint> = [];
+	public function storeGraphPoint(time:Float) {
+		var idx = graphPoints.length;
+		while (idx > 0 && graphPoints[idx - 1].time > time)
+			--idx; // very not likely but just in case
+
+		graphPoints.insert(idx, {
+			time: time,
+			nps: nps,
+			combo: combo,
+			accuracy: accuracy
+		});
+	}
 
 	// TODO
 	// i wanna make this a getter at some point
@@ -140,5 +157,12 @@ class N2XStatistics extends nevermore.play.Statistics {
 		}
 
 		return grades[grades.length - 1];
+	}
+
+	override function set_nps(v:Int) {
+		nps = v;
+		if (v > maxNPS) maxNPS = v;
+		storeGraphPoint(Conductor.audioTime);
+		return nps;
 	}
 }

@@ -237,7 +237,7 @@ class PlayState extends FunkinState {
 	}
 
 	function openPauseMenu() {
-		final substate:PauseMenu = new PauseMenu(songID, Difficulty.current, 0);
+		final substate:PauseMenu = new PauseMenu(chart.title, Difficulty.current, 0);
 		substate.cameras = [camOther];
 
 		openSubState(substate);
@@ -543,7 +543,7 @@ class PlayState extends FunkinState {
 
 		hud.add(judgeNames = new FlxText(5, 0, 0, '', 18));
 		judgeNames.font = Assets.getPath('fonts/LineSeed.ttf');
-		judgeNames.color = 0xFFFF0000; // sets the default format color to the miss color
+		judgeNames.color = stats.missColor; // sets the default format color to the miss color
 		judgeNames.borderStyle = FlxTextBorderStyle.OUTLINE;
 		judgeNames.borderSize = 1.5;
 		judgeNames.visible = Settings.data.judgementCounter;
@@ -602,7 +602,8 @@ class PlayState extends FunkinState {
 			judgeNames.addFormat(new FlxTextFormat(judge.color), lastNameEnd, judgeNames.text.length);
 			lastNameEnd = judgeNames.text.length;
 		}
-		judgeNames.text += "MS";
+		var shortenedName:String = stats.missName.charAt(0) + stats.missName.charAt(stats.missName.length - 1);
+		judgeNames.text += shortenedName.toUpperCase();
 		judgeNames.updateHitbox();
 	}
 
@@ -673,6 +674,7 @@ class PlayState extends FunkinState {
 		stats.grade = stats.getGrade();
 		stats.score = scoring.get(stats);
 		stats.accuracy = accuracy.get(stats);
+		stats.storeGraphPoint(Conductor.audioTime);
 
 		if (!hud.visible) return;
 

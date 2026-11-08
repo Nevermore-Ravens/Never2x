@@ -2,6 +2,7 @@
 // project specific
 import funkin.core.*;
 import funkin.ui.*;
+import funkin.core.Difficulty.DiffData;
 import funkin.core.WeekData.WeekFile;
 import funkin.core.Scores.PlayData;
 import funkin.objects.FunkinSprite;

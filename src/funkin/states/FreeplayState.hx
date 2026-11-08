@@ -40,6 +40,7 @@ class FreeplayState extends FunkinState {
 	static var curDifficulty:Int;
 	static var curDiffName:String = Difficulty.current;
 	static var curDiffs:Array<String> = Difficulty.list;
+	static var curColors:Array<FlxColor> = Difficulty.colors;
 
 	var grpSongs:FlxTypedSpriteGroup<Alphabet>;
 	var grpIcons:FlxTypedSpriteGroup<CharIcon>;
@@ -83,12 +84,13 @@ class FreeplayState extends FunkinState {
 			folder: '',
 			icon: 'random',
 			difficulties: ['???'],
+			colors: [0xFFFFFFFF],
 			weekIdx: 0
 		});
 
 		for (i => week in WeekData.list) {
 			for (song in week.songs) {
-				var diffs:Array<String> = song?.difficulties;
+				var diffs:Array<DiffData> = song?.difficulties;
 				if (song.difficulties == null || song.difficulties.length == 0) diffs = Difficulty.loadFromWeek(week);
 
 				songList.push({
@@ -96,7 +98,8 @@ class FreeplayState extends FunkinState {
 					colour: song.color,
 					folder: week.folder,
 					icon: song.icon,
-					difficulties: diffs,
+					difficulties: [for (diff in diffs) diff.name],
+					colors: [for (diff in diffs) diff.color],
 					weekIdx: i
 				});
 			}
@@ -224,6 +227,7 @@ class FreeplayState extends FunkinState {
 			WeekData.current = songList[curSelected].weekIdx;
 			PlayState.songID = songID;
 			Difficulty.list = curDiffs;
+			Difficulty.colors = curColors;
 			Difficulty.current = curDiffName;
 			FunkinState.switchState(new PlayState());
 			// so that the user doesn't have to scroll all the way back up
@@ -337,6 +341,7 @@ class FreeplayState extends FunkinState {
 		}
 
 		curDiffs = songList[curSelected].difficulties;
+		curColors = songList[curSelected].colors;
 		curDifficulty = curDiffs.indexOf(curDiffName);
 		if (curDifficulty == -1) curDifficulty = 0;
 		changeDifficulty();
@@ -348,6 +353,7 @@ class FreeplayState extends FunkinState {
 		curDiffName = curDiffs[curDifficulty];
 		var displayDiff:String = curDiffName.toUpperCase();
 		difficultyText.text = curDiffs.length == 1 ? displayDiff : '< $displayDiff >';
+		difficultyText.color = curColors[curDifficulty];
 
 		var play:PlayData = Scores.get(songList[curSelected].id, curDiffName);
 		intendedScore = play.score;
@@ -390,5 +396,6 @@ typedef SongMeta = {
 	var colour:FlxColor;
 	var folder:String;
 	var difficulties:Array<String>;
+	var colors:Array<FlxColor>;
 	var weekIdx:Int;
 }

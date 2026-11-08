@@ -5,7 +5,6 @@
 	"receptor": {
 		"style": "sparrow",
 		"spritesheet": "sheet",
-		"angles": [180, -45, 0, 180, 45, 0],
 		"animations": [
 			{
 				"name": "standard",
@@ -28,7 +27,6 @@
 	"note": {
 		"style": "sparrow",
 		"spritesheet": "sheet",
-		"angles": [180, -45, 0, 180, 45, 0],
 		"animations": [{
 			"name": "standard",
 			"prefixes": ["red0", "green0", "blue0", "blue0", "green0", "red0"],

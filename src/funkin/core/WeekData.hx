@@ -9,7 +9,7 @@ class WeekFile {
 	var background:String = '';
 	var folder:String = '';
 	var fileName:String = ''; 
-	var difficulties:Array<String> = Difficulty.default_list;
+	var difficulties:Array<DiffData> = Difficulty.loadDynamic(null);
 }
 
 @:structInit
@@ -18,7 +18,7 @@ class SongData {
 	var id:String = '';
 	var color:FlxColor = 0xFFFFFFFF;
 	var icon:String = 'face';
-	var difficulties:Array<String> = [];
+	var difficulties:Array<DiffData> = [];
 }
 
 class WeekData {
@@ -68,19 +68,20 @@ class WeekData {
 		var data = Json5.parse(File.getContent(path));
 		for (property in Reflect.fields(data)) {
 			if (!Reflect.fields(file).contains(property)) continue;
-			if (property == 'songs' || property == 'file' || property == 'fileName') continue;
+			if (property == 'songs' || property == 'difficulties' || property == 'file' || property == 'fileName') continue;
 
 			Reflect.setField(file, property, Reflect.field(data, property));
 		}
+		file.difficulties = Difficulty.loadDynamic(data.difficulties);
 
 		// god i hate haxe sometimes
-		var songs:Array<{id:String, color:FlxColor, icon:String, difficulties:Array<String>}> = data.songs;
+		var songs:Array<{id:String, color:FlxColor, icon:String, difficulties:Dynamic}> = data.songs;
 		for (song in songs) {
 			file.songs.push({
 				id: song.id,
 				color: song.color,
 				icon: song.icon,
-				difficulties: song.difficulties
+				difficulties: song.difficulties == null ? null : Difficulty.loadDynamic(song.difficulties, file.difficulties)
 			});
 		}
 
