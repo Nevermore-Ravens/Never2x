@@ -15,15 +15,18 @@ enum abstract ComboColorMode(Int) {
 class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 	public static inline final default_precacheDigits:Int = 4;
 
+	public var sheet(default, set):String = "images/ui/comboNums";
 	public var minDigits:Int = 3;
-	public var simple:Bool = false;
 	public var spacing:Float = 0;
+	
+	public var simple:Bool = false;
+	public var yBump:Float = 5;
 
 	public var colorMode:ComboColorMode = NONE;
 
 	public function new(?x:Float, ?y:Float) {
 		super(x, y);
-		for (i in 0...default_precacheDigits) add(new Number());
+		for (i in 0...default_precacheDigits) add(new Number(sheet));
 		scale.set(0.45, 0.45);
 	}
 
@@ -43,7 +46,7 @@ class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 		clearNums(comboStr.length);
 
 		// then add any new ones
-		for (_ in 0...comboStr.length - length) insert(0, new Number());
+		for (_ in 0...comboStr.length - length) insert(0, new Number(sheet));
 
 		for (i in 0...comboStr.length) {
 			final num:Number = members[i];
@@ -55,7 +58,7 @@ class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 			if (num.animation.frameIndex != convertedNum) num.animation.frameIndex = convertedNum;
 			num.scale.set(scale.x, scale.y);
 			num.updateHitbox();
-			num.setPosition(x + ((num.width + spacing) * centerI), y - 5);
+			num.setPosition(x + ((num.width + spacing) * centerI), y - yBump);
 			num.visibility = Settings.data.comboAlpha;
 
 			FlxTween.cancelTweensOf(num);
@@ -89,9 +92,27 @@ class ComboDisplay extends FlxTypedSpriteGroup<Number> {
 		for (mem in members)
 			mem.color = targetColor;
 	}
+
+	function set_sheet(to:String) {
+		final texture = Assets.image(to);
+		for (i in 0...members.length) {
+			var num = members[i];
+			var centerI = i - length * 0.5;
+			var intendedX = x + ((num.width + spacing) * centerI);
+
+			var anim = num.animation.frameIndex;
+			num.loadGraphic(texture, true, Math.floor(texture.width * 0.2), Math.floor(texture.height * 0.5));
+			num.animation.frameIndex = anim;
+			num.updateHitbox();
+
+			var newX = x + ((num.width + spacing) * centerI);
+			num.x += newX - intendedX;
+		}
+		return sheet = to;
+	}
 }
 
-private class Number extends FunkinSprite {
+class Number extends FunkinSprite {
 	// using this instead of `alpha`
 	// so you can set the `alpha` variable without fucking up anything
 	public var visibility(default, set):Float = 1;
@@ -103,10 +124,10 @@ private class Number extends FunkinSprite {
 		return visibility;
 	}
 
-	public function new() {
+	public function new(?sheet:String = "images/ui/comboNums") {
 		super();
 
-		final texture = Assets.image('images/ui/comboNums');
+		final texture = Assets.image(sheet);
 		loadGraphic(texture, true, Math.floor(texture.width * 0.2), Math.floor(texture.height * 0.5));
 		visibility = 0;
 

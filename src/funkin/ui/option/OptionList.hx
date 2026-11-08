@@ -1,4 +1,4 @@
-package funkin.ui;
+package funkin.ui.option;
 
 import flixel.math.FlxRect;
 import funkin.states.OptionsState.Option;

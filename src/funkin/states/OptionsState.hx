@@ -1,9 +1,9 @@
 package funkin.states;
 
-import haxe.io.Path;
 import funkin.ui.TextList;
-import funkin.ui.OptionList;
-// import funkin.objects.menu.NoteCustomization;
+import funkin.ui.option.OptionList;
+import funkin.ui.option.NoteCustomization;
+import funkin.ui.option.PopupTransform;
 import funkin.objects.FunkinSprite;
 import funkin.core.Settings.SaveVariables;
 import flixel.input.keyboard.FlxKey;
@@ -109,6 +109,15 @@ class OptionsState extends FunkinState {
 			new Option("judge_counter", "judge_counter_desc", "judgementCounter", BoolOption),
 			new Option('hit_error_bar', 'hit_error_bar_desc', "hitErrorBar", BoolOption),
 			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"], true)),
+			{
+				var opt = new Option("<NO-LANG>Repositon Popups", "<NO-LANG>", "", ButtonOption);
+				opt.hasSound = true;
+				opt.onChange = function(_) {
+					self.lastList = self.targetList;
+					self.targetList = self.popupEdit;
+				};
+				opt;
+			},
 			new Option("popup_cent", "popup_cent_desc", "popupCenter", ListOption(["FNF", "Field", "Center"], true)),
 			new Option("time_text", "time_text_desc", "timeText", BoolOption),
 			new Option("hide_acc", "hide_acc_desc", "hideAcc", BoolOption),
@@ -116,10 +125,10 @@ class OptionsState extends FunkinState {
 			new Option("hide_tightest_judge", "hide_tightest_judge_desc", "hideTightestJudge", BoolOption),
 			{
 				var opt = new Option("judge_alpha", "judge_alpha_desc", "judgementAlpha", FloatOption(0, 1, 0.05, false, true));
-					opt.formatText = function(_) {
-						return (opt.value * 100) + "%";
-					};
-					opt;
+				opt.formatText = function(_) {
+					return (opt.value * 100) + "%";
+				};
+				opt;
 			},
 			{
 				var opt = new Option("combo_alpha", "combo_alpha_desc", "comboAlpha", FloatOption(0, 1, 0.05, false, true));
@@ -276,6 +285,7 @@ class OptionsState extends FunkinState {
 	var targetPos:FlxPoint = FlxPoint.get();
 
 	var noteEdit:NoteCustomization;
+	var popupEdit:PopupTransform;
 
 	override function create() {
 		super.create();
@@ -303,7 +313,11 @@ class OptionsState extends FunkinState {
 		noteEdit.onOptEnter = optEnter.bind(noteEdit);
 		noteEdit.active = false;
 
-		add(noteEdit); // dont want a chain reaction with onAccept
+		popupEdit = new PopupTransform(10, FlxG.height + 10, FlxG.width - 20, FlxG.height - 20);
+		popupEdit.active = false;
+
+		add(popupEdit); // dont want a chain reaction with onAccept
+		add(noteEdit); 
 		add(optText);
 		add(cateText);
 
@@ -447,6 +461,8 @@ class OptionsState extends FunkinState {
 		// damn switch didnt wanna work
 		if (to == noteEdit)
 			targetPos.set(FlxG.width, 0);
+		else if (to == popupEdit)
+			targetPos.set(0, FlxG.height);
 		else
 			targetPos.set();
 

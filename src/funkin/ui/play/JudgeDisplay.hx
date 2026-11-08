@@ -8,6 +8,8 @@ using flixel.util.FlxColorTransformUtil;
 
 class JudgeDisplay extends FunkinSprite {
 	public var simple:Bool = false;
+	public var scaleBumped:Float = 0.7;
+	public var scaleFlat:Float = 0.65;
 	
 	// using this instead of `alpha`
 	// so you can set the `alpha` variable without fucking up anything
@@ -22,6 +24,7 @@ class JudgeDisplay extends FunkinSprite {
 
 	var ogX:Float = 0;
 	var ogY:Float = 0;
+
 	var inMotion:Bool = false;
 	public function new(?x:Float, ?y:Float) {
 		super(x, y);
@@ -35,7 +38,7 @@ class JudgeDisplay extends FunkinSprite {
 		visibility = 0;
 
 		active = true;
-		scale.set(0.65, 0.65);
+		scale.set(scaleFlat, scaleFlat);
 		updateHitbox();
 	}
 	
@@ -56,11 +59,12 @@ class JudgeDisplay extends FunkinSprite {
 			acceleration.y = 0;
 
 			FlxTween.cancelTweensOf(this.scale);
-			scale.set(0.7, 0.7);
+			scale.set(scaleBumped, scaleBumped);
 
 			FlxTween.tween(this, {visibility: 0}, 0.35, {startDelay: 0.75});
-			FlxTween.tween(this.scale, {x: 0.65, y: 0.65}, 0.2, {ease: FlxEase.cubeIn});
+			FlxTween.tween(this.scale, {x: scaleFlat, y: scaleFlat}, 0.2, {ease: FlxEase.cubeIn});
 		} else { // fnf-like judgements
+			scale.set(scaleFlat, scaleFlat);
 			velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
 			acceleration.y = 550;
 			FlxTween.tween(this, {visibility: 0}, 0.2, {startDelay: Conductor.crotchet * 0.001});

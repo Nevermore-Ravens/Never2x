@@ -10,6 +10,7 @@ import funkin.core.accuracy.*;
 import funkin.core.N2XStatistics;
 import funkin.core.Meta;
 import funkin.ui.play.*;
+import funkin.ui.play.ComboDisplay.Number;
 import funkin.objects.Stage;
 import funkin.objects.Character;
 import funkin.objects.NoteSplash;
@@ -166,7 +167,8 @@ class PlayState extends FunkinState {
 		noteStyle = noteStyle != "default" && meta.styleNames.exists(noteStyle) ? noteStyle : meta.styleKeys[0];
 
 		var skin = NoteStyling.getSkinAndStyle(noteSkin, noteStyle);
-		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - skin.spacing * Settings.data.strumSize : 50;
+		var strumlineHeight:Float = skin.spacing * Settings.data.strumSize;
+		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - strumlineHeight : 50;
 
 		playerID = switch Settings.data.gameplayModifiers['playingSide'] {
 			default: 1;
@@ -206,34 +208,28 @@ class PlayState extends FunkinState {
 		add(hud = new FlxSpriteGroup());
 		hud.cameras = [camHUD];
 
-		var simplePopups:Bool = Settings.data.popupCenter != 'FNF';
-		var centeredPopups:Bool = Settings.data.centeredNotes || Settings.data.popupCenter == 'Center';
-		var popupX:Float = notefield.getStrumline(playerID).x;
+		var popupX:Float = (Settings.data.popupOnField ? notefield.getStrumline(playerID).x : 0);
 
-		add(judgeSprite = new JudgeDisplay(simplePopups ? popupX : 400, 300));
-		judgeSprite.simple = simplePopups;
+		add(judgeSprite = new JudgeDisplay(popupX + Settings.data.judgementPos[0], Settings.data.judgementPos[1]));
+		judgeSprite.scaleBumped *= Settings.data.judgeScale;
+		judgeSprite.scaleFlat *= Settings.data.judgeScale;
+		judgeSprite.simple = Settings.data.simplePopup;
+		judgeSprite.x -= judgeSprite.width * 0.5;
+		judgeSprite.y -= judgeSprite.height * 0.5;
 		judgeSprite.camera = camHUD;
 
-		var judgeY:Float = judgeSprite.y + judgeSprite.height;
-		add(comboSprite = new ComboDisplay(simplePopups ? popupX : 450, judgeY + 20));
-		comboSprite.simple = simplePopups;
+
+		add(comboSprite = new ComboDisplay(popupX + Settings.data.comboPos[0], Settings.data.comboPos[1]));
+		comboSprite.simple = judgeSprite.simple;
+		comboSprite.scale.set(0.45 * Settings.data.comboScale, 0.45 * Settings.data.comboScale);
 		comboSprite.cameras = [camHUD];
 		comboSprite.colorMode = switch Settings.data.comboTinting {
 			case "Per-Note": PER_NOTE;
 			case "Clear Flag": CLEAR_FLAG;
 			default: NONE;
 		};
-
-		if (simplePopups) {
-			if (centeredPopups) {
-				judgeSprite.screenCenter();
-				comboSprite.screenCenter(X);
-				comboSprite.x += comboSprite.width / 2;
-				comboSprite.y = judgeSprite.y + 110;
-			} else {
-				judgeSprite.x -= judgeSprite.width / 2;
-			}
-		}
+		if (Settings.data.popupPosSafety)
+			guardPopupPositions();
 
 		load();
 		makeHUD();
@@ -621,6 +617,31 @@ class PlayState extends FunkinState {
 		}
 
 		judgeCounters.text += Util.moneyString(stats.misses);
+	}
+
+	function guardPopupPositions() {
+		var comboNum = comboSprite.members[0];
+		if (comboNum == null)
+			comboSprite.add(comboNum = new Number(comboSprite.sheet));
+		comboNum.scale.copyFrom(comboSprite.scale);
+		comboNum.updateHitbox();
+		
+		var strumlineHeight:Float = notefield.player.skin.spacing * Settings.data.strumSize;
+		var strumlineYPos:Float = notefield.player.y;
+		var comboLeft = comboSprite.x + (comboNum.width + comboSprite.spacing) * (-comboSprite.length * 0.5);
+		var comboRight = comboSprite.x + (comboNum.width + comboSprite.spacing) * (comboSprite.length * 0.5);
+		
+		// long
+		var overlapsJudge = judgeSprite.x < notefield.player.findMaxX() && judgeSprite.x + judgeSprite.width > notefield.player.findMinX() 
+							&& judgeSprite.y < strumlineYPos + strumlineHeight + 20 && judgeSprite.y + judgeSprite.height > strumlineYPos - 20;
+		var overlapsCombo = comboLeft < notefield.player.findMaxX() && comboRight > notefield.player.findMinX()
+							&& comboSprite.y < strumlineYPos + strumlineHeight + 20 && comboSprite.y + comboNum.height > strumlineYPos - 20;
+		var distance = Math.sqrt(Math.pow(comboSprite.x - judgeSprite.x, 2) + Math.pow(comboSprite.x - judgeSprite.x, 2));
+
+		if (overlapsJudge || (overlapsCombo && distance <= 75))
+			judgeSprite.screenCenter(Y);
+		if (overlapsCombo || (overlapsJudge && distance <= 75))
+			comboSprite.y = distance <= 75 ? judgeSprite.y + judgeSprite.height + 20 : 420;
 	}
 
 	dynamic function updateTimeText() {

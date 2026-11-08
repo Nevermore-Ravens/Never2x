@@ -1,4 +1,4 @@
-package funkin.ui;
+package funkin.ui.option;
 
 import nevermore.play.Note;
 import nevermore.skins.NoteskinSection;

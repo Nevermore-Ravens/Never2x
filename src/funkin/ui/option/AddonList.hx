@@ -1,4 +1,4 @@
-package funkin.ui;
+package funkin.ui.option;
 
 import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;

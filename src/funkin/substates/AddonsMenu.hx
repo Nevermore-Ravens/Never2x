@@ -1,6 +1,6 @@
 package funkin.substates;
 
-import funkin.ui.AddonList;
+import funkin.ui.option.AddonList;
 
 class AddonsMenu extends FlxSubState {
 	var wasVisible:Bool;
