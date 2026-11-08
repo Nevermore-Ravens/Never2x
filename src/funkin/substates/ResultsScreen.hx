@@ -117,7 +117,7 @@ class ResultsScreen extends flixel.FlxSubState {
 			bars.add(bar);
 
 			var txt = new FlxText(bar.x + 5, bar.y + bar.height * 0.5, 0, "");
-			txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 36, 0xFFFFFFFF, LEFT, OUTLINE, 0xFF000000);
+			txt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 36, 0xFFFFFFFF, LEFT, OUTLINE, 0xFF000000);
 			txt.setGraphicSize(0, Math.min(bar.height - 4, txt.height));
 			txt.updateHitbox();
 			txt.y -= txt.height * 0.5;
@@ -125,15 +125,15 @@ class ResultsScreen extends flixel.FlxSubState {
 		}
 
 		scoreTxt = new FlxText(480, graphBG.y + graphBG.height + 10, 0, "Score: 0");
-		scoreTxt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 36, 0xFFFFFFFF, LEFT);
+		scoreTxt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 36, 0xFFFFFFFF, LEFT);
 		scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		add(scoreTxt);
 		accuracyTxt = new FlxText(scoreTxt.x, scoreTxt.y + scoreTxt.height, 0, "Accuracy: 0%");
-		accuracyTxt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 32, 0xFFFFFFFF, LEFT);
+		accuracyTxt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 32, 0xFFFFFFFF, LEFT);
 		accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		add(accuracyTxt);
 		notes = new FlxText(accuracyTxt.x, accuracyTxt.y + accuracyTxt.height + 25, 0, "Best/Highest Combo: 0/0\nBest NPS: 0");
-		notes.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 28, 0xFFFFFFFF, LEFT);
+		notes.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 28, 0xFFFFFFFF, LEFT);
 		notes.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		add(notes);
 
@@ -152,14 +152,14 @@ class ResultsScreen extends flixel.FlxSubState {
 		add(rankTxt);
 
 		diff = new FlxText(rankTxt.x + rankTxt.width, rankTxt.y, 0, Difficulty.current.toUpperCase());
-		diff.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 32, Difficulty.currentColor, RIGHT);
+		diff.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 32, Difficulty.currentColor, RIGHT);
 		diff.setBorderStyle(OUTLINE, diff.color.lightness < 0.15 ? 0xFFFFFFFF : 0xFF000000, 2);
 		diff.x -= diff.width;
 		diff.y -= diff.height;
 		add(diff);
 
 		title = new FlxText(diff.x + diff.width, diff.y, 0, stats.songName);
-		title.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 36, 0xFFFFFFFF, RIGHT);
+		title.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 36, 0xFFFFFFFF, RIGHT);
 		title.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		title.x -= title.width;
 		title.y -= title.height;
