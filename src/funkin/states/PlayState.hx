@@ -218,7 +218,6 @@ class PlayState extends FunkinState {
 		judgeSprite.y -= judgeSprite.height * 0.5;
 		judgeSprite.camera = camHUD;
 
-
 		add(comboSprite = new ComboDisplay(popupX + Settings.data.comboPos[0], Settings.data.comboPos[1]));
 		comboSprite.simple = judgeSprite.simple;
 		comboSprite.scale.set(0.45 * Settings.data.comboScale, 0.45 * Settings.data.comboScale);

@@ -39,10 +39,6 @@ class Util {
 		return from + FlxMath.bound(weight * 60 * FlxG.elapsed, 0, 1) * (to - from);
 	}
 
-	public static function expDecay(a:Float, b:Float, decay:Float) {
-		return b + (a - b) * Math.exp(-decay * FlxG.elapsed);
-	}
-
 	public static function isLetter(c:String) { // thanks kade
 		var ascii:Int = StringTools.fastCodeAt(c, 0);
 		return (ascii >= 65 && ascii <= 90) || (ascii >= 97 && ascii <= 122) || (ascii >= 192 && ascii <= 214) || (ascii >= 216 && ascii <= 246)
