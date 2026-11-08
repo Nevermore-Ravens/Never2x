@@ -375,8 +375,8 @@ class PlayState extends FunkinState {
 		if (notefield.autoplay || note.player != playerID) return;
 
 		var deviation:Float = note.getDeviation(notefield.input.timestamp);
-		var judgeID:Int = Judgement.getID(deviation);
-		var judge:Judgement = Judgement.current[judgeID];
+		var judgeID:Int = Judgement.current.indexOf(note.judgement);
+		var judge:Judgement = note.judgement;
 		var displayJudge:Bool = !note.behavior.punishable;
 		var displayCombo:Bool = true;	
 

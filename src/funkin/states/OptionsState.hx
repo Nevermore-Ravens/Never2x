@@ -180,7 +180,7 @@ class OptionsState extends FunkinState {
 			},
 			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"], true)),
 			new Option("cam_movement", "cam_movement_desc", "notesMoveCamera", BoolOption),
-			new Option('strum_glow', 'strum_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Per-Note'], true)),
+			new Option('strum_glow', 'strum_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Note'], true)),
 			new Option("can_unglow", "can_unglow_desc", "unglowOnAnimFinish", BoolOption),
 		],
 		"Performance" => [

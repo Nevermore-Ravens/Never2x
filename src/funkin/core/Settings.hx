@@ -15,7 +15,7 @@ class SaveVariables {
 	// gameplay
 	var scrollDirection:String = UP;
 	var quantColouring:String = "None";
-	var strumGlow:String = 'Per-Note';
+	var strumGlow:String = 'Note';
 	var scrollSpeed:Float = 3;
 	var strumSize:Float = 1;
 	var centeredNotes:Bool = false;
@@ -156,6 +156,7 @@ class Settings {
 	public static function updateNevermore() {
 		Nevermore.settings.inputOffset = data.inputOffset;
 		Nevermore.settings.holdGrain = data.holdGrain;
+		Nevermore.settings.receptorGlow = data.strumGlow;
 		//Nevermore.settings.quantization = data.quantization;
 	}
 

@@ -101,8 +101,9 @@ class FreeplayState extends FunkinState {
 				});
 			}
 		}
-		curSelected = Std.int(FlxMath.bound(curSelected, 0, songList.length - 1));
 
+		curSelected = Std.int(FlxMath.bound(curSelected, 0, songList.length - 1));
+ 
 		add(bg = new FlxSprite(0, 0, Assets.image('images/menus/desatBG')));
 		bg.antialiasing = Settings.data.antialiasing;
 		bg.screenCenter();
