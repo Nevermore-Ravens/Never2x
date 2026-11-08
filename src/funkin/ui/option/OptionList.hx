@@ -172,6 +172,23 @@ class OptionList extends TextList {
 		hover.scale.y = Math.max(hover.scale.y, 0);
 	}
 
+	public function getOptionIndex(id:String) {
+		for (i in 0...list.length) {
+			if (list[i].id == id)
+				return i;
+		}
+		return -1;
+	}
+	public function setOptionValue(id:String, to:Dynamic) {
+		var idx = getOptionIndex(id);
+		if (idx < 0)
+			return;
+
+		list[idx].value = to;
+		components[idx].change(list[idx]);
+		position(0);
+	}
+
     override function regenerate(txts:Array<String>, ?subs:Array<String>) {
 		hasSubTexts = subs != null;
 
@@ -327,6 +344,9 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 	}
 	public function change(opt:Option):Void {
 		var curAnim = animation.name;
+		if (curAnim == Std.string(opt.value == true))
+			return;
+
 		var lastFrame = (curAnim != null && curAnim.startsWith("to")) ? animation.curAnim.numFrames - 1 - animation.curAnim.curFrame : -1;
 		playAnim("to" + (opt.value == true));
 		if (lastFrame >= 0 && animation.curAnim != null)

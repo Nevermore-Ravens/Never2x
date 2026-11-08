@@ -118,7 +118,6 @@ class OptionsState extends FunkinState {
 				};
 				opt;
 			},
-			new Option("popup_cent", "popup_cent_desc", "popupCenter", ListOption(["FNF", "Field", "Center"], true)),
 			new Option("time_text", "time_text_desc", "timeText", BoolOption),
 			new Option("hide_acc", "hide_acc_desc", "hideAcc", BoolOption),
 			new Option("hide_hud", "hide_hud_desc", "hideHUD", BoolOption),

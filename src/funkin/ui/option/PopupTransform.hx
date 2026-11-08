@@ -50,7 +50,7 @@ class PopupTransform extends OptionList {
 			},
 			new Option("<NO-LANG>Position Safety", "<NO-LANG>If the popup objects will recenter if overlapping a strumline.", "popupPosSafety", BoolOption),
 			{
-				var opt = new Option('<NO-LANE>Judgement Scale', '<NO-LANG>How big the judgement will be.', 'judgeScale', FloatOption(0.05, 3, 0.05, false, true));
+				var opt = new Option('<NO-LANG>Judgement Scale', '<NO-LANG>How big the judgement will be.', 'judgeScale', FloatOption(0.05, 3, 0.05, false, true));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
@@ -76,6 +76,54 @@ class PopupTransform extends OptionList {
 						num.x = comboSprite.x + ((num.width + comboSprite.spacing) * centerI);
 					}
 				}
+				opt;
+			},
+			{
+				var opt = new Option("<NO-LANG>Apply Preset", "<NO-LANG>Set's your judgement and combo stlying with a selection of presets.", "", ButtonOption);
+				opt.onChange = function(v) {
+					var opts = ["Cancel", "Funkin'", "Centered", "In-Between"]; // , "Field-Centered" (I need to visualize Field Anchored/popupOnField first)
+
+					var x:Float = mousePoint.x;
+					var y:Float = mousePoint.y;
+					if (Controls.justPressed("accept")) {
+						@:privateAccess var hover = hover;
+						x = hover.x + hover.scale.x;
+						y = hover.y + hover.scale.y;
+					}
+
+					FlxG.state.persistentUpdate = false;
+					FlxG.state.openSubState(new DropdownPrompt(x, y, 250, opts, function(idx) {
+						FlxG.sound.play(Assets.audio("sfx/scroll"));
+
+						inline function setPos(judgeX:Float, judgeY:Float, comboX:Float, comboY:Float) {
+							Settings.data.judgementPos[0] = judgeX;
+							Settings.data.judgementPos[1] = judgeY;
+							judgeSprite.setPosition(this.x - 10 + judgeX - judgeSprite.width * 0.5, this.y - 10 + judgeY - judgeSprite.height * 0.5);
+
+							Settings.data.comboPos[0] = comboX;
+							Settings.data.comboPos[1] = comboY;
+							comboSprite.setPosition(this.x - 10 + comboX, this.y - 10 + comboY);
+						}
+
+						switch (idx) {
+							case 1: // Funkin'
+								setOptionValue("simplePopup", false);
+								setOptionValue("judgeScale", 1);
+								setOptionValue("comboScale", 1);
+								setPos(530, 350, 450, 420);
+							case 2: // Centered
+								setOptionValue("judgeScale", 1);
+								setOptionValue("comboScale", 1);
+								setPos(640, 360, 640, 420);
+							case 3: // In-Between
+								setOptionValue("simplePopup", true);
+								setOptionValue("popupPosSafety", Settings.data.centeredNotes);
+								setOptionValue("judgeScale", 0.85);
+								setOptionValue("comboScale", 0.85);
+								setPos(640, 100, 640, 150);
+						}
+					}));
+				};
 				opt;
 			}
 		]);
@@ -140,6 +188,12 @@ class PopupTransform extends OptionList {
 				break;
 			}
 		}
+	}
+
+	override function destroy() {
+		super.destroy();
+		judgeSprite.destroy();
+		comboSprite.destroy();
 	}
 
 	override function draw() {
