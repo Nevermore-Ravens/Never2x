@@ -119,7 +119,7 @@ class TitleState extends FunkinState {
 		if (seenIntro) {
 			skipIntro();
 
-			// so that you doesn't have to restart the game every time
+			// so that you don't have to restart the game every time
 			Meta.cacheFiles(true);
 			return;
 		}

@@ -259,7 +259,7 @@ class PlayState extends FunkinState {
 		updateIconScales(delta);
 		updateIconPositions();
 
-		if (FlxG.keys.justPressed.ENTER) {
+		if (Controls.justPressed('pause')) {
 			openPauseMenu();
 		}
 
