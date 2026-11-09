@@ -5,22 +5,6 @@ import haxe.ds.Vector;
 import funkin.core.Addons;
 
 class Util {
-	/**
-		Resets the music to the menu music, addon, and travel to a state.
-	**/
-	public static function toMenu(target:FlxState) {
-		if (Conductor.vocals != null)
-			Conductor.vocals.destroy();
-
-		Conductor.reset();
-		Conductor.inst = makeSound(Assets.audio('music/freakyMenu'), true);
-		Conductor.clock.timingMap.reset([{tempo: 102}]);
-		Conductor.metronome = false;
-		Conductor.play();
-		Addons.current = null;
-		FunkinState.switchState(target);
-	}
-
 	// because FlxG.sound.load() is utterly fucked for making sounds
 	// we do it the old fnf-legacy ninjamuffin method
 	// and just make it ourselves

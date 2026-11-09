@@ -208,8 +208,9 @@ class ResultsScreen extends flixel.FlxSubState {
 	}
 
 	override function update(delta:Float) {
-		if (FlxG.keys.justPressed.ENTER)
-			FlxG.switchState(new FreeplayState());
+		if (Controls.justPressed('accept')) {
+			FunkinState.toMenu(new FreeplayState());
+		}
 
 		for (dot in graphDots.members) {
 			if (!dot.alive) continue;

@@ -1,8 +1,6 @@
 package funkin;
 
 class FunkinState extends flixel.FlxState {
-	public static var menuSong:String = "";
-
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
 	
@@ -17,6 +15,20 @@ class FunkinState extends flixel.FlxState {
 		if (!skipNextTransOut) {
 			openSubState(new Transition(0.5, true));
 		} else skipNextTransOut = false;
+	}
+
+	public static function toMenu(target:FlxState) {
+		if (Conductor.vocals != null) {
+			Conductor.vocals.destroy();
+			Conductor.vocals = null;
+		}
+
+		Conductor.inst = Util.makeSound(Assets.audio('music/freakyMenu'), true);
+		Conductor.clock.timingMap.reset([{tempo: 102}]);
+		Conductor.play();
+		Addons.current = null;
+
+		FunkinState.switchState(target);
 	}
 
 	// i am so sorry (this is just taken directly from psych im not trying to bother with flixel's transition bs

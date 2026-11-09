@@ -737,15 +737,22 @@ class PlayState extends FunkinState {
 
 	// forceLeave:Bool - forces you to leave to the main menu
 	public function endSong(?forceLeave:Bool = false) {
-		Scores.set({
-			songID: songID,
-			difficulty: Difficulty.current,
-			score: stats.score,
-			accuracy: stats.accuracy,
-			modifiers: Settings.data.gameplayModifiers.copy()
-		});
+		if (stats.hitData.length == 0) {
+			FunkinState.toMenu(new FreeplayState());
+			return;
+		}
 
-		Scores.save();
+		if (!forceLeave) {
+			Scores.set({
+				songID: songID,
+				difficulty: Difficulty.current,
+				score: stats.score,
+				accuracy: stats.accuracy,
+				modifiers: Settings.data.gameplayModifiers.copy()
+			});
+
+			Scores.save();
+		}
 
 		persistentUpdate = false;
 		Conductor.stop();
