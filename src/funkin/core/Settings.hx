@@ -51,7 +51,7 @@ class SaveVariables {
 
 	// graphics (that affect performance)
 	var framerate:Int = 60;
-	var holdGrain:Int = 1;
+	var holdGrain:Int = 5;
 	var antialiasing:Bool = true;
 	var audioStreams:Bool = true;
 	var reducedQuality:Bool = false;
@@ -82,7 +82,7 @@ class SaveVariables {
 	var comboAlpha:Float = 1;
 	var healthBarAlpha:Float = 1;
 	var language:String = 'English';
-	var infoCounter:Bool = true;
+	var infoCounter:Bool = false;
 	var transitions:Bool = true;
 	var timeText:Bool = true;
 	var hideHUD:Bool = false;

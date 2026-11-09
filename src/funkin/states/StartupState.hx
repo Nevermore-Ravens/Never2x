@@ -25,6 +25,7 @@ class StartupState extends FlxState {
 			onAccept: function() {
 				Settings.data.scrollSpeed = 2.5;
 				Settings.data.hitErrorBar = false;
+				Settings.data.holdGrain = 10;
 			}
 		},
 		{
@@ -32,6 +33,7 @@ class StartupState extends FlxState {
 			description: 'I regularly play FNF and nothing else.',
 			onAccept: function() {
 				Settings.data.hitErrorBar = false;
+				Settings.data.holdGrain = 10;
 			}
 		},
 		{
@@ -50,9 +52,9 @@ class StartupState extends FlxState {
 				Settings.data.popupPosSafety = true;
 				Settings.data.judgementPos = [640, 360];
 				Settings.data.comboPos = [640, 420];
-				
 				Settings.data.judgementCounter = true;
 				Settings.data.gameVisibility = 50;
+				Settings.data.holdGrain = 10;
 			}
 		},
 		{
@@ -61,7 +63,7 @@ class StartupState extends FlxState {
 			onAccept: function() {
 				Settings.data.quantColouring = 'In The Groove';
 				Settings.data.noteSplashSkin = 'none';
-				Settings.data.holdGrain = 10;
+				Settings.data.holdGrain = 1;
 				Settings.data.hideHUD = true;
 				Settings.data.simplePopup = true;
 				Settings.data.cameraZooms = 'Off';
@@ -72,7 +74,6 @@ class StartupState extends FlxState {
 			name: 'Casual',
 			description: 'I just like hitting notes, not much else to it.',
 			onAccept: function() {
-				Settings.data.holdGrain = 5;
 				Settings.data.hitErrorBar = false;
 			}
 		},
