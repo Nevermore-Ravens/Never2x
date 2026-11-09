@@ -3,14 +3,16 @@ package funkin.ui;
 import flixel.util.FlxGradient;
 
 /**
- * this is literally just psych's transition class i am SO sorry
- * @author Shadow_Mario_
-**/
+this is literally just psych's transition class i am SO sorry
+now slightly edited because this actually kinda sucked ass
+@author Shadow_Mario_
+*/
 class Transition extends FlxSubState {
-	public static var finishCallback:Void -> Void;
+	public static dynamic function finishCallback() {}
 	var isTransIn:Bool = false;
-	var transBlack:FlxSprite;
-	var transGradient:FlxSprite;
+
+	var gradient:FlxSprite;
+	var black:FlxSprite;
 
 	var duration:Float;
 	public function new(duration:Float, isTransIn:Bool) {
@@ -21,49 +23,56 @@ class Transition extends FlxSubState {
 
 	override function create() {
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		var width:Int = Std.int(FlxG.width / Math.max(camera.zoom, 0.001));
-		var height:Int = Std.int(FlxG.height / Math.max(camera.zoom, 0.001));
-		transGradient = FlxGradient.createGradientFlxSprite(1, height, (isTransIn ? [0x0, FlxColor.BLACK] : [FlxColor.BLACK, 0x0]));
-		transGradient.scale.x = width;
-		transGradient.updateHitbox();
-		transGradient.scrollFactor.set();
-		transGradient.screenCenter(X);
-		add(transGradient);
 
-		transBlack = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-		transBlack.scale.set(width, height + 400);
-		transBlack.updateHitbox();
-		transBlack.scrollFactor.set();
-		transBlack.screenCenter(X);
-		add(transBlack);
+		var zoom:Float = Math.max(camera.zoom, 0.001);
+		var width:Int = Std.int(FlxG.width / zoom);
+		var height:Int = Std.int(FlxG.height / zoom);
 
-		if (isTransIn) transGradient.y = transBlack.y - transBlack.height;
-		else transGradient.y = -transGradient.height;
+		var colours:Array<Int> = [FlxColor.BLACK, 0x0];
+		if (isTransIn) colours.reverse();
 
-		super.create();
+		add(gradient = FlxGradient.createGradientFlxSprite(1, height, colours));
+		gradient.scale.x = width;
+		gradient.updateHitbox();
+		gradient.scrollFactor.set();
+		gradient.screenCenter(X);
+
+		add(black = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK));
+		black.scale.set(width, height + 400);
+		black.updateHitbox();
+		black.scrollFactor.set();
+		black.screenCenter(X);
+
+		if (isTransIn) {
+			gradient.y = black.y - black.height;
+			black.y = gradient.y + gradient.height;
+		} else {
+			gradient.y = -gradient.height;
+			black.y = gradient.y - black.height;
+		}
 	}
 
 	override function update(elapsed:Float) {
-		super.update(elapsed);
+		var zoom:Float = Math.max(camera.zoom, 0.001);
+		var height:Float = FlxG.height * zoom;
+		var targetPos:Float = gradient.height + 50 * zoom;
 
-		final height:Float = FlxG.height * Math.max(camera.zoom, 0.001);
-		final targetPos:Float = transGradient.height + 50 * Math.max(camera.zoom, 0.001);
-		if (duration > 0) transGradient.y += (height + targetPos) * elapsed / duration;
-		else transGradient.y = (targetPos) * elapsed;
+		if (duration <= 0) gradient.y = targetPos;
+		else {
+			gradient.y += (height + targetPos) * elapsed / duration;
+		}
 
-		if (isTransIn) transBlack.y = transGradient.y + transGradient.height;
-		else transBlack.y = transGradient.y - transBlack.height;
+		if (isTransIn) black.y = gradient.y + gradient.height;
+		else black.y = gradient.y - black.height;
 
-		if (transGradient.y >= targetPos) close();
+		if (gradient.y >= targetPos) close();
 	}
 
 	// Don't delete this
 	override function close():Void {
 		super.close();
 
-		if (finishCallback != null) {
-			finishCallback();
-			finishCallback = null;
-		}
+		finishCallback();
+		finishCallback = function() {}
 	}
 }

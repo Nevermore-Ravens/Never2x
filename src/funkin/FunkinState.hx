@@ -7,14 +7,16 @@ class FunkinState extends flixel.FlxState {
 	public static var skipNextTransOut:Bool = false;
 	
 	override function create() {
-		super.create();
-
 		Conductor.reset();
 		Conductor.clock.active = false;
 
 		Conductor.clock.stepHit.add(stepHit);
 		Conductor.clock.beatHit.add(beatHit);
 		Conductor.clock.measureHit.add(measureHit);
+
+		if (!skipNextTransOut) {
+			openSubState(new Transition(0.5, true));
+		} else skipNextTransOut = false;
 	}
 
 	// i am so sorry (this is just taken directly from psych im not trying to bother with flixel's transition bs
