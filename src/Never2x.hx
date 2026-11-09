@@ -99,7 +99,8 @@ class Never2x extends Sprite {
 class InitState extends flixel.FlxState {
 	override function create():Void {
 		setDefines();
-		flixel.FlxG.switchState(new TitleState());
+		//flixel.FlxG.switchState(new TitleState());
+		flixel.FlxG.switchState(new StartupState());
 	}
 
 	private function startNevermore() {

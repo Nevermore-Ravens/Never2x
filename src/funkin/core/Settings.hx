@@ -58,13 +58,12 @@ class SaveVariables {
 	var shaders:Bool = true;
 	var gpuCache:Bool = true;
 	var fullscreen:Bool = false;
-	var closeAnimation = true;
 	var reflections:Bool = true;
 	var videos:Bool = true;
 
 	// visuals (that don't affect performance)
 	var flashingLights:Bool = true;
-	var noteSkin:String = 'camv2';
+	var noteSkin:String = 'funkin';
 	var noteSkinStyle:String = 'default';
 	var noteSplashSkin:String = 'classic';
 	var unglowOnAnimFinish:Bool = true;
@@ -88,7 +87,6 @@ class SaveVariables {
 	var timeText:Bool = true;
 	var hideHUD:Bool = false;
 	var lyrics:Bool = true;
-	var notesMoveCamera:Bool = false;
 
 	// miscellaneous
 	var discordRPC:Bool = true;
