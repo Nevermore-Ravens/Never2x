@@ -81,7 +81,7 @@ class FreeplayState extends FunkinState {
 		songList.push({
 			id: 'random',
 			colour: 0xFF000000,
-			folder: '',
+			addon: null,
 			icon: 'random',
 			difficulties: ['???'],
 			colors: [0xFFFFFFFF],
@@ -96,7 +96,7 @@ class FreeplayState extends FunkinState {
 				songList.push({
 					id: song.id,
 					colour: song.color,
-					folder: week.folder,
+					addon: week.from,
 					icon: song.icon,
 					difficulties: [for (diff in diffs) diff.name],
 					colors: [for (diff in diffs) diff.color],
@@ -331,7 +331,7 @@ class FreeplayState extends FunkinState {
 			grpIcons.members[num].alpha = num == curSelected ? 1 : 0.6;
 		}
 
-		Addons.current = Addons.get(songList[curSelected].folder); // sigh
+		Addons.current = songList[curSelected].addon;
 
 		var newColour:Int = songList[curSelected].colour;
 		if (newColour != intendedColour) {
@@ -394,7 +394,7 @@ typedef SongMeta = {
 	var id:String;
 	var icon:String;
 	var colour:FlxColor;
-	var folder:String;
+	var addon:Addon;
 	var difficulties:Array<String>;
 	var colors:Array<FlxColor>;
 	var weekIdx:Int;

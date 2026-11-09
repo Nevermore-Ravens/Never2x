@@ -149,7 +149,7 @@ class PauseMenu extends flixel.FlxSubState {
 					music.stop();
 					Conductor.stop();
 					Conductor.reset();
-					FunkinState.switchState(new OptionsState());
+					FunkinState.toMenu(new OptionsState());
 					OptionsState.inPlayState = true;
 
 				case 'Change Difficulty': 

@@ -7,9 +7,10 @@ class WeekFile {
 	var weekNum:String = '';
 	var name:String = '';
 	var background:String = '';
-	var folder:String = '';
 	var fileName:String = ''; 
 	var difficulties:Array<DiffData> = Difficulty.loadDynamic(null);
+
+	var from:Addon = null;
 }
 
 @:structInit
@@ -37,6 +38,7 @@ class WeekData {
 	public static function reload() {
 		list.resize(0);
 
+		var addons:Array<Addon> = [null];
 		var directories:Array<String> = ['assets'];
 		var originalLength:Int = directories.length;
 		
@@ -44,6 +46,7 @@ class WeekData {
 		for (addon in Addons.list) {
 			if (!addon.enabled) continue;
 			directories.push('addons/${addon.directory}');
+			addons.push(addon);
 		}
 		#end
 
@@ -53,7 +56,7 @@ class WeekData {
 			for (week in FileSystem.readDirectory('$path/weeks')) {
 				var file:WeekFile = getFile('$path/weeks/$week');
 				file.fileName = week.replace('.json', '');
-				if (i >= originalLength) file.folder = path;
+				file.from = addons[i];
 				
 				list.push(file);
 				if (file.weekNum == "") file.weekNum = Std.string(list.length);
