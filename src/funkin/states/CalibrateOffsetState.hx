@@ -82,7 +82,7 @@ class CalibrateOffsetState extends FunkinState {
 		var direction:String = finalOffset > 0 ? 'later' : 'earlier';
 		var msSuffix:String = Math.abs(finalOffset) != 1 ? 's' : '';
 
-		introText.text = 'Your offset is: $finalOffset millisecond$msSuffix ($direction).\n\nPress Accept to confirm.\nPress Back to retry.';
+		introText.text = 'Your approximated offset is: $finalOffset millisecond$msSuffix ($direction).\n\nPress Accept to confirm.\nPress Back to retry.';
 		introText.screenCenter();
 
 		finished = true;
