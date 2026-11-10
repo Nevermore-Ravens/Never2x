@@ -261,7 +261,7 @@ class OptionsState extends FunkinState {
 			},
 			{
 				var opt = new Option("calc_offset", "calc_offset_desc", "", ButtonOption);
-				//opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
+				opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
 				opt;
 			}
 		]

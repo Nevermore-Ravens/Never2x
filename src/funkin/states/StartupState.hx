@@ -49,9 +49,6 @@ class StartupState extends FlxState {
 				// why aren't these working properly ??????
 				Settings.data.simplePopup = true;
 				Settings.data.popupOnField = true;
-				Settings.data.popupPosSafety = true;
-				Settings.data.judgementPos = [640, 360];
-				Settings.data.comboPos = [640, 420];
 				Settings.data.judgementCounter = true;
 				Settings.data.gameVisibility = 50;
 				Settings.data.holdGrain = 10;
@@ -81,15 +78,14 @@ class StartupState extends FlxState {
 			name: 'Competitive',
 			description: "I try to achieve the best score on everything that I possibly can.",
 			onAccept: function() {
-				Settings.data.noteSplashSkin = 'None';
+				Settings.data.quantColouring = 'StepMania (3.9)';
+				Settings.data.noteSplashSkin = 'none';
 				Settings.data.judgementCounter = true;
 				Settings.data.hideTightestJudge = true;
 				Settings.data.gameVisibility = 0;
 				Settings.data.healthBarAlpha = 0;
 				Settings.data.simplePopup = true;
 				Settings.data.popupOnField = true;
-				Settings.data.judgementPos = [640, 360];
-				Settings.data.comboPos = [640, 420];
 			}
 		}
 	];

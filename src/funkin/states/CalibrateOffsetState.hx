@@ -1,15 +1,12 @@
 package funkin.states;
 
-/*
-import lime.ui.KeyCode;
-import lime.app.Application;
-
-import funkin.objects.PlayField;
-import funkin.objects.Strumline;
-import funkin.objects.Note;
+import nevermore.play.NoteField;
+import nevermore.play.Strumline;
+import nevermore.play.Note;
+import nevermore.play.Statistics;
 
 class CalibrateOffsetState extends FunkinState {
-	var playfield:PlayField;
+	var notefield:NoteField;
 	var strumline:Strumline;
 
 	var extraTime:Float = 1500; // 1.5 seconds
@@ -19,8 +16,8 @@ class CalibrateOffsetState extends FunkinState {
 	var finished:Bool = false;
 	var skipIntro:Bool = false;
 
-	var totalNoteDifference:Float = 0;
-	var notesHit:Int = 0;
+	var stats:Statistics = {};
+
 	var finalOffset:Float = 0;
 
 	public function new(?skipIntro:Bool = false):Void {
@@ -31,22 +28,26 @@ class CalibrateOffsetState extends FunkinState {
 	override function create():Void {
 		super.create();
 		Conductor.stop();
+
+		var downscroll:Bool = Settings.data.scrollDirection == 'Down';
+		var skin = NoteStyling.getSkinAndStyle(Settings.data.noteSkin, 'normal');
+		var strumlineHeight:Float = skin.spacing * Settings.data.strumSize;
+		var strumlineYPos:Float = downscroll ? FlxG.height - 50 - strumlineHeight : 50;
 		
-		strumline = new Strumline(0, 0, true);
+		strumline = new Strumline(0, strumlineYPos, skin);
 		strumline.screenCenter(X);
 
-		add(playfield = new PlayField([strumline]));
-		playfield.downscroll = Settings.data.downscroll;
-		playfield.playerID = 0;
-		strumline.y = playfield.downscroll ? FlxG.height - 150 : 50;
-		playfield.noteHit = noteHit;
-		playfield.visible = skipIntro;
-		playfield.active = skipIntro;
+		add(notefield = new NoteField([strumline]));
+		notefield.scrollDirection = Settings.data.scrollDirection;
+		notefield.assistTicks = true;
+		notefield.noteHit = noteHit;
+		notefield.visible = skipIntro;
+		notefield.active = skipIntro;
 
 		load();
 		
 		// don't need to worry about offset for this one
-		Conductor._time = -extraTime;
+		Conductor.audioTime = -extraTime;
 		if (skipIntro) start();
 
 		add(introBG = new FlxSprite().makeGraphic(1, 1, FlxColour.BLACK));
@@ -55,10 +56,10 @@ class CalibrateOffsetState extends FunkinState {
 		introBG.visible = !skipIntro;
 		introBG.alpha = skipIntro ? 0 : 1;
 
-		add(introText = new FlxText(0, 0, FlxG.width, '
-			Welcome to the calibration offset menu!\n\nIt\'s designed to make your taps more synced to the music.\nRemember to relax as much as possible, and focus on how close the notes are to the music, not the strums.\n\nKeep in mind that human error is always a thing,\nso the offset given might not exactly work.\nDon\'t stress it!\n\nPress Accept to start
-		', 20));
-		introText.font = Paths.font('vcr.ttf');
+		add(introText = new FlxText(0, 0, FlxG.width, "
+			Welcome to the offset calibration menu!\nThis is where you set your input offset, so your taps are in sync with the song.\nDon't sweat it, and don't focus on the visuals too much.\n\nGood luck!
+		", 25));
+		introText.font = Assets.getPath('fonts/LineSeed.ttf');
 		introText.alignment = 'center';
 		introText.screenCenter();
 		introText.visible = !skipIntro;
@@ -67,60 +68,40 @@ class CalibrateOffsetState extends FunkinState {
 
 	var songID:String = 'Sync Test';
 	function load():Void {
-		var song:Chart = Song.createDummyFile();
+		var song:Chart = Song.load('music', 'Test');
 
-		Conductor.timingPoints = [
-			{
-				time: 0,
-				bpm: 128
-			}
-		];
-
-		Conductor.bpm = Conductor.timingPoints[0].bpm;
-		var beat: Float = 4;
-		while(beat < 96){		
-			song.notes.push({
-				time: Math.max(0, Conductor.crotchet * beat),
-				lane: (beat % 4) <= 1 ? 0 : 3,
-				length: 0,
-				player: 0,
-				speed: 1,
-				type: ''
-			});
-
-			beat += 2;
-		}
-
-		Conductor.inst = Util.makeSound(Assets.audio('songs/$songID/Inst'));
+		Conductor.inst = Util.makeSound(Assets.audio('music/Test.ogg'));
 		Conductor.inst.onComplete = finish;
 
-		playfield.load(song.notes);
-		playfield.scrollSpeed = Settings.data.scrollSpeed;
+		notefield.load(song);
+		notefield.scrollSpeed = Settings.data.scrollSpeed;
 	}
 
 	function finish():Void {
-		finalOffset = Math.floor(totalNoteDifference / notesHit);
-		introText.text = 'Your offset is: $finalOffset millisecond${Math.abs(finalOffset) != 1 ? 's' : ''} (${finalOffset > 0 ? 'later' : 'earlier'})\n\nPress Accept to confirm\nPress Back to retry';
+		finalOffset = Math.floor(stats.mean);
+		var direction:String = finalOffset > 0 ? 'later' : 'earlier';
+		var msSuffix:String = Math.abs(finalOffset) != 1 ? 's' : '';
+
+		introText.text = 'Your offset is: $finalOffset millisecond$msSuffix ($direction).\n\nPress Accept to confirm.\nPress Back to retry.';
 		introText.screenCenter();
 
 		finished = true;
-		Conductor.playing = false;
+		Conductor.clock.active = false;
 
-		FlxTween.tween(introBG, {alpha: 1}, 0.5, {onComplete: function(_) playfield.visible = false});
+		FlxTween.tween(introBG, {alpha: 1}, 0.5, {onComplete: function(_) notefield.visible = false});
 		FlxTween.tween(introText, {alpha: 1}, 0.5);
 		introBG.visible = true;
 		introText.visible = true;
 	}
 
 	function start():Void {
-		Conductor.playing = true;
+		Conductor.clock.active = true;
 		new FlxTimer().start(extraTime / 1000, function(_) Conductor.play());
-		playfield.active = true;
+		notefield.active = true;
 
 		if (skipIntro) return;
 
-		playfield.visible = true;
-		playfield.active = true;
+		notefield.visible = true;
 		
 		FlxTween.tween(introBG, {alpha: 0}, 0.5);
 		FlxTween.tween(introText, {alpha: 0}, 0.5);
@@ -130,18 +111,23 @@ class CalibrateOffsetState extends FunkinState {
 		super.update(delta);
 
 		if (finished && Controls.justPressed('accept')) {
-			Settings.data.noteOffset = finalOffset;
+			Settings.data.inputOffset = finalOffset;
+			Settings.updateNevermore();
 			FlxG.switchState(new OptionsState());
 		}
 
 		if (Controls.justPressed('back')) {
 			if (finished) FlxG.switchState(new CalibrateOffsetState(true));
-			else FlxG.switchState(new OptionsState());
-		} else if (!Conductor.playing && !finished && Controls.justPressed('accept')) start();
+			else {
+				FunkinState.skipNextTransIn = true;
+				FunkinState.switchState(new OptionsState());
+			}
+		} else if (!Conductor.clock.active && !finished && Controls.justPressed('accept')) start();
 	}
 
 	function noteHit(_, note:Note):Void {
-		totalNoteDifference += note.hitTime;
-		notesHit++;
+		stats.registerHit({
+			deviation: note.getDeviation(notefield.input.timestamp)
+		});
 	}
-}*/
+}
