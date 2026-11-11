@@ -56,7 +56,7 @@ class NoteStyling {
 		NoteColor.list["Custom"] = Settings.data.customColumns; // may become Array<Array> later on
 
 		Nevermore.settings.luminize = Settings.data.quantColouring != "None";
-		NoteColor.bySnap = NoteColor.quantList.exists(Settings.data.quantColouring);
+		NoteColor.bySnap = Nevermore.settings.luminize && NoteColor.quantList.exists(Settings.data.quantColouring);
 		@:privateAccess NoteColor.quantType = NoteColor.bySnap ? Settings.data.quantColouring : CUSTOM;
 		@:privateAccess NoteColor.type = CUSTOM;
 	}

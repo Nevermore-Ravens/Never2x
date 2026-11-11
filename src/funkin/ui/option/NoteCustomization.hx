@@ -9,6 +9,10 @@ import funkin.shaders.HueGrad;
 import funkin.states.OptionsState;
 import funkin.core.NoteStyling.NoteskinMeta;
 
+import flixel.graphics.FlxGraphic;
+import lime.system.Clipboard;
+import lime.ui.FileDialog;
+
 @:access(nevermore.skins.NoteskinSection)
 class NoteCustomization extends OptionList {
     var curSection:NoteskinSection<Dynamic>;
@@ -30,6 +34,26 @@ class NoteCustomization extends OptionList {
 	var shaders:Array<GradMask> = [];
 	var hueShader:HueGrad;
 	var colWarning:FlxText;
+
+    var actionIdx:Map<String, Int> = [
+        "reset" => 0,
+        "copy" => 1,
+        "paste" => 2,
+        "pick" => 3,
+        "export" => 4,
+        "import" => 5,
+        "switch" => 6
+    ];
+    var curAction:Int = 0;
+    var actionsCustom = ["reset", "copy", "paste", "switch", "import", "export"];
+    var actionsPreset = ["pick", "copy", "paste", "switch", "export"];
+    var keyCountTxt:FlxTypedGroup<FlxText>;
+    var actionIcons:FlxTypedGroup<FunkinSprite>;
+    var actionHover:FunkinSprite;
+    var actionLabel:FlxText;
+    var actLabelTimer:FlxTimer = new FlxTimer();
+
+    var paletteDialog:FileDialog;
 
     var noteSelIdx:Int;
     var noteColIdx:Int;
@@ -122,6 +146,96 @@ class NoteCustomization extends OptionList {
 		colHover.setPosition(colTxts.members[0].x - 4, colTxts.members[0].y - 4);
 		colHover.scale.set(wheels.members[0].width + 8, (wheels.members[0].y + wheels.members[0].height + 4) - (colTxts.members[0].y - 4));
 		colHover.origin.set();
+
+        paletteDialog = new FileDialog();
+        paletteDialog.onOpen.add(function(bytes) {
+            var str:String = cast bytes;
+            var type:String = str.substring(0, str.indexOf("\n"));
+            if (type != "COLUMNS" && type != "QUANTS") {
+                actionFailed("note_pal_invalid", [type]);
+                return;
+            }
+            var bySnap = type == "QUANTS";
+            str = str.substring(str.indexOf("\n") + 1);
+
+            var result:Array<FlxColor> = [];
+            var lineIdx:Int = str.indexOf("\n");
+            var interpResult:Int = 0; // 0 - ok, 1 - skip, 2 - break
+            inline function interpLine(line:String) {
+                interpResult = (line.trim().length <= 0) ? 1 : 0;
+
+                if (interpResult == 0) {
+                    var col = line.trim().replace("#", "0x");
+                    if (col.length == 6 && !col.startsWith("0x"))
+                        col = "0x" + col;
+                    if (col.length != 8) {
+                        interpResult = 2;
+                        actionFailed("note_pal_bad_type", [line]);
+                    } else
+                        result.push(Std.parseInt(col));
+                }
+            }
+            while (lineIdx >= 0) {
+                var line:String = str.substring(0, lineIdx);
+                str = str.substring(lineIdx + 1);
+                lineIdx = str.indexOf("\n");
+                interpLine(line);
+                if (interpResult == 2)
+                    return;
+            }
+            interpLine(str);
+            if (interpResult == 2)
+                return;
+
+            if (result.length <= 0) {
+                actionFailed("note_pal_empty");
+                return;
+            }
+            if (bySnap && result.length != Constants.SNAPS.length) {
+                actionFailed("note_pal_quant_mismatch", [Std.string(result.length), Std.string(Constants.SNAPS.length)]);
+                return;
+            }
+            if (!bySnap && result.length != 4) {
+                actionFailed("note_pal_no_4k");
+                return;
+            }
+
+            var target = bySnap ? Settings.data.customQuants : Settings.data.customColumns;
+            for (i in 0...result.length)
+                target[i] = result[i];
+            overrideActionLabel(bySnap ? "note_pal_success_quant" : "note_pal_success_column", [Std.string(result.length)]);
+
+            NoteStyling.updatePalette();
+            updatePalette();
+            applySection();
+            changeNote(0);
+        });
+
+
+        actLabelTimer.finished = true;
+        actionHover = new FunkinSprite(x + 5, y + height - 5);
+        actionHover.makeGraphic(1, 1, 0xFFFFFFFF);
+        actionHover.scale.set(60, 60);
+        actionHover.updateHitbox();
+        actionHover.y -= actionHover.height;
+        actionHover.alpha = 0;
+
+        actionIcons = new FlxTypedGroup();
+        keyCountTxt = new FlxTypedGroup();
+        regenActions(false);
+        /*for (i in 0...9) {
+            var key = 9 - i;
+            var txt = new FlxText(x + width - 5, y + height - 5, 60, Std.string(key));
+            txt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 52, (i == curAction - actionIcons.length && current == noteActIdx) ? 0xFF000000 : 0xFFFFFFFF, CENTER);
+            txt.fieldHeight = 60;
+            txt.x -= txt.width * (i + 1);
+            txt.y -= txt.height;
+            keyCountTxt.insert(0, txt);
+        }*/
+
+        actionLabel = new FlxText(x + 5, actionHover.y);
+        actionLabel.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 20, 0xFFFFFFFF, 0);
+        actionLabel.alpha = 0;
 
         onOptMove = noteOptMove;
         onSelect = (_, __) -> holdingCol = false;
@@ -223,9 +337,7 @@ class NoteCustomization extends OptionList {
 
                     applySection();
                     
-                    // actions[0] = v.startsWith("Custom") ? "reset" : "apply_custom";
-                    // actionTxt.members[0].text = _t(actions[0]).toUpperCase();
-                    // actionTxt.members[0].offset.x = actionTxt.members[0].width * 0.5;
+                    regenActions();
                     changeNote(0);
                 }
                 opt;
@@ -268,20 +380,19 @@ class NoteCustomization extends OptionList {
 
     function noteOptMove(current:Int, left:Bool) {
         final inc = left ? -1 : 1;
+        FlxG.sound.play(Assets.audio("sfx/scroll"));
         switch (list[current].id) {
             case "NOTE_SELECT":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 changeNote(inc);
             case "NOTE_EDIT_COL_0":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 editColor(0, Std.int(FlxMath.bound(curCol[0] + inc * (FlxG.keys.pressed.SHIFT ? 1 : 5), 0, rgb ? 255 : 360)));
             case "NOTE_EDIT_COL_1":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 editColor(1, Std.int(FlxMath.bound(curCol[1] + inc * (FlxG.keys.pressed.SHIFT ? 1 : 5), 0, rgb ? 255 : 100)));
             case "NOTE_EDIT_COL_2":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
                 editColor(2, Std.int(FlxMath.bound(curCol[2] + inc * (FlxG.keys.pressed.SHIFT ? 1 : 5), 0, rgb ? 255 : 100)));
             case "NOTE_ACTIONS":
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                changeAction(inc);
         }
     }
 
@@ -441,6 +552,117 @@ class NoteCustomization extends OptionList {
 		colWarning.visible = !isCustom && curPalette[curNote] != (NoteColor.bySnap ? NoteColor.quantList[Settings.data.quantColouring] : skinPalette)[curNote];*/
 	}
 
+    function overrideActionLabel(with:String, ?args:Array<String>) {
+        actionLabel.text = _formatT(with, args ?? []);
+        actLabelTimer.start(1, function(_) {
+            if (current != noteActIdx)
+                return;
+
+            var actionArray = Settings.data.quantColouring.startsWith("Custom") ? actionsCustom : actionsPreset;
+            actionLabel.text = curAction >= actionArray.length ? _formatT("note_switch_key", [Std.string(curAction - actionArray.length + 1)]) : _t("note_" + actionArray[curAction]);
+        });
+    }
+    function actionFailed(reason:String, ?args:Array<String>) {
+        args ??= [];
+        Sys.println(_formatT(reason, args));
+        overrideActionLabel(reason, args);
+        FlxG.sound.play(Assets.audio("sfx/cancel"));
+
+        FlxTween.cancelTweensOf(actionHover);
+        FlxTween.shake(actionHover, 5 / actionHover.scale.x, 0.35, X, {ease: FlxEase.quadOut});
+        FlxTween.color(actionHover, 0.35, 0xFFFF5F5F, 0xFFFFFFFF, {ease: FlxEase.quadOut});
+    }
+    function runAction(idx:Int) {
+        if (idx >= actionIcons.length) {
+            // nothing for now
+            return;
+        }
+
+        var actionArray = Settings.data.quantColouring.startsWith("Custom") ? actionsCustom : actionsPreset;
+        switch (actionArray[idx]) {
+            case "reset":
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                var target = NoteColor.bySnap ? Settings.data.customQuants : Settings.data.customColumns;
+                var ref = NoteColor.bySnap ? Settings.default_data.customQuants : Settings.default_data.customColumns;
+                bigNote.color = notes.members[curNote].color = target[curNote] = curPalette[curNote] = ref[curNote];
+                updateColor();
+            case "copy":
+				FlxG.sound.play(Assets.audio("sfx/scroll"));
+				Clipboard.text = curPalette[curNote].toWebString();
+			case "paste":
+				var str = Clipboard.text.replace("#", "0x");
+				if (str.length == 6 && !str.startsWith("0x"))
+					str = "0x" + str;
+
+				if (str.length == 8) {
+					FlxG.sound.play(Assets.audio("sfx/scroll"));
+					notes.members[curNote].color = bigNote.color = curPalette[curNote] = Std.parseInt(str);
+					updateColor();
+					checkCanApply();
+				} else
+                    actionFailed("note_bad_paste", [Clipboard.text]);
+            case "pick":
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                var target = NoteColor.bySnap ? Settings.data.customQuants : Settings.data.customColumns;
+                target[curNote] = curPalette[curNote];
+            case "import":
+                paletteDialog.open("txt");
+            case "export":
+                var result = NoteColor.bySnap ? "QUANTS" : "COLUMNS";
+                for (col in curPalette)
+                    result += "\n" + col.toWebString();
+                paletteDialog.save(result, "txt");
+            case "switch":
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                rgb = !rgb;
+                wheels.members[0].shader = rgb ? shaders[0] : hueShader;
+                updateColor();
+        
+                var names = rgb ? ["red", "green", "blue"] : ["hue", "sat", "val"];
+                for (i in 0...colTxts.length)
+                    colTxts.members[i].text = _t(names[i]);
+        }
+    }
+    function changeAction(inc:Int) {
+        var actionArray = Settings.data.quantColouring.startsWith("Custom") ? actionsCustom : actionsPreset;
+        curAction = FlxMath.wrap(curAction + inc, 0, actionArray.length - 1 + keyCountTxt.length);
+        if (actLabelTimer.finished) {
+            actionLabel.text = curAction >= actionArray.length ? _formatT("note_switch_key", [Std.string(curAction - actionArray.length + 1)]) : _t("note_" + actionArray[curAction]);
+            actionLabel.y = actionHover.y;
+            actionLabel.alpha = 0;
+        }
+        actionLabel.x = curAction >= actionArray.length ? x + width - 5 - actionLabel.width : x + 5;
+    }
+    function regenActions(?fixIndex:Bool = true) {
+        var actionArray = Settings.data.quantColouring.startsWith("Custom") ? actionsCustom : actionsPreset;
+        if (fixIndex)
+           curAction = curAction >= actionIcons.length ? (curAction - actionIcons.length) + actionArray.length : FlxMath.minInt(curAction, actionArray.length - 1);
+
+        while (actionIcons.length > actionArray.length) {
+            var ico = actionIcons.members[actionIcons.length - 1];
+            actionIcons.remove(ico, true);
+            ico.destroy();
+        }
+        for (i in 0...actionArray.length) {
+            if (i >= actionIcons.length)
+                makeActionIcon(actionArray[i]);
+            else
+                actionIcons.members[i].animation.play(actionArray[i]);
+        }
+    }
+    function makeActionIcon(act:String) {
+        var actTex = Assets.image("images/menus/options/notesactionsgay");
+
+        var icon = new FunkinSprite(x + 5 + 60 * actionIcons.length, y + height - 5);
+        icon.loadGraphic(actTex, true, actTex.height, actTex.height);
+        for (k => idx in actionIdx)
+            icon.animation.add(k, [idx]);
+        icon.animation.play(act);
+        icon.color = actionIcons.length == curAction && current == noteActIdx ? 0xFF000000 : 0xFFFFFFFF;
+        icon.y -= icon.height;
+        actionIcons.add(icon);
+    }
+
     override function mouseControl() {
 		if (dragging) {
 			components[current].hovering(current, list[current], this, mousePoint);
@@ -506,6 +728,32 @@ class NoteCustomization extends OptionList {
                     FlxG.sound.play(Assets.audio("sfx/scroll"));
                 }
             }
+        }
+
+        for (i => icon in actionIcons.members) {
+            if (!(mousePoint.x >= icon.x && mousePoint.x <= icon.x + icon.width && mousePoint.y >= icon.y && mousePoint.y <= icon.y + icon.height))
+                continue;
+
+            if (mouseMoved && (curAction != i || current != noteActIdx)) {
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                current = noteActIdx;
+                changeAction(i - curAction);
+            }
+            if (FlxG.mouse.justPressed) {
+                runAction(i);
+            }
+        }
+        for (i => txt in keyCountTxt.members) {
+            if (!(mousePoint.x >= txt.x && mousePoint.x <= txt.x + txt.width && mousePoint.y >= txt.y && mousePoint.y <= txt.y + txt.height))
+                continue;
+
+            if (mouseMoved && (curAction != i + actionIcons.length || current != noteActIdx)) {
+                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                current = noteActIdx;
+                changeAction((i + actionIcons.length) - curAction);
+            }
+            if (FlxG.mouse.justPressed)
+                runAction(i + actionIcons.length);
         }
     }
 
@@ -607,6 +855,15 @@ class NoteCustomization extends OptionList {
             (current >= noteColIdx && current < noteColIdx + 3) ? 1 : 0,
             elapsed * 15
         );
+
+        actionHover.x = FlxMath.lerp(actionHover.x, curAction >= actionIcons.length ? keyCountTxt.members[curAction - actionIcons.length].x : actionIcons.members[curAction].x, elapsed * 15);
+        actionHover.alpha = FlxMath.lerp(actionHover.alpha, current == noteActIdx ? 1 : 0, elapsed * 15);
+        actionLabel.alpha = FlxMath.lerp(actionLabel.alpha, current == noteActIdx || !actLabelTimer.finished ? 1 : 0, elapsed * 10);
+        actionLabel.y = actionHover.y - actionLabel.height * actionLabel.alpha;
+        for (i in 0...actionIcons.length)
+            actionIcons.members[i].color = FlxColor.interpolate(actionIcons.members[i].color, (i == curAction && current == noteActIdx) ? 0xFF000000 : 0xFFFFFFFF, elapsed * 15);
+        for (i in 0...keyCountTxt.length)
+            keyCountTxt.members[i].color = FlxColor.interpolate(keyCountTxt.members[i].color, (i == curAction - actionIcons.length && current == noteActIdx) ? 0xFF000000 : 0xFFFFFFFF, elapsed * 15);
 	}
 
     override function destroy() {
@@ -635,5 +892,10 @@ class NoteCustomization extends OptionList {
         colVals.draw();
         // colHover.draw();
         // colHover.blend = NORMAL;
+
+        actionLabel.draw();
+        actionHover.draw();
+        actionIcons.draw();
+        keyCountTxt.draw();
     }
 }
