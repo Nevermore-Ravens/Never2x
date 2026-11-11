@@ -12,6 +12,7 @@
 	<!--<define name="IS_TESTBUILD" />-->
 
 	<!-- THIS ALSO AFFECTS MODCHARTS AS WELL KEEP THAT IN MIND -->
+	<!-- these do nothing as of right now ignore these -->
 	<define name="SCRIPTS_ALLOWED"/>
 	<define name="ADDONS_ALLOWED"/>
 	<define name="VIDEOS_ALLOWED" if="cpp"/>

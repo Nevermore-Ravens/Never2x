@@ -4,13 +4,14 @@ Web is also not supported specifically because of websites that try to steal mod
 
 # Dependencies
 * Haxe 4.3 (at least, everything after that should still work)
-* Lime 8.1.2
-* HaxeFlixel 5.5.0
-* HaxeFlixel Addons 3.0.2
-* OpenFL 9.3.3
+* Lime ([commit b39477133e7c1eff7f83d5414fecc5143560f02e](https://github.com/openfl/lime/commit/b39477133e7c1eff7f83d5414fecc5143560f02e))
+* [HaxeFlixel](https://github.com/Nevermore-Ravens/flixel)
+* HaxeFlixel Addons 4.0.2
+* [Nevermore](https://github.com/Nevermore-Ravens/Nevermore)
+* OpenFL 9.5.0
 * hxdiscord_rpc 1.2.4
 * hxjson5
-* [HScript Iris](https://github.com/pisayesiwsi/hscript-iris)
+* [HScript Copper](https://github.com/SrtHero278/hscript-copper)
 * [Moonchart](https://github.com/MaybeMaru/moonchart)
 * hxvlc 2.2.4 (or 1.9.2)
 * [flixel-animate](https://github.com/MaybeMaru/flixel-animate)
