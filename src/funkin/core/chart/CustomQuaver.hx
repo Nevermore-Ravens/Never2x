@@ -149,7 +149,7 @@ class CustomQuaver extends Quaver {
 			}
 		}
 
-		vels.sort((a, b) -> Std.int(a.time - b.time));
+		//vels.sort((a, b) -> Std.int(a.time - b.time));
 		return vels;
 	}
 }

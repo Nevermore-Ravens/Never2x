@@ -129,7 +129,7 @@ class SongParser extends BaseParser {
 				addBPMChanges(meta);
 				addEvents(ssc);
 
-				result.scrollVelocities = ssc.getScrollVelocities();
+				result.scrollVelocities = [];
 				result.offset = meta.offset;
 
 				fnf.fromFormat(ssc);
