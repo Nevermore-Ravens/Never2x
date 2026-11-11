@@ -1,0 +1,14 @@
+{
+	name: 'English (US)',
+
+	translations: [
+		{
+			id: 'score_text',
+			text: 'Score: ${0} | Combo Breaks: ${1} | Accuracy: ${2}%'
+		},
+		{
+			id: '',
+			text: ''
+		}
+	]
+}
