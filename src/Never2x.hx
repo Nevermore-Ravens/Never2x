@@ -1,5 +1,6 @@
 package;
 
+import lime.app.Application;
 import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
 import funkin.core.LanguageHandler;
@@ -50,6 +51,25 @@ class Never2x extends Sprite {
 		infoCounter.visible = Settings.data.infoCounter;
 
 		@:privateAccess FlxG.keys._nativeCorrection.set("0_43", FlxKey.PLUS);
+
+		Application.current.frameProfile = LowEnergy;
+		Application.current.frameOptions = {
+			busyWait: Off,
+			timePrecision: Millisecond,
+
+			// NOTE FOR LATER:
+			// currently with lime 8.4.0 frame throttling is a bit fucky
+			// too much pressure on rendering causes inputs (including the mouse) to slow down or get delayed
+			// (you can replicate this in any heavy mod that uses shaders or whatever
+			// like mario's madness or indie cross
+			// but newer lime kinda makes it more likely to happen with the new main loop
+			//
+			// uncapMode: Soft
+			//
+			// this fixes it at the cost of fps yknow
+			// not being capped anymore
+			// im not sure how to fix this so i'll just leave this note here until i figure it out more
+		};
 	}
 
 	override function __enterFrame(delta:Int) {
