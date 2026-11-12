@@ -35,7 +35,7 @@ class Languages {
 	}
 
 	public static function reset(localeID:String = '') {
-		current = getByID(localeID);
+		current = getByID('en-US');
 	}
 
 	public static function getByID(id:String):Locale {
@@ -46,9 +46,19 @@ class Languages {
 		return null;
 	}
 
-	public static function getText(id:String, ?replace:Array<Dynamic>):String {
+	public static function getText(id:String):String {
+		return current.translations[id] ?? id;
+	}
+
+	public static function getFormattedText(id:String, ?replace:Array<Dynamic>):String {
+		var translation:String = current.translations[id] ?? id;
+
 		replace ??= [];
-		return current.translations[id];
+		for (i in 0 ... replace.length) {
+			translation = translation.replace("${" + i + "}", replace[i]);
+		}
+
+		return translation;
 	}
 }
 

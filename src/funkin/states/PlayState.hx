@@ -533,7 +533,7 @@ class PlayState extends FunkinState {
 		infoText.borderStyle = FlxTextBorderStyle.OUTLINE;
 		infoText.borderSize = 1.5;
 
-		hud.add(autoplayText = new FlxText(0, 0, FlxG.width, 'Autoplay', 30));
+		hud.add(autoplayText = new FlxText(0, 0, FlxG.width, Languages.getText('autoplay'), 30));
 		autoplayText.alignment = 'center';
 		autoplayText.font = Assets.getPath('fonts/LineSeed.ttf');
 		autoplayText.borderStyle = FlxTextBorderStyle.OUTLINE;
@@ -683,14 +683,15 @@ class PlayState extends FunkinState {
 			clearTypeTxt.color = stats.clearType.color;
 		} else clearTypeTxt.visible = false;
 
-		infoText.text = 'Score: ${Util.moneyString(stats.score)}';
+		var scoreTxt:String = Languages.getFormattedText('info_text_score', [Util.moneyString(stats.score)]);
+		var comboBreakTxt:String = Languages.getFormattedText('info_text_combo_breaks', [Util.moneyString(stats.comboBreaks)]);
 
-		if (stats.clearType != CLEAR) {
-			infoText.text += ' | Combo Breaks: ${stats.comboBreaks}';
+		infoText.text = scoreTxt + ' | ' + comboBreakTxt;
+
+		if (!Settings.data.hideAcc) {
+			var accuracyTxt:String = Languages.getFormattedText('info_text_accuracy', [Util.truncateFloat(stats.accuracy, 3)]);
+			infoText.text += ' | ' + accuracyTxt;
 		}
-
-		if (!Settings.data.hideAcc)
-			infoText.text += ' | Accuracy: ${Util.truncateFloat(stats.accuracy, 3)}%';
 	}
 
 	dynamic function updateIconPositions():Void {

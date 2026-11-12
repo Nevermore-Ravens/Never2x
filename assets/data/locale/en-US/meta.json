@@ -3,12 +3,20 @@
 
 	translations: [
 		{
-			id: 'score_text',
-			text: 'Score: ${0} | Combo Breaks: ${1} | Accuracy: ${2}%'
+			id: 'info_text_score',
+			text: 'Score: ${0}'
 		},
 		{
-			id: '',
-			text: ''
+			id: 'info_text_combo_breaks',
+			text: 'Combo Breaks: ${0}'
+		},
+		{
+			id: 'info_text_accuracy',
+			text: 'Accuracy: ${0}%'
+		},
+		{
+			id: 'autoplay',
+			text: 'Autoplay'
 		}
 	]
 }
