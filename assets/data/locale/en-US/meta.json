@@ -1,7 +1,9 @@
 {
 	name: 'English (US)',
 
+	// use this as a base for your own translations
 	translations: [
+		// Playfield
 		{
 			id: 'info_text_score',
 			text: 'Score: ${0}'
@@ -17,6 +19,340 @@
 		{
 			id: 'autoplay',
 			text: 'Autoplay'
-		}
+		},
+
+		// Options
+		{
+			id: 'settings',
+			text: 'Settings'
+		},
+		{
+			id: 'keybinds',
+			text: 'Keybinds'
+		},
+		{
+			id: 'left_note',
+			text: 'Left (Notes)'
+		},
+		{
+			id: 'left_note_desc',
+			text: 'For hitting left notes.'
+		},
+		{
+			id: 'down_note',
+			text: 'Down (Notes)'
+		},
+		{
+			id: 'down_note_desc',
+			text: 'For hitting down notes.'
+		},
+		{
+			id: 'up_note',
+			text: 'Up (Notes)'
+		},
+		{
+			id: 'up_note_desc',
+			text: 'For hitting up notes.'
+		},
+		{
+			id: 'right_note',
+			text: 'Right (Notes)'
+		},
+		{
+			id: 'right_note_desc',
+			text: 'For hitting right notes.'
+		},
+		{
+			id: 'pause',
+			text: 'Pause'
+		},
+		{
+			id: 'pause_desc',
+			text: 'For pausing the game mid-song.'
+		},
+		{
+			id: 'reset',
+			text: 'Reset'
+		},
+		{
+			id: 'reset_desc',
+			text: 'For forfeiting the song mid-way, if allowed.'
+		},
+		{
+			id: 'ui_left',
+			text: 'Left (UI)'
+		},
+		{
+			id: 'ui_left_desc',
+			text: 'For moving left in the menus.'
+		},
+		{
+			id: 'ui_down',
+			text: 'Down (UI)'
+		},
+		{
+			id: 'ui_down_desc',
+			text: 'For moving down in the menus.'
+		},
+		{
+			id: 'ui_up',
+			text: 'Up (UI)'
+		},
+		{
+			id: 'ui_up_desc',
+			text: 'For moving up in the menus.'
+		},
+		{
+			id: 'ui_right',
+			text: 'Right (UI)'
+		},
+		{
+			id: 'ui_right_desc',
+			text: 'For moving right in the menus.'
+		},
+		{
+			id: 'accept',
+			text: 'Accept'
+		},
+		{
+			id: 'accept_desc',
+			text: 'For confirming actions in the menus.'
+		},
+		{
+			id: 'back',
+			text: 'Back'
+		},
+		{
+			id: 'back_desc',
+			text: 'For exiting or canceling actions in the menus.'
+		},
+		{
+			id: 'mute',
+			text: 'Mute/Unmute'
+		},
+		{
+			id: 'mute_desc',
+			text: 'For muting or unmuting the game.'
+		},
+		{
+			id: 'volume_up',
+			text: 'Volume Up'
+		},
+		{
+			id: 'volume_up_desc',
+			text: 'For increasing the volume.'
+		},
+		{
+			id: 'volume_down',
+			text: 'Volume Down'
+		},
+		{
+			id: 'volume_down_desc',
+			text: 'For decreasing the volume.'
+		},
+		{
+			id: 'gameplay',
+			text: 'Gameplay'
+		},
+		{
+			id: 'scroll_dir',
+			text: 'Scroll Direction'
+		},
+		{
+			id: 'scroll_dir_desc',
+			text: 'Which way the notes will move.'
+		},
+		{
+			id: 'scroll_speed',
+			text: 'Scroll Speed'
+		},
+		{
+			id: 'scroll_speed_desc',
+			text: 'How fast the notes will move.'
+		},
+		{
+			id: 'lane_underlay',
+			text: 'Lane Underlay'
+		},
+		{
+			id: 'lane_underlay_desc',
+			text: 'Displays a black line below the notefield to make it easier to read. This value changes the opacity.'
+		},
+		{
+			id: 'customize_notes',
+			text: 'Customize Notes'
+		},
+		{
+			id: 'customize_notes_desc',
+			text: 'Edit the note textures and colors to your liking.'
+		},
+		{
+			id: 'input_offset',
+			text: 'Input Offset'
+		},
+		{
+			id: 'input_offset_desc',
+			text: 'Shifts the time of all notes forward or backward, or the playhead relative to the audio position.\nNegative values mean you have to hit notes earlier, and positive values mean you have to hit them later.'
+		},
+		{
+			id: 'visual_offset',
+			text: 'Visual Offset'
+		},
+		{
+			id: 'visual_offset_desc',
+			text: 'Shifts the visual playhead of all notes relative to the receptors, rather than the audio.\nNegative values moves the playhead to be "after" the receptors.'
+		},
+		{
+			id: 'ghost_tapping',
+			text: 'Ghost Tapping'
+		},
+		{
+			id: 'ghost_tapping_desc',
+			text: 'Whether or not you avoid a penalty for pressing a key without hitting notes.'
+		},
+		{
+			id: 'can_reset',
+			text: 'Can Reset'
+		},
+		{
+			id: 'can_reset_desc',
+			text: "If you're allowed to die and restart by pressing your reset bind."
+		},
+		{
+			id: 'calibrate_offset',
+			text: 'Calibrate Offset'
+		},
+		{
+			id: 'calibrate_offset_desc',
+			text: 'Detects and applies your input offset.'
+		},
+		{
+			id: 'note_customization',
+			text: 'Note Customization'
+		},
+		{
+			id: 'quant_coloring',
+			text: 'Quant Coloring'
+		},
+		{
+			id: 'quant_coloring_desc',
+			text: 'The colorization method for the notes.'
+		},
+		{
+			id: 'note_skin',
+			text: 'Note Skin'
+		},
+		{
+			id: 'note_skin_desc',
+			text: 'What texture the notes will use in-game.'
+		},
+		{
+			id: 'skin_style',
+			text: 'Skin Style'
+		},
+		{
+			id: 'skin_style_desc',
+			text: 'What style of note skin will be used in-game.'
+		},
+		{
+			id: 'splash_skin',
+			text: 'Splash Skin'
+		},
+		{
+			id: 'splash_skin_desc',
+			text: 'What texture the note splashes will use in-game.'
+		},
+		{
+			id: 'color_warning',
+			text: "You're not on a custom set! Your modified color will not save!\nPlease use \"Apply to Custom\" and switch Quant Coloring to \"Custom\" or \"Custom (Columns).\""
+		},
+		{
+			id: 'red',
+			text: 'Red'
+		},
+		{
+			id: 'green',
+			text: 'Green'
+		},
+		{
+			id: 'blue',
+			text: 'Blue'
+		},
+		{
+			id: 'hue',
+			text: 'Hue'
+		},
+		{
+			id: 'saturation',
+			text: 'Saturation'
+		},
+		{
+			id: 'value',
+			text: 'Value'
+		},
+		{
+			id: 'note_reset',
+			text: 'Reset Color'
+		},
+		{
+			id: 'note_pick',
+			text: 'Apply to Custom'
+		},
+		{
+			id: 'note_copy',
+			text: 'Copy Color'
+		},
+		{
+			id: 'note_paste',
+			text: 'Paste Color'
+		},
+		{
+			id: 'note_switch',
+			text: 'Switch RGB/HSV'
+		},
+		{
+			id: 'note_import',
+			text: 'Import Palette'
+		},
+		{
+			id: 'note_export',
+			text: 'Export Palette'
+		},
+		{
+			id: 'note_switch_key',
+			text: 'Switch to ${0}K'
+		},
+		{
+			id: 'note_bad_paste',
+			text: 'Invalid clipboard item! (${0})'
+		},
+		{
+			id: 'note_pal_invalid',
+			text: 'Invalid palette type! (${0})'
+		},
+		{
+			id: 'note_pal_bad_type',
+			text: 'Found a non-color! (${0})'
+		},
+		{
+			id: 'note_pal_empty',
+			text: 'No colors found!'
+		},
+		{
+			id: 'note_pal_quant_mismatch',
+			text: 'Invalid quant color count! (${0} != ${1})'
+		},
+		{
+			id: 'note_pal_no_4k',
+			text: 'Non-4K palettes are currently unsupported!'
+		},
+		{
+			id: 'note_pal_success_quant',
+			text: 'Applied Quant Palette'
+		},
+		{
+			id: 'note_pal_success_column',
+			text: 'Applied ${0}K Palette'
+		},
 	]
 }
