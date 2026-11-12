@@ -522,5 +522,113 @@
 			id: 'can_unglow_desc',
 			text: 'Whether or not the receptor going back to static relies on the animation finishing, or the player releasing the key.'
 		},
+		{
+			id: 'performance',
+			text: 'Performance'
+		},
+		{
+			id: 'framerate',
+			text: 'Framerate'
+		},
+		{
+			id: 'framerate_desc',
+			text: 'The maximum frame rate the gmae will run at.'
+		},
+		{
+			id: 'antialiasing',
+			text: 'Antialiasing'
+		},
+		{
+			id: 'antialiasing_desc',
+			text: 'If textures will have a linear transition between pixels instead of instant.'
+		},
+		{
+			id: 'audio_streaming',
+			text: 'Audio Streaming'
+		},
+		{
+			id: 'audio_streaming_desc',
+			text: "If music will load as it plays or simply load all at once. (If you're suffering from lag spikes, try disabling this! Memory usage may be higher, but also more stable.)"
+		},
+		{
+			id: 'reduced_quality',
+			text: 'Reduced Quality'
+		},
+		{
+			id: 'reduced_quality_desc',
+			text: 'If the game can cut out a few things for less work.'
+		},
+		{
+			id: 'videos',
+			text: 'Videos'
+		},
+		{
+			id: 'videos_desc',
+			text: 'Whether the game can run videos or not. Can impact performance/load times, if enabled.'
+		},
+		{
+			id: 'shaders',
+			text: 'Shaders'
+		},
+		{
+			id: 'shaders_desc',
+			text: 'If some sprites can use special code to create special visuals.'
+		},
+		{
+			id: 'hold_grain',
+			text: 'Hold Grain'
+		},
+		{
+			id: 'hold_grain_desc',
+			text: "How many times the game will compress sustain vertices.\nHigher values will stretch the hold graphic for more performance.\nRecommended to be at lower values if you're playing modcharts, but otherwise higher values for casual play."
+		},
+		{
+			id: 'audio',
+			text: 'Audio'
+		},
+		{
+			id: 'metronome',
+			text: 'Metronome'
+		},
+		{
+			id: 'metronome_desc',
+			text: 'If the game will play a tick every beat while playing a song.'
+		},
+		{
+			id: 'assist_ticks',
+			text: 'Assist Ticks'
+		},
+		{
+			id: 'assist_ticks_desc',
+			text: 'If the game will play a tick every time a note should be hit. Use this if you want hitsounds.'
+		},
+		{
+			id: 'pause_music',
+			text: 'Pause Music'
+		},
+		{
+			id: 'pause_music_desc',
+			text: 'What music should play whenever the game is paused.'
+		},
+		{
+			id: 'miscellaneous',
+			text: 'Miscellaneous'
+		},
+		{
+			id: 'info_counter',
+			text: 'Info Counter'
+		},
+		{
+			id: 'info_counter_desc',
+			text: 'Whether to display debug info in the corner of the window.'
+		},
+		{
+			id: 'fullscreen',
+			text: 'Fullscreen'
+		},
+		{
+			id: 'fullscreen_desc',
+			text: 'Whether or not the game will take all of your screen space. (This can affect your viewing experience with Discord screensharing!)'
+		},
 	]
 }
