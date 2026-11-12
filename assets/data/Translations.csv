@@ -87,11 +87,23 @@ sat,SATURATION,SATURATION,SATURATION
 green,GREEN,GREEN,GREEN
 val,VALUE,VALUE,VALUE
 blue,BLUE,BLUE,BLUE
-apply_custom,APPLY TO CUSTOM,APPLY TO CUSTOM,APPLY TO CUSTOM
-copy,COPY,COPY,COPY
-paste,PASTE,PASTE,PASTE
-rgb,RGB,RGB,RGB
-hsv,HSV,HSV,HSV
+note_reset,Reset Color,Reset Color,Reset Color
+note_pick,Apply to Custom,Apply to Custom,Apply to Custom
+note_copy,Copy Color,Copy Color,Copy Color
+note_paste,Paste Color,Paste Color,Paste Color
+note_switch,Switch RGB/HSV
+note_import,Import Palette,Import Palette,Import Palette
+note_export,Export Palette,Export Palette,Export Palette
+note_switch_key,Switch to {0}K,Switch to {0}K,Switch to {0}K,
+
+note_bad_paste,Invalid clipboard item! ({0}),Invalid clipboard item! ({0}),Invalid clipboard item! ({0})
+note_pal_invalid,Invalid palette type! ({0}),Invalid palette type! ({0}),Invalid palette type! ({0})
+note_pal_bad_type,Found a non-color! ({0}),Found a non-color! ({0}),Found a non-color! ({0})
+note_pal_empty,No colors found!,No colors found!,No colors found!
+note_pal_quant_mismatch,Invalid quant color count! ({0} != {1}),Invalid quant color count! ({0} != {1}),Invalid quant color count! ({0} != {1})
+note_pal_no_4k,Non 4K palettes are currently unsupported!,Non 4K palettes are currently unsupported!,Non 4K palettes are currently unsupported!
+note_pal_success_quant,Applied Quant Palette,Applied Quant Palette,Applied Quant Palette,
+note_pal_success_column,Applied {0}K Palette,Applied {0}K Palette,Applied {0}K Palette
 ,,,
 HUD,HUD,HUD,HUD
 judge_counter,Judgement Counter,Contador de Julgamentos,判定数表示

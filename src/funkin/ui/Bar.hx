@@ -83,7 +83,8 @@ class Bar extends FlxSpriteGroup {
 		rightBar.clipRect.x = barOffset.x + leftSize;
 		rightBar.clipRect.y = barOffset.y;
 
-		barCenter = leftBar.x + leftSize + barOffset.x;
+		var left = leftBar.x + leftBar.origin.x - leftBar.origin.x * leftBar.scale.x - leftBar.offset.x;
+		barCenter = left + (leftSize + barOffset.x) * leftBar.scale.x;
 
 		leftBar.clipRect = leftBar.clipRect;
 		rightBar.clipRect = rightBar.clipRect;

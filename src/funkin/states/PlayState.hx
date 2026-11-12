@@ -175,9 +175,9 @@ class PlayState extends FunkinState {
 			case 'Opponent': 0;
 		}
 
-		leftStrumline = new Strumline(320, strumlineYPos, skin);
+		leftStrumline = new Strumline(FlxG.width * 0.25, strumlineYPos, skin);
 		leftStrumline.size = Settings.data.strumSize;
-		rightStrumline = new Strumline(960, strumlineYPos, skin);
+		rightStrumline = new Strumline(FlxG.width * 0.75, strumlineYPos, skin);
 		rightStrumline.size = Settings.data.strumSize;
 
 		add(notefield = new NoteField([leftStrumline, rightStrumline], playerID));
