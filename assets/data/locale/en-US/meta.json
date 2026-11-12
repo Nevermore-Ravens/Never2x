@@ -354,5 +354,173 @@
 			id: 'note_pal_success_column',
 			text: 'Applied ${0}K Palette'
 		},
+		{
+			id: 'hud',
+			text: 'HUD'
+		},
+		{
+			id: 'judge_counter',
+			text: 'Judgement Counter'
+		},
+		{
+			id: 'judge_counter_desc',
+			text: 'If there will be a counter on the side showing your judgement totals.'
+		},
+		{
+			id: 'hit_error_bar',
+			text: 'Hit Error Bar'
+		},
+		{
+			id: 'hit_error_bar_desc',
+			text: 'If the game will show a bar showing how off your recent hits were.'
+		},
+		{
+			id: 'combo_tinting',
+			text: 'Combo Tinting'
+		},
+		{
+			id: 'combo_tinting_desc',
+			text: 'Allows for the combo display to be tinted.'
+		},
+/*		{
+			id: 'popup_center',
+			text: 'Popup Center'
+		},*/
+		{
+			id: 'combo_tinting_desc',
+			text: 'Allows for the combo display to be tinted.'
+		},
+		{
+			id: 'hide_acc',
+			text: 'Hide Accuracy'
+		},
+		{
+			id: 'hide_acc_desc',
+			text: 'Hides the accuracy percentage in the HUD.'
+		},
+		{
+			id: 'hide_hud',
+			text: "Hide HUD"
+		},
+		{
+			id: 'hide_hud_desc',
+			text: "Makes the entire HUD disappear, if you want just the notefield. Or if you're showcasing something."
+		},
+		{
+			id: 'hide_tightest_judge',
+			text: 'Hide Tightest Judgement'
+		},
+		{
+			id: 'hide_tightest_judge_desc',
+			text: 'Whether or not the game will display the highest possible judgement when it is hit.'
+		},
+		{
+			id: 'judge_alpha',
+			text: 'Judgement Alpha'
+		},
+		{
+			id: 'judge_alpha_desc',
+			text: 'How much you can see the of judgement display.'
+		},
+		{
+			id: 'combo_alpha',
+			text: 'Combo Alpha'
+		},
+		{
+			id: 'combo_alpha_desc',
+			text: 'How much you can see the of the combo display.'
+		},
+		{
+			id: 'hp_alpha',
+			text: 'Health Bar Alpha'
+		},
+		{
+			id: 'hp_alpha_desc',
+			text: 'How much you can see of the health bar in-game.'
+		},
+		{
+			id: 'visuals',
+			text: 'Visuals'
+		},
+		{
+			id: 'language',
+			text: 'Language'
+		},
+		{
+			id: 'language_desc',
+			text: 'Changes the language of the game. (This feature is not fully implemented yet!)'
+		},
+		{
+			id: 'flashing_lights',
+			text: 'Flashing Lights'
+		},
+		{
+			id: 'flashing_lights_desc',
+			text: 'If the game is allowed to risk seizures for fast colored effects.'
+		},
+		{
+			id: 'game_alpha',
+			text: 'Game Visibility'
+		},
+		{
+			id: 'game_alpha_desc',
+			text: 'How much you can see the visuals behind the HUD. (If this is set to 0%, the visuals will be disabled entirely. That could help with performance!)'
+		},
+		{
+			id: 'receptor_size',
+			text: 'Strumline Zoom'
+		},
+		{
+			id: 'receptor_size_desc',
+			text: 'How much scaling gets applied to your notefield.'
+		},
+		{
+			id: 'center_field',
+			text: 'Centered Field'
+		},
+		{
+			id: 'center_field_desc',
+			text: 'If your notefield should be in the middle of the playfield, instead of on the side.'
+		},
+		{
+			id: 'time_text',
+			text: 'Time Text'
+		},
+		{
+			id: 'time_text_desc',
+			text: "If the HUD will display text to show where you're at in the song."
+		},
+		{
+			id: 'opp_notes',
+			text: 'Opponent Notes'
+		},
+		{
+			id: 'opp_notes_desc',
+			text: "Whether the opponent's notefield will be visible. Automatically gets turned off with \"Centered Field\"."
+		},
+		{
+			id: 'cam_zooms',
+			text: 'Camera Zooms'
+		},
+		{
+			id: 'cam_zooms_desc',
+			text: 'If the game is allowed to bump the camera to the song.'
+		},
+		{
+			id: 'receptor_glow',
+			text: 'Receptor Glow'
+		},
+		{
+			id: 'receptor_glow_desc',
+			text: 'How the receptors will glow when you hit a note.'
+		},
+		{
+			id: 'can_unglow',
+			text: 'Unglow on Anim Finish'
+		},
+		{
+			id: 'can_unglow_desc',
+			text: 'Whether or not the receptor going back to static relies on the animation finishing, or the player releasing the key.'
+		},
 	]
 }
