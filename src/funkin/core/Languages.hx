@@ -34,7 +34,7 @@ class Languages {
 		Sys.println('');
 	}
 
-	public static function reset(localeID:String = '') {
+	public static function change(localeID:String = '') {
 		current = getByID('en-US');
 	}
 
