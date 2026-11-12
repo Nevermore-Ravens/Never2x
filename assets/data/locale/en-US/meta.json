@@ -20,6 +20,30 @@
 			id: 'autoplay',
 			text: 'Autoplay'
 		},
+		{
+			id: 'killer',
+			text: 'Killer'
+		},
+		{
+			id: 'sick',
+			text: 'Sick'
+		},
+		{
+			id: 'good',
+			text: 'Good'
+		},
+		{
+			id: 'bad',
+			text: 'Bad'
+		},
+		{
+			id: 'shit',
+			text: 'Shit'
+		},
+		{
+			id: 'miss',
+			text: 'Miss'
+		},
 
 		// Options
 		{
@@ -630,5 +654,80 @@
 			id: 'fullscreen_desc',
 			text: 'Whether or not the game will take all of your screen space. (This can affect your viewing experience with Discord screensharing!)'
 		},
+		{
+			id: 'discord_rpc',
+			text: 'Discord RPC'
+		},
+		{
+			id: 'discord_rpc_desc',
+			text: 'If the game can connect to your Discord client and display that you are playing Never2x.'
+		},
+		{
+			id: 'auto_pause',
+			text: 'Auto Pause'
+		},
+		{
+			id: 'auto_pause_desc',
+			text: 'Automatically pauses the game if the window loses focus.'
+		},
+		{
+			id: 'clear_save',
+			text: 'Clear Save'
+		},
+		{
+			id: 'clear_save_desc',
+			text: 'Will delete all of your save data.'
+		},
+		{
+			id: 'clear_scores',
+			text: 'Clear Scores'
+		},
+		{
+			id: 'clear_scores_desc',
+			text: "Will delete all of your scores that you've obtained."
+		},
+
+		// Miscellaneous
+		{
+			id: 'early',
+			text: 'Early'
+		},
+		{
+			id: 'late',
+			text: 'Late'
+		},
+		{
+			id: 'up',
+			text: 'Up'
+		},
+		{
+			id: 'down',
+			text: 'Down'
+		},
+		{
+			id: 'on',
+			text: 'On'
+		},
+		{
+			id: 'off',
+			text: 'Off'
+		},
+		{
+			id: 'cancel',
+			text: 'Cancel'
+		},
+		{
+			id: 'open_folder',
+			text: 'Open Folder'
+		},
+		{
+			id: 'refresh',
+			text: 'Refresh'
+		},
+		{
+			id: 'apply',
+			text: 'Apply'
+		},
+
 	]
 }
