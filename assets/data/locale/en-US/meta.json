@@ -224,7 +224,7 @@
 		},
 		{
 			id: 'input_offset_desc',
-			text: 'Shifts the time of all notes forward or backward, or the playhead relative to the audio position.\nNegative values mean you have to hit notes earlier, and positive values mean you have to hit them later.'
+			text: 'Shifts the playhead forward or backward, relative to the audio position.\nNegative = notes come later.\nPositive = notes come earlier.'
 		},
 		{
 			id: 'visual_offset',
