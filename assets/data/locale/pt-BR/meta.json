@@ -1,3 +1,732 @@
 {
-	name: 'Portuguese (Brazil)'
+	name: 'Portuguese (Brazil)',
+	nativeName: 'Português (Brasil),
+
+	translations: [
+		// Playfield
+		{
+			id: 'info_text_score',
+			text: 'Pontos: ${0}'
+		},
+		{
+			id: 'info_text_combo_breaks',
+			text: 'Combo Breaks: ${0}'
+		},
+		{
+			id: 'info_text_accuracy',
+			text: 'Precisão: ${0}%'
+		},
+		{
+			id: 'autoplay',
+			text: 'Automático'
+		},
+		{
+			id: 'killer',
+			text: 'Killer'
+		},
+		{
+			id: 'sick',
+			text: 'Sick'
+		},
+		{
+			id: 'good',
+			text: 'Good'
+		},
+		{
+			id: 'bad',
+			text: 'Bad'
+		},
+		{
+			id: 'shit',
+			text: 'Shit'
+		},
+		{
+			id: 'miss',
+			text: 'Erro'
+		},
+
+		// Options
+		{
+			id: 'settings',
+			text: 'Configurações'
+		},
+		{
+			id: 'keybinds',
+			text: 'Teclas'
+		},
+		{
+			id: 'left_note',
+			text: 'Nota Esquerda'
+		},
+		{
+			id: 'left_note_desc',
+			text: 'Para acertar notas apontadas para a esquerda.'
+		},
+		{
+			id: 'down_note',
+			text: 'Nota Baixo'
+		},
+		{
+			id: 'down_note_desc',
+			text: 'Para acertar notas apontadas para baixo.'
+		},
+		{
+			id: 'up_note',
+			text: 'Nota Cima'
+		},
+		{
+			id: 'up_note_desc',
+			text: 'Para acertar notas apontadas para cima.'
+		},
+		{
+			id: 'right_note',
+			text: 'Nota Direita'
+		},
+		{
+			id: 'right_note_desc',
+			text: 'Para acertar notas apontadas para a direita.'
+		},
+		{
+			id: 'pause',
+			text: 'Pausar'
+		},
+		{
+			id: 'pause_desc',
+			text: 'Para pausar o jogo durante a canção.'
+		},
+		{
+			id: 'reset',
+			text: 'Reiniciar'
+		},
+		{
+			id: 'reset_desc',
+			text: 'Para te fazer morrer durante a canção. (se possível)'
+		},
+		{
+			id: 'ui_left',
+			text: 'Esquerda (UI)'
+		},
+		{
+			id: 'ui_left_desc',
+			text: 'Para ir a esquerda em menus.'
+		},
+		{
+			id: 'ui_down',
+			text: 'Baixo (UI)'
+		},
+		{
+			id: 'ui_down_desc',
+			text: 'Para ir para baixo em menus.'
+		},
+		{
+			id: 'ui_up',
+			text: 'Cima (UI)'
+		},
+		{
+			id: 'ui_up_desc',
+			text: 'Para ir para cima em menus.'
+		},
+		{
+			id: 'ui_right',
+			text: 'Direita (UI)'
+		},
+		{
+			id: 'ui_right_desc',
+			text: 'Para ir a direita em menus.'
+		},
+		{
+			id: 'accept',
+			text: 'Confirmar'
+		},
+		{
+			id: 'accept_desc',
+			text: 'Para confirmar ações em menus.'
+		},
+		{
+			id: 'back',
+			text: 'Recuar'
+		},
+		{
+			id: 'back_desc',
+			text: 'Para sair ou cancelar ações em menus.'
+		},
+		{
+			id: 'mute',
+			text: 'Alternar silêncio'
+		},
+		{
+			id: 'mute_desc',
+			text: 'Para silênciar ou dessilênciar o jogo.'
+		},
+		{
+			id: 'volume_up',
+			text: 'Aumentar Volume'
+		},
+		{
+			id: 'volume_up_desc',
+			text: 'Para aumentar o volume do jogo.'
+		},
+		{
+			id: 'volume_down',
+			text: 'Diminuir volume'
+		},
+		{
+			id: 'volume_down_desc',
+			text: 'Para diminuir o volume do jogo.'
+		},
+		{
+			id: 'gameplay',
+			text: 'Jogabilidade'
+		},
+		{
+			id: 'scroll_dir',
+			text: 'Direção de Rolagem das Notas'
+		},
+		{
+			id: 'scroll_dir_desc',
+			text: 'Para onde as notas irão se mover.'
+		},
+		{
+			id: 'scroll_speed',
+			text: 'Velocidade das Notas'
+		},
+		{
+			id: 'scroll_speed_desc',
+			text: 'Define a velocidade que as notas irão se mover.'
+		},
+		{
+			id: 'lane_underlay',
+			text: 'Fundo da Pista de Notas'
+		},
+		{
+			id: 'lane_underlay_desc',
+			text: 'Mostra uma linha escura atrás da pista de notas para deixa-las mais legíveis. Este valor altera a opacidade do fundo.'
+		},
+		{
+			id: 'customize_notes',
+			text: 'Aparência das Notas'
+		},
+		{
+			id: 'customize_notes_desc',
+			text: 'Altere a aparência de suas notas como preferir.'
+		},
+		{
+			id: 'input_offset',
+			text: 'Offset das Notas'
+		},
+		{
+			id: 'input_offset_desc',
+			text: 'Altera o tempo das notas para que apareçam mais a frente ou atrás. Ou do cursor de reprodução relaivamente a posição de áudio.\nValores negativos significam que você terá que acertar notas pouco antes, e positivos significam que você terá de acerta-las pouco depois.'
+		},
+		{
+			id: 'visual_offset',
+			text: 'Offset Visual'
+		},
+		{
+			id: 'visual_offset_desc',
+			text: 'Move o cursor de reprodução visual de todos os itens relativamente ao receptores (notas cinzas em cima/em baixo), Ao invés do áudio.\nValores negativos moverão o cursor "para frente" dos receptores.'
+		},
+		{
+			id: 'ghost_tapping',
+			text: 'Ghost Tapping'
+		},
+		{
+			id: 'ghost_tapping_desc',
+			text: 'Te deixa evitar penalidades por apertar teclas sem acertar notas.'
+		},
+		{
+			id: 'can_reset',
+			text: 'Permitir Reinício'
+		},
+		{
+			id: 'can_reset_desc',
+			text: "Te deixa reiniciar a música apertando sua tecla de reset."
+		},
+		{
+			id: 'calibrate_offset',
+			text: 'Calibrar Offset'
+		},
+		{
+			id: 'calibrate_offset_desc',
+			text: 'Detecta e aplica um offset para suas notas.'
+		},
+		{
+			id: 'note_customization',
+			text: 'Aparência das Notas'
+		},
+		{
+			id: 'quant_coloring',
+			text: 'Coloração por Quantização'
+		},
+		{
+			id: 'quant_coloring_desc',
+			text: 'O metôdo de coloração para as notas.'
+		},
+		{
+			id: 'note_skin',
+			text: 'Textura das Notas'
+		},
+		{
+			id: 'note_skin_desc',
+			text: 'Que textura as notas irão usar em jogo.'
+		},
+		{
+			id: 'skin_style',
+			text: 'Estilo da Skin'
+		},
+		{
+			id: 'skin_style_desc',
+			text: 'Que estilo a textura das notas serão usadas em jogo.'
+		},
+		{
+			id: 'splash_skin',
+			text: 'Textura do Splash'
+		},
+		{
+			id: 'splash_skin_desc',
+			text: 'Que textura os splashes de nota irão usar em jogo.'
+		},
+		{
+			id: 'color_warning',
+			text: "Você não está usando um conjunto personalizado! A cor modificada não será salva!\nUse \"Aplicar as personalizadas\" e mude a Coloração por Quant para \"Personalizado\" ou \"Personalizado (Direcional)\"."
+		},
+		{
+			id: 'red',
+			text: 'Vermelho'
+		},
+		{
+			id: 'green',
+			text: 'Verde'
+		},
+		{
+			id: 'blue',
+			text: 'Azul'
+		},
+		{
+			id: 'hue',
+			text: 'Hue'
+		},
+		{
+			id: 'saturation',
+			text: 'Saturação'
+		},
+		{
+			id: 'value',
+			text: 'Valor'
+		},
+		{
+			id: 'note_reset',
+			text: 'Restaurar Cor Padrão'
+		},
+		{
+			id: 'note_pick',
+			text: 'Aplicar as personalizadas'
+		},
+		{
+			id: 'note_copy',
+			text: 'Copiar Cor'
+		},
+		{
+			id: 'note_paste',
+			text: 'Colar Cor'
+		},
+		{
+			id: 'note_switch',
+			text: 'Alternar entre RGB/HSV'
+		},
+		{
+			id: 'note_import',
+			text: 'Importar Paleta de Cores'
+		},
+		{
+			id: 'note_export',
+			text: 'Exportar Paleta de Cores'
+		},
+		{
+			id: 'note_switch_key',
+			text: 'Trocar para ${0}k'
+		},
+		{
+			id: 'note_bad_paste',
+			text: 'Item inválido na área de transferência! (${0})'
+		},
+		{
+			id: 'note_pal_invalid',
+			text: 'Tipo de paleta de cores inválido! (${0})'
+		},
+		{
+			id: 'note_pal_bad_type',
+			text: 'Cor inválida encontrada! (${0})'
+		},
+		{
+			id: 'note_pal_empty',
+			text: 'Nenhuma cor encontrada!'
+		},
+		{
+			id: 'note_pal_quant_mismatch',
+			text: 'Contagem de cores quantizadas inválida! (${0} != ${1})'
+		},
+		{
+			id: 'note_pal_no_4k',
+			text: 'Paletas de cores não-4K não são compatíveis por enquanto!'
+		},
+		{
+			id: 'note_pal_success_quant',
+			text: 'Paleta de cores quantizada aplicada'
+		},
+		{
+			id: 'note_pal_success_column',
+			text: 'Paleta de cores ${0}K aplicada'
+		},
+		{
+			id: 'hud',
+			text: 'HUD'
+		},
+		{
+			id: 'judge_counter',
+			text: 'Contador de Availações'
+		},
+		{
+			id: 'judge_counter_desc',
+			text: 'Se um contador mostrando avaliações totais deve ser mostrado no canto.'
+		},
+		{
+			id: 'hit_error_bar',
+			text: 'Barra de Erro de Timing'
+		},
+		{
+			id: 'hit_error_bar_desc',
+			text: 'Se o jogo deve mostrar uma barra que mostra a posição de seus acertos recentes.'
+		},
+		{
+			id: 'combo_tinting',
+			text: 'Combo Tonal'
+		},
+		{
+			id: 'combo_tinting_desc',
+			text: 'Deixa o indicador de combo ter cores.'
+		},
+/*		{
+			id: 'popup_center',
+			text: 'Pop-ups no centro'
+		},*/
+		{
+			id: 'popup_center_desc',
+			text: 'Mostra os pop-ups de combo no centro da tela.'
+		},
+		{
+			id: 'hide_acc',
+			text: 'Esconder Precisão'
+		},
+		{
+			id: 'hide_acc_desc',
+			text: 'Esconde o medidor de precisão da HUD.'
+		},
+		{
+			id: 'hide_hud',
+			text: "Esconder HUD"
+		},
+		{
+			id: 'hide_hud_desc',
+			text: "Esconde a HUD completamente, caso você queira ver só suas notas. Ou se você estiver mostrando algo."
+		},
+		{
+			id: 'hide_tightest_judge',
+			text: 'Esconder Melhor Avaliação'
+		},
+		{
+			id: 'hide_tightest_judge_desc',
+			text: 'Se o jogo deve esconder a melhor classificação possível quando você acerta-la.'
+		},
+		{
+			id: 'judge_alpha',
+			text: 'Opacidade da Avaliação'
+		},
+		{
+			id: 'judge_alpha_desc',
+			text: 'Define o quão opaca a availação será quando aparecer.'
+		},
+		{
+			id: 'combo_alpha',
+			text: 'Opacidade do Combo'
+		},
+		{
+			id: 'combo_alpha_desc',
+			text: 'Define o quão opaco será o indicador de combo.'
+		},
+		{
+			id: 'hp_alpha',
+			text: 'Opacidade da Barra de Vida'
+		},
+		{
+			id: 'hp_alpha_desc',
+			text: 'Define oquão opaca será a barra de vida.'
+		},
+		{
+			id: 'visuals',
+			text: 'Visuais'
+		},
+		{
+			id: 'language',
+			text: 'Idioma'
+		},
+		{
+			id: 'language_desc',
+			text: 'Altera o idioma do jogo.'
+		},
+		{
+			id: 'flashing_lights',
+			text: 'Luzes Piscantes'
+		},
+		{
+			id: 'flashing_lights_desc',
+			text: 'Se o jogo tem permissão pra arriscar convulsões com efeitos coloridos rápidos.'
+		},
+		{
+			id: 'game_alpha',
+			text: 'Opacidade do Jogo'
+		},
+		{
+			id: 'game_alpha_desc',
+			text: 'Define a opacidade dos visuais atrás da HUD. (Se estiver em 0%, os visuais serão desativados completamente. Pode ajudar com desempenho!)'
+		},
+		{
+			id: 'receptor_size',
+			text: 'Zoom da Linha de Receptores'
+		},
+		{
+			id: 'receptor_size_desc',
+			text: 'Quanto de zoom é aplicado a sua linha de receptores.'
+		},
+		{
+			id: 'center_field',
+			text: 'Centralizar Pista de Notas'
+		},
+		{
+			id: 'center_field_desc',
+			text: 'Se a pista de notas deverá ir pro centro da tela, habitualmente ela está em um dos cantos.'
+		},
+		{
+			id: 'time_text',
+			text: 'Texto de Progresso'
+		},
+		{
+			id: 'time_text_desc',
+			text: "Se um texto mostrando o tempo da música será mostrado na HUD."
+		},
+		{
+			id: 'opp_notes',
+			text: 'Mostrar Notas do Oponente'
+		},
+		{
+			id: 'opp_notes_desc',
+			text: "Se a pista de notas do oponente será mostrada. Se desliga automaticamente quando \"Centralizar Pista de Notas\" está ligado."
+		},
+		{
+			id: 'cam_zooms',
+			text: 'Zooms de Câmera'
+		},
+		{
+			id: 'cam_zooms_desc',
+			text: 'Se o jogo pode deixar que a câmera salte no ritmo da música.'
+		},
+		{
+			id: 'receptor_glow',
+			text: 'Brilho dos Receptores'
+		},
+		{
+			id: 'receptor_glow_desc',
+			text: 'Como os receptores devem brilhar quando você acertar uma nota.'
+		},
+		{
+			id: 'can_unglow',
+			text: 'Remover brilho ao fim da animação'
+		},
+		{
+			id: 'can_unglow_desc',
+			text: 'Se os receptores devem retornar para suas animações padrões quando a atual terminar, ou quando você soltar a tecla.'
+		},
+		{
+			id: 'performance',
+			text: 'Desempenho'
+		},
+		{
+			id: 'framerate',
+			text: 'Framerate'
+		},
+		{
+			id: 'framerate_desc',
+			text: 'O framerate máximo que o jogo pode alcançar.'
+		},
+		{
+			id: 'antialiasing',
+			text: 'Anti-aliasing'
+		},
+		{
+			id: 'antialiasing_desc',
+			text: 'Se as texturas do jogo terão uma transição linear entre pixels ao invés de instantânea.'
+		},
+		{
+			id: 'audio_streaming',
+			text: 'Streaming de Áudio'
+		},
+		{
+			id: 'audio_streaming_desc',
+			text: "Se músicas devem ser carregadas de forma dinâmica (enquanto tocam) ou imediata. (Se você experienciar lag ou engasgadas, tente desligar isso! Tenha em mente que isso deixará o uso de memória um pouco mais alto, porém mais estável.)"
+		},
+		{
+			id: 'reduced_quality',
+			text: 'Qualidade reduzida'
+		},
+		{
+			id: 'reduced_quality_desc',
+			text: 'Se o jogo deve remover alguns elementos (pode melhorar tempos de carregamento).'
+		},
+		{
+			id: 'videos',
+			text: 'Vídeos'
+		},
+		{
+			id: 'videos_desc',
+			text: 'Se o jogo pode mostrar vídeos ou não. Se ligado, pode impactar desempenho e tempos de carregamento.'
+		},
+		{
+			id: 'shaders',
+			text: 'Shaders'
+		},
+		{
+			id: 'shaders_desc',
+			text: 'Permite alguns sprites usar código especial para criar efeitos visuais.'
+		},
+		{
+			id: 'hold_grain',
+			text: 'Compressão do Hold'
+		},
+		{
+			id: 'hold_grain_desc',
+			text: "Quantas vezes o jogo comprime os vértices das notas sustenidas.\nValóres mais altos irão esticar o gráfico do hold para melhorar desempenho.\nRecomendado manter valores baixos se você jogar modcharts, caso contrário, valores mais altos para jogo casual."
+		},
+		{
+			id: 'audio',
+			text: 'Som'
+		},
+		{
+			id: 'metronome',
+			text: 'Metrônomo'
+		},
+		{
+			id: 'metronome_desc',
+			text: 'Permite que o jogo toque um som a cada batida enquanto uma música toca.'
+		},
+		{
+			id: 'assist_ticks',
+			text: 'Tique-taques de Assistência'
+		},
+		{
+			id: 'assist_ticks_desc',
+			text: 'Permite que o jogo toque um som de tique cada vez que você *deve* acertar uma nota. Use isso se quiser algo tipo sons de acerto (Hitsounds).'
+		},
+		{
+			id: 'pause_music',
+			text: 'Música de Pausa'
+		},
+		{
+			id: 'pause_music_desc',
+			text: 'Que música deve tocar quando o jogo estiver pausado.'
+		},
+		{
+			id: 'miscellaneous',
+			text: 'Diversos'
+		},
+		{
+			id: 'info_counter',
+			text: 'Indicador Técnico'
+		},
+		{
+			id: 'info_counter_desc',
+			text: 'Mostra informação técnica sobre o jogo no canto da tela.'
+		},
+		{
+			id: 'fullscreen',
+			text: 'Tela Cheia'
+		},
+		{
+			id: 'fullscreen_desc',
+			text: 'Preenche sua tela inteira com o jogo. (Pode afetar desempenho de livestreams no Discord!)'
+		},
+		{
+			id: 'discord_rpc',
+			text: 'Integração com Discord'
+		},
+		{
+			id: 'discord_rpc_desc',
+			text: 'Permite o jogo a conectar com seu Discord para mostrar que você está jogando Never2x.'
+		},
+		{
+			id: 'auto_pause',
+			text: 'Pausa Automática'
+		},
+		{
+			id: 'auto_pause_desc',
+			text: 'Pausa o jogo automaticamente quando a janela perde seu foco.'
+		},
+		{
+			id: 'clear_save',
+			text: 'Limpar Dados Salvos'
+		},
+		{
+			id: 'clear_save_desc',
+			text: 'Isso irá deletar TODOS os seus dados salvos do jogo (*é irreversível a menos que você tenha um backup!!!*).'
+		},
+		{
+			id: 'clear_scores',
+			text: 'Limpar Recordes Pessoais'
+		},
+		{
+			id: 'clear_scores_desc',
+			text: "Isso irá deletar TODOS os seus recorde pessoais (*é irreversível a menos que você tenha um backup!!!*)."
+		},
+
+		// Miscellaneous
+		{
+			id: 'early',
+			text: 'Adiantado'
+		},
+		{
+			id: 'late',
+			text: 'Atrasado'
+		},
+		{
+			id: 'up',
+			text: 'Cima'
+		},
+		{
+			id: 'down',
+			text: 'Baixo'
+		},
+		{
+			id: 'on',
+			text: 'Ligado'
+		},
+		{
+			id: 'off',
+			text: 'Desligado'
+		},
+		{
+			id: 'cancel',
+			text: 'Cancelar'
+		},
+		{
+			id: 'open_folder',
+			text: 'Abrir Pasta'
+		},
+		{
+			id: 'refresh',
+			text: 'Atualizar'
+		},
+		{
+			id: 'apply',
+			text: 'Aplicar'
+		},
+	]
 }
