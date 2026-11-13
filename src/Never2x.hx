@@ -3,7 +3,6 @@ package;
 import lime.app.Application;
 import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
-import funkin.core.LanguageHandler;
 import haxe.CallStack;
 import haxe.io.Path;
 import openfl.Lib;
@@ -180,9 +179,6 @@ class InitState extends flixel.FlxState {
 		DiscordClient.start();
 		Meta.cacheFiles();
 		Alphabet.loadData();
-		LanguageHandler.loadTranslations();
-
-		LanguageHandler.setLanguage(Settings.data.language);
 		
 		Languages.init();
 		Languages.change(Settings.data.language);

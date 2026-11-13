@@ -34,6 +34,12 @@ class Languages {
 		Sys.println('');
 	}
 
+	public static function getNames():Array<String> {
+		return [
+			for (locale in list) locale.name
+		];
+	}
+
 	public static function change(localeID:String = '') {
 		current = getByID('en-US');
 	}

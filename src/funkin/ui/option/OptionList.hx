@@ -231,7 +231,7 @@ class OptionList extends TextList {
 		curHolding = 0;
 		dragging = false;
 
-		var txts = [for (opt in list) (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name))];
+		var txts = [for (opt in list) (opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : getText(opt.name))];
 		var subs = [for (i => opt in list) getDesc(opt)];
 		regenerate(txts, subs);
 		this.list = list;
@@ -265,7 +265,7 @@ class OptionList extends TextList {
 	}
 
 	public static function getDesc(opt:Option) {
-		return (opt.desc.startsWith("<NO-LANG>") ? opt.desc.substring(9, opt.desc.length) : _formatT(opt.desc, [_t("accept").toUpperCase()]));
+		return (opt.desc.startsWith("<NO-LANG>") ? opt.desc.substring(9, opt.desc.length) : getFormattedText(opt.desc, [getText("accept").toUpperCase()]));
 	}
 
 	override function draw() {

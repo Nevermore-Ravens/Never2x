@@ -130,7 +130,7 @@ class NoteCustomization extends OptionList {
 			wheel.shader = shaders[shaders.length - 1];
 			wheels.add(wheel);
 
-			var txt = new FlxText(wheel.x, wheel.y - 5, wheel.width, _t(names[i]));
+			var txt = new FlxText(wheel.x, wheel.y - 5, wheel.width, getText(names[i]));
 			txt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 20, 0xFFFFFFFF, LEFT);
 			txt.y -= txt.height;
 			colTxts.add(txt);
@@ -553,18 +553,18 @@ class NoteCustomization extends OptionList {
 	}
 
     function overrideActionLabel(with:String, ?args:Array<String>) {
-        actionLabel.text = _formatT(with, args ?? []);
+        actionLabel.text = getFormattedText(with, args ?? []);
         actLabelTimer.start(1, function(_) {
             if (current != noteActIdx)
                 return;
 
             var actionArray = Settings.data.quantColouring.startsWith("Custom") ? actionsCustom : actionsPreset;
-            actionLabel.text = curAction >= actionArray.length ? _formatT("note_switch_key", [Std.string(curAction - actionArray.length + 1)]) : _t("note_" + actionArray[curAction]);
+            actionLabel.text = curAction >= actionArray.length ? getFormattedText("note_switch_key", [Std.string(curAction - actionArray.length + 1)]) : getText("note_" + actionArray[curAction]);
         });
     }
     function actionFailed(reason:String, ?args:Array<String>) {
         args ??= [];
-        Sys.println(_formatT(reason, args));
+        Sys.println(getFormattedText(reason, args));
         overrideActionLabel(reason, args);
         FlxG.sound.play(Assets.audio("sfx/cancel"));
 
@@ -620,14 +620,14 @@ class NoteCustomization extends OptionList {
         
                 var names = rgb ? ["red", "green", "blue"] : ["hue", "sat", "val"];
                 for (i in 0...colTxts.length)
-                    colTxts.members[i].text = _t(names[i]);
+                    colTxts.members[i].text = getText(names[i]);
         }
     }
     function changeAction(inc:Int) {
         var actionArray = Settings.data.quantColouring.startsWith("Custom") ? actionsCustom : actionsPreset;
         curAction = FlxMath.wrap(curAction + inc, 0, actionArray.length - 1 + keyCountTxt.length);
         if (actLabelTimer.finished) {
-            actionLabel.text = curAction >= actionArray.length ? _formatT("note_switch_key", [Std.string(curAction - actionArray.length + 1)]) : _t("note_" + actionArray[curAction]);
+            actionLabel.text = curAction >= actionArray.length ? getFormattedText("note_switch_key", [Std.string(curAction - actionArray.length + 1)]) : getText("note_" + actionArray[curAction]);
             actionLabel.y = actionHover.y;
             actionLabel.alpha = 0;
         }

@@ -81,7 +81,7 @@ class SaveVariables {
 	var hideTightestJudge:Bool = false;
 	var comboAlpha:Float = 1;
 	var healthBarAlpha:Float = 1;
-	var language:String = 'English';
+	var language:String = 'en-US';
 	var infoCounter:Bool = false;
 	var transitions:Bool = true;
 	var timeText:Bool = true;

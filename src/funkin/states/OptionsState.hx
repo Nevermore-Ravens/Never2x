@@ -14,9 +14,9 @@ import flixel.input.gamepad.FlxGamepad.FlxGamepadModel;
 class OptionsState extends FunkinState {
 	public static var self:OptionsState;
 
-	final categoryList:Array<String> = ["Keybinds", "Gameplay", "HUD", "Visuals", "Performance", "Misc."];
+	final categoryList:Array<String> = ["keybinds", "gameplay", "hud", "visuals", "performance", "miscellaneous"];
 	final optionsList:Map<String, Array<Option>> = [
-		"Keybinds" => [
+		"keybinds" => [
             {
     			var opt = new Option("swap_keybind_mode_generic", "swap_keybind_mode_desc", "", ButtonOption);
 				opt.formatText = function(selected) {
@@ -72,7 +72,7 @@ class OptionsState extends FunkinState {
 			}
 			// ill not add the debug keys
 		],
-		"Gameplay" => [
+		"gameplay" => [
 			{
 				var opt = new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"]));
 				opt;
@@ -91,21 +91,21 @@ class OptionsState extends FunkinState {
 				opt;
 			},
 			{
-				var opt = new Option('note_offset', 'note_offset_desc', "inputOffset", FloatOption(-5000, 5000, 1));
+				var opt = new Option('input_offset', 'input_offset_desc', "inputOffset", FloatOption(-5000, 5000, 1));
 				opt.formatText = function(_) {
 					return opt.value + " MS";
 				};
 				opt;
 			},
-			new Option('ghost_t', 'ghost_t_desc', "ghostTapping", BoolOption),
+			new Option('ghost_tapping', 'ghost_tapping_desc', "ghostTapping", BoolOption),
 			new Option('metronome', 'metronome_desc', "metronome", BoolOption),
-			new Option('assist_claps', 'assist_claps_desc', "assistTicks", BoolOption),
+			new Option('assist_ticks', 'assist_ticks_desc', "assistTicks", BoolOption),
 			new Option('can_reset', 'can_reset_desc', "canReset", BoolOption),
 			//new Option('acc_type', 'acc_type_desc', "accuracyType", ListOption(["Simple", "Complex"]))
 			//i'm gonna be honest, all complex acc does is make ranking inconsistent, given how we have
 			//standardized score based on judgements now i really don't see a need to have complex acc at all -fox
 		],
-		"HUD" => [
+		"hud" => [
 			new Option("judge_counter", "judge_counter_desc", "judgementCounter", BoolOption),
 			new Option('hit_error_bar', 'hit_error_bar_desc', "hitErrorBar", BoolOption),
 			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"], true)),
@@ -144,17 +144,17 @@ class OptionsState extends FunkinState {
 				opt;
 			}
 		],
-		"Visuals" => [
+		"visuals" => [
 			{
-				var opt = new Option('language', 'language_desc', "language", ListOption(LanguageHandler.getLanguages(), true));
+				var opt = new Option('language', 'language_desc', "language", ListOption(Languages.getNames(), true));
 				opt.onChange = function(v) {
-					LanguageHandler.setLanguage(v);
+					Languages.change(v);
 					for (i => cate in self.categoryList)
-						self.cateText.setText(i, _t(cate));
+						self.cateText.setText(i, getText(cate));
 
 					for (i => opt in self.curOptList) {
 						final opt = self.curOptList[i];
-						self.optText.setText(i, opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : _t(opt.name));
+						self.optText.setText(i, opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : getText(opt.name));
 						self.optText.setSubText(i, OptionList.getDesc(opt));
 						// self.optText.setSubText(i, opt.formatText(i == self.optText.current));
 					}
@@ -163,13 +163,13 @@ class OptionsState extends FunkinState {
 			},
 			new Option("flashing_lights", "flashing_lights_desc", "flashingLights", BoolOption),
 			{
-				var opt = new Option('strum_size', 'strum_size_desc', 'strumSize', FloatOption(0.05, 3, 0.05, false, true));
+				var opt = new Option('receptor_size', 'receptor_size_desc', 'strumSize', FloatOption(0.05, 3, 0.05, false, true));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
 				opt;
 			},
-			new Option('center_notes', 'center_notes_desc', "centeredNotes", BoolOption),
+			new Option('center_field', 'center_field_desc', "centeredNotes", BoolOption),
 			new Option('opp_notes', 'opp_notes_desc', "opponentNotes", BoolOption),
 			{
 				var opt = new Option('lane_underlay', 'lane_underlay_desc', 'laneUnderlay', FloatOption(0, 1, 0.05, false, true));
@@ -179,11 +179,10 @@ class OptionsState extends FunkinState {
 				opt;
 			},
 			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"], true)),
-			new Option("cam_movement", "cam_movement_desc", "notesMoveCamera", BoolOption),
-			new Option('strum_glow', 'strum_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Note'], true)),
+			new Option('receptor_glow', 'receptor_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Note'], true)),
 			new Option("can_unglow", "can_unglow_desc", "unglowOnAnimFinish", BoolOption),
 		],
-		"Performance" => [
+		"performance" => [
 			{
 				var opt = new Option("framerate", "framerate_desc", "framerate", IntOption(15, 1000, 5));
 				opt.onChange = function(v) {
@@ -209,7 +208,7 @@ class OptionsState extends FunkinState {
 				}
 				opt;
 			},
-			new Option("streams", "streams_desc", "audioStreams", BoolOption),
+			new Option("audio_streaming", "audio_streaming_desc", "audioStreams", BoolOption),
 			new Option("reduced_quality", "reduced_quality_desc", "reducedQuality", BoolOption),
 			{
 				var opt = new Option("game_alpha", "game_alpha_desc", "gameVisibility", IntOption(0, 100, 5, false, true));
@@ -232,9 +231,9 @@ class OptionsState extends FunkinState {
 				opt;
 			}
 		],
-		"Misc." => [
+		"miscellaneous" => [
 			{
-				var opt = new Option("fps_counter", "fps_counter_desc", 'infoCounter', BoolOption);
+				var opt = new Option("info_counter", "info_counter_desc", 'infoCounter', BoolOption);
 				opt.onChange = function(v) {
 					Never2x.infoCounter.visible = v;
 				};
@@ -260,7 +259,7 @@ class OptionsState extends FunkinState {
 				opt;
 			},
 			{
-				var opt = new Option("calc_offset", "calc_offset_desc", "", ButtonOption);
+				var opt = new Option("calibrate_offset", "calibrate_offset_desc", "", ButtonOption);
 				opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
 				opt;
 			}
@@ -298,7 +297,7 @@ class OptionsState extends FunkinState {
 		bg.wrapMode = REPEAT;
 		add(bg);
 
-		cateText = new TextList(10, 10, 300, 700, [for (cate in categoryList) _t(cate)]);
+		cateText = new TextList(10, 10, 300, 700, [for (cate in categoryList) getText(cate)]);
 		cateText.onAccept = openCategory;
 		cateText.onClick = openCategory;
 		cateText.onSelect = function(_, __) {
@@ -393,7 +392,7 @@ class OptionsState extends FunkinState {
 				optText.allowMouse = false;
 	
 				waitingForKey = true;
-				optText.setSubText(optText.current, _t("sel_key_desc"));
+				optText.setSubText(optText.current, getText("sel_key_desc"));
 				cast (optText.components[optText.current], Textbox).text = "Setting...";
 			case ListOption(options, true, translateItems):
 				var opts:Array<String> = [for (value in options) list.list[current].formatListOption(value, translateItems == true)];
@@ -551,7 +550,7 @@ class Option {
 
 	public dynamic function formatListOption(item:String, translated:Bool) {
 		if (translated)
-			return _t(id + "_" + item);
+			return getText(id + "_" + item);
 		return item.toLowerCase() == "off" ? "OFF" : item;
 	}
 
@@ -565,7 +564,7 @@ class Option {
 			case BoolOption:
 				hasEnter = true;
 				formatText = function(_) {
-					return _t(value ? "on" : "off").toUpperCase();
+					return getText(value ? "on" : "off").toUpperCase();
 				};
 			case KeyOption:
 				hasEnter = true;

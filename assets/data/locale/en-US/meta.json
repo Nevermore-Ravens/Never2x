@@ -55,6 +55,14 @@
 			text: 'Keybinds'
 		},
 		{
+			id: 'swap_keybind_mode_generic',
+			text: 'Swap keybind mode'
+		},
+		{
+			id: 'swap_keybind_mode_desc',
+			text: 'Press ACCEPT to swap keybind modes'
+		},
+		{
 			id: 'left_note',
 			text: 'Left (Notes)'
 		},
@@ -444,7 +452,7 @@
 		},
 		{
 			id: 'judge_alpha_desc',
-			text: 'How much you can see the of judgement display.'
+			text: 'How much you can see of the judgement display.'
 		},
 		{
 			id: 'combo_alpha',
@@ -452,7 +460,7 @@
 		},
 		{
 			id: 'combo_alpha_desc',
-			text: 'How much you can see the of the combo display.'
+			text: 'How much you can see of the combo display.'
 		},
 		{
 			id: 'hp_alpha',
@@ -556,7 +564,7 @@
 		},
 		{
 			id: 'framerate_desc',
-			text: 'The maximum frame rate the gmae will run at.'
+			text: 'The maximum frame rate the game will run at.'
 		},
 		{
 			id: 'antialiasing',

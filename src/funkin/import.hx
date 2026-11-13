@@ -11,8 +11,8 @@ import funkin.objects.FunkinSpriteGroup;
 import funkin.states.*;
 
 //these are functions we use a lot, so make them generally available
-import funkin.core.LanguageHandler._t;
-import funkin.core.LanguageHandler._formatT;
+import funkin.core.Languages.getText;
+import funkin.core.Languages.getFormattedText;
 
 // nevermore specific
 import nevermore.backend.Vector3;
