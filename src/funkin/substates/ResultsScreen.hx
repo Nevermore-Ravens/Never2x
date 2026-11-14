@@ -144,30 +144,30 @@ class ResultsScreen extends flixel.FlxSubState {
 
 		clearTxt = new SkewedText(FlxG.width - 10, FlxG.height, 0, stats.clearType);
 		clearTxt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 120, stats.clearType.color, RIGHT);
-		clearTxt.setBorderStyle(OUTLINE, clearTxt.color.lightness > 0.85 ? 0xFF000000 : 0xFFFFFFFF, 4);
+		clearTxt.setBorderStyle(OUTLINE, clearTxt.color.lightness > 0.85 ? 0xFF000000 : 0xFFFFFFFF, 8);
 		clearTxt.x -= clearTxt.width;
-		clearTxt.y -= clearTxt.height;
+		clearTxt.y -= clearTxt.height - clearTxt.borderSize;
 		add(clearTxt);
 
 		rankTxt = new SkewedText(clearTxt.x + clearTxt.width, clearTxt.y, 0, stats.grade.type);
 		rankTxt.setFormat(Assets.getPath("fonts/cafeSquare.ttf"), 56, stats.grade.color, RIGHT);
 		rankTxt.setBorderStyle(OUTLINE, rankTxt.color.lightness > 0.2 ? FlxColor.interpolate(rankTxt.color, 0xFF000018, 0.75) : FlxColor.interpolate(rankTxt.color, 0xFFFBCFDD, 0.5), 3);
 		rankTxt.x -= rankTxt.width;
-		rankTxt.y -= rankTxt.height;
+		rankTxt.y -= rankTxt.height - rankTxt.borderSize;
 		add(rankTxt);
 
 		diff = new SkewedText(rankTxt.x + rankTxt.width, rankTxt.y, 0, Difficulty.current.toUpperCase());
 		diff.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 32, Difficulty.currentColor, RIGHT);
 		diff.setBorderStyle(OUTLINE, diff.color.lightness < 0.15 ? 0xFFFFFFFF : 0xFF000000, 2);
 		diff.x -= diff.width;
-		diff.y -= diff.height;
+		diff.y -= diff.height - diff.borderSize;
 		add(diff);
 
 		title = new SkewedText(diff.x + diff.width, diff.y, 0, stats.songName);
 		title.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 36, 0xFFFFFFFF, RIGHT);
 		title.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		title.x -= title.width;
-		title.y -= title.height;
+		title.y -= title.height - title.borderSize;
 		add(title);
 
 		tweenObjects();
@@ -223,6 +223,14 @@ class ResultsScreen extends flixel.FlxSubState {
 		missLine = FlxG.bitmap.create(timeDot.width, Std.int(graphBG.frameHeight), 0xFF808080);
 		missLine.destroyOnNoUse = false;
 
+		var indicators = [lateTxt, earlyTxt, meanLine, meanTxt, stddLine, stddTxt];
+		var indicatorY = [for (ind in indicators) ind.y];
+		var indicatorA = [for (ind in indicators) ind.alpha];
+		for (ind in indicators) {
+			ind.y = graphBG.y + (graphBG.height - ind.height) * 0.5;
+			ind.alpha = 0;
+		}
+
 		graphBG.y -= 15;
 		graphBG.alpha = 0;
 		var idx = 0;
@@ -241,6 +249,8 @@ class ResultsScreen extends flixel.FlxSubState {
 				++idx;
 			}
 		});
+		for (i => ind in indicators)
+			tweens.tween(ind, {y: indicatorY[i], alpha: indicatorA[i]}, 0.7, {ease: FlxEase.quadOut, startDelay: bgTwn.duration});
 
 		for (i in 0...(stats.judgements.length + 1)) {
 			var isMiss = i == stats.judgements.length;

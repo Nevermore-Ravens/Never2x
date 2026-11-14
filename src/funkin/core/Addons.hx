@@ -32,7 +32,7 @@ class Addon {
 	function get_authors():Array<String> return data.authors;
 
 	public function toString():String {
-		return 'Name: $name | Description: $description';
+		return '($directory) Name: $name | Description: $description';
 	}
 }
 
@@ -60,8 +60,13 @@ class Addons {
 		Assets.main.getPath = _getPath;
 		reload();
 
-		if (list.length > 0) Sys.println('Addons loaded.');
-		else Sys.println('No addons exist.');
+		if (list.length > 0) {
+			Sys.println('Addons loaded!');
+			for (addon in list)
+				Sys.println("- " + addon);
+			Sys.println("");
+		} else
+			Sys.println('No addons exist.\n');
 	}
 
 	// tells you if there are any addons currently enabled/running
@@ -84,7 +89,6 @@ class Addons {
 			loaded.push(key);
 			list.push(addon);
 
-			Sys.println('Addon "${addon.name}" loaded!');
 			return addon;
 		}
 

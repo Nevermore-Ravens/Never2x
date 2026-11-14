@@ -30,7 +30,7 @@ class Languages {
 
 		Sys.println('Translations loaded!');
 		for (locale in list) {
-			Sys.println(locale);
+			Sys.println("-  " + locale);
 		}
 		Sys.println('');
 	}
@@ -56,7 +56,7 @@ class Languages {
 			if (locale.id == id) return locale;
 		}
 
-		return null;
+		return list[0];
 	}
 
 	public static function getText(id:String):String {
