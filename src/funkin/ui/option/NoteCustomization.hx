@@ -117,7 +117,7 @@ class NoteCustomization extends OptionList {
 		colHover = new FunkinSprite();
 		colHover.makeGraphic(1, 1, 0xFFFFFFFF);
 
-		var names = ["hue", "sat", "val"];
+		var names = ["hue", "saturation", "value"];
 		wheels = new FlxTypedGroup<FunkinSprite>();
 		colVals = new FlxTypedGroup<FlxText>();
 		colTxts = new FlxTypedGroup<FlxText>();
@@ -330,7 +330,7 @@ class NoteCustomization extends OptionList {
                 quantPalettes.unshift('Custom');
                 quantPalettes.unshift('None');
     
-                var opt = new Option('quant_col', 'quant_col_desc', "quantColouring", ListOption(quantPalettes, true));
+                var opt = new Option('quant_coloring', 'quant_coloring_desc', "quantColouring", ListOption(quantPalettes, true));
                 opt.onChange = function(v) {
                     NoteStyling.updatePalette();
                     updatePalette();

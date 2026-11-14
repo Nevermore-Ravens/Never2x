@@ -22,6 +22,7 @@ class Languages {
 		// gonna do a folder check later but just for now
 		list = [
 			new Locale('en-US'),
+			new Locale('en-PL'),
 			new Locale('pt-BR'),
 			new Locale('es-ES'),
 			new Locale('jp-JP')

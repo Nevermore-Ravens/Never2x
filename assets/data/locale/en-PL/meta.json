@@ -1,0 +1,512 @@
+{
+	name: 'English (Pig Latin)',
+
+	translations: [
+		{
+			id: 'resume',
+			text: 'Esumeray'
+		},
+		{
+			id: 'restart',
+			text: 'Estartray'
+		},
+		{
+			id: 'options',
+			text: 'Ptionsoway'
+		},
+		{
+			id: 'change_difficulty',
+			text: 'Hangecay Ifficultyday'
+		},
+		{
+			id: 'exit_to_menu',
+			text: 'Xiteway otay Enumay'
+		},
+		{
+			id: 'blueballed',
+			text: 'Lueballedbay: ${0}'
+		},
+		{
+			id: 'personal_best',
+			text: 'Ersonalpay Estbay: ${0} (${1}%)'
+		},
+		{
+			id: 'edit_modifiers',
+			text: 'Diteway Odifiersmay'
+		},
+		{
+			id: 'info_text_score',
+			text: 'Coresay: ${0}'
+		},
+		{
+			id: 'info_text_combo_breaks',
+			text: 'Ombocay Reaksbay: ${0}'
+		},
+		{
+			id: 'info_text_accuracy',
+			text: 'Ccuracyaway: ${0}%'
+		},
+		{
+			id: 'autoplay',
+			text: 'Utoplayaway'
+		},
+		{
+			id: 'killer',
+			text: 'Killer'
+		},
+		{
+			id: 'sick',
+			text: 'Sick'
+		},
+		{
+			id: 'good',
+			text: 'Good'
+		},
+		{
+			id: 'bad',
+			text: 'Bad'
+		},
+		{
+			id: 'shit',
+			text: 'Shit'
+		},
+		{
+			id: 'miss',
+			text: 'Miss'
+		},
+		{
+			id: 'playback_rate',
+			text: 'Laybackpay Ateray'
+		},
+		{
+			id: 'playback_rate_desc',
+			text: 'Owhay astfay hetay amegay illway peedsay puway roway lowsay ownday hetay ongsay.'
+		},
+		{
+			id: 'playing_side',
+			text: 'Layingpay Idesay'
+		},
+		{
+			id: 'playing_side_desc',
+			text: "Hichway idesay ou'reyay layingpay noway orfay hetay ongsay."
+		},
+		{
+			id: 'no_fail',
+			text: 'Onway Ailfay'
+		},
+		{
+			id: 'no_fail_desc',
+			text: "Fiway ou'llyay ivelay veneway henway utoway foway ealthhay."
+		},
+		{
+			id: 'min_clear_type',
+			text: 'Min. Learcay Ypetay'
+		},
+		{
+			id: 'min_clear_type_desc',
+			text: 'Hetay owestlay learcay ypetay ouyay ancay avehay ithoutway ailingfay.'
+		},
+		{
+			id: 'mirrored_otesnay',
+			text: 'Irroredmay Otesnay'
+		},
+		{
+			id: 'mirrored_otesnay_desc',
+			text: 'Fiway hetay hartcay illway lipfay tsiway otesnay roundaway.'
+		},
+		{
+			id: 'randomized_otesnay',
+			text: 'Andomizedray Otesnay'
+		},
+		{
+			id: 'randomized_otesnay_desc',
+			text: 'Fiway hetay amegay illway wapsay hetay aneslay roundaway.'
+		},
+		{
+			id: 'modcharts',
+			text: 'Odchartsmay'
+		},
+		{
+			id: 'modcharts_desc',
+			text: 'Fiway hetay amegay illway oday omesay ackyway tuffsay ithway hetay otesnay otay akemay tiway ooklay oolercay.'
+		},
+		{
+			id: 'scroll_velocities',
+			text: 'Crollsay Elocitiesvay'
+		},
+		{
+			id: 'scroll_velocities_desc',
+			text: 'Fiway hetay amegay illway llowaway crollsay elocitiesvay otay ebay seduway.'
+		},
+		{
+			id: 'sustains',
+			text: 'Ustainssay'
+		},
+		{
+			id: 'sustains_desc',
+			text: 'Fiway hetay amegay illway ddaway oldshay roway otnay.'
+		},
+		{
+			id: 'autoplay',
+			text: 'Utoplayaway'
+		},
+		{
+			id: 'autoplay_desc',
+			text: 'Fiway hetay amegay illway laypay hetay hartcay orfay ouyay.'
+		},
+		{
+			id: 'blind',
+			text: 'Lindbay'
+		},
+		{
+			id: 'blind_desc',
+			text: 'Owhay uchmay foway hetay hartcay oday ouyay ememberray?'
+		},
+
+		// Options
+		{
+			id: 'keybinds',
+			text: 'Eybindskay'
+		},
+		{
+			id: 'swap_keybind_mode_generic',
+			text: 'Wapsay eybindkay odemay'
+		},
+		{
+			id: 'swap_keybind_mode_desc',
+			text: 'Resspay ACCEPT otay wapsay eybindkay odesmay'
+		},
+		{
+			id: 'left_note',
+			text: 'Eftlay (Otesnay)'
+		},
+		{
+			id: 'left_note_desc',
+			text: 'Orfay ittinghay eftlay otesnay.'
+		},
+		{
+			id: 'down_note',
+			text: 'Ownday (Otesnay)'
+		},
+		{
+			id: 'down_note_desc',
+			text: 'Orfay ittinghay ownday otesnay.'
+		},
+		{
+			id: 'up_note',
+			text: 'Puway (Otesnay)'
+		},
+		{
+			id: 'up_note_desc',
+			text: 'Orfay ittinghay puway otesnay.'
+		},
+		{
+			id: 'right_note',
+			text: 'Ightray (Otesnay)'
+		},
+		{
+			id: 'right_note_desc',
+			text: 'Orfay ittinghay ightray otesnay.'
+		},
+		{
+			id: 'pause',
+			text: 'Ausepay'
+		},
+		{
+			id: 'pause_desc',
+			text: 'Orfay ausingpay hetay amegay idmay-ongsay.'
+		},
+		{
+			id: 'reset',
+			text: 'Esetray'
+		},
+		{
+			id: 'reset_desc',
+			text: 'Orfay orfeitingfay hetay ongsay idmay-ayway, fiway llowedaway.'
+		},
+		{
+			id: 'ui_left',
+			text: 'Eftlay (UI)'
+		},
+		{
+			id: 'ui_left_desc',
+			text: 'Orfay ovingmay eftlay niway hetay enusmay.'
+		},
+		{
+			id: 'ui_down',
+			text: 'Ownday (UI)'
+		},
+		{
+			id: 'ui_down_desc',
+			text: 'Orfay ovingmay ownday niway hetay enusmay.'
+		},
+		{
+			id: 'ui_up',
+			text: 'Puway (UI)'
+		},
+		{
+			id: 'ui_up_desc',
+			text: 'Orfay ovingmay puway niway hetay enusmay.'
+		},
+		{
+			id: 'ui_right',
+			text: 'Ightray (UI)'
+		},
+		{
+			id: 'ui_right_desc',
+			text: 'Orfay ovingmay ightray niway hetay enusmay.'
+		},
+		{
+			id: 'accept',
+			text: 'Cceptay'
+		},
+		{
+			id: 'accept_desc',
+			text: 'Orfay onfirmingcay ctionsaway niway hetay enusmay.'
+		},
+		{
+			id: 'back',
+			text: 'Ackbay'
+		},
+		{
+			id: 'back_desc',
+			text: 'Orfay xitingeway roway ancelingcay ctionsaway niway hetay enusmay.'
+		},
+		{
+			id: 'mute',
+			text: 'Utemay/Nmuteuway'
+		},
+		{
+			id: 'mute_desc',
+			text: 'Orfay utingmay roway nmutinguway hetay amegay.'
+		},
+		{
+			id: 'volume_up',
+			text: 'Olumevay Puway'
+		},
+		{
+			id: 'volume_up_desc',
+			text: 'Orfay ncreasingiway hetay olumevay.'
+		},
+		{
+			id: 'volume_down',
+			text: 'Olumevay Ownday'
+		},
+		{
+			id: 'volume_down_desc',
+			text: 'Orfay ecreasingday hetay olumevay.'
+		},
+		{
+			id: 'gameplay',
+			text: 'Ameplaygay'
+		},
+		{
+			id: 'scroll_dir',
+			text: 'Crollsay Irectionday'
+		},
+		{
+			id: 'scroll_dir_desc',
+			text: 'Hichway ayway hetay otesnay illway ovemay.'
+		},
+		{
+			id: 'scroll_speed',
+			text: 'Crollsay Peedsay'
+		},
+		{
+			id: 'scroll_speed_desc',
+			text: 'Owhay astfay hetay otesnay illway ovemay.'
+		},
+		{
+			id: 'lane_underlay',
+			text: 'Anelay Nderlayuway'
+		},
+		{
+			id: 'lane_underlay_desc',
+			text: 'Isplaysday away lackbay inelway elowbay hetay otefieldnay otay akemay tiway asiereway otay eadray. Histay aluevay hangescay hetay pacityoway.'
+		},
+		{
+			id: 'customize_notes',
+			text: 'Ustomizecay Otesnay'
+		},
+		{
+			id: 'customize_notes_desc',
+			text: 'Diteway hetay otenay exturestay ndaway olorscay otay ouryay ikinglay.'
+		},
+		{
+			id: 'note_customization',
+			text: 'Otenay Ustomizationcay'
+		},
+		{
+			id: 'quant_coloring',
+			text: 'Uantqay Oloringcay'
+		},
+		{
+			id: 'quant_coloring_desc',
+			text: 'Hetay olorizationcay ethodmay orfay hetay otesnay.'
+		},
+		{
+			id: 'note_skin',
+			text: 'Otenay Kinsay'
+		},
+		{
+			id: 'note_skin_desc',
+			text: 'Hatway Exturetay hetay otesnay illway seuway niway-amegay.'
+		},
+		{
+			id: 'skin_style',
+			text: 'Kinsay Tylesay'
+		},
+		{
+			id: 'skin_style_desc',
+			text: 'Hatway tylesay foway otenay kinsay illway ebay seduway niway-amegay.'
+		},
+		{
+			id: 'splash_skin',
+			text: 'Plashsay Kinsay'
+		},
+		{
+			id: 'splash_skin_desc',
+			text: 'Hatway exturetay hetay otenay plashessay illway seuway niway-amegay.'
+		},
+		{
+			id: 'color_warning',
+			text: "Ou'reyay otnay noway away ustomcay etsay! Ouryay odifiedmay olorcay illway otnay avesay!\nLeasepay seuway \"Pplyaway otay Ustomcay\" ndaway witchsay Uantqay Oloringcay otay \"Ustomcay\" roway \"Ustomcay (Olumnscay).\""
+		},
+		{
+			id: 'red',
+			text: 'Edray'
+		},
+		{
+			id: 'green',
+			text: 'Reengay'
+		},
+		{
+			id: 'blue',
+			text: 'Luebay'
+		},
+		{
+			id: 'hue',
+			text: 'Uehay'
+		},
+		{
+			id: 'saturation',
+			text: 'Aturationsay'
+		},
+		{
+			id: 'value',
+			text: 'Aluevay'
+		},
+		{
+			id: 'note_reset',
+			text: 'Esetray Olorcay'
+		},
+		{
+			id: 'note_pick',
+			text: 'Pplyaway otay Ustomcay'
+		},
+		{
+			id: 'note_copy',
+			text: 'Opycay Olorcay'
+		},
+		{
+			id: 'note_paste',
+			text: 'Astepay Olorcay'
+		},
+		{
+			id: 'note_switch',
+			text: 'Witchsay RGB/HSV'
+		},
+		{
+			id: 'note_import',
+			text: 'Mportiway Alettepay'
+		},
+		{
+			id: 'note_export',
+			text: 'Xporteway Alettepay'
+		},
+		{
+			id: 'note_switch_key',
+			text: 'Witchsay otay ${0}K'
+		},
+		{
+			id: 'note_bad_paste',
+			text: 'Nvalidiway lipboardcay temiway! (${0})'
+		},
+		{
+			id: 'note_pal_invalid',
+			text: 'Nvalidiway alettepay ypetay! (${0})'
+		},
+		{
+			id: 'note_pal_bad_type',
+			text: 'Oundfay away onnay-olorcay! (${0})'
+		},
+		{
+			id: 'note_pal_empty',
+			text: 'Onay olorscay oundfay!'
+		},
+		{
+			id: 'note_pal_quant_mismatch',
+			text: 'Nvalidiway uantqay olorcay ountcay! (${0} != ${1})'
+		},
+		{
+			id: 'note_pal_no_4k',
+			text: 'Onnay-4K alettespay reaway urrentlycay nsupporteduway!'
+		},
+		{
+			id: 'note_pal_success_quant',
+			text: 'Ppliedaway Uantqay Alettepay'
+		},
+		{
+			id: 'note_pal_success_column',
+			text: 'Ppliedaway ${0}K Alettepay'
+		},
+		{
+			id: 'input_offset',
+			text: 'Nputiway Ffsetoway'
+		},
+		{
+			id: 'input_offset_desc',
+			text: 'Hiftssay hetay layheadpay orwardfay roway ackwardbay, elativeray otay hetay udioaway ositionpay.\nEgativenay = otesnay omecay aterlay.\nOsitivepay = otesnay omecay arliereway.'
+		},
+		{
+			id: 'visual_offset',
+			text: 'Visual Offset'
+		},
+		{
+			id: 'visual_offset_desc',
+			text: 'Shifts the visual playhead of all notes relative to the receptors, rather than the audio.\nNegative values moves the playhead to be "after" the receptors.'
+		},
+		{
+			id: 'ghost_tapping',
+			text: 'Hostgay Appingtay'
+		},
+		{
+			id: 'ghost_tapping_desc',
+			text: 'Hetherway roway otnay ouyay voidaway away enaltypay orfay ressingpay away eykay ithoutway ittinghay otesnay.'
+		},
+		{
+			id: 'can_reset',
+			text: 'Ancay Esetray'
+		},
+		{
+			id: 'can_reset_desc',
+			text: "Fiway ou'reyay llowedaway otay ieday ndaway estartray ybay ressingpay ouryay esetray indbay."
+		},
+		{
+			id: 'metronome',
+			text: 'Etronomemay'
+		},
+		{
+			id: 'metronome_desc',
+			text: 'Fiway hetay amegay illway laypay away icktay veryeway eatbay hileway layingpay away ongsay.'
+		},
+		{
+			id: 'assist_ticks',
+			text: 'Ssistaway Ickstay'
+		},
+		{
+			id: 'assist_ticks_desc',
+			text: 'Fiway hetay amegay illway laypay away icktay veryeway imetay away otenay houldsay ebay ithay. Seuway histay fiway ouyay antway itsoundshay.'
+		},
+	]
+}

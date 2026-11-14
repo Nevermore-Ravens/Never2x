@@ -12,6 +12,10 @@
 			text: 'Restart'
 		},
 		{
+			id: 'options',
+			text: 'Options'
+		},
+		{
 			id: 'change_difficulty',
 			text: 'Change Difficulty'
 		},
