@@ -42,9 +42,9 @@ class PopupTransform extends OptionList {
 		setOptions([
 			{
 				var opt = new Option("<NO-LANG>Simple Popups", "<NO-LANG>Whether or not popups will simply bump and fade instead of jump and fall.", "simplePopup", BoolOption);
-				opt.onChange = function(v) {
-					judgeSprite.simple = v;	
-					comboSprite.simple = v;	
+				opt.onChange = function(val:Bool) {
+					judgeSprite.simple = val;	
+					comboSprite.simple = val;	
 				};
 				opt;
 			},
@@ -54,9 +54,9 @@ class PopupTransform extends OptionList {
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
-				opt.onChange = function(v) {
-					judgeSprite.scaleBumped = 0.7 * Settings.data.judgeScale;
-					judgeSprite.scaleFlat = 0.65 * Settings.data.judgeScale;
+				opt.onChange = function(val:Float) {
+					judgeSprite.scaleBumped = 0.7 * val;
+					judgeSprite.scaleFlat = 0.65 * val;
 					judgeSprite.scale.set(judgeSprite.scaleFlat, judgeSprite.scaleFlat);
 				}
 				opt;
@@ -66,8 +66,8 @@ class PopupTransform extends OptionList {
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
-				opt.onChange = function(v) {
-					comboSprite.scale.set(0.45 * Settings.data.comboScale, 0.45 * Settings.data.comboScale);
+				opt.onChange = function(val:Float) {
+					comboSprite.scale.set(0.45 * val, 0.45 * val);
 					for (i in 0...comboSprite.members.length) {
 						var num = comboSprite.members[i];
 						var centerI = i - comboSprite.length * 0.5;
@@ -80,7 +80,7 @@ class PopupTransform extends OptionList {
 			},
 			{
 				var opt = new Option("<NO-LANG>Apply Preset", "<NO-LANG>Set's your judgement and combo stlying with a selection of presets.", "", ButtonOption);
-				opt.onChange = function(v) {
+				opt.onChange = function(_) {
 					var opts = ["Cancel", "Funkin'", "Centered", "In-Between"]; // , "Field-Centered" (I need to visualize Field Anchored/popupOnField first)
 
 					var x:Float = mousePoint.x;

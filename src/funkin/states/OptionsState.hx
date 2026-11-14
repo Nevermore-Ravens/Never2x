@@ -48,7 +48,7 @@ class OptionsState extends FunkinState {
 			new Option("", "", "", Unselectable),
 			{
 				var opt = new Option("mute", "mute_desc", "volume_mute", KeyOption);
-				opt.onChange = function(v) {
+				opt.onChange = function(_) {
 					// reverse the function before settings as this gets inputted after setting.
 					FlxG.sound.toggleMuted();
 				}
@@ -56,7 +56,7 @@ class OptionsState extends FunkinState {
 			},
 			{
 				var opt = new Option("volume_up", "volume_up_desc", "volume_up", KeyOption);
-				opt.onChange = function(v) {
+				opt.onChange = function(_) {
 					// reverse the function before settings as this gets inputted after setting.
 					FlxG.sound.changeVolume(-0.1);
 				}
@@ -64,7 +64,7 @@ class OptionsState extends FunkinState {
 			},
 			{
 				var opt = new Option("volume_down", "volume_down_desc", "volume_down", KeyOption);
-				opt.onChange = function(v) {
+				opt.onChange = function(_) {
 					// reverse the function before settings as this gets inputted after setting.
 					FlxG.sound.changeVolume(0.1);
 				}
@@ -148,8 +148,8 @@ class OptionsState extends FunkinState {
 				opt.formatListOption = function(item:String, translated:Bool) {
 					return Languages.getByID(item)?.name ?? item;
 				}
-				opt.onChange = function(v) {
-					Languages.change(v);
+				opt.onChange = function(val:String) {
+					Languages.change(val);
 					for (i => cate in self.categoryList)
 						self.cateText.setText(i, getText(cate));
 
@@ -186,25 +186,25 @@ class OptionsState extends FunkinState {
 		"performance" => [
 			{
 				var opt = new Option("framerate", "framerate_desc", "framerate", IntOption(15, 1000, 5));
-				opt.onChange = function(v) {
-					FlxG.drawFramerate = FlxG.updateFramerate = v;
+				opt.onChange = function(val:Int) {
+					FlxG.drawFramerate = FlxG.updateFramerate = val;
 				};
 				opt;
 			},
 			{
 				var opt = new Option("antialiasing", "antialiasing_desc", "antialiasing", BoolOption);
-				opt.onChange = function(v) {
+				opt.onChange = function(val:Bool) {
 					for (i => cata in self.cateText.texts.members)
-						cata.antialiasing = v;
+						cata.antialiasing = val;
 
 					for (i => txt in self.optText.texts.members)
-						txt.antialiasing = v;
-					for (i => val in self.optText.subTexts.members)
-						val.antialiasing = v;
+						txt.antialiasing = val;
+					for (i => valT in self.optText.subTexts.members)
+						valT.antialiasing = val;
 
 					for (member in self.members) {
 						if (!(member is flixel.FlxSprite)) continue;
-						cast (member, flixel.FlxSprite).antialiasing = v;
+						cast (member, flixel.FlxSprite).antialiasing = val;
 					}
 				}
 				opt;
@@ -223,7 +223,7 @@ class OptionsState extends FunkinState {
 			new Option("hold_grain", "hold_grain_desc", "holdGrain", IntOption(1, 8, 1, false, true)),
 			{
 				var opt = new Option("gpu_cache", "gpu_cache_desc", "gpuCache", BoolOption);
-				opt.onChange = function(v) {
+				opt.onChange = function(_) {
 					Controls.save();
 					Settings.save();
 					Sys.exit(1);
@@ -234,8 +234,8 @@ class OptionsState extends FunkinState {
 		"audio" => [
 			{
 				var opt = new Option('master_volume', 'master_volume_desc', 'volume', FloatOption(0, 1, 0.05, false, true));
-				opt.onChange = function(value) {
-					FlxG.sound.volume = value;
+				opt.onChange = function(val:Float) {
+					FlxG.sound.volume = val;
 				};
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
@@ -244,14 +244,8 @@ class OptionsState extends FunkinState {
 			},
 			{
 				var opt = new Option('music_volume', 'music_volume_desc', 'musicVolume', FloatOption(0, 1, 0.05, false, true));
-
-				// for some magical fucking reason
-				// `value` for this option specifically is an integer
-				// but `opt.value` isn't
-				//
-				// i love this language
-				opt.onChange = function(_) {
-					Conductor.volume = opt.value * 0.75;
+				opt.onChange = function(val:Float) {
+					Conductor.volume = val * 0.75;
 				};
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
@@ -260,8 +254,8 @@ class OptionsState extends FunkinState {
 			},
 			{
 				var opt = new Option('sfx_volume', 'sfx_volume_desc', 'sfxVolume', FloatOption(0, 1, 0.05, false, true));
-				opt.onChange = function(_) {
-					Conductor.clock.metronomeSound.volume = opt.value;
+				opt.onChange = function(val:Float) {
+					Conductor.clock.metronomeSound.volume = val;
 				}
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
@@ -276,15 +270,15 @@ class OptionsState extends FunkinState {
 		"miscellaneous" => [
 			{
 				var opt = new Option("info_counter", "info_counter_desc", 'infoCounter', BoolOption);
-				opt.onChange = function(v) {
-					Never2x.infoCounter.visible = v;
+				opt.onChange = function(val:Bool) {
+					Never2x.infoCounter.visible = val;
 				};
 				opt;
 			},
 			{
 				var opt = new Option("fullscreen", "fullscreen_desc", "fullscreen", BoolOption);
-				opt.onChange = function(v) {
-					FlxG.fullscreen = v;
+				opt.onChange = function(val:Bool) {
+					FlxG.fullscreen = val;
 				};
 				opt;
 			}, 
@@ -295,8 +289,8 @@ class OptionsState extends FunkinState {
 			},
 			{
 				var opt = new Option("auto_pause", "auto_pause_desc", "autoPause", BoolOption);
-				opt.onChange = function(v) {
-					FlxG.autoPause = v;
+				opt.onChange = function(val:Bool) {
+					FlxG.autoPause = val;
 				};
 				opt;
 			},
@@ -584,7 +578,7 @@ class Option {
 	public var hasSound:Bool = true;
 	public var textboxArrows:Bool = true;
 
-	public dynamic function onChange(v:Dynamic) {}
+	public dynamic function onChange<T>(v:T) {}
 
 	public dynamic function formatText(selected:Bool):String {
 		return '$value';
