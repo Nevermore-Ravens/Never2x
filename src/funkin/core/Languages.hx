@@ -34,6 +34,12 @@ class Languages {
 		Sys.println('');
 	}
 
+	public static function getIDs():Array<String> {
+		return [
+			for (locale in list) locale.id
+		];
+	}
+
 	public static function getNames():Array<String> {
 		return [
 			for (locale in list) locale.name
@@ -41,7 +47,7 @@ class Languages {
 	}
 
 	public static function change(localeID:String = '') {
-		current = getByID('en-US');
+		current = getByID(localeID);
 	}
 
 	public static function getByID(id:String):Locale {

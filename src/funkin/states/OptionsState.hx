@@ -146,8 +146,12 @@ class OptionsState extends FunkinState {
 		],
 		"visuals" => [
 			{
-				var opt = new Option('language', 'language_desc', "language", ListOption(Languages.getNames(), true));
+				var opt = new Option('language', 'language_desc', "language", ListOption(Languages.getIDs(), true));
+				opt.formatListOption = function(item:String, translated:Bool) {
+					return Languages.getByID(item)?.name ?? item;
+				}
 				opt.onChange = function(v) {
+					trace(v);
 					Languages.change(v);
 					for (i => cate in self.categoryList)
 						self.cateText.setText(i, getText(cate));
