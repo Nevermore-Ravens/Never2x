@@ -268,6 +268,7 @@ class OptionsState extends FunkinState {
 				};
 				opt;
 			},
+			new Option('pause_music', 'pause_music_desc', 'pauseMusic', ListOption(['Off', 'Song Instrumental', 'Breakfast'], true)),
 			new Option("audio_streaming", "audio_streaming_desc", "audioStreams", BoolOption),
 			new Option('metronome', 'metronome_desc', "metronome", BoolOption),
 			new Option('assist_ticks', 'assist_ticks_desc', "assistTicks", BoolOption)

@@ -11,7 +11,7 @@ class PauseMenu extends flixel.FlxSubState {
 	var deaths:Int;
 
 	var music:FlxSound;
-	public static var musicPath:String = Settings.data.pauseMusic;
+	public var musicPath:String = Settings.data.pauseMusic;
 	public static var openCount:Int = 0;
 
 	public static var wentToOptions:Bool = false;
@@ -39,14 +39,13 @@ class PauseMenu extends flixel.FlxSubState {
 			if (openCount > 3 || Settings.data.pauseType == 'Disabled') options.remove('resume');
 		}
 
-		if (musicPath != 'None') {
-			/*if (musicPath == 'Song Instrumental') {
+		if (musicPath != 'Off') {
+			if (musicPath == 'Song Instrumental') {
 				@:privateAccess
 				music = Util.makeSound(Conductor.inst._sound, 0, true);
-			} else */music = Util.makeSound(Assets.audio("music/" + musicPath), 0, true);
+			} else music = Util.makeSound(Assets.audio("music/" + musicPath), 0, true);
 
-			music.time = FlxG.random.float(0, music.length * 0.75);
-			music.play();
+			music.play(true, FlxG.random.float(0, music.length * 0.75));
 		}
 
 		FlxG.autoPause = false;
