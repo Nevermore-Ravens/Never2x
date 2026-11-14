@@ -93,7 +93,7 @@ class PopupTransform extends OptionList {
 
 					FlxG.state.persistentUpdate = false;
 					FlxG.state.openSubState(new DropdownPrompt(x, y, 250, opts, function(idx) {
-						FlxG.sound.play(Assets.audio("sfx/scroll"));
+						FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 
 						inline function setPos(judgeX:Float, judgeY:Float, comboX:Float, comboY:Float) {
 							Settings.data.judgementPos[0] = judgeX;

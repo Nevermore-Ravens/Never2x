@@ -196,12 +196,12 @@ class FreeplayState extends FunkinState {
 			}
 
 			if (FlxG.keys.justPressed.CONTROL || (FlxG.mouse.justPressed && FlxG.mouse.x >= modsText.x + (modsText.width - modsText.height) * 0.5 && FlxG.mouse.y >= modsMenu.y && FlxG.mouse.y <= modsMenu.y + modsMenu.height)) {
-				FlxG.sound.play(Assets.audio("sfx/scroll"));
+				FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 				modsMenu.allowMouse = true;
 				modsMenu.allowKeys = true;
 			}
 		} else if (Controls.justPressed("back") || FlxG.keys.justPressed.CONTROL || FlxG.mouse.justPressedRight || (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(modsMenu))) {
-			FlxG.sound.play(Assets.audio("sfx/cancel"));
+			FlxG.sound.play(Assets.audio("sfx/cancel"), Settings.data.sfxVolume);
 			modsMenu.allowMouse = false;
 			modsMenu.allowKeys = false;
 		}
@@ -323,6 +323,8 @@ class FreeplayState extends FunkinState {
 	}
 
 	function changeSelection(?change:Int = 0, ?volume:Float = 0.4) {
+		volume = Settings.data.sfxVolume * volume;
+
 		curSelected = FlxMath.wrap(curSelected + change, 0, songList.length - 1);
 		if (volume > 0.0) FlxG.sound.play(Assets.audio('sfx/scroll'), volume);
 

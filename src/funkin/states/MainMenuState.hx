@@ -85,7 +85,7 @@ class MainMenuState extends FunkinState {
 
 		if (Controls.justPressed('accept') || (mouseControls && FlxG.mouse.overlaps(optionGrp.members[curSelected]) && FlxG.mouse.justPressed)) {
 			actionPressed = true;
-			FlxG.sound.play(Assets.audio('sfx/confirm'));
+			FlxG.sound.play(Assets.audio('sfx/confirm'), Settings.data.sfxVolume);
 
 			for (i => option in optionGrp.members) {
 				if (i == curSelected) continue;
@@ -152,7 +152,7 @@ class MainMenuState extends FunkinState {
 		curItem.centerOffsets();
 		curItem.screenCenter(X);
 
-		FlxG.sound.play(Assets.audio('sfx/scroll'));
+		FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 		camFollow.y = curItem.getGraphicMidpoint().y - (optionGrp.length > 4 ? optionGrp.length * 8 : 0);
 	}
 }

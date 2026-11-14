@@ -181,6 +181,7 @@ class PlayState extends FunkinState {
 		rightStrumline.size = Settings.data.strumSize;
 
 		add(notefield = new NoteField([leftStrumline, rightStrumline], playerID));
+		notefield.tickSound.volume = Settings.data.sfxVolume;
 		notefield.visible = !Settings.data.gameplayModifiers['blind'];
 		notefield.autoplay = Settings.data.gameplayModifiers['autoplay'];
 		notefield.assistTicks = Settings.data.assistTicks;
@@ -328,13 +329,12 @@ class PlayState extends FunkinState {
 		if (Assets.exists('songs/$songID/Vocals.ogg')) {
 			Conductor.vocals = Util.makeSound(Assets.audio('songs/$songID/Vocals'));
 		}
-
+		
 		// quickly plays the song and then stops it
 		// so that when the song actually starts playing later
 		// it doesn't stutter for a bit
 		//
 		// why does this actually work what the fuck
-		var lastVolume:Float = Conductor.volume;
 		Conductor.volume = 0; // to make sure we don't accidentally hear a sliver of the audio
 		Conductor.inst.play();
 		Conductor.inst.stop();
@@ -344,7 +344,7 @@ class PlayState extends FunkinState {
 			Conductor.vocals.stop();
 		}
 
-		Conductor.volume = lastVolume;
+		Conductor.volume = Settings.data.musicVolume;
 		Conductor.rate = Settings.data.gameplayModifiers['playbackRate'];
 
 		// TODO: make this customizable

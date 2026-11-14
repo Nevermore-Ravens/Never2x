@@ -14,7 +14,7 @@ import flixel.input.gamepad.FlxGamepad.FlxGamepadModel;
 class OptionsState extends FunkinState {
 	public static var self:OptionsState;
 
-	final categoryList:Array<String> = ["keybinds", "gameplay", "hud", "visuals", "performance", "miscellaneous"];
+	final categoryList:Array<String> = ["keybinds", "gameplay", "hud", "visuals", "audio", "performance", "miscellaneous"];
 	final optionsList:Map<String, Array<Option>> = [
 		"keybinds" => [
             {
@@ -98,8 +98,6 @@ class OptionsState extends FunkinState {
 				opt;
 			},
 			new Option('ghost_tapping', 'ghost_tapping_desc', "ghostTapping", BoolOption),
-			new Option('metronome', 'metronome_desc', "metronome", BoolOption),
-			new Option('assist_ticks', 'assist_ticks_desc', "assistTicks", BoolOption),
 			new Option('can_reset', 'can_reset_desc', "canReset", BoolOption),
 			//new Option('acc_type', 'acc_type_desc', "accuracyType", ListOption(["Simple", "Complex"]))
 			//i'm gonna be honest, all complex acc does is make ranking inconsistent, given how we have
@@ -151,7 +149,6 @@ class OptionsState extends FunkinState {
 					return Languages.getByID(item)?.name ?? item;
 				}
 				opt.onChange = function(v) {
-					trace(v);
 					Languages.change(v);
 					for (i => cate in self.categoryList)
 						self.cateText.setText(i, getText(cate));
@@ -212,7 +209,6 @@ class OptionsState extends FunkinState {
 				}
 				opt;
 			},
-			new Option("audio_streaming", "audio_streaming_desc", "audioStreams", BoolOption),
 			new Option("reduced_quality", "reduced_quality_desc", "reducedQuality", BoolOption),
 			{
 				var opt = new Option("game_alpha", "game_alpha_desc", "gameVisibility", IntOption(0, 100, 5, false, true));
@@ -234,6 +230,47 @@ class OptionsState extends FunkinState {
 				}
 				opt;
 			}
+		],
+		"audio" => [
+			{
+				var opt = new Option('master_volume', 'master_volume_desc', 'volume', FloatOption(0, 1, 0.05, false, true));
+				opt.onChange = function(value) {
+					FlxG.sound.volume = value;
+				};
+				opt.formatText = function(_) {
+					return (opt.value * 100) + "%";
+				};
+				opt;
+			},
+			{
+				var opt = new Option('music_volume', 'music_volume_desc', 'musicVolume', FloatOption(0, 1, 0.05, false, true));
+
+				// for some magical fucking reason
+				// `value` for this option specifically is an integer
+				// but `opt.value` isn't
+				//
+				// i love this language
+				opt.onChange = function(_) {
+					Conductor.volume = opt.value * 0.75;
+				};
+				opt.formatText = function(_) {
+					return (opt.value * 100) + "%";
+				};
+				opt;
+			},
+			{
+				var opt = new Option('sfx_volume', 'sfx_volume_desc', 'sfxVolume', FloatOption(0, 1, 0.05, false, true));
+				opt.onChange = function(_) {
+					Conductor.clock.metronomeSound.volume = opt.value;
+				}
+				opt.formatText = function(_) {
+					return (opt.value * 100) + "%";
+				};
+				opt;
+			},
+			new Option("audio_streaming", "audio_streaming_desc", "audioStreams", BoolOption),
+			new Option('metronome', 'metronome_desc', "metronome", BoolOption),
+			new Option('assist_ticks', 'assist_ticks_desc', "assistTicks", BoolOption)
 		],
 		"miscellaneous" => [
 			{
@@ -258,7 +295,7 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("auto_pause", "auto_pause_desc", "autoPause", BoolOption);
 				opt.onChange = function(v) {
-						FlxG.autoPause = v;
+					FlxG.autoPause = v;
 				};
 				opt;
 			},
@@ -305,7 +342,7 @@ class OptionsState extends FunkinState {
 		cateText.onAccept = openCategory;
 		cateText.onClick = openCategory;
 		cateText.onSelect = function(_, __) {
-			FlxG.sound.play(Assets.audio("sfx/scroll"));
+			FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 		};
 
 		optText = new OptionList(cateText.x + cateText.width + 10, cateText.y, FlxG.width - 330, 700);
@@ -339,7 +376,7 @@ class OptionsState extends FunkinState {
 				optText.components[optText.current].change(opt);
 				targetList = lastList;
 
-				FlxG.sound.play(Assets.audio("sfx/" + sound));
+				FlxG.sound.play(Assets.audio("sfx/" + sound), Settings.data.sfxVolume);
 				waitingForKey = false;
 			}
 
@@ -367,7 +404,7 @@ class OptionsState extends FunkinState {
 			}
 			return;
 		} else if (Controls.justPressed('back') || FlxG.mouse.justPressedRight) {
-			FlxG.sound.play(Assets.audio("sfx/cancel"));
+			FlxG.sound.play(Assets.audio("sfx/cancel"), Settings.data.sfxVolume);
 
 			if (targetList == cateText) {
 				if (inPlayState) FunkinState.switchState(new PlayState());
@@ -410,7 +447,7 @@ class OptionsState extends FunkinState {
 
 				persistentUpdate = false;
 				openSubState(new DropdownPrompt(x, y, 250, opts, function(idx) {
-					FlxG.sound.play(Assets.audio("sfx/scroll"));
+					FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 					list.list[current].value = options[idx];
 					list.components[current].change(list.list[current]);
 					@:privateAccess list.position(0);
@@ -420,7 +457,7 @@ class OptionsState extends FunkinState {
 	}
 
 	function openCategory(cate:Int) {
-		FlxG.sound.play(Assets.audio("sfx/scroll"));
+		FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 		if (targetList == optText && cate == selCategory)
 			return;
 

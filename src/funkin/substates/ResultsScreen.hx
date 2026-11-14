@@ -192,12 +192,12 @@ class ResultsScreen extends flixel.FlxSubState {
 		}
 
 		var lastSoundTime = 0;
-		tick = Util.makeSound(Assets.audio("sfx/scroll"));
+		tick = Util.makeSound(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 		var scoreTwn = tweens.num(0, 1, 2, {ease: FlxEase.quadOut, startDelay: 0.2, onComplete: function(twn) {
 			if (exiting) return;
 
-			var sound = FlxG.sound.play(Assets.audio("sfx/confirm"));
-			music = Util.makeSound(Assets.audio("music/results"), 1, true);
+			FlxG.sound.play(Assets.audio("sfx/confirm"), Settings.data.sfxVolume);
+			music = Util.makeSound(Assets.audio("music/results"), Settings.data.musicVolume, true);
 			music.play();
 		}}, function(scale) {
 			var soundTime = Math.ceil(scale * 150);

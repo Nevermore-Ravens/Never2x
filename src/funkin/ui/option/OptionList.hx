@@ -30,7 +30,7 @@ class OptionList extends TextList {
 
 		components[last].selectionChanged(list[last], false);
 		components[current].selectionChanged(list[current], true);
-		FlxG.sound.play(Assets.audio("sfx/scroll"));
+		FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 
 		if (onSelect != null)
 			onSelect(current, last);
@@ -59,7 +59,7 @@ class OptionList extends TextList {
 			holdWait = 0.5;
 
 			if (curOption.hasSound)
-				FlxG.sound.play(Assets.audio("sfx/" + curOption.sound));
+				FlxG.sound.play(Assets.audio("sfx/" + curOption.sound), Settings.data.sfxVolume);
 			curOption.change(leftJustPressed);
 			components[current].change(curOption);
 
@@ -69,7 +69,7 @@ class OptionList extends TextList {
 		if (Controls.justPressed('accept')) {
 			if (curOption.hasEnter) {
 				if (curOption.hasSound)
-					FlxG.sound.play(Assets.audio("sfx/" + curOption.sound));
+					FlxG.sound.play(Assets.audio("sfx/" + curOption.sound), Settings.data.sfxVolume);
 
 				dragging = false;
 				curHolding = 0;
@@ -321,7 +321,7 @@ class Checkbox extends FunkinSprite implements OptionComponent<Checkbox> {
 		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
 
 		if (opt.hasSound)
-			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound), Settings.data.sfxVolume);
 		opt.enter();
 		change(opt);
 
@@ -382,7 +382,7 @@ class Textbox extends FlxText implements OptionComponent<Textbox> {
 		if (!FlxG.mouse.justPressed) return;
 
 		if (opt.hasSound)
-			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound), Settings.data.sfxVolume);
 
 		var action:Int = -1; // -1 - None, 0 - Enter, 1 - Left, 2 - Right
 		if (opt.textboxArrows && opt.hasEnter && opt.hasMove) {
@@ -466,7 +466,7 @@ class DropdownText extends FunkinSprite implements OptionComponent<DropdownText>
 		if (!FlxG.mouse.justPressed || !opt.hasEnter) return;
 
 		if (opt.hasSound)
-			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound), Settings.data.sfxVolume);
 		opt.enter();
 		change(opt);
 
@@ -552,7 +552,7 @@ class Slider extends FunkinSprite implements OptionComponent<Slider> {
 
 		list.dragging = FlxG.mouse.pressed;
 		if (opt.hasSound && FlxG.mouse.justPressed)
-			FlxG.sound.play(Assets.audio("sfx/" + opt.sound));
+			FlxG.sound.play(Assets.audio("sfx/" + opt.sound), Settings.data.sfxVolume);
 
 		// eh dont feel like Math.max(Math.min today
 		final remapped = FlxMath.remapToRange(mousePoint.x, x + BAR_PADDING * label.scale.x, x + scale.x - BAR_PADDING * label.scale.x, min, max);

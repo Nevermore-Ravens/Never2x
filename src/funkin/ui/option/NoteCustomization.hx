@@ -380,7 +380,7 @@ class NoteCustomization extends OptionList {
 
     function noteOptMove(current:Int, left:Bool) {
         final inc = left ? -1 : 1;
-        FlxG.sound.play(Assets.audio("sfx/scroll"));
+        FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
         switch (list[current].id) {
             case "NOTE_SELECT":
                 changeNote(inc);
@@ -391,7 +391,7 @@ class NoteCustomization extends OptionList {
             case "NOTE_EDIT_COL_2":
                 editColor(2, Std.int(FlxMath.bound(curCol[2] + inc * (FlxG.keys.pressed.SHIFT ? 1 : 5), 0, rgb ? 255 : 100)));
             case "NOTE_ACTIONS":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 changeAction(inc);
         }
     }
@@ -566,7 +566,7 @@ class NoteCustomization extends OptionList {
         args ??= [];
         Sys.println(getFormattedText(reason, args));
         overrideActionLabel(reason, args);
-        FlxG.sound.play(Assets.audio("sfx/cancel"));
+        FlxG.sound.play(Assets.audio("sfx/cancel"), Settings.data.sfxVolume);
 
         FlxTween.cancelTweensOf(actionHover);
         FlxTween.shake(actionHover, 5 / actionHover.scale.x, 0.35, X, {ease: FlxEase.quadOut});
@@ -581,13 +581,13 @@ class NoteCustomization extends OptionList {
         var actionArray = Settings.data.quantColouring.startsWith("Custom") ? actionsCustom : actionsPreset;
         switch (actionArray[idx]) {
             case "reset":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 var target = NoteColor.bySnap ? Settings.data.customQuants : Settings.data.customColumns;
                 var ref = NoteColor.bySnap ? Settings.default_data.customQuants : Settings.default_data.customColumns;
                 bigNote.color = notes.members[curNote].color = target[curNote] = curPalette[curNote] = ref[curNote];
                 updateColor();
             case "copy":
-				FlxG.sound.play(Assets.audio("sfx/scroll"));
+				FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 				Clipboard.text = curPalette[curNote].toWebString();
 			case "paste":
 				var str = Clipboard.text.replace("#", "0x");
@@ -595,14 +595,14 @@ class NoteCustomization extends OptionList {
 					str = "0x" + str;
 
 				if (str.length == 8) {
-					FlxG.sound.play(Assets.audio("sfx/scroll"));
+					FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 					notes.members[curNote].color = bigNote.color = curPalette[curNote] = Std.parseInt(str);
 					updateColor();
 					checkCanApply();
 				} else
                     actionFailed("note_bad_paste", [Clipboard.text]);
             case "pick":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 var target = NoteColor.bySnap ? Settings.data.customQuants : Settings.data.customColumns;
                 target[curNote] = curPalette[curNote];
             case "import":
@@ -613,7 +613,7 @@ class NoteCustomization extends OptionList {
                     result += "\n" + col.toWebString();
                 paletteDialog.save(result, "txt");
             case "switch":
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 rgb = !rgb;
                 wheels.members[0].shader = rgb ? shaders[0] : hueShader;
                 updateColor();
@@ -671,7 +671,7 @@ class NoteCustomization extends OptionList {
         if (holdingCol) {
 			if (FlxG.mouse.justReleased) {
 				holdingCol = false;
-				FlxG.sound.play(Assets.audio("sfx/scroll"));
+				FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 			}
 
             final curItem = current - noteColIdx;
@@ -705,13 +705,13 @@ class NoteCustomization extends OptionList {
 
                     if (FlxG.mouse.justReleased && curNote != i) {
                         changeNote(i - curNote);
-                        FlxG.sound.play(Assets.audio("sfx/scroll"));
+                        FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                     }
                 }
             }
 
             if (queueHover >= 0 && queueHover != hoverNote)
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
             hoverNote = queueHover;
         } else
             hoverNote = -1;
@@ -720,12 +720,12 @@ class NoteCustomization extends OptionList {
             if (mousePoint.x >= wheel.x - 4 && mousePoint.x <= wheel.x + wheel.width + 4 && mousePoint.y >= colTxts.members[i].y && mousePoint.y <= wheel.y + wheel.height) {
                 if (mouseMoved && current != noteColIdx + i) {
                     current = noteColIdx + i;
-                    FlxG.sound.play(Assets.audio("sfx/scroll"));
+                    FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 }
 
                 if (FlxG.mouse.justPressed) {
                     holdingCol = true;
-                    FlxG.sound.play(Assets.audio("sfx/scroll"));
+                    FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 }
             }
         }
@@ -735,7 +735,7 @@ class NoteCustomization extends OptionList {
                 continue;
 
             if (mouseMoved && (curAction != i || current != noteActIdx)) {
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 current = noteActIdx;
                 changeAction(i - curAction);
             }
@@ -748,7 +748,7 @@ class NoteCustomization extends OptionList {
                 continue;
 
             if (mouseMoved && (curAction != i + actionIcons.length || current != noteActIdx)) {
-                FlxG.sound.play(Assets.audio("sfx/scroll"));
+                FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
                 current = noteActIdx;
                 changeAction((i + actionIcons.length) - curAction);
             }

@@ -11,7 +11,7 @@ class FailedMenu extends FunkinSubstate {
 	override function create():Void {
 		super.create();
 
-		Conductor.inst = Util.makeSound(Assets.audio('sfx/gameover-loop.ogg'), 1, true);
+		Conductor.inst = Util.makeSound(Assets.audio('sfx/gameover-loop.ogg'), Settings.data.musicVolume, true);
 		Conductor.vocals = null;
 		Conductor.clock.timingMap.reset([{time: 0, tempo: 100}]);
 		Conductor.clock.offset = 0;
@@ -75,7 +75,7 @@ class FailedMenu extends FunkinSubstate {
 		controls.y = (FlxG.height - controls.height);
 		controls.alpha = 0;
 
-		FlxG.sound.play(Assets.audio('sfx/gameover-start.ogg'));
+		FlxG.sound.play(Assets.audio('sfx/gameover-start.ogg'), Settings.data.sfxVolume);
 		new FlxTimer().start(1.062, function(_) {
 			FlxTween.tween(failed, {y: 5}, 1.5, {ease: FlxEase.cubeOut});
 			FlxTween.tween(failed, {alpha: 1}, 3, {ease: FlxEase.cubeOut});
@@ -105,7 +105,7 @@ class FailedMenu extends FunkinSubstate {
 			for (obj in members) obj.visible = false;
 
 			accepted = true;
-			FlxG.sound.play(Assets.audio('sfx/gameover-confirm.ogg'));
+			FlxG.sound.play(Assets.audio('sfx/gameover-confirm.ogg'), Settings.data.sfxVolume);
 			FlxTween.num(1, 0, 1, function(num:Float) Conductor.inst.volume = num);
 			new FlxTimer().start(4, function(_) {
 				FlxG.resetState();

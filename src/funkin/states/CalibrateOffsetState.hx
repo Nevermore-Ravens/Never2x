@@ -40,6 +40,7 @@ class CalibrateOffsetState extends FunkinState {
 		add(notefield = new NoteField([strumline]));
 		notefield.scrollDirection = Settings.data.scrollDirection;
 		notefield.assistTicks = true;
+		notefield.tickSound.volume = Settings.data.sfxVolume;
 		notefield.noteHit = noteHit;
 		notefield.visible = skipIntro;
 		notefield.active = skipIntro;

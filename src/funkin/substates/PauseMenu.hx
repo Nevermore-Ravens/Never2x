@@ -98,7 +98,7 @@ class PauseMenu extends flixel.FlxSubState {
 			obj.alpha = curSelected == index ? 1 : 0.5;
 		}
 
-		FlxG.sound.play(Assets.audio('sfx/scroll'));
+		FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 	}
 
 	function regenerateOptions(list:Array<String>) {
@@ -114,7 +114,7 @@ class PauseMenu extends flixel.FlxSubState {
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (music != null && music.volume < Settings.data.pauseMusicVolume) music.volume += elapsed;
+		if (music != null && music.volume < (Settings.data.musicVolume * 0.75)) music.volume += elapsed;
 
 		final downJustPressed:Bool = Controls.justPressed('ui_down');
 		if (downJustPressed || Controls.justPressed('ui_up')) changeSelection(downJustPressed ? 1 : -1);

@@ -91,6 +91,9 @@ class SaveVariables {
 	// miscellaneous
 	var discordRPC:Bool = true;
 	var autoPause:Bool = true;
+	var volume:Float = 1;
+	var musicVolume:Float = 1;
+	var sfxVolume:Float = 1;
 
 	var gameplayModifiers:Map<String, Dynamic> = [
 		'playbackRate' => 1.0,
@@ -147,6 +150,8 @@ class Settings {
 		}
 
 		#if DISCORD_ALLOWED DiscordClient.check(); #end
+
+		FlxG.sound.volume = data.volume;
 
 		updateNevermore();
 	}

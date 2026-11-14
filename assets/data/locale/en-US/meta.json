@@ -742,6 +742,30 @@
 			text: 'Audio'
 		},
 		{
+			id: 'master_volume',
+			text: 'Master Volume'
+		},
+		{
+			id: 'master_volume_desc',
+			text: 'The global volume that applies to all sound effects and music.'
+		},
+		{
+			id: 'music_volume',
+			text: 'Music Volume'
+		},
+		{
+			id: 'music_volume_desc',
+			text: 'The volume of all music in the game, relative to the global volume.'
+		},
+		{
+			id: 'sfx_volume',
+			text: 'SFX Volume'
+		},
+		{
+			id: 'sfx_volume_desc',
+			text: 'The volume of all sound effects in the game, relative to the global volume.'
+		},
+		{
 			id: 'metronome',
 			text: 'Metronome'
 		},

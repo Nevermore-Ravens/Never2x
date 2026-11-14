@@ -23,9 +23,10 @@ class FunkinState extends flixel.FlxState {
 			Conductor.vocals = null;
 		}
 
-		Conductor.inst = Util.makeSound(Assets.audio('music/freakyMenu'), true);
+		Conductor.inst = Util.makeSound(Assets.audio('music/freakyMenu'), 1, true);
 		Conductor.clock.timingMap.reset([{tempo: 102}]);
 		Conductor.play();
+		Conductor.volume = Settings.data.musicVolume * 0.75;
 
 		FunkinState.switchState(target);
 	}

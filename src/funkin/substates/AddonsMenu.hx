@@ -48,13 +48,13 @@ class AddonsMenu extends FlxSubState {
 		leftBox.allowDrag = false;
 		leftBox.onRemoveAddon = function(addon, graphic) {
 			rightBox.addAddon(addon, graphic);
-			FlxG.sound.play(Assets.audio('sfx/scroll'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 			leftBox.focused = leftBox.allowKeys = leftBox.list.length > 1;
 			rightBox.focused = rightBox.allowKeys = !leftBox.focused;
 			curBox = leftBox.focused ? leftBox: rightBox;
 		};
 		leftBox.onSelect = function(cur, last) {
-			FlxG.sound.play(Assets.audio('sfx/scroll'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 			leftBox.focused = leftBox.allowKeys = true;
 			rightBox.focused = rightBox.allowKeys = false;
 			curBox = leftBox;
@@ -64,13 +64,13 @@ class AddonsMenu extends FlxSubState {
 		rightBox.focused = rightBox.allowKeys = addonsOff.length <= 0 && addonsOn.length > 0;
 		rightBox.onRemoveAddon = function(addon, graphic) {
 			leftBox.addAddon(addon, graphic);
-			FlxG.sound.play(Assets.audio('sfx/scroll'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 			rightBox.focused = rightBox.allowKeys = rightBox.list.length > 1;
 			leftBox.focused = leftBox.allowKeys = !rightBox.focused;
 			curBox = leftBox.focused ? leftBox: rightBox;
 		};
 		rightBox.onSelect = function(cur, last) {
-			FlxG.sound.play(Assets.audio('sfx/scroll'));
+			FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 			leftBox.focused = leftBox.allowKeys = false;
 			rightBox.focused = rightBox.allowKeys = true;
 			curBox = rightBox;
@@ -136,7 +136,7 @@ class AddonsMenu extends FlxSubState {
 		} else if (curBox.focused && !FlxG.keys.pressed.SHIFT && ((lastCurrent == 0 && upJustPressed) || (lastCurrent == curBox.list.length - 1 && Controls.justPressed("ui_down")))) {
 			curBox.current = lastCurrent;
 			inActions = true;
-			FlxG.sound.play(Assets.audio("sfx/scroll"));
+			FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 			curBox.focused = curBox.allowKeys = false;
 		}
 		
@@ -145,7 +145,7 @@ class AddonsMenu extends FlxSubState {
 			for (i => act in actionTxt.members) {
 				if (FlxG.mouse.screenX >= act.x - 5 && FlxG.mouse.screenX <= act.x + act.width + 5 && FlxG.mouse.screenY >= act.y - 5 && FlxG.mouse.screenY <= act.y + act.height + 5) {
 					if (!inActions || curAction != i)
-						FlxG.sound.play(Assets.audio('sfx/scroll'));
+						FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 					curAction = i;
 					inActions = true;
 					leftBox.focused = leftBox.allowKeys = false;
@@ -200,7 +200,7 @@ class AddonsMenu extends FlxSubState {
 				else
 					target.retarget(idx);
 			} else {
-				FlxG.sound.play(Assets.audio("sfx/scroll"));
+				FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 				curAction = (curAction + (leftJustPressed ? -1 : 1) + actions.length) % actions.length;
 			}
 		}

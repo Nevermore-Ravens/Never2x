@@ -127,7 +127,8 @@ class TitleState extends FunkinState {
 		Conductor.inst = Util.makeSound(Assets.audio('music/freakyMenu'), 0, true);
 		Conductor.play();
 
-		FlxTween.num(0, 0.7, 4, {ease: FlxEase.linear}, function(num) {
+		FlxTween.num(0, Settings.data.musicVolume * 0.75, 4, {ease: FlxEase.linear}, function(num) {
+			if (seenIntro) return;
 			Conductor.volume = num;
 		});
 	}
@@ -212,7 +213,7 @@ class TitleState extends FunkinState {
 				titleText.animation.play('press');
 
 				FlxG.camera.flash(Settings.data.flashingLights ? FlxColor.WHITE : 0x4CFFFFFF, 1);
-				FlxG.sound.play(Assets.audio('sfx/confirm'), 0.7);
+				FlxG.sound.play(Assets.audio('sfx/confirm'), Settings.data.sfxVolume);
 				skipped = true;
 				transitionTmr = new FlxTimer().start(1.5, function(_) {
 					FunkinState.switchState(new MainMenuState());
@@ -276,5 +277,6 @@ class TitleState extends FunkinState {
 		introGroup.visible = true;
 		FlxG.camera.flash(FlxColor.WHITE, 2);
 		seenIntro = true;
+		Conductor.volume = Settings.data.musicVolume * 0.75;
 	}
 }

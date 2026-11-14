@@ -17,16 +17,16 @@ class Countdown extends FunkinSprite {
 	public dynamic function onTick(tick:Int):Void {
 		switch (tick) {
 			case 4: 
-				FlxG.sound.play(Assets.audio('sfx/metronome'));
+				FlxG.sound.play(Assets.audio('sfx/metronome'), Settings.data.sfxVolume);
 				animation.frameIndex = 0;
 			case 3: 
-				FlxG.sound.play(Assets.audio('sfx/metronome'));
+				FlxG.sound.play(Assets.audio('sfx/metronome'), Settings.data.sfxVolume);
 				animation.frameIndex = 1;
 			case 2: 
-				FlxG.sound.play(Assets.audio('sfx/metronome'));
+				FlxG.sound.play(Assets.audio('sfx/metronome'), Settings.data.sfxVolume);
 				animation.frameIndex = 2;
 			case 1: 
-				FlxG.sound.play(Assets.audio('sfx/menu_confirm'));
+				FlxG.sound.play(Assets.audio('sfx/menu_confirm'), Settings.data.sfxVolume);
 				animation.frameIndex = 3;
 		}
 		for(handler in onTickHandlers){
