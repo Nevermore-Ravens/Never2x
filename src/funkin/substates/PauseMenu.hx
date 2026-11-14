@@ -3,7 +3,7 @@ package funkin.substates;
 import funkin.states.OptionsState;
 
 class PauseMenu extends flixel.FlxSubState {
-	var options:Array<String> = ['Resume', 'Restart', 'Options', 'Exit to Menu'];
+	var options:Array<String> = ['resume', 'restart', 'options', 'exit_to_menu'];
 	var optionGrp:FlxTypedSpriteGroup<Alphabet>;
 
 	var difficulty:String;
@@ -32,11 +32,11 @@ class PauseMenu extends flixel.FlxSubState {
 		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
 			tmr.active = false);
 
-		if (Difficulty.list.length > 1) options.insert(3, 'Change Difficulty');
+		if (Difficulty.list.length > 1) options.insert(3, 'change_difficulty');
 
 		if (Settings.data.pauseType != 'Unlimited') {
 			openCount++;
-			if (openCount > 3 || Settings.data.pauseType == 'Disabled') options.remove('Resume');
+			if (openCount > 3 || Settings.data.pauseType == 'Disabled') options.remove('resume');
 		}
 
 		if (musicPath != 'None') {
@@ -70,7 +70,7 @@ class PauseMenu extends flixel.FlxSubState {
 		songDifficulty.alpha = 0;
 		add(songDifficulty);
 
-		var blueballed:FlxText = new FlxText(20, 15 + 64, 0, 'Blueballed: $deaths', 32);
+		var blueballed:FlxText = new FlxText(20, 15 + 64, 0, getFormattedText('blueballed', [deaths]), 32);
 		blueballed.font = Assets.getPath('fonts/vcr.ttf');
 		blueballed.x = FlxG.width - (blueballed.width + 20);
 		blueballed.alpha = 0;
@@ -105,7 +105,7 @@ class PauseMenu extends flixel.FlxSubState {
 		optionGrp.clear();
 
 		for (index => option in list) {
-			final alphabet:Alphabet = optionGrp.add(new Alphabet(90, 320, option, BOLD, LEFT));
+			final alphabet:Alphabet = optionGrp.add(new Alphabet(90, 320, getText(option), BOLD, LEFT));
 			alphabet.isMenuItem = true;
 			alphabet.targetY = index;
 		}
@@ -137,28 +137,28 @@ class PauseMenu extends flixel.FlxSubState {
 				FlxG.autoPause = Settings.data.autoPause;
 				close();
 			} else switch (options[curSelected]) {
-				case 'Resume': resume();
+				case 'resume': resume();
 					
-				case 'Restart': 
+				case 'restart': 
 					music.stop();
 					FlxG.mouse.visible = false;
 					FunkinState.resetState();
 					FlxG.autoPause = Settings.data.autoPause;
 
-				case 'Options':
+				case 'options':
 					music.stop();
 					Conductor.stop();
 					Conductor.reset();
 					FunkinState.toMenu(new OptionsState());
 					OptionsState.inPlayState = true;
 
-				case 'Change Difficulty': 
+				case 'change_difficulty': 
 					regenerateOptions(Difficulty.list);
 					changingDifficulty = true;
 					curSelected = 0;
 					changeSelection();
 
-				case 'Exit to Menu':
+				case 'exit_to_menu':
 					music.stop();
 					PlayState.self.endSong(true);
 					FlxG.autoPause = Settings.data.autoPause;

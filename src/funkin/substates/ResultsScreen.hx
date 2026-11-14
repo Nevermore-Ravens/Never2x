@@ -103,10 +103,10 @@ class ResultsScreen extends flixel.FlxSubState {
 		if ((stats.standardDeviation < 0) != near)
 			stddTxt.y += stddLine.height - stddTxt.height;
 
-		lateTxt = new FlxText(graphBG.x + 5, graphBG.y + 5, 0, "Late (" + hitWindow + "ms)");
+		lateTxt = new FlxText(graphBG.x + 5, graphBG.y + 5, 0, getText('late') + " (" + hitWindow + "ms)");
 		lateTxt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 20, 0xFFFFFFFF, LEFT);
 		add(lateTxt);
-		earlyTxt = new FlxText(graphBG.x + graphBG.width - 5, graphBG.y + graphBG.height - 5, 0, "Early (-" + hitWindow + "ms)");
+		earlyTxt = new FlxText(graphBG.x + graphBG.width - 5, graphBG.y + graphBG.height - 5, 0, getText('early') + " (-" + hitWindow + "ms)");
 		earlyTxt.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 20, 0xFFFFFFFF, LEFT);
 		earlyTxt.x -= earlyTxt.width;
 		earlyTxt.y -= earlyTxt.height;
@@ -129,11 +129,11 @@ class ResultsScreen extends flixel.FlxSubState {
 			barTxt.add(txt);
 		}
 
-		scoreTxt = new FlxText(480, graphBG.y + graphBG.height + 10, 0, "Score: 0");
+		scoreTxt = new FlxText(480, graphBG.y + graphBG.height + 10, 0, getFormattedText('info_text_score', [0]));
 		scoreTxt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 36, 0xFFFFFFFF, LEFT);
 		scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		add(scoreTxt);
-		accuracyTxt = new FlxText(scoreTxt.x, scoreTxt.y + scoreTxt.height, 0, "Accuracy: 0%");
+		accuracyTxt = new FlxText(scoreTxt.x, scoreTxt.y + scoreTxt.height, 0, getFormattedText('info_text_accuracy', [0]));
 		accuracyTxt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 32, 0xFFFFFFFF, LEFT);
 		accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		add(accuracyTxt);
@@ -207,8 +207,8 @@ class ResultsScreen extends flixel.FlxSubState {
 				lastSoundTime = soundTime;
 			}
 
-			scoreTxt.text = "Score: " + Util.moneyString(Math.round(stats.score * scale));
-			accuracyTxt.text = "Accuracy: " + Util.truncateFloat(stats.accuracy * scale, 3) + "%";
+			scoreTxt.text = getFormattedText('info_text_score', [Util.moneyString(Math.round(stats.score * scale))]);
+			accuracyTxt.text = getFormattedText("info_text_accuracy", [Util.truncateFloat(stats.accuracy * scale, 3)]);
 			notes.text = 'Best/Highest Combo: ${Math.round(stats.maxCombo * scale)}/${Math.round(stats.hitData.length * scale)}\nBest NPS: ${Math.round(stats.maxNPS * scale)}';
 		});
 

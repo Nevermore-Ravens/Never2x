@@ -96,7 +96,7 @@ class SaveVariables {
 		'playbackRate' => 1.0,
 		'minClearType' => "Clear",
 		'noFail' => false,
-		'botplay' => false,
+		'autoplay' => false,
 		'mirroredNotes' => false,
 		'randomizedNotes' => false,
 		'modcharts' => true, // for cam we can have this false default but i think on base n2x this should be true -marsh

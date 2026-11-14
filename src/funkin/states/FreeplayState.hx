@@ -8,17 +8,17 @@ import flixel.util.FlxDestroyUtil;
 
 class Modifier extends Option {
 	public static final list:Array<Modifier> = [
-		new Modifier("Playback Rate", "How fast the game will go.", "playbackRate", FloatOption(0.35, 5.0, 0.05)),
-		new Modifier('Playing Side', 'Which side you\'re playing on for the song.', 'playingSide', ListOption(['Default', 'Opponent'])),
-		new Modifier("No Fail", "If you'll live even when out of health.", "noFail", BoolOption),
-		new Modifier("Min. Clear Type", "The lowest clear type you can have without failing.", "minClearType", ListOption([])),
-		new Modifier("Mirrored Notes", "If the chart will flip its notes around.", "mirroredNotes", BoolOption),
-		new Modifier("Randomized Notes", "If the game will swap the lanes around.", "randomizedNotes", BoolOption),
-		#if MODCHARTS_ALLOWED new Modifier("Modcharts", "If the game will do some wacky stuff with the notes to make it\nlook cooler.", "modcharts", BoolOption), #end
-		#if SV_ALLOWED new Modifier("Scroll Velocities", "If the game will allow scroll velocities to be used.", "svs", BoolOption),#end
-		new Modifier("Sustains", "If the game will add holds or not.", "sustains", BoolOption),
-		new Modifier("Botplay", "If the game will play the chart for you.", "botplay", BoolOption),
-		new Modifier('Blind', 'How much of the chart do you remember?', 'blind', BoolOption),
+		new Modifier("playback_rate", "playback_rate_desc", "playbackRate", FloatOption(0.35, 5.0, 0.05)),
+		new Modifier('playing_side', 'playing_side_desc', 'playingSide', ListOption(['Default', 'Opponent'])),
+		new Modifier("no_fail", "no_fail_desc", "noFail", BoolOption),
+		new Modifier("min_clear_type", "min_clear_type_desc", "minClearType", ListOption([])),
+		new Modifier("mirrored_notes", "mirrored_notes_desc", "mirroredNotes", BoolOption),
+		new Modifier("randomized_notes", "randomized_notes_desc", "randomizedNotes", BoolOption),
+		#if MODCHARTS_ALLOWED new Modifier("modcharts", "modcharts_desc", "modcharts", BoolOption), #end
+		#if SV_ALLOWED new Modifier("scroll_velocities", "scroll_velocities_desc", "svs", BoolOption),#end
+		new Modifier("sustains", "sustains_desc", "sustains", BoolOption),
+		new Modifier("autoplay", "autoplay_desc", "autoplay", BoolOption),
+		new Modifier('blind', 'blind_desc', 'blind', BoolOption),
 	];
 
 	override function get_value():Dynamic {
@@ -152,7 +152,7 @@ class FreeplayState extends FunkinState {
 		modsMenu.allowMouse = false;
 		modsMenu.allowKeys = false;
 
-		add(modsText = new FlxText(modsMenu.x, modsMenu.y + modsMenu.height * 0.5, modsMenu.height, "v [CTRL] - Edit Modifiers v"));
+		add(modsText = new FlxText(modsMenu.x, modsMenu.y + modsMenu.height * 0.5, modsMenu.height, 'v [CTRL] - ' + getText('edit_modifiers') + ' v'));
 		modsText.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 24, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
 		modsText.angle = -90;
 		modsText.x -= (modsText.width + modsText.height) * 0.5;
@@ -179,7 +179,7 @@ class FreeplayState extends FunkinState {
 		if (accuracy.length < 2) accuracy.push(''); // No decimals, add an empty space
 		while (accuracy[1].length < 2) accuracy[1] += '0'; // Less than 2 decimals in it, add decimals then
 			
-		scoreText.text = 'PERSONAL BEST: $lerpScore (${accuracy.join('.')}%)';
+		scoreText.text = getFormattedText('personal_best', [lerpScore, accuracy.join('.')]).toUpperCase();
 
 		positionStats();
 

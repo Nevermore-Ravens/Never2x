@@ -182,7 +182,7 @@ class PlayState extends FunkinState {
 
 		add(notefield = new NoteField([leftStrumline, rightStrumline], playerID));
 		notefield.visible = !Settings.data.gameplayModifiers['blind'];
-		notefield.autoplay = Settings.data.gameplayModifiers['botplay'];
+		notefield.autoplay = Settings.data.gameplayModifiers['autoplay'];
 		notefield.assistTicks = Settings.data.assistTicks;
 		notefield.scrollSpeed = Settings.data.scrollSpeed;
 		notefield.scrollDirection = Settings.data.scrollDirection;

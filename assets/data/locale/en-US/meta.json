@@ -3,6 +3,35 @@
 
 	// use this as a base for your own translations
 	translations: [
+		{
+			id: 'resume',
+			text: 'Resume'
+		},
+		{
+			id: 'restart',
+			text: 'Restart'
+		},
+		{
+			id: 'change_difficulty',
+			text: 'Change Difficulty'
+		},
+		{
+			id: 'exit_to_menu',
+			text: 'Exit to Menu'
+		},
+		{
+			id: 'blueballed',
+			text: 'Blueballed: ${0}'
+		},
+		{
+			id: 'personal_best',
+			text: 'Personal Best: ${0} (${1}%)'
+		},
+		{
+			id: 'edit_modifiers',
+			text: 'Edit Modifiers'
+		},
+
 		// Playfield
 		{
 			id: 'info_text_score',
@@ -43,6 +72,96 @@
 		{
 			id: 'miss',
 			text: 'Miss'
+		},
+
+		// Modifiers
+		{
+			id: 'playback_rate',
+			text: 'Playback Rate'
+		},
+		{
+			id: 'playback_rate_desc',
+			text: 'How fast the game will speed up or slow down the song.'
+		},
+		{
+			id: 'playing_side',
+			text: 'Playing Side'
+		},
+		{
+			id: 'playing_side_desc',
+			text: "Which side you're playing on for the song."
+		},
+		{
+			id: 'no_fail',
+			text: 'No Fail'
+		},
+		{
+			id: 'no_fail_desc',
+			text: "If you'll live even when out of health."
+		},
+		{
+			id: 'min_clear_type',
+			text: 'Min. Clear Type'
+		},
+		{
+			id: 'min_clear_type_desc',
+			text: 'The lowest clear type you can have without failing.'
+		},
+		{
+			id: 'mirrored_notes',
+			text: 'Mirrored Notes'
+		},
+		{
+			id: 'mirrored_notes_desc',
+			text: 'If the chart will flip its notes around.'
+		},
+		{
+			id: 'randomized_notes',
+			text: 'Randomized Notes'
+		},
+		{
+			id: 'randomized_notes_desc',
+			text: 'If the game will swap the lanes around.'
+		},
+		{
+			id: 'modcharts',
+			text: 'Modcharts'
+		},
+		{
+			id: 'modcharts_desc',
+			text: 'If the game will do some wacky stuff with the notes to make it\nlook cooler.'
+		},
+		{
+			id: 'scroll_velocities',
+			text: 'Scroll Velocities'
+		},
+		{
+			id: 'scroll_velocities_desc',
+			text: 'If the game will allow scroll velocities to be used.'
+		},
+		{
+			id: 'sustains',
+			text: 'Sustains'
+		},
+		{
+			id: 'sustains_desc',
+			text: 'If the game will add holds or not.'
+		},
+		{
+			id: 'autoplay',
+			text: 'Autoplay'
+		},
+		{
+			id: 'autoplay_desc',
+			text: 'If the game will play the chart for you.'
+		},
+		{
+			id: 'blind',
+			text: 'Blind'
+		},
+		{
+			id: 'blind_desc',
+			text: 'How much of the chart do you remember?'
 		},
 
 		// Options

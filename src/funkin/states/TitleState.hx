@@ -241,7 +241,7 @@ class TitleState extends FunkinState {
 				alphabet.y += 40;
 				alphabet.text += 'Never2x by';
 			case 3:
-				alphabet.text += '\nRudyrue\nSrtHero278\nNebula the Zorua';
+				alphabet.text += '\nRudyrue\nSrtHero278\nMarshmallowMoth';
 			case 4:
 				alphabet.text = '';
 			case 5:
