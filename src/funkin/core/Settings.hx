@@ -164,4 +164,73 @@ class Settings {
 
 		if (saveToDisk) save();
 	}
+
+	public static function validate() {
+		var langs = Languages.getIDs();
+		if (!langs.contains(data.language)) {
+			data.language = langs.contains(default_data.language) ? default_data.language : langs[0];
+			Sys.println("Invalid language! Resetting value in settings.");
+		}
+
+		if (!["Default", "Off"].contains(data.cameraZooms)) {
+			data.cameraZooms = (data.cameraZooms.toLowerCase() == "false") ? "Off" : "Default";
+			Sys.println("Invalid camera zoom type! Adjusting value in settings.");
+		}
+
+		if (data.strumGlow == "Per-Note")
+			data.strumGlow = "Note";
+		if (data.quantColouring != "None" && !data.quantColouring.startsWith("Custom") && !NoteColor.quantList.exists(data.quantColouring)) {
+			data.quantColouring = default_data.quantColouring;
+			Sys.print("Invalid note palette! Resetting value in settings.");
+		}
+
+		var noteSkinMap = NoteStyling.getList();
+		if (!noteSkinMap.exists(data.noteSkin)) {
+			var foundLowercase = false;
+			for (key in noteSkinMap.keys()) {
+                if (key.toLowerCase() == data.noteSkin.toLowerCase()) {
+                    data.noteSkin = key;
+					foundLowercase = true;
+                    break;
+                }
+            }
+
+			if (foundLowercase)
+				data.noteSkin = noteSkinMap.exists(default_data.noteSkin) ? default_data.noteSkin : noteSkinMap.keys().next();
+			Sys.println(foundLowercase ? "Incorrect casing! Fixing value in settings." : "Invalid noteskin! Resetting value in settings.");
+		}
+		if (data.noteSkinStyle != "default" && !noteSkinMap[data.noteSkin].styleKeys.contains(data.noteSkinStyle)) {
+			data.noteSkinStyle = default_data.noteSkinStyle;
+			Sys.print("Invalid note skin style! Resetting value in settings.");
+		}
+
+		var modifierAlias = ["autoplay" => "botplay"];
+		for (key in default_data.gameplayModifiers.keys()) {
+			if (!data.gameplayModifiers.exists(key)) {
+				if (modifierAlias.exists(key) && data.gameplayModifiers.exists(modifierAlias[key])) {
+					data.gameplayModifiers.set(key, data.gameplayModifiers[modifierAlias[key]]);
+					data.gameplayModifiers.remove(modifierAlias[key]);
+					Sys.println('redirecting modifier ${modifierAlias[key]} to $key');
+				} else {
+					data.gameplayModifiers.set(key, default_data.gameplayModifiers[key]);
+					Sys.println('regrabbing modifier $key');
+				}
+			}
+		}
+
+		/*final possibleNotesplashes: Array<String> = ['none'];
+		for (splashPath in Paths.readDirectory("data/noteSplashes"))
+			if (splashPath.endsWith(".json5") || splashPath.endsWith(".json")) {
+				var splashName:String = haxe.io.Path.withoutDirectory(haxe.io.Path.withoutExtension(splashPath));
+				if(possibleNotesplashes.contains(splashName)) continue;
+				possibleNotesplashes.insert(0, splashName);
+			}
+
+		if (!possibleNotesplashes.contains(data.noteSplashSkin)) {
+			data.noteSplashSkin = "classic";
+			Sys.println("Note splash doesn't exist! Resetting value in settings.");
+		}*/
+
+		updateNevermore();
+	}
 }

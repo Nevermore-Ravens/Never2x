@@ -51,10 +51,10 @@ class Never2x extends Sprite {
 
 		@:privateAccess FlxG.keys._nativeCorrection.set("0_43", FlxKey.PLUS);
 
-		Application.current.frameProfile = LowEnergy;
-		Application.current.frameOptions = {
-			busyWait: Off,
-			timePrecision: Millisecond,
+		// Application.current.frameProfile = LowEnergy;
+		// Application.current.frameOptions = {
+		// 	busyWait: Off,
+		// 	timePrecision: Millisecond,
 
 			// NOTE FOR LATER:
 			// currently with lime 8.4.0 frame throttling is a bit fucky
@@ -68,7 +68,7 @@ class Never2x extends Sprite {
 			// this fixes it at the cost of fps yknow
 			// not being capped anymore
 			// im not sure how to fix this so i'll just leave this note here until i figure it out more
-		};
+		// };
 	}
 
 	override function __enterFrame(delta:Int) {
@@ -182,6 +182,8 @@ class InitState extends flixel.FlxState {
 		
 		Languages.init();
 		Languages.change(Settings.data.language);
+
+		Settings.validate();
 
 		FlxG.fullscreen = Settings.data.fullscreen;
 		FlxG.fixedTimestep = false;
