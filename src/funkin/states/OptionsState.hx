@@ -244,12 +244,6 @@ class OptionsState extends FunkinState {
 			},
 			{
 				var opt = new Option('music_volume', 'music_volume_desc', 'musicVolume', FloatOption(0, 1, 0.05, false, true));
-
-				// for some magical fucking reason
-				// `value` for this option specifically is an integer
-				// but `opt.value` isn't
-				//
-				// i love this language
 				opt.onChange = function(val:Float) {
 					Conductor.volume = val * 0.75;
 				};

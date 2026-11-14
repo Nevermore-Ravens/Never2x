@@ -245,12 +245,12 @@ class NoteCustomization extends OptionList {
                 opt.formatListOption = function(val, _) {
                     return noteSkinMap[val].name ?? val;
                 };
-                opt.onChange = function(v) {
+                opt.onChange = function(val:String) {
                     for (i => opt in list) {
                         if (opt.id != "noteSkinStyle") continue;
     
-                        var keys = noteSkinMap[v].styleKeys.copy();
-                        var names = noteSkinMap[v].styleNames.copy();
+                        var keys = noteSkinMap[val].styleKeys.copy();
+                        var names = noteSkinMap[val].styleNames.copy();
                         keys.unshift("default");
                         names.set("default", "Default (By Context)");
     
@@ -259,16 +259,16 @@ class NoteCustomization extends OptionList {
                             return names[item] ?? item;
                         };
     
-                        if (!noteSkinMap[v].styleNames.exists(Settings.data.noteSkinStyle)) {
+                        if (!noteSkinMap[val].styleNames.exists(Settings.data.noteSkinStyle)) {
                             Settings.data.noteSkinStyle = "default";
                             components[i].change(opt);
                         }
                     }
     
                     var style = Settings.data.noteSkinStyle;
-                    style = style != "default" && noteSkinMap[v].styleNames.exists(style) ? style : noteSkinMap[v].styleKeys[0];
+                    style = style != "default" && noteSkinMap[val].styleNames.exists(style) ? style : noteSkinMap[val].styleKeys[0];
 
-                    curSection = NoteStyling.getSkinAndStyle(v, style).sections.get("note");
+                    curSection = NoteStyling.getSkinAndStyle(val, style).sections.get("note");
                     applySection();
     
                     position(0);
@@ -283,15 +283,15 @@ class NoteCustomization extends OptionList {
                 keys.unshift("default");
                 names.set("default", "Default (By Context)");
     
-                var opt = new Option("note_skin_style", "note_skin_style_desc", "noteSkinStyle", ListOption(keys, true));
+                var opt = new Option("skin_style", "skin_style_desc", "noteSkinStyle", ListOption(keys, true));
                 opt.formatListOption = function(item, _) {
                     return names[item] ?? item;
                 };
-                opt.onChange = function(v) {
+                opt.onChange = function(val:String) {
                     var skin = Settings.data.noteSkin;
-                    v = v != "default" && noteSkinMap[skin].styleNames.exists(v) ? v : noteSkinMap[skin].styleKeys[0];
+                    val = val != "default" && noteSkinMap[skin].styleNames.exists(val) ? val : noteSkinMap[skin].styleKeys[0];
 
-                    curSection = NoteStyling.getSkinAndStyle(Settings.data.noteSkin, v).sections.get("note");
+                    curSection = NoteStyling.getSkinAndStyle(Settings.data.noteSkin, val).sections.get("note");
                     applySection();
     
                     position(0);
@@ -331,7 +331,7 @@ class NoteCustomization extends OptionList {
                 quantPalettes.unshift('None');
     
                 var opt = new Option('quant_coloring', 'quant_coloring_desc', "quantColouring", ListOption(quantPalettes, true));
-                opt.onChange = function(v) {
+                opt.onChange = function(_) {
                     NoteStyling.updatePalette();
                     updatePalette();
 
@@ -618,7 +618,7 @@ class NoteCustomization extends OptionList {
                 wheels.members[0].shader = rgb ? shaders[0] : hueShader;
                 updateColor();
         
-                var names = rgb ? ["red", "green", "blue"] : ["hue", "sat", "val"];
+                var names = rgb ? ["red", "green", "blue"] : ["hue", "saturation", "value"];
                 for (i in 0...colTxts.length)
                     colTxts.members[i].text = getText(names[i]);
         }
