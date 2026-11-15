@@ -155,4 +155,8 @@ class MainMenuState extends FunkinState {
 		FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 		camFollow.y = curItem.getGraphicMidpoint().y - (optionGrp.length > 4 ? optionGrp.length * 8 : 0);
 	}
+
+	override function onAddonsReload() {
+		FunkinState.toMenu(new MainMenuState());
+	}
 }

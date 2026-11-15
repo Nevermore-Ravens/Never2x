@@ -200,7 +200,7 @@ class Settings {
                 }
             }
 
-			if (foundLowercase)
+			if (!foundLowercase)
 				data.noteSkin = noteSkinMap.exists(default_data.noteSkin) ? default_data.noteSkin : noteSkinMap.keys().next();
 			Sys.println(foundLowercase ? "Incorrect casing! Fixing value in settings." : "Invalid noteskin! Resetting value in settings.");
 		}

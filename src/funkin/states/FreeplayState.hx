@@ -389,7 +389,11 @@ class FreeplayState extends FunkinState {
 			icon.setPosition(item.x + (item.width + (icon.width * 0.05)), item.y - (item.height * 0.5));
 			_lastVisibles.push(i);
 		}
-	}	
+	}
+
+	override function onAddonsReload() {
+		FunkinState.toMenu(new FreeplayState());
+	}
 }
 
 typedef SongMeta = {

@@ -277,6 +277,16 @@ class PlayState extends FunkinState {
 		self = null;
 	}
 
+	override function onAddonsReload() {
+		var playingAddon = WeekData.list[WeekData.current].from;
+		var newAddon = playingAddon == null ? null : Addons.getByID(playingAddon.directory);
+		if (playingAddon == null || newAddon?.enabled == true) {
+			Addons.current = newAddon;
+			FunkinState.resetState();
+		} else
+			FunkinState.toMenu(new FreeplayState()); // ADDON DOES NOT EXIST DO NOT PROCEED
+	}
+
 	override function beatHit(beat:Int):Void {
 		// there may be an offset and hud bump softcoding later on but
 		if (

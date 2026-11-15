@@ -2,9 +2,12 @@ package funkin.substates;
 
 import funkin.ui.option.AddonList;
 
+@:access(funkin.objects.NoteSplash)
+@:access(funkin.ui.option.AddonList)
 class AddonsMenu extends FlxSubState {
 	var wasVisible:Bool;
 	var wasPersistant:Bool;
+	var clockActive:Bool;
 	var leftBox:AddonList;
 	var rightBox:AddonList;
 	var curBox:AddonList;
@@ -17,6 +20,9 @@ class AddonsMenu extends FlxSubState {
 	// var actionInvert:FunkinSprite;
 	var actionPercentages:Array<Float>;
 
+	var activeTweens:Array<FlxTween> = [];
+	var activeTimers:Array<FlxTimer> = [];
+
 	public function new() {
 		super();
 		actionPercentages = [for (a in actions) 0.0];
@@ -24,6 +30,22 @@ class AddonsMenu extends FlxSubState {
 	}
 
 	override function create() {
+		FlxTween.globalManager.forEach(function(twn:FlxTween) {
+			if (twn == null || !twn.active)
+				return;
+			activeTweens.push(twn);
+			twn.active = false;
+		});
+		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) {
+			if (tmr == null || !tmr.active)
+				return;
+			activeTimers.push(tmr);
+			tmr.active = false;
+		});
+
+		FlxG.autoPause = false;
+		Conductor.pause();
+
 		visible = true;
 		wasVisible = FlxG.mouse.visible;
 		wasPersistant = parent.persistentUpdate;
@@ -142,8 +164,9 @@ class AddonsMenu extends FlxSubState {
 		
 		var runAction = inActions && Controls.justPressed("accept");
 		if ((leftBox.mouseMoved || rightBox.mouseMoved || FlxG.mouse.justPressed) && !leftBox.dragging && !rightBox.dragging) {
+			var mousePoint = leftBox.mousePoint;
 			for (i => act in actionTxt.members) {
-				if (FlxG.mouse.screenX >= act.x - 5 && FlxG.mouse.screenX <= act.x + act.width + 5 && FlxG.mouse.screenY >= act.y - 5 && FlxG.mouse.screenY <= act.y + act.height + 5) {
+				if (mousePoint.x >= act.x - 5 && mousePoint.x <= act.x + act.width + 5 && mousePoint.y >= act.y - 5 && mousePoint.y <= act.y + act.height + 5) {
 					if (!inActions || curAction != i)
 						FlxG.sound.play(Assets.audio('sfx/scroll'), Settings.data.sfxVolume);
 					curAction = i;
@@ -182,8 +205,13 @@ class AddonsMenu extends FlxSubState {
 					Settings.data.addonsOff = [for (addon in leftBox.list) addon.directory];
 					Settings.data.addonsOrder = [for (addon in rightBox.list) addon.directory];
 					Addons.reload();
+					Settings.validate();
 					Settings.save();
-					FlxG.resetState();
+					Meta.cacheFiles(true);
+					nevermore.skins.Noteskin.clear();
+					funkin.objects.NoteSplash.loader.sections.clear();
+					// im also hella tempted to do a decache on Assets but i gotta make sure i don't cause render bugs
+					FunkinState.addonsReloaded();
 			}
 		}
 
@@ -219,7 +247,19 @@ class AddonsMenu extends FlxSubState {
 		}
 	}
 
+	override function close() {
+		Conductor.resume();
+
+		for (twn in activeTweens)
+			twn.active = true;
+		for (tmr in activeTimers)
+			tmr.active = true;
+
+		super.close();
+	}
+
 	override function destroy() {
+		FlxG.autoPause = Settings.data.autoPause;
 		FlxG.mouse.visible = wasVisible;
 		FlxG.state.persistentUpdate = wasPersistant;
 		FlxG.cameras.remove(camera);

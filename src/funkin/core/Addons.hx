@@ -128,6 +128,13 @@ class Addons {
 
 		return null;
 	}
+	public static function getByID(id:String):Addon {
+		for (addon in list) {
+			if (addon.directory == id)
+				return addon;
+		}
+		return null;
+	}
 
 	static function _getPath(key:String, ?extensions:Array<String>):String {
 		// just original Assets.getPath();

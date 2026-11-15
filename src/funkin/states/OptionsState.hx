@@ -479,6 +479,10 @@ class OptionsState extends FunkinState {
 		self = null;
 	}
 
+	override function onAddonsReload() {
+		FunkinState.toMenu(new OptionsState());
+	}
+
 	function set_targetList(to:TextList) {
 		var mainOpts = to == cateText || to == optText;
 		for (mem in members) {

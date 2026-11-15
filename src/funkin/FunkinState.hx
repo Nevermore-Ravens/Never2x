@@ -64,7 +64,19 @@ class FunkinState extends flixel.FlxState {
 		return cast(FlxG.state, FunkinState);
 	}
 
+	public static function addonsReloaded() {
+		var state = getState();
+		if (state != null)
+			state.onAddonsReload();
+		else
+			resetState();
+	}
+
 	public function stepHit(step:Int):Void {}
 	public function beatHit(beat:Int):Void {}
 	public function measureHit(measure:Int):Void {}
+
+	function onAddonsReload() {
+		resetState();
+	}
 }

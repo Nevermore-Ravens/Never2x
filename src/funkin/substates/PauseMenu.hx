@@ -19,6 +19,9 @@ class PauseMenu extends flixel.FlxSubState {
 
 	var curSelected:Int = 0;
 
+	var activeTweens:Array<FlxTween> = [];
+	var activeTimers:Array<FlxTimer> = [];
+
 	public function new(song:String, difficulty:String, deaths:Int) {
 		super();
 		this.songName = song;
@@ -27,11 +30,18 @@ class PauseMenu extends flixel.FlxSubState {
 	}
 
 	override function create():Void {
-		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null)
-			twn.active = false);
-		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
-			tmr.active = false);
-
+		FlxTween.globalManager.forEach(function(twn:FlxTween) {
+			if (twn == null || !twn.active)
+				return;
+			activeTweens.push(twn);
+			twn.active = false;
+		});
+		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) {
+			if (tmr == null || !tmr.active)
+				return;
+			activeTimers.push(tmr);
+			tmr.active = false;
+		});
 		if (Difficulty.list.length > 1) options.insert(3, 'change_difficulty');
 
 		if (Settings.data.pauseType != 'Unlimited') {
@@ -177,10 +187,10 @@ class PauseMenu extends flixel.FlxSubState {
 	override function close() {
 		PauseMenu.wentToOptions = false; // reset
 
-		FlxTween.globalManager.forEach(function(twn:FlxTween) if (twn != null)
-			twn.active = true);
-		FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (tmr != null)
-			tmr.active = true);
+		for (twn in activeTweens)
+			twn.active = true;
+		for (tmr in activeTimers)
+			tmr.active = true;
 
 		super.close();
 	}
