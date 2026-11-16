@@ -191,6 +191,7 @@ class OptionsState extends FunkinState {
 				};
 				opt;
 			},
+			new Option("modchart_fps", "modchart_fps_desc", "modchartFPS", IntOption(15, 1000, 5)),
 			{
 				var opt = new Option("antialiasing", "antialiasing_desc", "antialiasing", BoolOption);
 				opt.onChange = function(val:Bool) {

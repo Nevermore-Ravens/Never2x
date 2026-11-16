@@ -51,6 +51,7 @@ class SaveVariables {
 
 	// graphics (that affect performance)
 	var framerate:Int = 60;
+	var modchartFPS:Int = 60;
 	var holdGrain:Int = 5;
 	var antialiasing:Bool = true;
 	var audioStreams:Bool = true;
@@ -157,6 +158,7 @@ class Settings {
 	}
 
 	public static function updateNevermore() {
+		Nevermore.settings.notefieldFramerate = data.modchartFPS;
 		Nevermore.settings.inputOffset = data.inputOffset;
 		Nevermore.settings.holdGrain = data.holdGrain;
 		Nevermore.settings.receptorGlow = data.strumGlow;

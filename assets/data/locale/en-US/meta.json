@@ -690,6 +690,14 @@
 			text: 'The maximum frame rate the game will run at.'
 		},
 		{
+			id: 'modchart_fps',
+			text: 'Modchart FPS'
+		},
+		{
+			id: 'modchart_fps_desc',
+			text: 'The maximum frame rate the modchart will redraw at.'
+		},
+		{
 			id: 'antialiasing',
 			text: 'Antialiasing'
 		},
