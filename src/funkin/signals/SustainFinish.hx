@@ -71,7 +71,7 @@ class SustainFinish {
 
 		this.deviation = releaseTimed ? deviation : 0;
 		judgement = Judgement.get(this.deviation);
-		registerJudge = releaseTimed && player;
+		registerJudge = !releaseTimed && player;
 	}
 
 	public function new() {}

@@ -132,6 +132,7 @@ class PlayState extends FunkinState {
 			var script = scripts.loadFile("characters/" + char.name); // these may be attached to the instance itself later on but
 			if (script != null)
 				script.set("character", char);
+			script.call("loadedCharacter");
 			return char;
 		}
 
@@ -142,6 +143,7 @@ class PlayState extends FunkinState {
 		add(stage = new Stage(meta.stage));
 		scripts.loadFile("stages/" + stage.name);
 		scripts.call("loadedStage");
+		signals.loadedStage.dispatch();
 
 		// don't want the positions auto instantiating/adding (it's a whole story trust me it's for the better)
 		if (spectator != null && stage.hasSpectatorPos())
@@ -240,6 +242,7 @@ class PlayState extends FunkinState {
 		makeHUD();
 
 		scripts.call("create");
+		signals.finishedCreate.dispatch();
 	}
 
 	function openPauseMenu() {
@@ -890,6 +893,9 @@ class PlayState extends FunkinState {
 }
 
 class GameSignals {
+	public var loadedStage:Event<Void->Void> = new Event<Void->Void>();
+	public var finishedCreate:Event<Void->Void> = new Event<Void->Void>();
+
 	public var noteHit:NoteHit = new NoteHit();
 	public var noteMiss:NoteMiss = new NoteMiss();
 
