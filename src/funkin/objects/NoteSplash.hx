@@ -90,14 +90,14 @@ class NoteSplash extends NoteObject {
 		}
 	}
 
-	public function hit(receptor:Receptor) {
+	public function hit(skin:String, color:FlxColor, luminize:Bool, receptor:Receptor) {
 		revive();
 		alpha = 0.6;
 
-		luminize = receptor.luminize;
-		color = receptor.color;
+		this.luminize = luminize;
+		this.color = color;
 
-		var data = getData(Settings.data.noteSplashSkin, receptor.parent.keyCount, receptor.luminize);
+		var data = getData(skin, receptor.parent.keyCount, luminize);
 		data.applyNoteObject(this);
 		scale.scale(receptor.parent.size * receptor.parent.keyScale);
 		animation.play(FlxG.random.getObject(data.animations).name, true);
