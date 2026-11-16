@@ -130,9 +130,10 @@ class PlayState extends FunkinState {
 				return null;
 			var char = new Character(0, 0, id);
 			var script = scripts.loadFile("characters/" + char.name); // these may be attached to the instance itself later on but
-			if (script != null)
+			if (script != null) {
 				script.set("character", char);
-			script.call("loadedCharacter");
+				script.call("loadedCharacter");
+			}
 			return char;
 		}
 

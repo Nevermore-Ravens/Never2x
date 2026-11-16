@@ -67,11 +67,11 @@ class SustainFinish {
 		this.strumline = strumline;
 
 		player = !game.notefield.autoplay && game.notefield.playerID == sustain.player;
-		releaseTimed = !game.notefield.releaseTimings || sustain.isRoll;
+		releaseTimed = game.notefield.releaseTimings && !sustain.isRoll;
 
 		this.deviation = releaseTimed ? deviation : 0;
 		judgement = Judgement.get(this.deviation);
-		registerJudge = !releaseTimed && player;
+		registerJudge = releaseTimed && player;
 	}
 
 	public function new() {}
