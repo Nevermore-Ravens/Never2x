@@ -13,6 +13,7 @@ import funkin.core.Meta;
 import funkin.ui.play.*;
 import funkin.ui.play.ComboDisplay.Number;
 import funkin.objects.Stage;
+import funkin.objects.Lyrics;
 import funkin.objects.Character;
 import funkin.objects.NoteSplash;
 import funkin.substates.PauseMenu;
@@ -60,6 +61,7 @@ class PlayState extends FunkinState {
 	var accuracy:AccuracyHandler = new DefaultAccuracy();
 
 	var hud:FlxSpriteGroup;
+	var lyrics:Lyrics;
 	var autoplayText:FlxText;
 	var infoText:FlxText;
 	var judgeSprite:JudgeDisplay;
@@ -239,6 +241,10 @@ class PlayState extends FunkinState {
 		if (Settings.data.popupPosSafety)
 			guardPopupPositions();
 
+		add(lyrics = new Lyrics());
+		lyrics.cameras = [camHUD];
+		lyrics.active = lyrics.visible = Settings.data.lyrics;
+
 		load();
 		makeHUD();
 
@@ -339,6 +345,9 @@ class PlayState extends FunkinState {
 		});
 		Conductor.clock.reset(chart);
 		Conductor.clock.offset = chart.offset;
+
+		// we'll add sub-rip title files later
+		lyrics.load(Assets.main.getPath('songs/$songID/lyrics', ["json"]));
 
 		Conductor.inst = Util.makeSound(Assets.audio('songs/$songID/Inst'));
 		Conductor.inst.onComplete = function() songCompleted();
