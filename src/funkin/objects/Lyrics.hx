@@ -57,8 +57,66 @@ class Lyrics extends FlxSpriteGroup {
 		switch haxe.io.Path.extension(path) {
 			// haha    ha get it     cuz srtpro27
 			case 'srt':
-				// uhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+				// hi hello it me	srtpro27
+				// this is based off a 3 year old gist i made back when cne was planning on doing xml subtitles then eric brought up srt
+				// it's actually longer but dare i say it cleaner
+				var txt = File.getContent(path);
+				var lines = txt.split("\n");
 
+				var curSubtitleIdx = 1; // srt files i assume rely on this to begin a new line
+				var requestTime = false;
+
+				var curLineIdx = -1;
+				var lastText = "";
+
+				var results:Array<LyricLine> = []; // we will go backwards a little.
+				var curStart = 0.0;
+				var curEnd = 0.0;
+				var curTxt = "";
+				
+				inline function pushSubtitle() {
+					curTxt = curTxt.trim();
+					var result:LyricLine = {
+						time: curStart,
+						duration: (curEnd - curStart) * 0.001,
+						text: curTxt,
+						subText: "",
+						newLine: true
+					};
+
+					if (curLineIdx >= 0 && curTxt.startsWith(lastText)) {
+						result.newLine = false;
+						result.text = curTxt.substring(lastText.length);
+						results[curLineIdx].duration = (curEnd - results[curLineIdx].time) * 0.001;
+					} else
+						curLineIdx = results.length;
+					lastText = curTxt;
+					results.push(result);
+				}
+
+				for (i => line in lines) {
+					line = line.trim();
+					if (line == Std.string(curSubtitleIdx)) {
+						if (curSubtitleIdx != 1)
+							pushSubtitle();
+						++curSubtitleIdx;
+						curStart = 0;
+						curEnd = 0;
+						curTxt = "";
+						requestTime = true;
+					} else if (requestTime) {
+						requestTime = false;
+						var arrowSplit = line.split("-->");
+						curStart = parseTime(arrowSplit[0].trim());
+						curEnd = parseTime(arrowSplit[1].trim());
+					} else
+						curTxt += "\n" + line;
+				}
+				pushSubtitle();
+
+				// now we can push them
+				for (result in results)
+					parseLine(result);
 			case 'json':
 				var data = Json5.parse(File.getContent(path));
 
@@ -243,6 +301,32 @@ class Lyrics extends FlxSpriteGroup {
 
 		_lyricData.push(data);
 		list.push(line);
+	}
+
+	public static function parseTime(str:String) {
+		final timings = [
+			1000, // Seconds
+			1000 * 60, // Minutes
+			1000 * 60 * 60, // Hours
+			1000 * 60 * 60 * 24, // Days
+		]; // surely nobody needs to add weeks
+
+		var miliIdx = str.lastIndexOf(",");
+		if (miliIdx < 0) miliIdx = str.lastIndexOf(".");
+
+		// parse the miliseconds (if existant first)
+		var time = miliIdx < 0 ? 0 : Std.parseFloat(str.substring(miliIdx + 1));
+		str = miliIdx < 0 ? str : str.substring(0, miliIdx);
+		var split = str.split(":");
+
+		for (i in 0...split.length) {
+			var timingI = split.length - 1 - i;
+
+			split[i] = split[i].trim();
+			time += Std.parseFloat(split[i]) * timings[timingI];
+		}
+
+		return time;
 	}
 
 	// ignore this

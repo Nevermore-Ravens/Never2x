@@ -128,8 +128,14 @@ class EventInterp {
 	}
 
 	static function getEase(ease:String, dir:String) {
-		if (dir == null || ease == "CLASSIC" || ease == "INSTANT" || ease == "linear")
-			return ease;
+		var dirLess = ease.startsWith("CLASSIC") || ease.startsWith("INSTANT") || ease.startsWith("linear");
+		
+		if (dir == null || dirLess) {
+			var dirIdx = dirLess ? ease.indexOf("In") : -1; // don't try to find a direction if its directionless
+			if (dirLess && dirIdx < 0) dirIdx = ease.indexOf("Out");
+			
+			return dirIdx < 0 ? ease : ease.substring(0, dirIdx);
+		}
 		return ease + dir;
 	}
 

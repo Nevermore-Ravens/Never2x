@@ -347,7 +347,7 @@ class PlayState extends FunkinState {
 		Conductor.clock.offset = chart.offset;
 
 		// we'll add sub-rip title files later
-		lyrics.load(Assets.main.getPath('songs/$songID/lyrics', ["json"]));
+		lyrics.load(Assets.main.getPath('songs/$songID/lyrics', ["json", "srt"]));
 
 		Conductor.inst = Util.makeSound(Assets.audio('songs/$songID/Inst'));
 		Conductor.inst.onComplete = function() songCompleted();
@@ -872,7 +872,7 @@ class PlayState extends FunkinState {
 
 			default:
 				var easeFunc = Util.easeFromString(ease);
-				camMoveTwn = FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x, y: camFollow.y}, duration * Conductor.semiquaver * 0.001, {ease: easeFunc});
+				camMoveTwn = FlxTween.tween(FlxG.camera.scroll, {x: camFollow.x - FlxG.width * 0.5, y: camFollow.y - FlxG.height * 0.5}, duration * Conductor.semiquaver * 0.001, {ease: easeFunc});
 		}
 	}
 	
