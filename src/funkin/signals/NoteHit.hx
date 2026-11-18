@@ -42,6 +42,10 @@ class NoteHit {
 		Additional text to append to the playing animation, if `animation + animationSuffix` doesn't exist, `animation` will play instead.
 	**/
 	public var animationSuffix:Null<String>;
+	/**
+		Whether or not the game will try to prevent dancing before the animation finishes.
+	**/
+	public var specialAnim:Bool;
 
 	/**
 		How much health to gain from the note hit.
@@ -140,13 +144,14 @@ class NoteHit {
 		character = game.getCharacter(note.player);
 		animation = (player && note.judgement.breaksCombo ? "miss" : "sing") + Note.directions[note.lane % Note.directions.length].toUpperCase();
 		animationSuffix = null;
+		specialAnim = false;
 		
 		health = player ? ((note.behavior.hitHealth ?? note.judgement.health) * note.behavior.healthMult) : 0;
 		applyToScore = player;
 		applyToAccuracy = player;
 		registerHit = player;
 
-		noteSplash = (!player || note.canGlow || game.splashSkin == "none" || judgementIndex > 1) ? null : game.splashSkin;
+		noteSplash = (!player || !note.canGlow || game.splashSkin == "none" || judgementIndex > 1) ? null : game.splashSkin;
 		luminzeSplash = note.canGlow && note.glowColor != null;
 		splashColor = luminzeSplash ? cast note.glowColor : 0xFFFFFFFF;
 		spawnedSplash = null;

@@ -48,6 +48,10 @@ class SustainTick {
 		Additional text to append to the playing animation, if `animation + animationSuffix` doesn't exist, `animation` will play instead.
 	**/
 	public var animationSuffix:Null<String>;
+	/**
+		Whether or not the game will try to prevent dancing before the animation finishes.
+	**/
+	public var specialAnim:Bool;
 
 	/**
 		How much health to gain from the hold tick.
@@ -87,6 +91,7 @@ class SustainTick {
 		character = mostRecent ? game.getCharacter(sustain.player) : null;
 		animation = "sing" + Note.directions[sustain.lane % Note.directions.length].toUpperCase();
 		animationSuffix = null;
+		specialAnim = false;
 		
 		health = 0;
 		applyToScore = player;

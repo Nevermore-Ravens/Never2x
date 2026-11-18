@@ -35,6 +35,10 @@ class NoteMiss {
 		Additional text to append to the playing animation, if `animation + animationSuffix` doesn't exist, `animation` will play instead.
 	**/
 	public var animationSuffix:Null<String>;
+	/**
+		Whether or not the game will try to prevent dancing before the animation finishes.
+	**/
+	public var specialAnim:Bool;
 
 	/**
 		How much health to get from the miss.
@@ -89,6 +93,7 @@ class NoteMiss {
 		character = game.getCharacter(note.player);
 		animation = "miss" + Note.directions[note.lane % Note.directions.length].toUpperCase();
 		animationSuffix = null;
+		specialAnim = false;
 		
 		health = (note.behavior.hitHealth ?? -10.5) * note.behavior.healthMult;
 		applyToScore = true;

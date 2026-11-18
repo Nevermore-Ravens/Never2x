@@ -247,6 +247,8 @@ class PlayState extends FunkinState {
 
 		load();
 		makeHUD();
+		if (splashSkin != "none")
+			NoteSplash.getData(splashSkin, notefield.player.keyCount, notefield.player.luminizeReceptors);
 
 		scripts.call("create");
 		signals.finishedCreate.dispatch();
@@ -399,7 +401,11 @@ class PlayState extends FunkinState {
 		scripts.call("noteHit", [signals.noteHit]);
 		signals.noteHit.emit();
 
-		signals.noteHit.character?.playAnim(signals.noteHit.animation, true, signals.noteHit.animationSuffix);
+		var char = signals.noteHit.character;
+		if (char != null) {
+			char.playAnim(signals.noteHit.animation, true, signals.noteHit.animationSuffix);
+			char.specialAnim = signals.noteHit.specialAnim;
+		}
 
 		var deviation:Float = signals.noteHit.deviation;
 		var judgeID:Int = signals.noteHit.judgementIndex;
@@ -457,7 +463,11 @@ class PlayState extends FunkinState {
 		scripts.call("noteMiss", [signals.noteMiss]);
 		signals.noteMiss.emit();
 
-		signals.noteMiss.character?.playAnim(signals.noteMiss.animation, true, signals.noteMiss.animationSuffix);
+		var char = signals.noteMiss.character;
+		if (char != null) {
+			char.playAnim(signals.noteMiss.animation, true, signals.noteMiss.animationSuffix);
+			char.specialAnim = signals.noteMiss.specialAnim;
+		}
 
 		health += signals.noteMiss.health;
 
@@ -495,7 +505,11 @@ class PlayState extends FunkinState {
 		scripts.call("sustainTick", [signals.sustainTick]);
 		signals.sustainTick.emit();
 
-		signals.sustainTick.character?.playAnim(signals.sustainTick.animation, true, signals.sustainTick.animationSuffix);
+		var char = signals.sustainTick.character;
+		if (char != null) {
+			char.playAnim(signals.sustainTick.animation, true, signals.sustainTick.animationSuffix);
+			char.specialAnim = signals.sustainTick.specialAnim;
+		}
 		health += signals.sustainTick.health;
 
 		if (signals.sustainTick.applyToScore)
@@ -525,7 +539,11 @@ class PlayState extends FunkinState {
 		scripts.call("sustainDrop", [signals.sustainDrop]);
 		signals.sustainDrop.emit();
 
-		signals.sustainDrop.character?.playAnim(signals.sustainDrop.animation, true, signals.sustainDrop.animationSuffix);
+		var char = signals.sustainDrop.character;
+		if (char != null) {
+			char.playAnim(signals.sustainDrop.animation, true, signals.sustainDrop.animationSuffix);
+			char.specialAnim = signals.sustainDrop.specialAnim;
+		}
 
 		health += signals.sustainDrop.health;
 		if (signals.sustainDrop.registerDrop) {
