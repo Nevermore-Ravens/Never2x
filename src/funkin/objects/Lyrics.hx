@@ -153,7 +153,7 @@ class Lyrics extends FlxSpriteGroup {
 		}
 
 		var lineData = _lyricData[index];
-		var skip = (Conductor.time - lineData.start.time) * 0.001;
+		var skip = (Conductor.audioTime - lineData.start.time) * 0.001;
 		if (lineData.start.duration - skip <= 0) return;
 
 		if (!line.newLine && (lineData.id != curLineData.id)) return;
