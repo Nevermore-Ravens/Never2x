@@ -119,6 +119,8 @@ class PlayState extends FunkinState {
 		stats = {};
 
 		events = new EventHandler();
+		events.prepare = signals.prepareEvent.dispatch;
+		events.triggered = signals.eventTriggered.dispatch;
 		events.registerEvent("Retarget Camera", moveCamera);
 		events.registerEvent("Zoom Camera", zoomCamera);
 		events.registerEvent("Bump Interval", setZoomInterval);
@@ -923,6 +925,9 @@ class PlayState extends FunkinState {
 class GameSignals {
 	public var loadedStage:Event<Void->Void> = new Event<Void->Void>();
 	public var finishedCreate:Event<Void->Void> = new Event<Void->Void>();
+
+	public var prepareEvent:Event<ChartEvent->Bool->Void> = new Event<ChartEvent->Bool->Void>();
+	public var eventTriggered:Event<ChartEvent->Void> = new Event<ChartEvent->Void>();
 
 	public var noteHit:NoteHit = new NoteHit();
 	public var noteMiss:NoteMiss = new NoteMiss();
