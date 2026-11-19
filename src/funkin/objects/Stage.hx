@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import openfl.display.BlendMode;
 import funkin.objects.Character;
 
 enum abstract StageObjType(String) {
@@ -34,6 +35,8 @@ typedef StageObject = {
 	var ?animations:Array<FunkinAnimData>;
 	var ?flipX:Bool;
 	var ?flipY:Bool;
+	var ?color:FlxColor;
+	var ?blend:Any;
 
 	// group specific
 	var ?objects:Array<StageObject>;
@@ -103,6 +106,14 @@ class Stage extends FunkinSpriteGroup {
 			loadObject(obj, this);
 	}
 
+	public static function interpBlend(val:Any):BlendMode {
+		if (val is String)
+			@:privateAccess BlendMode.fromString(cast val);
+		if (val is Int)
+			return cast val;
+		return null;
+	}
+
 	public function loadObject(data:StageObject, to:FunkinSpriteGroup) {
 		var obj:FlxSprite = switch (data.type) {
 			case GROUP:
@@ -118,6 +129,9 @@ class Stage extends FunkinSpriteGroup {
 			default:
 				var spr = new FunkinSprite();
 				spr.flipX = data.flipX == true;
+				spr.color = data.color ?? 0xFFFFFFFF;
+				
+				spr.blend = interpBlend(data.blend);
 				spr.flipY = data.flipY == true;
 
 				if (data.animations == null || data.animations.length <= 0)

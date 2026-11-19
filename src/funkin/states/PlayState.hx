@@ -326,7 +326,7 @@ class PlayState extends FunkinState {
 		}
 
 		for (character in [player, enemy, spectator]) {
-			if (character == null || !character.autoIdle || beat % character.danceInterval != 0) continue;
+			if (character == null || !character.autoIdle || character.danceInterval <= 0 || beat % character.danceInterval != 0) continue;
 			character.dance();
 		}
 
