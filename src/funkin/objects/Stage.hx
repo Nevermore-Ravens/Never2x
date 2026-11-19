@@ -108,7 +108,7 @@ class Stage extends FunkinSpriteGroup {
 
 	public static function interpBlend(val:Any):BlendMode {
 		if (val is String)
-			@:privateAccess BlendMode.fromString(cast val);
+			@:privateAccess return BlendMode.fromString((val:String).toLowerCase());
 		if (val is Int)
 			return cast val;
 		return null;
