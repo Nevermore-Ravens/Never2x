@@ -542,10 +542,6 @@
 			text: 'Popup Center'
 		},*/
 		{
-			id: 'combo_tinting_desc',
-			text: 'Allows for the combo display to be tinted.'
-		},
-		{
 			id: 'hide_acc',
 			text: 'Hide Accuracy'
 		},

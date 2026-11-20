@@ -1,5 +1,7 @@
 package funkin.core;
 
+import haxe.io.Path;
+
 typedef Translation = {
 	var id:String;
 	var text:String;
@@ -19,14 +21,13 @@ class Languages {
 		if (initialized) return;
 		initialized = true;
 
-		// gonna do a folder check later but just for now
-		list = [
-			new Locale('en-US'),
-			new Locale('en-PL'),
-			new Locale('pt-BR'),
-			new Locale('es-ES'),
-			new Locale('jp-JP')
-		];
+		var directory:String = 'assets/data/locale';
+		for (locale in FileSystem.readDirectory(directory)) {
+			var path:Path = new Path(directory + '/' + locale);
+			if (path.ext != 'json') continue;
+			
+			list.push(new Locale(path.file));
+		}
 
 		Sys.println('Translations loaded!');
 		for (locale in list) {
@@ -86,7 +87,7 @@ class Locale {
 
 		var file:LocaleFile = getDummyFile();
 		if (Assets.exists('data/locale/$id')) {
-			var meta:LocaleFile = cast Json5.parse(Assets.text('data/locale/$id/meta.json'));
+			var meta:LocaleFile = cast Json5.parse(Assets.text('data/locale/$id.json'));
 			file.name = meta.name;
 
 			meta.translations ??= [];
