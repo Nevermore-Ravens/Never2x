@@ -1,3 +1,22 @@
 {
-	name: 'Japanese (Japan)'
+	name: 'Japanese (Japan)',
+
+	translations: [
+		{
+			id: 'en-US',
+			text: '英語 (US)'
+		},
+		{
+			id: 'es-ES',
+			text: 'スペイン語 (スペイン)'
+		},
+		{
+			id: 'jp-JP',
+			text: '日本語 (日本)'
+		},
+		{
+			id: 'pt-BR',
+			text: 'ポルトガル語 (ブラジル)'
+		},
+	]
 }

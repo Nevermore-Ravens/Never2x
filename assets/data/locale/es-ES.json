@@ -1,3 +1,22 @@
 {
-	name: 'Spanish (Spain)'
+	name: 'Spanish (Spain)',
+
+	translations: [
+		{
+			id: 'en-US',
+			text: 'Inglés (US)'
+		},
+		{
+			id: 'es-ES',
+			text: 'Español (España)'
+		},
+		{
+			id: 'jp-JP',
+			text: 'Japonés (Japón)'
+		},
+		{
+			id: 'pt-BR',
+			text: 'Portugués (Brasil)'
+		},
+	]
 }

@@ -3,6 +3,18 @@
 
 	translations: [
 		{
+			id: 'en-US',
+			text: 'Inglês (US)'
+		},
+		{
+			id: 'es-ES',
+			text: 'Espanhol (Espanha)'
+		},
+		{
+			id: 'jp-JP',
+			text: 'Japonês (Japão)'
+		},
+		{
 			id: 'pt-BR',
 			text: 'Português (Brasil)'
 		},
