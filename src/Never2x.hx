@@ -35,6 +35,14 @@ class Never2x extends Sprite {
 
 	public static var version:String = '1.0.0';
 
+	// just a small wrapper for setting framerate
+	// cuz i found this really fucking annoying to do every time
+	public static var framerate(default, set):Int = 60;
+	static function set_framerate(v:Int):Int {
+		FlxG.drawFramerate = FlxG.updateFramerate = v;
+		return framerate = v;
+	}
+
 	public function new() {
 		super();
 
@@ -184,14 +192,12 @@ class InitState extends flixel.FlxState {
 		Languages.change(Settings.data.language);
 
 		Settings.validate();
+		Settings.updateFlixel();
 
-		FlxG.fullscreen = Settings.data.fullscreen;
 		FlxG.fixedTimestep = false;
-		FlxG.drawFramerate = FlxG.updateFramerate = Settings.data.framerate;
-		FlxG.game.focusLostFramerate = Math.floor(Settings.data.framerate / 4);
+		FlxG.game.focusLostFramerate = 10;
 		FlxG.keys.preventDefaultKeys = [TAB];
 		FlxG.cameras.useBufferLocking = true;
-		FlxG.autoPause = Settings.data.autoPause;
 
 		FlxG.sound.volume = FlxG.save.data.volume ?? 1.0;
 		FlxG.sound.muted = FlxG.save.data.muted ?? false;

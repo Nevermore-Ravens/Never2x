@@ -157,6 +157,12 @@ class Settings {
 		updateNevermore();
 	}
 
+	public static function updateFlixel() {
+		Never2x.framerate = data.framerate;
+		FlxG.autoPause = data.autoPause;
+		FlxG.fullscreen = data.fullscreen;
+	}
+
 	public static function updateNevermore() {
 		Nevermore.settings.notefieldFramerate = data.modchartFPS;
 		Nevermore.settings.inputOffset = data.inputOffset;

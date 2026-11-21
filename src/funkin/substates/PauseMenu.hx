@@ -155,7 +155,7 @@ class PauseMenu extends flixel.FlxSubState {
 					FlxG.autoPause = Settings.data.autoPause;
 
 				case 'options':
-					music.stop();
+					if (music != null) music.stop();
 					Conductor.stop();
 					Conductor.reset();
 					FunkinState.toMenu(new OptionsState());

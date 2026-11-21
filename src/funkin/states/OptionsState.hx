@@ -187,7 +187,7 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option("framerate", "framerate_desc", "framerate", IntOption(15, 1000, 5));
 				opt.onChange = function(val:Int) {
-					FlxG.drawFramerate = FlxG.updateFramerate = val;
+					Never2x.framerate = val;
 				};
 				opt;
 			},
@@ -299,7 +299,24 @@ class OptionsState extends FunkinState {
 				var opt = new Option("calibrate_offset", "calibrate_offset_desc", "", ButtonOption);
 				opt.onChange = function(_) FlxG.switchState(new CalibrateOffsetState());
 				opt;
-			}
+			},
+			{
+				var opt = new Option('clear_save', 'clear_save_desc', "", ButtonOption);
+				opt.onChange = function(_) {
+					Controls.reset(true);
+					Settings.reset(true);
+					Never2x.infoCounter.visible = Settings.data.infoCounter;
+					Settings.updateFlixel();
+				};
+				opt;
+			},
+			{
+				var opt = new Option('clear_scores', 'clear_scores_desc', "", ButtonOption);
+				opt.onChange = function(_) {
+					Scores.reset(true);
+				};
+				opt;
+			},
 		]
 	];
 	public static var inPlayState:Bool = false;

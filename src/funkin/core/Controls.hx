@@ -188,11 +188,13 @@ class Controls {
         return inline openfl.ui.Keyboard.__convertKeyCode(code);
     }
 
-	public static function reset() {
+	public static function reset(?saveToDisk:Bool = false) {
 		for (key in binds.keys()) {
 			if (!default_binds.exists(key)) continue;
 			setBindSet(key, default_binds.get(key).copy());
 		}
+
+		if (saveToDisk) save();
 	}
 
 	// use noteInputDirs.indexOf(name) to get the name corresponding with the input map's index

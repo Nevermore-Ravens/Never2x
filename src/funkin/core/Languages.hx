@@ -25,7 +25,7 @@ class Languages {
 		for (locale in FileSystem.readDirectory(directory)) {
 			var path:Path = new Path(directory + '/' + locale);
 			if (path.ext != 'json') continue;
-			
+
 			list.push(new Locale(path.file));
 		}
 
