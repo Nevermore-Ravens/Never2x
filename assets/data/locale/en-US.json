@@ -3,6 +3,24 @@
 
 	// use this as a base for your own translations
 	translations: [
+		// languages
+		{
+			id: 'en-US',
+			text: 'English (US)'
+		},
+		{
+			id: 'es-ES',
+			text: 'Spanish (Spain)'
+		},
+		{
+			id: 'jp-JP',
+			text: 'Japanese (Japan)'
+		},
+		{
+			id: 'pt-BR',
+			text: 'Portuguese (Brazil)'
+		},
+
 		{
 			id: 'resume',
 			text: 'Resume'

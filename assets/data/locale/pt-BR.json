@@ -1,8 +1,12 @@
 {
 	name: 'Portuguese (Brazil)',
-	nativeName: 'Português (Brasil)',
 
 	translations: [
+		{
+			id: 'pt-BR',
+			text: 'Português (Brasil)'
+		},
+
 		// Playfield
 		{
 			id: 'info_text_score',

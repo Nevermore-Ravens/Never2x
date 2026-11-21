@@ -77,6 +77,8 @@ class Languages {
 }
 
 class Locale {
+	// name of this translation in english
+	// ***NOT*** in the language's native name
 	public var name:String;
 	public var id:String;
 

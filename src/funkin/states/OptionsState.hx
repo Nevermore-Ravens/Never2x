@@ -146,7 +146,20 @@ class OptionsState extends FunkinState {
 			{
 				var opt = new Option('language', 'language_desc', "language", ListOption(Languages.getIDs(), true));
 				opt.formatListOption = function(item:String, translated:Bool) {
-					return Languages.getByID(item)?.name ?? item;
+					var name:String = Languages.getByID(item).name;
+
+					// if the currently used language is english
+					// scrap translating
+					if (Languages.current.id == Settings.default_data.language) {
+						return name; 
+					}
+
+					// if the current item is the language we're using
+					// use the native name for that language
+					if (item == Languages.current.id) return getText(item);
+
+					// otherwise display both
+					return getText(item) + ' - ' + name;
 				}
 				opt.onChange = function(val:String) {
 					Languages.change(val);
@@ -459,7 +472,7 @@ class OptionsState extends FunkinState {
 				}
 
 				persistentUpdate = false;
-				openSubState(new DropdownPrompt(x, y, 250, opts, function(idx) {
+				openSubState(new DropdownPrompt(x, y, 300, opts, function(idx) {
 					FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 					list.list[current].value = options[idx];
 					list.components[current].change(list.list[current]);
