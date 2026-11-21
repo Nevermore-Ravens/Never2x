@@ -472,7 +472,7 @@ class OptionsState extends FunkinState {
 				}
 
 				persistentUpdate = false;
-				openSubState(new DropdownPrompt(x, y, 300, opts, function(idx) {
+				openSubState(new DropdownPrompt(x, y, 450, opts, function(idx) {
 					FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 					list.list[current].value = options[idx];
 					list.components[current].change(list.list[current]);

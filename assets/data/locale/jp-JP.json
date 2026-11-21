@@ -4,7 +4,7 @@
 	translations: [
 		{
 			id: 'en-US',
-			text: '英語 (US)'
+			text: '英語 (アメリカ)'
 		},
 		{
 			id: 'es-ES',
