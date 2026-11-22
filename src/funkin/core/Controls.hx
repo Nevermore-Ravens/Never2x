@@ -45,7 +45,7 @@ class Controls {
 		'debug_2'		=> [EIGHT]
 	];
 
-	public static var binds:Map<String, Array<Int>> = default_binds;
+	public static var binds:Map<String, Array<Int>> = [for (key in default_binds.keys()) key => default_binds[key].copy()];
 
 	//hehe, controller support incoming, btw those A, B, X and Y binds are for xbox controllers
 	public static final default_gamepad_binds:Map<String, Array<FlxGamepadInputID>> = [
@@ -59,7 +59,7 @@ class Controls {
 		'pause'			=> [START, BACK],
 		'reset'			=> [Y]
 	];
-	public static var gamepad_binds:Map<String, Array<FlxGamepadInputID>> = default_gamepad_binds;
+	public static var gamepad_binds:Map<String, Array<FlxGamepadInputID>> = [for (key in default_gamepad_binds.keys()) key => default_gamepad_binds[key].copy()];
 
 	public static var bindSetters:Map<String, (name:String, list:Array<Int>, gamepad:Bool) -> Void> = [
 		'note_left' => onNoteBind,
