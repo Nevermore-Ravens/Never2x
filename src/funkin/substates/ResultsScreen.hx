@@ -82,7 +82,7 @@ class ResultsScreen extends flixel.FlxSubState {
 		meanLine.scale.set(graphBG.width, 3);
 		meanLine.updateHitbox();
 		add(meanLine);
-		meanTxt = new FlxText(meanLine.x + 5, meanLine.y, 0, 'Mean: ${Util.truncateFloat(stats.mean, 4)}ms');
+		meanTxt = new FlxText(meanLine.x + 5, meanLine.y, 0, getFormattedText('results_mean', [Util.truncateFloat(stats.mean, 4)]));
 		meanTxt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 16, 0xFF7984A1, LEFT);
 
 		add(meanTxt);
@@ -92,7 +92,7 @@ class ResultsScreen extends flixel.FlxSubState {
 		stddLine.scale.set(graphBG.width, 3);
 		stddLine.updateHitbox();
 		add(stddLine);
-		stddTxt = new FlxText(stddLine.x + stddLine.width - 5, stddLine.y, 0, 'Standard Dev.: ${Util.truncateFloat(stats.standardDeviation, 4)}ms');
+		stddTxt = new FlxText(stddLine.x + stddLine.width - 5, stddLine.y, 0, getFormattedText('results_standard_dev', [Util.truncateFloat(stats.standardDeviation, 4)]));
 		stddTxt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 16, 0xFFA17998, RIGHT);
 		stddTxt.x -= stddTxt.width;
 		add(stddTxt);
@@ -137,7 +137,7 @@ class ResultsScreen extends flixel.FlxSubState {
 		accuracyTxt.setFormat(Assets.getPath("fonts/LineSeedB.ttf"), 32, 0xFFFFFFFF, LEFT);
 		accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		add(accuracyTxt);
-		notes = new FlxText(accuracyTxt.x, accuracyTxt.y + accuracyTxt.height + 25, 0, "Best/Highest Combo: 0/0\nBest NPS: 0");
+		notes = new FlxText(accuracyTxt.x, accuracyTxt.y + accuracyTxt.height + 25, 0, getFormattedText('results_best_combo', [0, 0]) + '\n' + getFormattedText('results_nps', [0]));
 		notes.setFormat(Assets.getPath("fonts/LineSeed.ttf"), 28, 0xFFFFFFFF, LEFT);
 		notes.setBorderStyle(OUTLINE, 0xFF000000, 2);
 		add(notes);
@@ -209,7 +209,11 @@ class ResultsScreen extends flixel.FlxSubState {
 
 			scoreTxt.text = getFormattedText('info_text_score', [Util.moneyString(Math.round(stats.score * scale))]);
 			accuracyTxt.text = getFormattedText("info_text_accuracy", [Util.truncateFloat(stats.accuracy * scale, 3)]);
-			notes.text = 'Best/Highest Combo: ${Math.round(stats.maxCombo * scale)}/${Math.round(stats.hitData.length * scale)}\nBest NPS: ${Math.round(stats.maxNPS * scale)}';
+
+			var bestCombo:String = getFormattedText('results_best_combo', [Math.round(stats.maxCombo * scale), Math.round(stats.hitData.length * scale)]);
+			var highestNPS:String = getFormattedText('results_nps', [Math.round(stats.maxNPS * scale)]);
+
+			notes.text = bestCombo + '\n' + highestNPS;
 		});
 
 		var ranks = [rankTxt, clearTxt];

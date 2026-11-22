@@ -114,6 +114,22 @@
 			id: 'pause_music_Off',
 			text: 'Off'
 		},
+		{
+			id: 'results_standard_dev',
+			text: 'Standard Dev.: ${0}ms'
+		},
+		{
+			id: 'results_mean',
+			text: 'Mean: ${0}ms'
+		},
+		{
+			id: 'results_best_combo',
+			text: 'Best Combo: ${0}/${1}'
+		},
+		{
+			id: 'results_nps',
+			text: 'Highest NPS: ${0}'
+		},
 		
 		{
 			id: 'reposition_popups',
