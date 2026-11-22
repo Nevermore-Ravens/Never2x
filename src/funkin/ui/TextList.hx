@@ -199,8 +199,22 @@ class TextList extends FunkinSprite {
 		return hoverTmr > 0;
 
 	override function set_width(to:Float) {
+		// DEAR GOD ALL THESE NULL CHECKS
 		if (scale != null)
 			scale.x = to;
+		if (hover != null)
+			hover.scale.x = to;
+
+		if (texts != null) {
+			for (item in texts.members)
+				item.fieldWidth = to - 30;
+		}
+
+		if (hasSubTexts) {
+			for (item in subTexts.members)
+				item.fieldWidth = to - 30;
+		}
+
 		return width = to;
 	}
 	override function set_height(to:Float) {

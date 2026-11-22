@@ -74,7 +74,7 @@ class OptionsState extends FunkinState {
 		],
 		"gameplay" => [
 			{
-				var opt = new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"], true, true));
+				var opt = new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"], false, true));
 				opt;
 			},
 			{
@@ -166,12 +166,9 @@ class OptionsState extends FunkinState {
 					for (i => cate in self.categoryList)
 						self.cateText.setText(i, getText(cate));
 
-					for (i => opt in self.curOptList) {
-						final opt = self.curOptList[i];
-						self.optText.setText(i, opt.name.startsWith("<NO-LANG>") ? opt.name.substring(9, opt.name.length) : getText(opt.name));
-						self.optText.setSubText(i, OptionList.getDesc(opt));
-						// self.optText.setSubText(i, opt.formatText(i == self.optText.current));
-					}
+					self.optText.resetText();
+					self.noteEdit.resetText();
+					self.popupEdit.resetText();
 				}
 				opt;
 			},
@@ -482,7 +479,7 @@ class OptionsState extends FunkinState {
 				}
 
 				persistentUpdate = false;
-				openSubState(new DropdownPrompt(x, y, 450, opts, function(idx) {
+				openSubState(new DropdownPrompt(x, y, 0, opts, function(idx) {
 					FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 					list.list[current].value = options[idx];
 					list.components[current].change(list.list[current]);
@@ -555,9 +552,15 @@ class DropdownPrompt extends FlxSubState {
 
 	public function new(x:Float, y:Float, width:Float, options:Array<String>, onClick:Int->Void) {
 		super();
-		add(list = new TextList(x, y, width, 0, options));
+		add(list = new TextList(x, y, width <= 0 ? FlxG.width : width, 0, options));
 		list.itemSpacing = 30;
 		list.size = 18;
+		if (width <= 0) {
+			var finalWidth = 0.0;
+			for (item in list.texts.members)
+				finalWidth = Math.max(finalWidth, item.textField.textWidth);
+			list.width = finalWidth + 35;
+		}
 		list.height = Math.min(list.scrollInc * options.length, 600);
 		list.scrollInc = Math.max(list.scrollInc * options.length - list.height, 0) / options.length;
 

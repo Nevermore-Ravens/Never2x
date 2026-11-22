@@ -264,8 +264,20 @@ class OptionList extends TextList {
 		position(0);
 	}
 
+	public function resetText() {
+		for (i in 0...list.length) {
+			final opt = list[i];
+			setText(i, getString(opt.name));
+			setSubText(i, getDesc(opt));
+			components[i].change(opt); // some things may be a translated text
+		}
+	}
+
+	public static function getString(str:String) {
+		return (str.startsWith("<NO-LANG>") ? str.substring(9, str.length) : getFormattedText(str, [getText("accept").toUpperCase()]));
+	}
 	public static function getDesc(opt:Option) {
-		return (opt.desc.startsWith("<NO-LANG>") ? opt.desc.substring(9, opt.desc.length) : getFormattedText(opt.desc, [getText("accept").toUpperCase()]));
+		return getString(opt.desc);
 	}
 
 	override function draw() {
