@@ -34,8 +34,7 @@ class NoteStyling {
 		return Noteskin.cache.get(newKey, skin.loadKeyCount, skin.alreadyLuminized);
 	}
 
-	public static function switchFieldStyle(field:Strumline, style:String, ?force:Bool) {
-		var newSkin = findRelativeStyle(field.skin, style);
+	public static function switchFieldSkin(field:Strumline, newSkin:Noteskin) {
 		if (field.skin == newSkin)
 			return;
 		var idx = field.field.strumlines.members.indexOf(field);
@@ -49,6 +48,9 @@ class NoteStyling {
 			if (hold.alive && hold.player == idx)
 				hold.type = hold.type; // Sustain has a setter
 		}
+	}
+	public static function switchFieldStyle(field:Strumline, style:String, ?force:Bool) {
+		switchFieldSkin(field, findRelativeStyle(field.skin, style, force));
 	}
 
 	public static function updatePalette() {

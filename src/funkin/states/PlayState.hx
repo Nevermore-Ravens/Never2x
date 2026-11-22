@@ -737,7 +737,7 @@ class PlayState extends FunkinState {
 							&& judgeSprite.y < strumlineYPos + strumlineHeight + 20 && judgeSprite.y + judgeSprite.height > strumlineYPos - 20;
 		var overlapsCombo = comboLeft < notefield.player.findMaxX() && comboRight > notefield.player.findMinX()
 							&& comboSprite.y < strumlineYPos + strumlineHeight + 20 && comboSprite.y + comboNum.height > strumlineYPos - 20;
-		var distance = Math.sqrt(Math.pow(comboSprite.x - judgeSprite.x, 2) + Math.pow(comboSprite.x - judgeSprite.x, 2));
+		var distance = FlxMath.vectorLength(comboSprite.x - judgeSprite.x, comboSprite.y - judgeSprite.y);
 
 		if (overlapsJudge || (overlapsCombo && distance <= 75))
 			judgeSprite.screenCenter(Y);

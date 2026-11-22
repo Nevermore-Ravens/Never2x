@@ -808,6 +808,18 @@
 			text: 'If the popups will recenter, if overlapping a strumline.'
 		},
 		{
+			id: 'popup_pos_warning',
+			text: 'Overlapping popups! They will vertically reposition in-game if left overlapping!'
+		},
+		{
+			id: 'popup_on_field',
+			text: 'Field Anchored'
+		},
+		{
+			id: 'popup_on_field_desc',
+			text: 'If the popup positioning is relative to the playing field\'s center instead of the screen.'
+		},
+		{
 			id: 'judgement_scale',
 			text: 'Judgement Scale'
 		},

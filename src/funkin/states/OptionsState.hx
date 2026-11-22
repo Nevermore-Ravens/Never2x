@@ -453,6 +453,9 @@ class OptionsState extends FunkinState {
 		FlxG.camera.scroll.x = FlxMath.lerp(FlxG.camera.scroll.x, targetPos.x, delta * 20);
 		FlxG.camera.scroll.y = FlxMath.lerp(FlxG.camera.scroll.y, targetPos.y, delta * 20);
 
+		// prevent seeing the strums outta nowhere
+		popupEdit.setObjAlpha(Math.min(1 - FlxMath.vectorLength(FlxG.camera.scroll.x - (popupEdit.x - 10), FlxG.camera.scroll.y - (popupEdit.y - 10)) / FlxG.height, 1));
+
 		cateText.focused = cateText.allowKeys || cateText.hovered;
 		optText.focused = optText.allowKeys || optText.hovered;
 	}
@@ -537,9 +540,10 @@ class OptionsState extends FunkinState {
 		// damn switch didnt wanna work
 		if (to == noteEdit)
 			targetPos.set(FlxG.width, 0);
-		else if (to == popupEdit)
+		else if (to == popupEdit) {
+			popupEdit.resetStrumlines();
 			targetPos.set(0, FlxG.height);
-		else
+		} else
 			targetPos.set();
 
 		return targetList = to;
