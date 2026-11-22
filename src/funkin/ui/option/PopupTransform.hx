@@ -41,16 +41,16 @@ class PopupTransform extends OptionList {
 
 		setOptions([
 			{
-				var opt = new Option("<NO-LANG>Simple Popups", "<NO-LANG>Whether or not popups will simply bump and fade instead of jump and fall.", "simplePopup", BoolOption);
+				var opt = new Option("simple_popups", "simple_popups_desc", "simplePopup", BoolOption);
 				opt.onChange = function(val:Bool) {
 					judgeSprite.simple = val;	
 					comboSprite.simple = val;	
 				};
 				opt;
 			},
-			new Option("<NO-LANG>Position Safety", "<NO-LANG>If the popup objects will recenter if overlapping a strumline.", "popupPosSafety", BoolOption),
+			new Option("position_safety", "position_safety_desc", "popupPosSafety", BoolOption),
 			{
-				var opt = new Option('<NO-LANG>Judgement Scale', '<NO-LANG>How big the judgement will be.', 'judgeScale', FloatOption(0.05, 3, 0.05, false, true));
+				var opt = new Option('judgement_scale', 'judgement_scale_desc', 'judgeScale', FloatOption(0.05, 3, 0.05, false, true));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
@@ -62,7 +62,7 @@ class PopupTransform extends OptionList {
 				opt;
 			},
 			{
-				var opt = new Option('<NO-LANG>Combo Scale', '<NO-LANG>How big the combo will be', 'comboScale', FloatOption(0.05, 3, 0.05, false, true));
+				var opt = new Option('combo_scale', 'combo_scale_desc', 'comboScale', FloatOption(0.05, 3, 0.05, false, true));
 				opt.formatText = function(_) {
 					return (opt.value * 100) + "%";
 				};
@@ -79,10 +79,11 @@ class PopupTransform extends OptionList {
 				opt;
 			},
 			{
-				var opt = new Option("<NO-LANG>Apply Preset", "<NO-LANG>Set's your judgement and combo stlying with a selection of presets.", "", ButtonOption);
-				opt.onChange = function(_) {
-					var opts = ["Cancel", "Funkin'", "Centered", "In-Between"]; // , "Field-Centered" (I need to visualize Field Anchored/popupOnField first)
+				var opt = new Option("apply_preset", "apply_preset_desc", "", ButtonOption);
 
+				var optionList = ["Cancel", "Funkin'", "Centered", "In-Between"]; // , "Field-Centered" (I need to visualize Field Anchored/popupOnField first)
+
+				opt.onChange = function(_) {
 					var x:Float = mousePoint.x;
 					var y:Float = mousePoint.y;
 					if (Controls.justPressed("accept")) {
@@ -92,7 +93,7 @@ class PopupTransform extends OptionList {
 					}
 
 					FlxG.state.persistentUpdate = false;
-					FlxG.state.openSubState(new DropdownPrompt(x, y, 250, opts, function(idx) {
+					FlxG.state.openSubState(new DropdownPrompt(x, y, 250, optionList, function(idx) {
 						FlxG.sound.play(Assets.audio("sfx/scroll"), Settings.data.sfxVolume);
 
 						inline function setPos(judgeX:Float, judgeY:Float, comboX:Float, comboY:Float) {
@@ -105,7 +106,7 @@ class PopupTransform extends OptionList {
 							comboSprite.setPosition(this.x - 10 + comboX, this.y - 10 + comboY);
 						}
 
-						switch (idx) {
+						switch idx {
 							case 1: // Funkin'
 								setOptionValue("simplePopup", false);
 								setOptionValue("judgeScale", 1);

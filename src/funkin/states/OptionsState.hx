@@ -74,7 +74,7 @@ class OptionsState extends FunkinState {
 		],
 		"gameplay" => [
 			{
-				var opt = new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"]));
+				var opt = new Option('scroll_dir', 'scroll_dir_desc', "scrollDirection", ListOption(["Up", "Down"], true, true));
 				opt;
 			},
 			{
@@ -106,9 +106,9 @@ class OptionsState extends FunkinState {
 		"hud" => [
 			new Option("judge_counter", "judge_counter_desc", "judgementCounter", BoolOption),
 			new Option('hit_error_bar', 'hit_error_bar_desc', "hitErrorBar", BoolOption),
-			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"], true)),
+			new Option("combo_tinting", "combo_tinting_desc", "comboTinting", ListOption(["Off", "Clear Flag", "Per-Note"], true, true)),
 			{
-				var opt = new Option("<NO-LANG>Repositon Popups", "<NO-LANG>", "", ButtonOption);
+				var opt = new Option("reposition_popups", "", "", ButtonOption);
 				opt.hasSound = true;
 				opt.onChange = function(_) {
 					self.lastList = self.targetList;
@@ -192,8 +192,8 @@ class OptionsState extends FunkinState {
 				};
 				opt;
 			},
-			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"], true)),
-			new Option('receptor_glow', 'receptor_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Note'], true)),
+			new Option("cam_zooms", "cam_zooms_desc", "cameraZooms", ListOption(["Default", "Off"], true, true)),
+			new Option('receptor_glow', 'receptor_glow_desc', 'strumGlow', ListOption(['Off', 'Judgement', 'Note'], true, true)),
 			new Option("can_unglow", "can_unglow_desc", "unglowOnAnimFinish", BoolOption),
 		],
 		"performance" => [
@@ -276,7 +276,17 @@ class OptionsState extends FunkinState {
 				};
 				opt;
 			},
-			new Option('pause_music', 'pause_music_desc', 'pauseMusic', ListOption(['Off', 'Song Instrumental', 'Breakfast'], true)),
+			{
+				var opt = new Option('pause_music', 'pause_music_desc', 'pauseMusic', ListOption(['Off', 'Song Instrumental', 'Breakfast'], true));
+				opt.formatListOption = function(item:String, _) {
+					// song names don't get translated
+					var songs:Array<String> = ['Breakfast'];
+					if (songs.contains(item)) return item;
+
+					return getText(opt.name + '_' + item);
+				}
+				opt;
+			},
 			new Option("audio_streaming", "audio_streaming_desc", "audioStreams", BoolOption),
 			new Option('metronome', 'metronome_desc', "metronome", BoolOption),
 			new Option('assist_ticks', 'assist_ticks_desc', "assistTicks", BoolOption)
@@ -621,7 +631,7 @@ class Option {
 
 	public dynamic function formatListOption(item:String, translated:Bool) {
 		if (translated)
-			return getText(id + "_" + item);
+			return getText(name + "_" + item);
 		return item.toLowerCase() == "off" ? "OFF" : item;
 	}
 

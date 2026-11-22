@@ -22,6 +22,104 @@
 		},
 
 		{
+			id: 'scroll_dir_Up',
+			text: 'Up'
+		},
+		{
+			id: 'scroll_dir_Down',
+			text: 'Down'
+		},
+		{
+			id: 'combo_tinting_Off',
+			text: 'Off'
+		},
+		{
+			id: 'combo_tinting_Off',
+			text: 'Off'
+		},
+		{
+			id: 'combo_tinting_Clear Flag',
+			text: 'Clear Flag'
+		},
+		{
+			id: 'combo_tinting_Per-Note',
+			text: 'Per-Note'
+		},
+		{
+			id: 'cam_zooms_Default',
+			text: 'Default'
+		},
+		{
+			id: 'cam_zooms_Off',
+			text: 'Off'
+		},
+		{
+			id: 'receptor_glow_Off',
+			text: 'Off'
+		},
+		{
+			id: 'receptor_glow_Judgement',
+			text: 'Judgement'
+		},
+		{
+			id: 'receptor_glow_Note',
+			text: 'Note'
+		},
+
+		{
+			id: 'simple_popups',
+			text: 'Simple Popups'
+		},
+		{
+			id: 'simple_popups_desc',
+			text: 'Whether or not popups will simply bump and fade, instead of jump and fall.'
+		},
+		{
+			id: 'position_safety',
+			text: 'Position Safety'
+		},
+		{
+			id: 'position_safety_desc',
+			text: 'If the popups will recenter, if overlapping a strumline.'
+		},
+		{
+			id: 'judgement_scale',
+			text: 'Judgement Scale'
+		},
+		{
+			id: 'judgement_scale_desc',
+			text: 'How big the judgement sprite will be.'
+		},
+		{
+			id: 'combo_scale',
+			text: 'Combo Scale'
+		},
+		{
+			id: 'combo_scale_desc',
+			text: 'How big the combo sprites will be.'
+		},
+		{
+			id: 'apply_preset',
+			text: 'Apply Preset'
+		},
+		{
+			id: 'apply_preset_desc',
+			text: 'Sets your judgement and combo styling from a selection of presets.'
+		},
+		{
+			id: 'pause_music_Song Instrumental',
+			text: 'Song Instrumental'
+		},
+		{
+			id: 'pause_music_Off',
+			text: 'Off'
+		},
+		
+		{
+			id: 'reposition_popups',
+			text: 'Reposition Popups'
+		},
+		{
 			id: 'resume',
 			text: 'Resume'
 		},
