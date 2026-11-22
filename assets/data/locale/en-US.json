@@ -20,6 +20,10 @@
 			id: 'pt-BR',
 			text: 'Portuguese (Brazil)'
 		},
+		{
+			id: 'fr-FR',
+			text: 'French (France)'
+		},
 
 		{
 			id: 'scroll_dir_Up',

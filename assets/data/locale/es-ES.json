@@ -18,5 +18,9 @@
 			id: 'pt-BR',
 			text: 'Portugués (Brasil)'
 		},
+		{
+			id: 'fr-FR',
+			text: 'Francés (Francia)'
+		},
 	]
 }

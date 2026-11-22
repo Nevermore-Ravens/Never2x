@@ -1,0 +1,26 @@
+{
+	name: 'French (France)',
+
+	translations: [
+		{
+			id: 'en-US',
+			text: 'Anglais (US)'
+		},
+		{
+			id: 'es-ES',
+			text: 'Espagnol (Espagne)'
+		},
+		{
+			id: 'jp-JP',
+			text: 'Japonais (Japon)'
+		},
+		{
+			id: 'pt-BR',
+			text: 'Portugais (Brésil)'
+		},
+		{
+			id: 'fr-FR',
+			text: 'Français (France)'
+		},
+	]
+}

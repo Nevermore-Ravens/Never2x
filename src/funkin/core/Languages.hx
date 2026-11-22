@@ -88,7 +88,7 @@ class Locale {
 		this.id = id;
 
 		var file:LocaleFile = getDummyFile();
-		if (Assets.exists('data/locale/$id')) {
+		if (Assets.exists('data/locale/$id.json')) {
 			var meta:LocaleFile = cast Json5.parse(Assets.text('data/locale/$id.json'));
 			file.name = meta.name;
 
