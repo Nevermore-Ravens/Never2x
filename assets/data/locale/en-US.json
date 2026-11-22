@@ -25,120 +25,25 @@
 			text: 'French (France)'
 		},
 
+		// playfield
 		{
-			id: 'scroll_dir_Up',
-			text: 'Up'
+			id: 'info_text_score',
+			text: 'Score: ${0}'
 		},
 		{
-			id: 'scroll_dir_Down',
-			text: 'Down'
+			id: 'info_text_combo_breaks',
+			text: 'Combo Breaks: ${0}'
 		},
 		{
-			id: 'combo_tinting_Off',
-			text: 'Off'
+			id: 'info_text_accuracy',
+			text: 'Accuracy: ${0}%'
 		},
 		{
-			id: 'combo_tinting_Off',
-			text: 'Off'
-		},
-		{
-			id: 'combo_tinting_Clear Flag',
-			text: 'Clear Flag'
-		},
-		{
-			id: 'combo_tinting_Per-Note',
-			text: 'Per-Note'
-		},
-		{
-			id: 'cam_zooms_Default',
-			text: 'Default'
-		},
-		{
-			id: 'cam_zooms_Off',
-			text: 'Off'
-		},
-		{
-			id: 'receptor_glow_Off',
-			text: 'Off'
-		},
-		{
-			id: 'receptor_glow_Judgement',
-			text: 'Judgement'
-		},
-		{
-			id: 'receptor_glow_Note',
-			text: 'Note'
+			id: 'autoplay',
+			text: 'Autoplay'
 		},
 
-		{
-			id: 'simple_popups',
-			text: 'Simple Popups'
-		},
-		{
-			id: 'simple_popups_desc',
-			text: 'Whether or not popups will simply bump and fade, instead of jump and fall.'
-		},
-		{
-			id: 'position_safety',
-			text: 'Position Safety'
-		},
-		{
-			id: 'position_safety_desc',
-			text: 'If the popups will recenter, if overlapping a strumline.'
-		},
-		{
-			id: 'judgement_scale',
-			text: 'Judgement Scale'
-		},
-		{
-			id: 'judgement_scale_desc',
-			text: 'How big the judgement sprite will be.'
-		},
-		{
-			id: 'combo_scale',
-			text: 'Combo Scale'
-		},
-		{
-			id: 'combo_scale_desc',
-			text: 'How big the combo sprites will be.'
-		},
-		{
-			id: 'apply_preset',
-			text: 'Apply Preset'
-		},
-		{
-			id: 'apply_preset_desc',
-			text: 'Sets your judgement and combo styling from a selection of presets.'
-		},
-		{
-			id: 'pause_music_Song Instrumental',
-			text: 'Song Instrumental'
-		},
-		{
-			id: 'pause_music_Off',
-			text: 'Off'
-		},
-		{
-			id: 'results_standard_dev',
-			text: 'Standard Dev.: ${0}ms'
-		},
-		{
-			id: 'results_mean',
-			text: 'Mean: ${0}ms'
-		},
-		{
-			id: 'results_best_combo',
-			text: 'Best Combo: ${0}/${1}'
-		},
-		{
-			id: 'results_nps',
-			text: 'Highest NPS: ${0}'
-		},
-		
-		{
-			id: 'reposition_popups',
-			text: 'Reposition Popups'
-		},
+		// pause menu
 		{
 			id: 'resume',
 			text: 'Resume'
@@ -163,58 +68,26 @@
 			id: 'blueballed',
 			text: 'Blueballed: ${0}'
 		},
+
+		// results screen
 		{
-			id: 'personal_best',
-			text: 'Personal Best: ${0} (${1}%)'
+			id: 'results_standard_dev',
+			text: 'Standard Dev.: ${0}ms'
 		},
 		{
-			id: 'edit_modifiers',
-			text: 'Edit Modifiers'
+			id: 'results_mean',
+			text: 'Mean: ${0}ms'
+		},
+		{
+			id: 'results_best_combo',
+			text: 'Best Combo: ${0}/${1}'
+		},
+		{
+			id: 'results_nps',
+			text: 'Highest NPS: ${0}'
 		},
 
-		// Playfield
-		{
-			id: 'info_text_score',
-			text: 'Score: ${0}'
-		},
-		{
-			id: 'info_text_combo_breaks',
-			text: 'Combo Breaks: ${0}'
-		},
-		{
-			id: 'info_text_accuracy',
-			text: 'Accuracy: ${0}%'
-		},
-		{
-			id: 'autoplay',
-			text: 'Autoplay'
-		},
-		{
-			id: 'killer',
-			text: 'Killer'
-		},
-		{
-			id: 'sick',
-			text: 'Sick'
-		},
-		{
-			id: 'good',
-			text: 'Good'
-		},
-		{
-			id: 'bad',
-			text: 'Bad'
-		},
-		{
-			id: 'shit',
-			text: 'Shit'
-		},
-		{
-			id: 'miss',
-			text: 'Miss'
-		},
-
-		// Modifiers
+		// modifiers
 		{
 			id: 'playback_rate',
 			text: 'Playback Rate'
@@ -288,10 +161,6 @@
 			text: 'If the game will add holds or not.'
 		},
 		{
-			id: 'autoplay',
-			text: 'Autoplay'
-		},
-		{
 			id: 'autoplay_desc',
 			text: 'If the game will play the chart for you.'
 		},
@@ -304,12 +173,19 @@
 			text: 'How much of the chart do you remember?'
 		},
 
-		// Options
+		// freeplay
 		{
-			id: 'settings',
-			text: 'Settings'
+			id: 'personal_best',
+			text: 'Personal Best: ${0} (${1}%)'
 		},
 		{
+			id: 'edit_modifiers',
+			text: 'Edit Modifiers'
+		},
+
+		// options
+		// keybinds
+{
 			id: 'keybinds',
 			text: 'Keybinds'
 		},
@@ -441,6 +317,8 @@
 			id: 'volume_down_desc',
 			text: 'For decreasing the volume.'
 		},
+
+		// gameplay
 		{
 			id: 'gameplay',
 			text: 'Gameplay'
@@ -454,20 +332,20 @@
 			text: 'Which way the notes will move.'
 		},
 		{
+			id: 'scroll_dir_Up',
+			text: 'Up'
+		},
+		{
+			id: 'scroll_dir_Down',
+			text: 'Down'
+		},
+		{
 			id: 'scroll_speed',
 			text: 'Scroll Speed'
 		},
 		{
 			id: 'scroll_speed_desc',
 			text: 'How fast the notes will move.'
-		},
-		{
-			id: 'lane_underlay',
-			text: 'Lane Underlay'
-		},
-		{
-			id: 'lane_underlay_desc',
-			text: 'Displays a black line below the notefield to make it easier to read. This value changes the opacity.'
 		},
 		{
 			id: 'customize_notes',
@@ -509,6 +387,380 @@
 			id: 'can_reset_desc',
 			text: "If you're allowed to die and restart by pressing your reset bind."
 		},
+
+		// hud
+		{
+			id: 'hud',
+			text: 'HUD'
+		},
+		{
+			id: 'judge_counter',
+			text: 'Judgement Counter'
+		},
+		{
+			id: 'judge_counter_desc',
+			text: 'If there will be a counter on the side showing your judgement totals.'
+		},
+		{
+			id: 'hit_error_bar',
+			text: 'Hit Error Bar'
+		},
+		{
+			id: 'hit_error_bar_desc',
+			text: 'If the game will show a bar showing how off your recent hits were.'
+		},
+		{
+			id: 'combo_tinting',
+			text: 'Combo Tinting'
+		},
+		{
+			id: 'combo_tinting_desc',
+			text: 'Allows for the combo display to be tinted.'
+		},
+		{
+			id: 'combo_tinting_Off',
+			text: 'Off'
+		},
+		{
+			id: 'combo_tinting_Clear Flag',
+			text: 'Clear Flag'
+		},
+		{
+			id: 'combo_tinting_Per-Note',
+			text: 'Per-Note'
+		},
+		{
+			id: 'time_text',
+			text: 'Time Text'
+		},
+		{
+			id: 'time_text_desc',
+			text: "If the HUD will display text to show where you're at in the song."
+		},
+		{
+			id: 'hide_acc',
+			text: 'Hide Accuracy'
+		},
+		{
+			id: 'hide_acc_desc',
+			text: 'Hides the accuracy percentage in the HUD.'
+		},
+		{
+			id: 'hide_hud',
+			text: "Hide HUD"
+		},
+		{
+			id: 'hide_hud_desc',
+			text: "Makes the entire HUD disappear, if you want just the notefield. Or if you're showcasing something."
+		},
+		{
+			id: 'hide_tightest_judge',
+			text: 'Hide Tightest Judgement'
+		},
+		{
+			id: 'hide_tightest_judge_desc',
+			text: 'Whether or not the game will display the highest possible judgement when it is hit.'
+		},
+		{
+			id: 'judge_alpha',
+			text: 'Judgement Alpha'
+		},
+		{
+			id: 'judge_alpha_desc',
+			text: 'How much you can see of the judgement display.'
+		},
+		{
+			id: 'combo_alpha',
+			text: 'Combo Alpha'
+		},
+		{
+			id: 'combo_alpha_desc',
+			text: 'How much you can see of the combo display.'
+		},
+		{
+			id: 'hp_alpha',
+			text: 'Health Bar Alpha'
+		},
+		{
+			id: 'hp_alpha_desc',
+			text: 'How much you can see of the health bar in-game.'
+		},
+
+		// visuals
+		{
+			id: 'visuals',
+			text: 'Visuals'
+		},
+		{
+			id: 'language',
+			text: 'Language'
+		},
+		{
+			id: 'language_desc',
+			text: 'Changes the language of the game. (This feature is not fully implemented yet!)'
+		},
+		{
+			id: 'flashing_lights',
+			text: 'Flashing Lights'
+		},
+		{
+			id: 'flashing_lights_desc',
+			text: 'If the game is allowed to risk seizures for fast colored effects.'
+		},
+		{
+			id: 'game_alpha',
+			text: 'Game Visibility'
+		},
+		{
+			id: 'game_alpha_desc',
+			text: 'How much you can see the visuals behind the HUD. (If this is set to 0%, the visuals will be disabled entirely. That could help with performance!)'
+		},
+		{
+			id: 'receptor_size',
+			text: 'Strumline Zoom'
+		},
+		{
+			id: 'receptor_size_desc',
+			text: 'How much scaling gets applied to your notefield.'
+		},
+		{
+			id: 'center_field',
+			text: 'Centered Field'
+		},
+		{
+			id: 'center_field_desc',
+			text: 'If your notefield should be in the middle of the playfield, instead of on the side.'
+		},
+		{
+			id: 'opp_notes',
+			text: 'Opponent Notes'
+		},
+		{
+			id: 'opp_notes_desc',
+			text: "Whether the opponent's notefield will be visible. Automatically gets turned off with \"Centered Field\"."
+		},
+		{
+			id: 'lane_underlay',
+			text: 'Lane Underlay'
+		},
+		{
+			id: 'lane_underlay_desc',
+			text: 'Displays a black line below the notefield to make it easier to read. This value changes the opacity.'
+		},
+		{
+			id: 'cam_zooms',
+			text: 'Camera Zooms'
+		},
+		{
+			id: 'cam_zooms_desc',
+			text: 'If the game is allowed to bump the camera to the song.'
+		},
+		{
+			id: 'cam_zooms_Default',
+			text: 'Default'
+		},
+		{
+			id: 'cam_zooms_Off',
+			text: 'Off'
+		},
+		{
+			id: 'receptor_glow',
+			text: 'Receptor Glow'
+		},
+		{
+			id: 'receptor_glow_desc',
+			text: 'How the receptors will glow when you hit a note.'
+		},
+		{
+			id: 'receptor_glow_Off',
+			text: 'Off'
+		},
+		{
+			id: 'receptor_glow_Judgement',
+			text: 'Judgement'
+		},
+		{
+			id: 'receptor_glow_Note',
+			text: 'Note'
+		},
+		{
+			id: 'can_unglow',
+			text: 'Unglow on Anim Finish'
+		},
+		{
+			id: 'can_unglow_desc',
+			text: 'Whether or not the receptor going back to static relies on the animation finishing, or the player releasing the key.'
+		},
+
+		// audio
+		{
+			id: 'audio',
+			text: 'Audio'
+		},
+		{
+			id: 'master_volume',
+			text: 'Master Volume'
+		},
+		{
+			id: 'master_volume_desc',
+			text: 'The global volume that applies to all sound effects and music.'
+		},
+		{
+			id: 'music_volume',
+			text: 'Music Volume'
+		},
+		{
+			id: 'music_volume_desc',
+			text: 'The volume of all music in the game, relative to the global volume.'
+		},
+		{
+			id: 'sfx_volume',
+			text: 'SFX Volume'
+		},
+		{
+			id: 'sfx_volume_desc',
+			text: 'The volume of all sound effects in the game, relative to the global volume.'
+		},
+		{
+			id: 'metronome',
+			text: 'Metronome'
+		},
+		{
+			id: 'metronome_desc',
+			text: 'If the game will play a tick every beat while playing a song.'
+		},
+		{
+			id: 'assist_ticks',
+			text: 'Assist Ticks'
+		},
+		{
+			id: 'assist_ticks_desc',
+			text: 'If the game will play a tick every time a note should be hit. Use this if you want hitsounds.'
+		},
+		{
+			id: 'pause_music',
+			text: 'Pause Music'
+		},
+		{
+			id: 'pause_music_desc',
+			text: 'What music should play whenever the game is paused.'
+		},
+		{
+			id: 'pause_music_Song Instrumental',
+			text: 'Song Instrumental'
+		},
+		{
+			id: 'pause_music_Off',
+			text: 'Off'
+		},
+
+		// performance
+		{
+			id: 'performance',
+			text: 'Performance'
+		},
+		{
+			id: 'framerate',
+			text: 'Framerate'
+		},
+		{
+			id: 'framerate_desc',
+			text: 'The maximum frame rate the game will run at.'
+		},
+		{
+			id: 'modchart_fps',
+			text: 'Modchart FPS'
+		},
+		{
+			id: 'modchart_fps_desc',
+			text: 'The maximum frame rate the modchart will redraw at.'
+		},
+		{
+			id: 'antialiasing',
+			text: 'Antialiasing'
+		},
+		{
+			id: 'antialiasing_desc',
+			text: 'If textures will have a linear transition between pixels instead of instant.'
+		},
+		{
+			id: 'audio_streaming',
+			text: 'Audio Streaming'
+		},
+		{
+			id: 'audio_streaming_desc',
+			text: "If music will load as it plays or simply load all at once. (If you're suffering from lag spikes, try disabling this! Memory usage may be higher, but also more stable.)"
+		},
+		{
+			id: 'reduced_quality',
+			text: 'Reduced Quality'
+		},
+		{
+			id: 'reduced_quality_desc',
+			text: 'If the game can cut out a few things for less work.'
+		},
+		{
+			id: 'videos',
+			text: 'Videos'
+		},
+		{
+			id: 'videos_desc',
+			text: 'Whether the game can run videos or not. Can impact performance/load times, if enabled.'
+		},
+		{
+			id: 'shaders',
+			text: 'Shaders'
+		},
+		{
+			id: 'shaders_desc',
+			text: 'If some sprites can use special code to create special visuals.'
+		},
+		{
+			id: 'hold_grain',
+			text: 'Hold Grain'
+		},
+		{
+			id: 'hold_grain_desc',
+			text: "How many times the game will compress sustain vertices.\nHigher values will stretch the hold graphic for more performance.\nRecommended to be at lower values if you're playing modcharts, but otherwise higher values for casual play."
+		},
+
+		// miscellaneous
+		{
+			id: 'miscellaneous',
+			text: 'Miscellaneous'
+		},
+		{
+			id: 'info_counter',
+			text: 'Info Counter'
+		},
+		{
+			id: 'info_counter_desc',
+			text: 'Whether to display debug info in the corner of the window.'
+		},
+		{
+			id: 'fullscreen',
+			text: 'Fullscreen'
+		},
+		{
+			id: 'fullscreen_desc',
+			text: 'Whether or not the game will take all of your screen space. (This can affect your viewing experience with Discord screensharing!)'
+		},
+		{
+			id: 'discord_rpc',
+			text: 'Discord RPC'
+		},
+		{
+			id: 'discord_rpc_desc',
+			text: 'If the game can connect to your Discord client and display that you are playing Never2x.'
+		},
+		{
+			id: 'auto_pause',
+			text: 'Auto Pause'
+		},
+		{
+			id: 'auto_pause_desc',
+			text: 'Automatically pauses the game if the window loses focus.'
+		},
 		{
 			id: 'calibrate_offset',
 			text: 'Calibrate Offset'
@@ -517,6 +769,70 @@
 			id: 'calibrate_offset_desc',
 			text: 'Detects and applies your input offset.'
 		},
+		{
+			id: 'clear_save',
+			text: 'Clear Save'
+		},
+		{
+			id: 'clear_save_desc',
+			text: 'Will delete all of your save data.'
+		},
+		{
+			id: 'clear_scores',
+			text: 'Clear Scores'
+		},
+		{
+			id: 'clear_scores_desc',
+			text: "Will delete all of your scores that you've obtained."
+		},
+
+		// reposition popups
+		{
+			id: 'reposition_popups',
+			text: 'Reposition Popups'
+		},
+		{
+			id: 'simple_popups',
+			text: 'Simple Popups'
+		},
+		{
+			id: 'simple_popups_desc',
+			text: 'Whether or not popups will simply bump and fade, instead of jump and fall.'
+		},
+		{
+			id: 'position_safety',
+			text: 'Position Safety'
+		},
+		{
+			id: 'position_safety_desc',
+			text: 'If the popups will recenter, if overlapping a strumline.'
+		},
+		{
+			id: 'judgement_scale',
+			text: 'Judgement Scale'
+		},
+		{
+			id: 'judgement_scale_desc',
+			text: 'How big the judgement sprite will be.'
+		},
+		{
+			id: 'combo_scale',
+			text: 'Combo Scale'
+		},
+		{
+			id: 'combo_scale_desc',
+			text: 'How big the combo sprites will be.'
+		},
+		{
+			id: 'apply_preset',
+			text: 'Apply Preset'
+		},
+		{
+			id: 'apply_preset_desc',
+			text: 'Sets your judgement and combo styling from a selection of presets.'
+		},
+
+		// note customization
 		{
 			id: 'note_customization',
 			text: 'Note Customization'
@@ -644,342 +960,6 @@
 		{
 			id: 'note_pal_success_column',
 			text: 'Applied ${0}K Palette'
-		},
-		{
-			id: 'hud',
-			text: 'HUD'
-		},
-		{
-			id: 'judge_counter',
-			text: 'Judgement Counter'
-		},
-		{
-			id: 'judge_counter_desc',
-			text: 'If there will be a counter on the side showing your judgement totals.'
-		},
-		{
-			id: 'hit_error_bar',
-			text: 'Hit Error Bar'
-		},
-		{
-			id: 'hit_error_bar_desc',
-			text: 'If the game will show a bar showing how off your recent hits were.'
-		},
-		{
-			id: 'combo_tinting',
-			text: 'Combo Tinting'
-		},
-		{
-			id: 'combo_tinting_desc',
-			text: 'Allows for the combo display to be tinted.'
-		},
-/*		{
-			id: 'popup_center',
-			text: 'Popup Center'
-		},*/
-		{
-			id: 'hide_acc',
-			text: 'Hide Accuracy'
-		},
-		{
-			id: 'hide_acc_desc',
-			text: 'Hides the accuracy percentage in the HUD.'
-		},
-		{
-			id: 'hide_hud',
-			text: "Hide HUD"
-		},
-		{
-			id: 'hide_hud_desc',
-			text: "Makes the entire HUD disappear, if you want just the notefield. Or if you're showcasing something."
-		},
-		{
-			id: 'hide_tightest_judge',
-			text: 'Hide Tightest Judgement'
-		},
-		{
-			id: 'hide_tightest_judge_desc',
-			text: 'Whether or not the game will display the highest possible judgement when it is hit.'
-		},
-		{
-			id: 'judge_alpha',
-			text: 'Judgement Alpha'
-		},
-		{
-			id: 'judge_alpha_desc',
-			text: 'How much you can see of the judgement display.'
-		},
-		{
-			id: 'combo_alpha',
-			text: 'Combo Alpha'
-		},
-		{
-			id: 'combo_alpha_desc',
-			text: 'How much you can see of the combo display.'
-		},
-		{
-			id: 'hp_alpha',
-			text: 'Health Bar Alpha'
-		},
-		{
-			id: 'hp_alpha_desc',
-			text: 'How much you can see of the health bar in-game.'
-		},
-		{
-			id: 'visuals',
-			text: 'Visuals'
-		},
-		{
-			id: 'language',
-			text: 'Language'
-		},
-		{
-			id: 'language_desc',
-			text: 'Changes the language of the game. (This feature is not fully implemented yet!)'
-		},
-		{
-			id: 'flashing_lights',
-			text: 'Flashing Lights'
-		},
-		{
-			id: 'flashing_lights_desc',
-			text: 'If the game is allowed to risk seizures for fast colored effects.'
-		},
-		{
-			id: 'game_alpha',
-			text: 'Game Visibility'
-		},
-		{
-			id: 'game_alpha_desc',
-			text: 'How much you can see the visuals behind the HUD. (If this is set to 0%, the visuals will be disabled entirely. That could help with performance!)'
-		},
-		{
-			id: 'receptor_size',
-			text: 'Strumline Zoom'
-		},
-		{
-			id: 'receptor_size_desc',
-			text: 'How much scaling gets applied to your notefield.'
-		},
-		{
-			id: 'center_field',
-			text: 'Centered Field'
-		},
-		{
-			id: 'center_field_desc',
-			text: 'If your notefield should be in the middle of the playfield, instead of on the side.'
-		},
-		{
-			id: 'time_text',
-			text: 'Time Text'
-		},
-		{
-			id: 'time_text_desc',
-			text: "If the HUD will display text to show where you're at in the song."
-		},
-		{
-			id: 'opp_notes',
-			text: 'Opponent Notes'
-		},
-		{
-			id: 'opp_notes_desc',
-			text: "Whether the opponent's notefield will be visible. Automatically gets turned off with \"Centered Field\"."
-		},
-		{
-			id: 'cam_zooms',
-			text: 'Camera Zooms'
-		},
-		{
-			id: 'cam_zooms_desc',
-			text: 'If the game is allowed to bump the camera to the song.'
-		},
-		{
-			id: 'receptor_glow',
-			text: 'Receptor Glow'
-		},
-		{
-			id: 'receptor_glow_desc',
-			text: 'How the receptors will glow when you hit a note.'
-		},
-		{
-			id: 'can_unglow',
-			text: 'Unglow on Anim Finish'
-		},
-		{
-			id: 'can_unglow_desc',
-			text: 'Whether or not the receptor going back to static relies on the animation finishing, or the player releasing the key.'
-		},
-		{
-			id: 'performance',
-			text: 'Performance'
-		},
-		{
-			id: 'framerate',
-			text: 'Framerate'
-		},
-		{
-			id: 'framerate_desc',
-			text: 'The maximum frame rate the game will run at.'
-		},
-		{
-			id: 'modchart_fps',
-			text: 'Modchart FPS'
-		},
-		{
-			id: 'modchart_fps_desc',
-			text: 'The maximum frame rate the modchart will redraw at.'
-		},
-		{
-			id: 'antialiasing',
-			text: 'Antialiasing'
-		},
-		{
-			id: 'antialiasing_desc',
-			text: 'If textures will have a linear transition between pixels instead of instant.'
-		},
-		{
-			id: 'audio_streaming',
-			text: 'Audio Streaming'
-		},
-		{
-			id: 'audio_streaming_desc',
-			text: "If music will load as it plays or simply load all at once. (If you're suffering from lag spikes, try disabling this! Memory usage may be higher, but also more stable.)"
-		},
-		{
-			id: 'reduced_quality',
-			text: 'Reduced Quality'
-		},
-		{
-			id: 'reduced_quality_desc',
-			text: 'If the game can cut out a few things for less work.'
-		},
-		{
-			id: 'videos',
-			text: 'Videos'
-		},
-		{
-			id: 'videos_desc',
-			text: 'Whether the game can run videos or not. Can impact performance/load times, if enabled.'
-		},
-		{
-			id: 'shaders',
-			text: 'Shaders'
-		},
-		{
-			id: 'shaders_desc',
-			text: 'If some sprites can use special code to create special visuals.'
-		},
-		{
-			id: 'hold_grain',
-			text: 'Hold Grain'
-		},
-		{
-			id: 'hold_grain_desc',
-			text: "How many times the game will compress sustain vertices.\nHigher values will stretch the hold graphic for more performance.\nRecommended to be at lower values if you're playing modcharts, but otherwise higher values for casual play."
-		},
-		{
-			id: 'audio',
-			text: 'Audio'
-		},
-		{
-			id: 'master_volume',
-			text: 'Master Volume'
-		},
-		{
-			id: 'master_volume_desc',
-			text: 'The global volume that applies to all sound effects and music.'
-		},
-		{
-			id: 'music_volume',
-			text: 'Music Volume'
-		},
-		{
-			id: 'music_volume_desc',
-			text: 'The volume of all music in the game, relative to the global volume.'
-		},
-		{
-			id: 'sfx_volume',
-			text: 'SFX Volume'
-		},
-		{
-			id: 'sfx_volume_desc',
-			text: 'The volume of all sound effects in the game, relative to the global volume.'
-		},
-		{
-			id: 'metronome',
-			text: 'Metronome'
-		},
-		{
-			id: 'metronome_desc',
-			text: 'If the game will play a tick every beat while playing a song.'
-		},
-		{
-			id: 'assist_ticks',
-			text: 'Assist Ticks'
-		},
-		{
-			id: 'assist_ticks_desc',
-			text: 'If the game will play a tick every time a note should be hit. Use this if you want hitsounds.'
-		},
-		{
-			id: 'pause_music',
-			text: 'Pause Music'
-		},
-		{
-			id: 'pause_music_desc',
-			text: 'What music should play whenever the game is paused.'
-		},
-		{
-			id: 'miscellaneous',
-			text: 'Miscellaneous'
-		},
-		{
-			id: 'info_counter',
-			text: 'Info Counter'
-		},
-		{
-			id: 'info_counter_desc',
-			text: 'Whether to display debug info in the corner of the window.'
-		},
-		{
-			id: 'fullscreen',
-			text: 'Fullscreen'
-		},
-		{
-			id: 'fullscreen_desc',
-			text: 'Whether or not the game will take all of your screen space. (This can affect your viewing experience with Discord screensharing!)'
-		},
-		{
-			id: 'discord_rpc',
-			text: 'Discord RPC'
-		},
-		{
-			id: 'discord_rpc_desc',
-			text: 'If the game can connect to your Discord client and display that you are playing Never2x.'
-		},
-		{
-			id: 'auto_pause',
-			text: 'Auto Pause'
-		},
-		{
-			id: 'auto_pause_desc',
-			text: 'Automatically pauses the game if the window loses focus.'
-		},
-		{
-			id: 'clear_save',
-			text: 'Clear Save'
-		},
-		{
-			id: 'clear_save_desc',
-			text: 'Will delete all of your save data.'
-		},
-		{
-			id: 'clear_scores',
-			text: 'Clear Scores'
-		},
-		{
-			id: 'clear_scores_desc',
-			text: "Will delete all of your scores that you've obtained."
 		},
 
 		// Miscellaneous
