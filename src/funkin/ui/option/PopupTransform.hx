@@ -93,6 +93,8 @@ class PopupTransform extends OptionList {
 		judgeSprite = new JudgeDisplay();
 		judgeSprite.scaleBumped *= Settings.data.judgeScale;
 		judgeSprite.scaleFlat *= Settings.data.judgeScale;
+		judgeSprite.scale.set(judgeSprite.scaleFlat, judgeSprite.scaleFlat);
+		judgeSprite.updateHitbox();
 		judgeSprite.simple = true;//Settings.data.simplePopup;
 		judgeSprite.x -= judgeSprite.width * 0.5;
 		judgeSprite.y -= judgeSprite.height * 0.5;

@@ -226,6 +226,8 @@ class PlayState extends FunkinState {
 		add(judgeSprite = new JudgeDisplay(popupX + Settings.data.judgementPos[0], Settings.data.judgementPos[1]));
 		judgeSprite.scaleBumped *= Settings.data.judgeScale;
 		judgeSprite.scaleFlat *= Settings.data.judgeScale;
+		judgeSprite.scale.set(judgeSprite.scaleFlat, judgeSprite.scaleFlat);
+		judgeSprite.updateHitbox();
 		judgeSprite.simple = Settings.data.simplePopup;
 		judgeSprite.x -= judgeSprite.width * 0.5;
 		judgeSprite.y -= judgeSprite.height * 0.5;
