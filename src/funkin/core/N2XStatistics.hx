@@ -2,7 +2,7 @@ package funkin.core;
 
 enum abstract ClearType(String) from String to String {
 	var CLEARTYPE_DEFAULT = 'N/A';
-	var KILLER_FULL_COMBO = 'KFC'; // kentucky fried combo
+	var MARVELOUS_FULL_COMBO = 'MFC';
 	var WHITE_FLAG = 'WF';
 	var SINGLE_DIGIT_SICK = 'SDS';
 	var SICK_FULL_COMBO = 'SFC';
@@ -19,7 +19,7 @@ enum abstract ClearType(String) from String to String {
 		return switch this {
 			default: 0xFFFFFFFF;
 
-			case KILLER_FULL_COMBO: 0xFF8ACCFF;
+			case MARVELOUS_FULL_COMBO: 0xFF8ACCFF;
 			case WHITE_FLAG: 0xFF8ACCFF;
 			case SINGLE_DIGIT_SICK: 0xFFFFED5E;
 			case SICK_FULL_COMBO: 0xFFFFED5E;
@@ -139,7 +139,7 @@ class N2XStatistics extends nevermore.play.Statistics {
 				if (sicks == 1) type = WHITE_FLAG;
 				else if (sicks <= 9) type = SINGLE_DIGIT_SICK;
 				else type = SICK_FULL_COMBO;
-			} else if (killers > 0) type = KILLER_FULL_COMBO;
+			} else if (killers > 0) type = MARVELOUS_FULL_COMBO;
 		} else {
 			if (comboBreaks == 1) type = MISS_FLAG;
 			else if (comboBreaks <= 9) type = SINGLE_DIGIT_COMBO_BREAK;
