@@ -136,10 +136,9 @@ class NoteHit {
 		this.note = note;
 		this.strumline = strumline;
 
+		player = !game.notefield.autoplay && game.notefield.playerID == note.player;
 		deviation = player ? note.getDeviation(game.notefield.input.timestamp) : 0;
 		judgementIndex = Judgement.current.indexOf(note.judgement);
-
-		player = !game.notefield.autoplay && game.notefield.playerID == note.player;
 		
 		character = game.getCharacter(note.player);
 		animation = (player && note.judgement.breaksCombo ? "miss" : "sing") + Note.directions[note.lane % Note.directions.length].toUpperCase();
